@@ -1,0 +1,26 @@
+<h1>Summary of downloads for all time per item in {{ ref }}</h1>
+{% if summary %}
+<p><strong>Summary</strong>: Total downloads is {{ summary.total }} for {{ summary.count }} items. 
+Most popular item has been downloaded {{ summary.max }} times whilst the average for the feed is {{ summary.avg }} times.</p>
+{% endif %}
+
+{% if listing %}
+<table>
+  <tr>
+    <th>Cumulative Count</th>
+    <th>Path</th>
+    <th>GUID</th>
+  </tr>
+    {% for row in listing %}
+  <tr>
+    <td>{{ row.count }}</td>
+    <td>{{ row.path }}</td>
+    <td><a href="/stats/report/pr/item/{{ row.guid }}">{{ row.guid }}</a></td>
+  </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No Data found</p>
+
+
+{% endif %}

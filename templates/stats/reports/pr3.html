@@ -1,0 +1,22 @@
+<h1>Summary of downloads for all time for {{ ref }}</h1>
+{% if listing %}
+<table>
+  <tr>
+    <th>Week Ending</th>
+    <th>Count</th>
+    <th>Path</th>
+  </tr>
+    {% for row in listing %}
+  <tr>
+    <td>{{ row.week_ending }}</td>
+    <td>{{ row.count }}</td>
+    <td>{{ row.path }}</td>
+  </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No Data found</p>
+
+
+{% endif %}
+
