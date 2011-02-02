@@ -105,12 +105,12 @@ class Command(BaseCommand):
                                     # Get header by looking in column B first, then in  column A if nothing present
                                     header = ''
                                     if summary.cell(row_id,heading_col1).value != '':
-            	                    if summary.cell(row_id,heading_col1).value in modelmapping:
-            		                header = modelmapping.get(summary.cell(row_id,heading_col1).value)
+                                        if summary.cell(row_id,heading_col1).value in modelmapping:
+                                            header = modelmapping.get(summary.cell(row_id,heading_col1).value)
                                         # There are two rows labelled "Not Listed". The first is a User Action, the second a Client Software field.
-            	        	    elif summary.cell(row_id,heading_col1).value == "Not Listed":
+                                        elif summary.cell(row_id,heading_col1).value == "Not Listed":
                                             if first_not_listed:
-            		                    header = 'ua_not_listed' 
+                                                header = 'ua_not_listed' 
                                                 first_not_listed = False
                                             else:
                                                 header = 'cs_not_listed'
@@ -125,7 +125,7 @@ class Command(BaseCommand):
                                         header = 'ERROR: UNKNOWN HEADER'
             
                                     # Now store the sheet value in the dictionary against the model fieldname
-            	                report[header] = col_value
+                                    report[header] = col_value
                 
                         # Now try and save this week's worth of data
                         obj, created = Summary.objects.get_or_create(week_ending=report.get('week_ending'), defaults=report)
@@ -133,7 +133,7 @@ class Command(BaseCommand):
                         # Summary report for keeping track of progress
                         if created:
                             print "Data for week ending",obj.week_ending,", has been added to the database"
-                    	obj.save()
+                            obj.save()
                         else:
                             print "Data for week ending",obj.week_ending,", was found in the database. Not updated."
             
@@ -144,13 +144,13 @@ class Command(BaseCommand):
                     print "Beginning import for TRACKS:", sheet_name
                     sheet = wb.sheet_by_name(sheet_name)
                     
-            	# Reset variables
-            	report = {}
-            	report['week_ending'] = sheet_name[0:10]
-            	count = 0
+                    # Reset variables
+                    report = {}
+                    report['week_ending'] = sheet_name[0:10]
+                    count = 0
             
-            	# Scan through all the rows, skipping the top row (headers).
-            	for row_id in range(1,sheet.nrows):
+                    # Scan through all the rows, skipping the top row (headers).
+                    for row_id in range(1,sheet.nrows):
                         report['path'] = sheet.cell(row_id,0).value
                         report['count'] = sheet.cell(row_id,1).value
                         report['handle'] = sheet.cell(row_id,2).value
@@ -160,14 +160,14 @@ class Command(BaseCommand):
                         obj, created = Track.objects.get_or_create(week_ending=report.get('week_ending'), handle=report.get('handle'), defaults=report)
                         
                         if created:
-            	        count = count + 1
-            		obj.save()
-            		# print row_id
-            	    else:
-            	        print "Track row", row_id, "has already been imported"
+                            count = count + 1
+                            obj.save()
+                            # print row_id
+                        else:
+                            print "Track row", row_id, "has already been imported"
                         
                     print "Imported TRACK data for", report.get('week_ending'), "with", count, "out of", sheet.nrows-1, "added."
-            	        
+                    
             
                 elif sheet_name.endswith(" Browse"):
                     print "Beginning import for BROWSE:", sheet_name
@@ -187,10 +187,10 @@ class Command(BaseCommand):
             
                         # Now test to see if this has been imported already. Note, use date and handle beucase Guid isn't present for tracks thathave been deleted, thus they show up as errors, even though there is valid data.
                         obj, created = Browse.objects.get_or_create(
-            	        week_ending=report.get('week_ending'), 
-            		handle=report.get('handle'),
-            		count=report.get('count'), # Because there are so many duplicates in Browse, add the data, we'll sort it later
-            		defaults=report)
+                            week_ending=report.get('week_ending'), 
+                            handle=report.get('handle'),
+                            count=report.get('count'), # Because there are so many duplicates in Browse, add the data, we'll sort it later
+                            defaults=report)
             
                         if created:
                             count = count + 1
@@ -207,28 +207,28 @@ class Command(BaseCommand):
                 elif sheet_name.endswith(" Previews"):
                     print "Beginning import for PREVIEW:", sheet_name
                     sheet = wb.sheet_by_name(sheet_name)
-            	                        
+                           
                     # Reset variables
                     report = {}
                     report['week_ending'] = sheet_name[0:10]
                     count = 0
-            									                                                
+                                                       
                     # Scan through all the rows, skipping the top row (headers).
                     for row_id in range(1,sheet.nrows):
                         report['path'] = sheet.cell(row_id,0).value
                         report['count'] = sheet.cell(row_id,1).value
                         report['handle'] = sheet.cell(row_id,2).value
-            	    report['guid'] = sheet.cell(row_id,3).value
+                        report['guid'] = sheet.cell(row_id,3).value
             
                         # Now test to see if this has been imported already. Note, use date and handle beucase Guid isn't present for tracks thathave been deleted, thus they show up as errors, even though there is valid data.
                         obj, created = Preview.objects.get_or_create(week_ending=report.get('week_ending'), handle=report.get('handle'), defaults=report)
             
                         if created:
-            	        count = count + 1
-            	        obj.save()
-            	        # print row_id
-            	    else:
-            	        print "Preview row", row_id, "has already been imported"
+                            count = count + 1
+                            obj.save()
+                            # print row_id
+                        else:
+                            print "Preview row", row_id, "has already been imported"
                     print "Imported Preview data for", report.get('week_ending'), "with", count, "out of", sheet.nrows-1, "added."
             
             
