@@ -274,7 +274,7 @@ class LogEntry(models.Model):
     size_of_response = models.BigIntegerField("size of response in bytes")
     # The following three fields need expanding into separate tables and parsing for duplicates and indexing purposes
     # request_string = models.TextField("first line of request")
-    file_request = models.ForeignKey(FireRequest, verbose_name="first line of request string")
+    file_request = models.ForeignKey(FileRequest, verbose_name="first line of request string")
     # referer_string = models.TextField("contents of referer")
     referer = models.ForeignKey(Referer, verbose_name="referer string")
     # user_agent_string = models.TextField("contents of user agent")
