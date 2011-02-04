@@ -144,6 +144,12 @@ class Preview(models.Model):
 # Apache log analysis classes
 ######
 
+class IPLocationManager(models.Manager):
+    def getLocationByIP(ip_string):
+        "For a given valid IP string, find a match for location in the data"
+        return None
+
+
 # GeoIP data lookup table based on data from Geocode?
 class IPLocation(models.Model):
     ip_range_start = models.IPAddressField("ip range start")
@@ -153,6 +159,8 @@ class IPLocation(models.Model):
     country_code = models.CharField("country code", max_length=2)
     country_name = models.CharField("country name", max_length=200)
     last_updated = models.DateTimeField("last updated")
+    
+    objects = IPLocationManager()
     
     def __unicode__(self):
         return self.country_name

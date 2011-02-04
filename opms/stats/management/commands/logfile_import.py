@@ -6,6 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 from opms.stats.models import *
 import apachelog, datetime, sys
 from dns import resolver,reversename
+from IPy import IP
         
 class Command(BaseCommand):
     args = '<spreadsheet.xls>'
@@ -29,6 +30,23 @@ class Command(BaseCommand):
             
             for line in log:
                 data = p.parse(line)
+                
+# data.items()    
+#[('%Y-%m-%dT%H:%M:%S%z', '2009-01-14T06:20:59+0000'),
+# ('%l', '-'),
+# ('%>s', '200'),
+# ('%h', '163.1.2.86'),
+# ('%A:%p', '163.1.3.25:80'),
+# ('%{User-Agent}i', 'check_http/1.96 (nagios-plugins 1.4.5)'),
+# ('%b', '207'),
+# ('%{Referer}i', '-'),
+# ('%u', '-'),
+# ('%v', 'media.podcasts.ox.ac.uk'),
+# ('%r', 'GET / HTTP/1.0')]
+ 
+ 
+# data.get('%{User-Agent}i')
+# 'check_http/1.96 (nagios-plugins 1.4.5)'
                 
                 # Validate the data - Count the number of elements
                 if len(data) <> 11:
@@ -74,9 +92,9 @@ class Command(BaseCommand):
                         int(time_ss[0:2]) # Cut off the +0000
                         ),
                     'server_name': data.get('%v'),
-                    'server_ip': server_ip,
+                    'server_ip': IP(server_ip).strNormal(0),
                     'server_port': int(server_port),
-                    'remote_ip': data.get('%h'),
+                    'remote_ip': remote_rdns.get['ip_address'],
                     'remote_logname': data.get('%l'),
                     'remote_user': data.get('%u'),
                     'remote_rdns': remote_rdns,
@@ -90,32 +108,21 @@ class Command(BaseCommand):
                 print '============================\n'
                 print data,'\n'
                 print log_entry,'\n'
-
-
-        
-# Locate file
-# Open file
-# Read line by line
-#  parse line
-#  store in relevant fields
-#  do associated lookups and stores
                 
-# data.items()    
-#[('%Y-%m-%dT%H:%M:%S%z', '2009-01-14T06:20:59+0000'),
-# ('%l', '-'),
-# ('%>s', '200'),
-# ('%h', '163.1.2.86'),
-# ('%A:%p', '163.1.3.25:80'),
-# ('%{User-Agent}i', 'check_http/1.96 (nagios-plugins 1.4.5)'),
-# ('%b', '207'),
-# ('%{Referer}i', '-'),
-# ('%u', '-'),
-# ('%v', 'media.podcasts.ox.ac.uk'),
-# ('%r', 'GET / HTTP/1.0')]
- 
- 
-# data.get('%{User-Agent}i')
-# 'check_http/1.96 (nagios-plugins 1.4.5)'
+                # Create if there isn't already a duplicate record in place
+                obj, created = LogEntry.objects.get_or_create(
+                    time_of_request=log_entry.get('time_of_request'),  
+                    server_ip=log_entry.get('server_ip'), 
+                    remote_ip=log_entry.get('remote_ip'), 
+                    size_of_response=log_entry.get('size_of_response'), 
+                    file_request=log_entry.get('file_request'), 
+                    defaults=log_entry)
+        
+                if created:
+                    print "Record imported: %s" % log_entry
+                else:
+                    print "DUPLICATE RECORD DETECTED: %s" % log_entry
+
 
             print "Import finished\n\n"
 
@@ -124,33 +131,54 @@ class Command(BaseCommand):
         "Get or create a LogFile record for the given filename"
         return filename
 
-# Reverse DNS====
-# from dns import resolver,reversename
-# addr=reversename.from_address("192.168.0.1")
-# str(resolver.query(addr,"PTR")[0])
+
 
     def _ip_to_domainname(self, ipaddress):
         "Returns the domain name for a given IP where known"
-        return "www.%s.com" % ipaddress
+        # validate IP address
+        try: 
+            adr = IP(ipaddress)
+        # PUT ERROR HANDLING IN HERE!
+        
+        rnds = {}
+        rdns['ip_address'] = adr.strNormal(0)
+        rdns['ip_int'] = adr.setDec(0)
+        rdns['resolved_name'] = 'No Resolved Name'
+        rdns['last_updated'] = datetime.datetime.utcnow()
+        
+        # Go get the location for this address - NOTE: THIS METHOD IS INCOMPLETE!
+        rdns['ip_location'] = IPLocation.getLocationByIP(rdns.get('ip_address'))
+        
+        # Now get or create an Rdns record for this IP address
+        obj, created = Rdns.objects.get_or_create(ip_address=rdns.get('ip_address'), defaults=rdns)
+        
+        if created:
+            # Do an RDNS lookup, and remember to save this back to the object
+            addr=reversename.from_address(rdns['ip_address'])
+            try:
+                rdns['resolved_name'] = str(resolver.query(addr,"PTR")[0])
+            # PUT ERROR HANDLING IN HERE!
+            
+            obj['resolved_name'] = rdns.get('resolved_name')
+            obj.save()
+        
+        return obj
+
+
 
     def _file_request(self, request_string):
         "Get or create a FileRequest object for a given request string"
         return request_string
-        
+
+
+
     def _referer(self, referer_string):
         "Get or create a Referer record for the given string"
         return referer_string
-        
+
+
+
     def _user_agent(self, agent_string):
         "Get or create a UserAgent record for the given string"
         # Split the string into likely parts
-        # ua, created = UserAgent.objects.get_or_create(field=value, field=value, defaults=everything)
-
-        # obj, created = Preview.objects.get_or_create(week_ending=report.get('week_ending'), handle=report.get('handle'), defaults=report)
-            
-        # if created:
-        #     obj.save()
-        # else:
-
         return agent_string
-        
