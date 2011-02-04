@@ -54,7 +54,7 @@ class Command(BaseCommand):
                         int(date_dd), 
                         int(time_hh), 
                         int(time_mm), 
-                        int(time_ss)
+                        int(time_ss[0:2]) # Cut off the +0000
                         ),
                     'server_name': data.get('%v'),
                     'server_ip': server_ip,
