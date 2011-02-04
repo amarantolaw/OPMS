@@ -158,7 +158,7 @@ class IPLocation(models.Model):
         return self.country_name
 
 # Reverse DNS Lookup cache. Because we don't want to be always hitting DNS servers.
-class Rdns(models.Model:)
+class Rdns(models.Model):
     ip_address = models.IPAddressField("ip address")
     ip_int = models.IntegerField("ip as an integer")
     ip_location = models.ForeignKey(IPLocation, verbose_name="IP geo-location")
