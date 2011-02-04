@@ -81,8 +81,9 @@ class Command(BaseCommand):
                     'user_agent': data.get('%{User-Agent}i'),
                 }
                 
-                print data
-                print log_entry
+                print '============================\n'
+                print data,'\n'
+                print log_entry,'\n'
                 
 # data.items()    
 #[('%Y-%m-%dT%H:%M:%S%z', '2009-01-14T06:20:59+0000'),
