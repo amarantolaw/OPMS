@@ -74,7 +74,7 @@ class Command(BaseCommand):
                     'remote_logname': data.get('%l'),
                     'remote_user': data.get('%u'),
                     'remote_rdns': self._ip_to_domainname(data.get('%h')),
-                    'status_code': status_code),
+                    'status_code': status_code,
                     'size_of_response': size_of_response,
                     'file_request': data.get('%r'),
                     'referer': data.get('%{Referer}i'),
