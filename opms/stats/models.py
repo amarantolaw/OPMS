@@ -265,16 +265,12 @@ class LogEntry(models.Model):
     remote_ip_int = models.IntegerField("remote ip address as integer")
     remote_logname = models.CharField("remote log name", max_length=200,)
     remote_user = models.CharField("remote user name", max_length=200,)
-    remote_iplocation = models.ForeignKey(IPLocation, verbose_name="remote geo-location")
     remote_rnds = models.ForeignKey(Rdns, verbose_name="remote reverse dns name")
     status_code = models.IntegerField("status code")
     size_of_response = models.BigIntegerField("size of response in bytes")
     # The following three fields need expanding into separate tables and parsing for duplicates and indexing purposes
-    # request_string = models.TextField("first line of request")
     file_request = models.ForeignKey(FileRequest, verbose_name="first line of request string")
-    # referer_string = models.TextField("contents of referer")
     referer = models.ForeignKey(Referer, verbose_name="referer string")
-    # user_agent_string = models.TextField("contents of user agent")
     user_agent = models.ForeignKey(UserAgent, verbose_name="user agent string")
     # This needs to be optional, as there may 0-n tracking tags on this entry
     tracking = models.ManyToManyField(Tracking, verbose_name="tracking on this entry")
