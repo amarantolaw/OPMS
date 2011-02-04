@@ -136,11 +136,12 @@ class Command(BaseCommand):
     def _ip_to_domainname(self, ipaddress):
         "Returns the domain name for a given IP where known"
         # validate IP address
-        try: 
-            adr = IP(ipaddress)
+        # try: 
+        adr = IP(ipaddress)
+        # else:
         # PUT ERROR HANDLING IN HERE!
         
-        rnds = {}
+        rdns = {}
         rdns['ip_address'] = adr.strNormal(0)
         rdns['ip_int'] = adr.setDec(0)
         rdns['resolved_name'] = 'No Resolved Name'
@@ -155,8 +156,9 @@ class Command(BaseCommand):
         if created:
             # Do an RDNS lookup, and remember to save this back to the object
             addr=reversename.from_address(rdns['ip_address'])
-            try:
-                rdns['resolved_name'] = str(resolver.query(addr,"PTR")[0])
+            # try:
+            rdns['resolved_name'] = str(resolver.query(addr,"PTR")[0])
+            # else:
             # PUT ERROR HANDLING IN HERE!
             
             obj['resolved_name'] = rdns.get('resolved_name')
