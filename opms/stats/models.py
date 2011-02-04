@@ -216,9 +216,6 @@ class UserAgent(models.Model):
 # http://msdn.microsoft.com/en-us/library/ms537503(v=vs.85).aspx
 # Application Name/App Version (Compatibility flag; Version Token; Platform token;) Misc other
 # Need to account for blank user agents - "No User Agent"
-#
-# Quick analysis of one log file from 1-2-11 gave 750 User Agent strings... From 14-1-09 gave 129!
-# awk -F\" '{print $6}' access.log-20110201 | sort | uniq -c | sort -fr >user-agents-2.txt
     full_string = models.TextField("contents of user agent")
     application_name = models.CharField("application name", max_length=200)
     application_version = models.CharField("application version", max_length=10)
