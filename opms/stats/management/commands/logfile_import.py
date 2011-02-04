@@ -48,7 +48,14 @@ class Command(BaseCommand):
                 
                 log_entry = {
                     'logfile': filename,
-                    'time_of_request': datetime.datetime(date_yyyy, date_mm, date_dd, time_hh, time_mm, time_ss),
+                    'time_of_request': datetime.datetime(
+                        int(date_yyyy), 
+                        int(date_mm), 
+                        int(date_dd), 
+                        int(time_hh), 
+                        int(time_mm), 
+                        int(time_ss)
+                        ),
                     'server_name': data.get('%v'),
                     'server_ip': server_ip,
                     'server_port': int(server_port),
