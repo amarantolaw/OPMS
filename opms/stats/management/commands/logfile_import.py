@@ -35,7 +35,30 @@ class Command(BaseCommand):
             log = open(filename)
             
             for line in log:
-                print p.parse(line)
+                data = p.parse(line)
+                
+                # Validate the data - Count the number of elements
+                
+                server_ip, server_port = data.get('%A:%p').split(':')
+                log_entry = {
+                    ('logfile', filename),
+                    ('time_of_request', datetime.datetime(2009,01,14,06,20,59)),
+                    ('server_name', data.get('%v')),
+                    ('server_ip', server_ip),
+                    ('server_port', int(server_port)),
+                    ('remote_ip', data.get('%h')),
+                    ('remote_logname', data.get('%l')),
+                    ('remote_user', data.get('%u')),
+                    ('remote_rdns', self._ip_to_domainname(data.get('%h'))),
+                    ('status_code', int(data.get('%>s'))),
+                    ('size_of_response', int(data.get('%b'))),
+                    ('file_request', data.get('%r')),
+                    ('referer', data.get('%{Referer}i')),
+                    ('user_agent', data.get('%{User-Agent}i')),
+                }
+                
+                print data
+                print log_entry
                 
 # data.items()    
 #[('%Y-%m-%dT%H:%M:%S%z', '2009-01-14T06:20:59+0000'),
