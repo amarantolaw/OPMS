@@ -4,7 +4,7 @@
 
 from django.core.management.base import BaseCommand, CommandError
 from opms.stats.models import *
-import apachelog, time, sys
+import apachelog, datetime, sys
 from dns import resolver,reversename
         
 class Command(BaseCommand):
@@ -39,10 +39,16 @@ class Command(BaseCommand):
                 
                 # Validate the data - Count the number of elements
                 
+                # Pull apart the date time string
+                date_string, time_string = data.get('%Y-%m-%dT%H:%M:%S%z').split('T')
+                date_yyyy, date_mm, date_dd = date_string.split('-')
+                time_hh, time_mm, time_ss = time_string.split(':')
+                # Pull apart the server and port
                 server_ip, server_port = data.get('%A:%p').split(':')
+                
                 log_entry = {
                     'logfile': filename,
-                    'time_of_request': datetime.datetime(2009,01,14,06,20,59),
+                    'time_of_request': datetime.datetime(date_yyyy, date_mm, date_dd, time_hh, time_mm, time_ss),
                     'server_name': data.get('%v'),
                     'server_ip': server_ip,
                     'server_port': int(server_port),
