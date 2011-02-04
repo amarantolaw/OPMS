@@ -55,7 +55,7 @@ class Command(BaseCommand):
                     size_of_response = 0
                 
                 # Status code validation
-                status_code = int(data.get('%>s')
+                status_code = int(data.get('%>s'))
                 
                 log_entry = {
                     'logfile': filename,
@@ -75,7 +75,7 @@ class Command(BaseCommand):
                     'remote_user': data.get('%u'),
                     'remote_rdns': self._ip_to_domainname(data.get('%h')),
                     'status_code': status_code),
-                    'size_of_response': size_of_response),
+                    'size_of_response': size_of_response,
                     'file_request': data.get('%r'),
                     'referer': data.get('%{Referer}i'),
                     'user_agent': data.get('%{User-Agent}i'),
