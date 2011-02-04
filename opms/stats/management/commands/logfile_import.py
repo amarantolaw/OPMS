@@ -143,7 +143,7 @@ class Command(BaseCommand):
         
         rdns = {}
         rdns['ip_address'] = adr.strNormal(0)
-        rdns['ip_int'] = adr.setDec(0)
+        rdns['ip_int'] = adr.strDec(0)
         rdns['resolved_name'] = 'No Resolved Name'
         rdns['last_updated'] = datetime.datetime.utcnow()
         
