@@ -43,8 +43,19 @@ class Command(BaseCommand):
                 date_string, time_string = data.get('%Y-%m-%dT%H:%M:%S%z').split('T')
                 date_yyyy, date_mm, date_dd = date_string.split('-')
                 time_hh, time_mm, time_ss = time_string.split(':')
+                
                 # Pull apart the server and port
                 server_ip, server_port = data.get('%A:%p').split(':')
+                
+                # Size of response validation. Can be '-' when status not 200
+                size_of_response = data.get('%b')
+                if size_of_response.isdigit():
+                    size_of_response = int(size_of_response)
+                else:
+                    size_of_response = 0
+                
+                # Status code validation
+                status_code = int(data.get('%>s')
                 
                 log_entry = {
                     'logfile': filename,
@@ -63,8 +74,8 @@ class Command(BaseCommand):
                     'remote_logname': data.get('%l'),
                     'remote_user': data.get('%u'),
                     'remote_rdns': self._ip_to_domainname(data.get('%h')),
-                    'status_code': int(data.get('%>s')),
-                    'size_of_response': int(data.get('%b')),
+                    'status_code': status_code),
+                    'size_of_response': size_of_response),
                     'file_request': data.get('%r'),
                     'referer': data.get('%{Referer}i'),
                     'user_agent': data.get('%{User-Agent}i'),
