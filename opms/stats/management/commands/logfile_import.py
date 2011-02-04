@@ -98,5 +98,5 @@ class Command(BaseCommand):
 # addr=reversename.from_address("192.168.0.1")
 # str(resolver.query(addr,"PTR")[0])
 
-    def _ip_to_domainname(ipaddress):
+    def _ip_to_domainname(self, ipaddress):
         return "www.%s.com" % ipaddress
