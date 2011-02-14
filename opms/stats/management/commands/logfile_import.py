@@ -157,13 +157,13 @@ class Command(BaseCommand):
             # Attempt an RDNS lookup, and remember to save this back to the object
             addr=reversename.from_address(rdns['ip_address'])
             # try:
-            obj['resolved_name'] = str(resolver.query(addr,"PTR")[0])
+            obj.resolved_name = str(resolver.query(addr,"PTR")[0])
             # else:
             # PUT ERROR HANDLING IN HERE!
             
             # Go get the location for this address
-            obj['country_code'] = self.geoip.country_code_by_addr(rdns.get('ip_address'))
-            obj['country_name'] = self.geoip.country_name_by_addr(rdns.get('ip_address'))
+            obj.country_code = self.geoip.country_code_by_addr(rdns.get('ip_address'))
+            obj.country_name = self.geoip.country_name_by_addr(rdns.get('ip_address'))
             
             obj.save()
         
