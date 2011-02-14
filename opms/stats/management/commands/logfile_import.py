@@ -30,7 +30,9 @@ class Command(BaseCommand):
             p = apachelog.parser(format)
             
             log = open(filename)
-            
+            # This only needs setting/getting the once per call of this function
+            logfile = self._logfile(filename)
+
             for line in log:
                 data = p.parse(line)
                 
@@ -57,7 +59,6 @@ class Command(BaseCommand):
                 
                 
                 # Get or create the foreign key elements, Logfile, Rdns, FileRequest, Referer, UserAgent
-                logfile = self._logfile(filename)
                 remote_rdns = self._ip_to_domainname(data.get('%h'))
                 file_request = self._file_request(data.get('%r'))
                 referer = self._referer(data.get('%{Referer}i'))
@@ -132,7 +133,27 @@ class Command(BaseCommand):
 
     def _logfile(self, filename):
         "Get or create a LogFile record for the given filename"
-        return filename
+        
+        # Simple hack for this method initially...
+        logfile = {}
+        logfile['service_name'] = "mpoau"
+        logfile['file_name'] = "testname.log"
+        logfile['file_path'] = "/testpath/"
+        logfile['last_updated'] = datetime.datetime.utcnow()
+        
+        obj, created = LogFile.objects.get_or_create(
+            service_name = logfile.get('service_name'),
+            file_name = logfile.get('file_name'),
+            file_path = logfile.get('file_path'),
+            defaults = logfile)
+        
+        # If this isn't the first time, and the datetime is significantly different from last access, update the time
+        if not created and (logfile.get('last_updated') - obj.last_updated).days > 0:
+            obj.last_updated = logfile.get('last_updated')
+        
+        obj.save()
+
+        return obj
 
 
 
