@@ -97,7 +97,7 @@ class Command(BaseCommand):
                     'server_name': data.get('%v'),
                     'server_ip': IP(server_ip).strNormal(0),
                     'server_port': int(server_port),
-                    'remote_ip': remote_rdns.get['ip_address'],
+                    'remote_ip': remote_rdns.get('ip_address'),
                     'remote_logname': data.get('%l'),
                     'remote_user': data.get('%u'),
                     'remote_rdns': remote_rdns,
