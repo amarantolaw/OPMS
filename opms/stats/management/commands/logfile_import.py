@@ -150,22 +150,22 @@ class Command(BaseCommand):
         rdns['resolved_name'] = 'No Resolved Name'
         rdns['last_updated'] = datetime.datetime.utcnow()
         
-        # Go get the location for this address - NOTE: THIS METHOD IS INCOMPLETE!
-        rdns['country_code'] = self.geoip.country_code_by_addr(rdns.get('ip_address'))
-        rdns['country_name'] = self.geoip.country_name_by_addr(rdns.get('ip_address'))
-        
         # Now get or create an Rdns record for this IP address
         obj, created = Rdns.objects.get_or_create(ip_address=rdns.get('ip_address'), defaults=rdns)
         
         if created:
-            # Do an RDNS lookup, and remember to save this back to the object
+            # Attempt an RDNS lookup, and remember to save this back to the object
             addr=reversename.from_address(rdns['ip_address'])
             # try:
             rdns['resolved_name'] = str(resolver.query(addr,"PTR")[0])
             # else:
             # PUT ERROR HANDLING IN HERE!
-            
             obj['resolved_name'] = rdns.get('resolved_name')
+            
+            # Go get the location for this address
+            rdns['country_code'] = self.geoip.country_code_by_addr(rdns.get('ip_address'))
+            rdns['country_name'] = self.geoip.country_name_by_addr(rdns.get('ip_address'))
+            
             obj.save()
         
         return obj
