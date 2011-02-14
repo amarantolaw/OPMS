@@ -109,18 +109,18 @@ class Command(BaseCommand):
                 }
                 
                 print '============================\n'
-                print data,'\n'
-                print log_entry,'\n'
+                print 'Data: %s\n' % data
+                print 'log_entry=%s\n' % log_entry
                 
                 # Create if there isn't already a duplicate record in place
                 obj, created = LogEntry.objects.get_or_create(
-                    time_of_request=log_entry.get('time_of_request'),  
-                    server_ip=log_entry.get('server_ip'), 
-                    remote_ip=log_entry.get('remote_ip'), 
-                    size_of_response=log_entry.get('size_of_response'), 
-                    file_request=log_entry.get('file_request'), 
+                    time_of_request=log_entry.get('time_of_request'),
+                    server_ip=log_entry.get('server_ip'),
+                    remote_ip=log_entry.get('remote_ip'),
+                    size_of_response=log_entry.get('size_of_response'),
+                    file_request=log_entry.get('file_request'),
                     defaults=log_entry)
-        
+
                 if created:
                     print "Record imported: %s" % log_entry
                 else:
@@ -166,14 +166,53 @@ class Command(BaseCommand):
             obj.country_name = self.geoip.country_name_by_addr(rdns.get('ip_address'))
             
             obj.save()
-        
+
         return obj
 
 
 
     def _file_request(self, request_string):
         "Get or create a FileRequest object for a given request string"
-        return request_string
+        
+        # Example request strings
+        # GET /philfac/lockelectures/locke_album_cover.jpg HTTP/1.1
+        # GET / HTTP/1.0
+        # GET /oucs/oxonian_interviews/300by300_interview.png HTTP/1.0
+        # GET /robots.txt HTTP/1.0
+        # GET /astro/introduction/astronomy_intro-medium-audio.mp3?CAMEFROM=podcastsGET HTTP/1.1
+        
+        # Crude splitting...
+        ts = request_string.split()
+        fs = ts[1].split('?')
+        
+        fr = {}
+        fr['method'] = ts[0]
+        fr['uri_string'] = fs[0]
+        fr['protocol'] = ts[2]
+        
+        if len(fs)==2:
+            fr['argument_string'] = fs[1]
+            
+            # Bonus code here to split the arguments into tracking elements
+            tracking_list = fs[1].split('&')
+            for key_value in tracking_list:
+                print "Key-Value = %s" % key_value
+            # STORE THIS DATA EVENTUALLY!
+        else:
+            fr['argument_string'] = ""
+        
+        # Now get or create a FileRequest record for this string
+        obj, created = FileRequest.objects.get_or_create(
+            method = fr.get('method'), 
+            uri_string = fr.get('uri_string'),
+            argument_string = fr.get('argument_string'),
+            protocol = fr.get('protocol'),
+            defaults = fr)
+        
+        if created:
+            obj.save()
+        
+        return obj
 
 
 

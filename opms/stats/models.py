@@ -224,9 +224,15 @@ class Referer(models.Model):
 
 # Lookup table for request string entries
 class FileRequest(models.Model):
+    METHOD_CHOICES = (
+        (u'GET', u'GET'),
+        (u'POST', u'POST'),
+    )
     #full_string = models.TextField("first line of request")
+    method = models.CharField("request method", max_length=5, choices=METHOD_CHOICES)
     uri_string = models.TextField("uri path in request string")
     argument_string = models.TextField("arguments in request string")
+    protocol = models.CharField("request protocol", max_length=20)
 
     def __unicode__(self):
         return self.uri_string
