@@ -149,7 +149,6 @@ class Preview(models.Model):
 class Rdns(models.Model):
     ip_address = models.IPAddressField("ip address")
     ip_int = models.IntegerField("ip as an integer")
-    ip_location = models.ForeignKey(IPLocation, verbose_name="IP geo-location")
     resolved_name = models.TextField("resolved dns name")
     country_code = models.CharField("country code", max_length=2)
     country_name = models.CharField("country name", max_length=200)
