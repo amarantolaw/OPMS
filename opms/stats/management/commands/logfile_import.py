@@ -4,13 +4,16 @@
 
 from django.core.management.base import BaseCommand, CommandError
 from opms.stats.models import *
-import apachelog, datetime, sys
+import apachelog, datetime, sys, pygeoip
 from dns import resolver,reversename
 from IPy import IP
         
 class Command(BaseCommand):
     args = '<spreadsheet.xls>'
     help = 'Imports the contents of the specified spreadsheet into the database'
+    
+    def __init__(self):
+        geoip = GeoIP('/home/carl/Projects/opms_master/OPMS/data/geoip/GeoIP.dat',GeoIP.MMAP_CACHE)
 
     def handle(self, *args, **options):
 
@@ -148,7 +151,8 @@ class Command(BaseCommand):
         rdns['last_updated'] = datetime.datetime.utcnow()
         
         # Go get the location for this address - NOTE: THIS METHOD IS INCOMPLETE!
-        rdns['ip_location'] = IPLocation.getLocationByIP(rdns.get('ip_address'))
+        rdns['country_code'] = self.geoip.country_code_by_addr(rdns.get('ip_address'))
+        rdns['country_name'] = self.geoip.country_name_by_addr(rdns.get('ip_address'))
         
         # Now get or create an Rdns record for this IP address
         obj, created = Rdns.objects.get_or_create(ip_address=rdns.get('ip_address'), defaults=rdns)

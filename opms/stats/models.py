@@ -144,26 +144,6 @@ class Preview(models.Model):
 # Apache log analysis classes
 ######
 
-class IPLocationManager(models.Manager):
-    def getLocationByIP(ip_string):
-        "For a given valid IP string, find a match for location in the data"
-        return None
-
-
-# GeoIP data lookup table based on data from Geocode?
-class IPLocation(models.Model):
-    ip_range_start = models.IPAddressField("ip range start")
-    ip_range_end = models.IPAddressField("ip range end")
-    ip_int_start = models.IntegerField("ip integer range start")
-    ip_int_end = models.IntegerField("ip integer range end")
-    country_code = models.CharField("country code", max_length=2)
-    country_name = models.CharField("country name", max_length=200)
-    last_updated = models.DateTimeField("last updated")
-    
-    objects = IPLocationManager()
-    
-    def __unicode__(self):
-        return self.country_name
 
 # Reverse DNS Lookup cache. Because we don't want to be always hitting DNS servers.
 class Rdns(models.Model):
@@ -171,6 +151,8 @@ class Rdns(models.Model):
     ip_int = models.IntegerField("ip as an integer")
     ip_location = models.ForeignKey(IPLocation, verbose_name="IP geo-location")
     resolved_name = models.TextField("resolved dns name")
+    country_code = models.CharField("country code", max_length=2)
+    country_name = models.CharField("country name", max_length=200)
     last_updated = models.DateTimeField("last updated")
     
     def __unicode__(self):
