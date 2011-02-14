@@ -13,7 +13,7 @@ class Command(BaseCommand):
     help = 'Imports the contents of the specified spreadsheet into the database'
     
     def __init__(self):
-        geoip = GeoIP('/home/carl/Projects/opms_master/OPMS/data/geoip/GeoIP.dat',GeoIP.MMAP_CACHE)
+        geoip = pygeoip.GeoIP('/home/carl/Projects/opms_master/OPMS/data/geoip/GeoIP.dat',pygeoip.GeoIP.MMAP_CACHE)
 
     def handle(self, *args, **options):
 
