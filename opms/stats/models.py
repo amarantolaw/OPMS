@@ -207,9 +207,9 @@ class UserAgent(models.Model):
 # Need to account for blank user agents - "No User Agent"
     full_string = models.TextField("contents of user agent")
     application_name = models.CharField("application name", max_length=200)
-    application_version = models.CharField("application version", max_length=10)
-    platform_version = models.ForeignKey(PlatformVersion, verbose_name="platform information")
-    browser_version = models.ForeignKey(BrowserVersion, verbose_name="browser information")
+    application_version = models.CharField("application version", max_length=100)
+    platform_version = models.ForeignKey(PlatformVersion, verbose_name="platform information", blank=True, null=True)
+    browser_version = models.ForeignKey(BrowserVersion, verbose_name="browser information", blank=True, null=True)
 
     def __unicode__(self):
         return self.full_string
@@ -271,6 +271,50 @@ class Tracking(models.Model):
 
 # Log file request table. Each row is a request from a log file
 class LogEntry(models.Model):
+    # Status codes from: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+    STATUS_CODE_CHOICES = (
+        (100, u'100 Continue'),
+        (101, u'101 Switching Protocols'),
+        (200, u'200 OK'),
+        (201, u'201 Created'),
+        (202, u'202 Accepted'),
+        (203, u'203 Non-Authoritative Information'),
+        (204, u'204 No Content'),
+        (205, u'205 Reset Content'),
+        (206, u'206 Partial Content'),
+        (300, u'300 Multiple Choices'),
+        (301, u'301 Moved Permanently'),
+        (302, u'302 Found'),
+        (303, u'303 See Other'),
+        (304, u'304 Not Modified'),
+        (305, u'305 Use Proxy'),
+        (306, u'306 (Unused)'),
+        (307, u'307 Temporary Redirect'),
+        (400, u'400 Bad Request'),
+        (401, u'401 Unauthorized'),
+        (402, u'402 Payment Required'),
+        (403, u'403 Forbidden'),
+        (404, u'404 Not Found'),
+        (405, u'405 Method Not Allowed'),
+        (406, u'406 Not Acceptable'),
+        (407, u'407 Proxy Authentication Required'),
+        (408, u'408 Request Timeout'),
+        (409, u'409 Conflict'),
+        (410, u'410 Gone'),
+        (411, u'411 Length Required'),
+        (412, u'412 Precondition Failed'),
+        (413, u'413 Request Entity Too Large'),
+        (414, u'414 Request-URI Too Long'),
+        (415, u'415 Unsupported Media Type'),
+        (416, u'416 Requested Range Not Satisfiable'),
+        (417, u'417 Expectation Failed'),
+        (500, u'500 Internal Server Error'),
+        (501, u'501 Not Implemented'),
+        (502, u'502 Bad Gateway'),
+        (503, u'503 Service Unavailable'),
+        (504, u'504 Gateway Timeout'),
+        (505, u'505 HTTP Version Not Supported')
+    )
     logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
     time_of_request = models.DateTimeField("time of request")
     server_name = models.CharField("server dns name", max_length=200)
