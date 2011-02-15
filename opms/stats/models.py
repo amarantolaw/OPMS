@@ -228,11 +228,25 @@ class FileRequest(models.Model):
         (u'GET', u'GET'),
         (u'POST', u'POST'),
     )
+    FILE_TYPE_CHOICES = (
+        (u'mp3', u'Audio MP3'),
+        (u'mp4', u'Video MP4'),
+        (u'm4a', u'Audio M4A'),
+        (u'm4b', u'Audiobook M4B'),
+        (u'm4p', u'Audio Protected M4P'),
+        (u'm4v', u'Video M4V'),
+        (u'txt', u'Text TXT'),
+        (u'gif', u'Image GIF'),
+        (u'png', u'Image PNG'),
+        (u'jpg', u'Image JPG'),
+        (u'', u'Unknown'),
+    )
     #full_string = models.TextField("first line of request")
     method = models.CharField("request method", max_length=5, choices=METHOD_CHOICES)
     uri_string = models.TextField("uri path in request string")
     argument_string = models.TextField("arguments in request string")
     protocol = models.CharField("request protocol", max_length=20)
+    file_type = models.CharField("file type", max_length=3, choices=FILE_TYPE_CHOICES)
 
     def __unicode__(self):
         return self.uri_string
@@ -242,8 +256,14 @@ class FileRequest(models.Model):
 # e.g. CAMEFROM=value; lfi=value; DESTINATION=value;
 # These may be found in the URL argument string, or in the Referer string
 class Tracking(models.Model):
+    SOURCE_CHOICES = (
+        (u'FileRequest', u'File Request'),
+        (u'Referer', u'Referer'),
+        (u'Manual', u'Manually Tagged'),
+    )
     key_string = models.CharField("key string", max_length=50)
     value_string = models.CharField("value string", max_length=200)
+    source = models.CharField("data source", max_length=20, choices=SOURCE_CHOICES)
 
     def __unicode__(self):
         return '%s=%s' % (self.key_string,value_string)
