@@ -6,6 +6,7 @@ By Hicro Kee (http://hicrokee.com)
 email: hicrokee AT gmail DOT com
 
 Modified by Michal Molhanec http://molhanec.net 
+Modified by Carl Marshall for use with OPMS project
 
 Usage:
 
@@ -52,6 +53,8 @@ class UASparser:
     
     ini_url  = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini'
     ver_url  = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini&ver=y'
+    ini_path = 'ua_data/uas_20110211-01.ini.txt'
+    ver_path = 'ua_data/version.txt'
     info_url = 'http://user-agent-string.info'
     os_img_url = 'http://user-agent-string.info/pub/img/os/%s'
     ua_img_url = 'http://user-agent-string.info/pub/img/ua/%s'
@@ -231,6 +234,14 @@ class UASparser:
         resq = urllib2.Request(url)
         context = urllib2.urlopen(resq)
         return context.read()
+        
+    
+    def _fetchFile(self,path):
+        """
+        Get ini file by a given path
+        """
+        f = open(path)
+        return f.read()
     
     def _checkCache(self):
         """
@@ -252,21 +263,23 @@ class UASparser:
         """
         ver_data = None
         
+        # CM: If I call updateData, I want it to reread the file.
         #Check the latest version first
         #pass if no need to update
-        try:
-            ver_data = self._fetchURL(self.ver_url)
-            if os.path.exists(self.cache_file_name):
-                cache_file = open(self.cache_file_name,'rb')
-                data = pickle.load(cache_file)
-                if data['version'] == ver_data:
-                    return True
-        except:
-            raise UASException("Failed to get version of lastest data")
+        #try:
+        #    ver_data = self._fetchURL(self.ver_url)
+        #    if os.path.exists(self.cache_file_name):
+        #        cache_file = open(self.cache_file_name,'rb')
+        #        data = pickle.load(cache_file)
+        #        if data['version'] == ver_data:
+        #            return True
+        #except:
+        #    raise UASException("Failed to get version of lastest data")
         
         try:
             cache_file = open(self.cache_file_name,'wb')
-            ini_file = self._fetchURL(self.ini_url)
+            # ini_file = self._fetchURL(self.ini_url)
+            ini_file = self._fetchFile(self.ini_path)
             ini_data = self._parseIniFile(ini_file)
             if ver_data:
                 ini_data['version'] = ver_data
