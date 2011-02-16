@@ -276,15 +276,15 @@ class UASparser:
         #except:
         #    raise UASException("Failed to get version of lastest data")
         
-        #try:
+        try:
             cache_file = open(self.cache_file_name,'wb')
             # ini_file = self._fetchURL(self.ini_url)
             ini_file = self._fetchFile(self.ini_path)
             ini_data = self._parseIniFile(ini_file)
             if ver_data:
                 ini_data['version'] = ver_data
-        #except:
-        #    raise UASException("Failed to download cache data")
+        except:
+            raise UASException("Failed to download cache data")
         
         pickle.dump(ini_data, cache_file)
             
