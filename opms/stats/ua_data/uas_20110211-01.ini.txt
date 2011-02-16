@@ -9416,7 +9416,7 @@
 [browser_reg]
 ; browser_reg_id[] = "Browser regstring"
 ; browser_reg_id[] = "Browser id"
-10000[] = "/iTunes\/([0-9\.]+)/si"
+10000[] = "^iTunes\/([0-9\.]+)*/si"
 10000[] = "387"
 49[] = "/mozilla.*Blazer\/([0-9a-z\+\-\.]+)/si"
 49[] = "43"
