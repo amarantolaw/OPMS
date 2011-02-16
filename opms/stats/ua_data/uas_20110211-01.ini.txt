@@ -9393,6 +9393,13 @@
 386[] = ""
 386[] = "go_browser.png"
 386[] = "/list-of-ua/browser-detail?browser=GO Browser"
+387[] = 18
+387[] = "iTunes"
+387[] = "http://www.apple.com/itunes/"
+387[] = "Apple"
+387[] = "http://www.apple.com/"
+387[] = ""
+387[] = ""
 [browser_type]
 ; browser_type_id[] = "Browser type"
 0[] = "Browser"
@@ -9409,6 +9416,8 @@
 [browser_reg]
 ; browser_reg_id[] = "Browser regstring"
 ; browser_reg_id[] = "Browser id"
+10000[] = "/iTunes\/([0-9\.]+)/si"
+10000[] = "387"
 49[] = "/mozilla.*Blazer\/([0-9a-z\+\-\.]+)/si"
 49[] = "43"
 69[] = "/mozilla.*rv:[0-9\.]+.*gecko\/[0-9]+.*firefox\/([0-9a-z\+\-\.]+).*swiftfox/si"
