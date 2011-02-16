@@ -53,8 +53,8 @@ class UASparser:
     
     ini_url  = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini'
     ver_url  = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini&ver=y'
-    ini_path = 'ua_data/uas_20110211-01.ini.txt'
-    ver_path = 'ua_data/version.txt'
+    ini_path = 'stats/ua_data/uas_20110211-01.ini.txt'
+    ver_path = 'stats/ua_data/version.txt'
     info_url = 'http://user-agent-string.info'
     os_img_url = 'http://user-agent-string.info/pub/img/os/%s'
     ua_img_url = 'http://user-agent-string.info/pub/img/ua/%s'
@@ -276,15 +276,15 @@ class UASparser:
         #except:
         #    raise UASException("Failed to get version of lastest data")
         
-        try:
+        #try:
             cache_file = open(self.cache_file_name,'wb')
             # ini_file = self._fetchURL(self.ini_url)
             ini_file = self._fetchFile(self.ini_path)
             ini_data = self._parseIniFile(ini_file)
             if ver_data:
                 ini_data['version'] = ver_data
-        except:
-            raise UASException("Failed to download cache data")
+        #except:
+        #    raise UASException("Failed to download cache data")
         
         pickle.dump(ini_data, cache_file)
             
