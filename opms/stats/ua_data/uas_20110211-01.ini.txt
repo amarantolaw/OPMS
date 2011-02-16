@@ -9393,7 +9393,7 @@
 386[] = ""
 386[] = "go_browser.png"
 386[] = "/list-of-ua/browser-detail?browser=GO Browser"
-387[] = 18
+387[] = "18"
 387[] = "iTunes"
 387[] = "http://www.apple.com/itunes/"
 387[] = "Apple"
