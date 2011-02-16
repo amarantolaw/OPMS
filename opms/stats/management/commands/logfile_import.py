@@ -58,10 +58,18 @@ class Command(BaseCommand):
                     print "#### Houston, we have a problem with this entry: %s" % data
                 
                 
+                # Status code validation
+                status_code = 0
+                for item in LogEntry.STATUS_CODE_CHOICES:
+                    if int(data.get('%>s')) == item[0]:
+                        status_code = int(data.get('%>s'))
+                if status_code == 0:
+                    print "#### Houston, we have a STATUS CODE 0 problem with this entry: %s" % data
+                
                 # Get or create the foreign key elements, Logfile, Rdns, FileRequest, Referer, UserAgent
                 remote_rdns = self._ip_to_domainname(data.get('%h'))
                 file_request = self._file_request(data.get('%r'))
-                referer = self._referer(data.get('%{Referer}i'))
+                referer = self._referer(data.get('%{Referer}i'), status_code)
                 user_agent = self._user_agent(data.get('%{User-Agent}i'))
                 
                 # Tracking needs dealing with later...
@@ -80,9 +88,6 @@ class Command(BaseCommand):
                     size_of_response = int(size_of_response)
                 else:
                     size_of_response = 0
-                
-                # Status code validation
-                status_code = int(data.get('%>s'))
                 
                 # Build the log entry dictionary
                 log_entry = {
@@ -126,6 +131,14 @@ class Command(BaseCommand):
                     print "Record imported: %s" % log_entry
                 else:
                     print "DUPLICATE RECORD DETECTED: %s" % log_entry
+
+                # TRACKING information needs to be parsed and stored now.
+            
+            # Bonus code here to split the arguments into tracking elements
+            # tracking_list = fs[1].split('&')
+            # for key_value in tracking_list:
+            #    print "Key-Value = %s" % key_value
+            # STORE THIS DATA EVENTUALLY!
 
 
             print "Import finished\n\n"
@@ -202,7 +215,7 @@ class Command(BaseCommand):
         # GET /robots.txt HTTP/1.0
         # GET /astro/introduction/astronomy_intro-medium-audio.mp3?CAMEFROM=podcastsGET HTTP/1.1
         
-        # Crude splitting...
+        # Crude splitting... first on spaces, then on file/querystring
         ts = request_string.split()
         fs = ts[1].split('?')
         
@@ -211,16 +224,19 @@ class Command(BaseCommand):
         fr['uri_string'] = fs[0]
         fr['protocol'] = ts[2]
         
+        # Querystring is optional, so test for it first.
         if len(fs)==2:
             fr['argument_string'] = fs[1]
-            
-            # Bonus code here to split the arguments into tracking elements
-            tracking_list = fs[1].split('&')
-            for key_value in tracking_list:
-                print "Key-Value = %s" % key_value
-            # STORE THIS DATA EVENTUALLY!
         else:
             fr['argument_string'] = ""
+        
+        # Crude file typing (in lieu of an actual file database...)
+        # Take the last three letters of the filename and compare to known types
+        ft = fr.get('uri_string')[-3:].lower()
+        fr['file_type'] = ""
+        for item in FileRequest.FILE_TYPE_CHOICES:
+            if ft == item[0]:
+                fr['file_type'] = ft
         
         # Now get or create a FileRequest record for this string
         obj, created = FileRequest.objects.get_or_create(
@@ -237,13 +253,53 @@ class Command(BaseCommand):
 
 
 
-    def _referer(self, referer_string):
+    def _referer(self, referer_string, status_code):
         "Get or create a Referer record for the given string"
-        return referer_string
+        ref = {}
+        ref['full_string'] = ""
+        
+        if status_code in (200,206,304):
+            ref['full_string'] = referer_string
+        
+        # Now get or create a Referer record for this string
+        obj, created = Referer.objects.get_or_create(
+            full_string = ref.get('full_string'),
+            defaults = ref)
+        
+        if created:
+            obj.save()
+        
+        return obj
 
 
 
     def _user_agent(self, agent_string):
         "Get or create a UserAgent record for the given string"
         # Split the string into likely parts
-        return agent_string
+        
+        ua = {}
+        ua['full_string'] = agent_string
+        
+        # Try and determine the application name and version being used. Destructively deconstruct the string.
+        # If "-" then UA is blank... simples...
+        # Look for /, everything before that is the application
+        # Look for " ", everything before that is the version number
+        ua['application_name'] = ""
+        ua['application_version'] = ""
+        
+        # Determine software platform (or hardware in the case of iOS devices)
+        ua['platform_version'] = 0
+        
+        # Determine the browser/playback software
+        ua['browser_version'] = 0
+        
+        
+        # Now get or create a UserAgent record for this string
+        obj, created = UserAgent.objects.get_or_create(
+            full_string = ua.get('full_string'), 
+            defaults = ua)
+        
+        if created:
+            obj.save()
+        
+        return obj
