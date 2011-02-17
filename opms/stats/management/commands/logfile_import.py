@@ -4,6 +4,7 @@
 
 from django.core.management.base import BaseCommand, CommandError
 from opms.stats.models import *
+from opms.stats.uasparser import UASparser
 import apachelog, datetime, sys, pygeoip
 from dns import resolver,reversename
 from IPy import IP
@@ -14,6 +15,7 @@ class Command(BaseCommand):
     
     def __init__(self):
         self.geoip = pygeoip.GeoIP('/home/carl/Projects/opms_master/OPMS/data/geoip/GeoIP.dat',pygeoip.MMAP_CACHE)
+        self.uasp = UASparser(cache_dir="/home/carl/Projects/opms_master/OPMS/opms/stats/ua_data/")
 
     def handle(self, *args, **options):
 
@@ -275,31 +277,54 @@ class Command(BaseCommand):
 
     def _user_agent(self, agent_string):
         "Get or create a UserAgent record for the given string"
-        # Split the string into likely parts
-        
+        user_agent = {}
         ua = {}
-        ua['full_string'] = agent_string
+        os = {}
         
-        # Try and determine the application name and version being used. Destructively deconstruct the string.
-        # If "-" then UA is blank... simples...
-        # Look for /, everything before that is the application
-        # Look for " ", everything before that is the version number
-        ua['application_name'] = ""
-        ua['application_version'] = ""
-        
-        # Determine software platform (or hardware in the case of iOS devices)
-        ua['platform_version'] = 0
-        
-        # Determine the browser/playback software
-        ua['browser_version'] = 0
-        
+        # Store the full string for later analysis
+        user_agent['full_string'] = agent_string
         
         # Now get or create a UserAgent record for this string
         obj, created = UserAgent.objects.get_or_create(
-            full_string = ua.get('full_string'), 
-            defaults = ua)
+            full_string = user_agent.get('full_string'), 
+            defaults = user_agent)
         
         if created:
+            # Parse the string to extract the easy bits
+            uas_dict = self.uasp.parse(user_agent.get('full_string'))
+            user_agent.type = uas_dict.get('typ')
+            
+            # Deal with the OS record
+            os['company'] = uas_dict.get('os_company')
+            os['family'] = uas_dict.get('os_family')
+            os['name'] = uas_dict.get('os_name')
+            
+            # Now get or create an OS record
+            user_agent.os, created = OS.objects.get_or_create(
+                company = os.get('company'), 
+                family = os.get('family'), 
+                name = os.get('name'), 
+                defaults = os)
+            
+            if created:
+                user_agent.os.save()
+                
+            
+            # Deal with the UA record
+            ua['company'] = uas_dict.get('ua_company')
+            ua['family'] = uas_dict.get('ua_family')
+            ua['name'] = uas_dict.get('ua_name')
+            
+            # Now get or create an UA record
+            user_agent.ua, created = UA.objects.get_or_create(
+                company = ua.get('company'), 
+                family = ua.get('family'), 
+                name = ua.get('name'), 
+                defaults = ua)
+            
+            if created:
+                user_agent.ua.save()
+        
             obj.save()
         
         return obj
