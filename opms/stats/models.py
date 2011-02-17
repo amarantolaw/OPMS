@@ -175,41 +175,30 @@ class LogFile(models.Model):
         return self.file_name
 
 
-# Lookup table for Browsers and versions - this allows us to dynamically add more values as we find them
-class BrowserVersion(models.Model):
-    browser_token = models.CharField("browser token string", max_length=50)
-    browser_name = models.CharField("browser name", max_length=200)
+# Lookup table for Operating Systems and versions
+class OS(models.Model):
+    company = models.CharField("operating system company", max_length=200)
+    family = models.CharField("operating system family", max_length=100)
+    name = models.CharField("operating system identity", max_length=200)
     
     def __unicode__(self):
-        return self.browser_name
+        return self.name
 
-# Lookup table for Platforms and versions
-class PlatformVersion(models.Model):
-    PLATFORM_SHORTNAME_CHOICES = (
-        (u'Windows', u'Windows'),
-        (u'Mac OS', u'Mac OS'),
-        (u'iOS', u'iOS'),
-        (u'Other', u'Other'),
-        (u'Unknown', u'Unknown'),        
-    )
-    platform_token = models.CharField("platform token string", max_length=50)
-    platform_name = models.CharField("platform full name", max_length=200)
-    platform_shortname = models.CharField("platform short name", max_length=50, choices=PLATFORM_SHORTNAME_CHOICES)
+# Lookup table for User Agents and versions
+class UA(models.Model):
+    company = models.CharField("user agent company", max_length=200)
+    family = models.CharField("user agent family", max_length=100)
+    name = models.CharField("user agent identity", max_length=200)
     
     def __unicode__(self):
-        return self.platform_name
+        return self.name
 
 # Lookup table for User Agent entries
 class UserAgent(models.Model):
-# Examples from https://developer.mozilla.org/en/Gecko_user_agent_string_reference
-# http://msdn.microsoft.com/en-us/library/ms537503(v=vs.85).aspx
-# Application Name/App Version (Compatibility flag; Version Token; Platform token;) Misc other
-# Need to account for blank user agents - "No User Agent"
-    full_string = models.TextField("contents of user agent")
-    application_name = models.CharField("application name", max_length=200)
-    application_version = models.CharField("application version", max_length=100)
-    platform_version = models.ForeignKey(PlatformVersion, verbose_name="platform information", blank=True, null=True)
-    browser_version = models.ForeignKey(BrowserVersion, verbose_name="browser information", blank=True, null=True)
+    full_string = models.TextField("full contents of user agent string")
+    type = models.CharField("user agent type", max_length=50)
+    os = models.ForeignKey(PlatformVersion, verbose_name="operating system information")
+    ua = models.ForeignKey(BrowserVersion, verbose_name="user agent information")
 
     def __unicode__(self):
         return self.full_string
