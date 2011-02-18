@@ -310,7 +310,6 @@ class LogEntry(models.Model):
     server_ip = models.IPAddressField("server ip address")
     server_port = models.IntegerField("server port number")
     remote_ip = models.IPAddressField("remote ip address")
-    remote_ip_int = models.IntegerField("remote ip address as integer")
     remote_logname = models.CharField("remote log name", max_length=200,)
     remote_user = models.CharField("remote user name", max_length=200,)
     remote_rdns = models.ForeignKey(Rdns, verbose_name="remote reverse dns name")
