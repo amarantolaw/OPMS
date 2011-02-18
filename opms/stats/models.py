@@ -255,7 +255,7 @@ class Tracking(models.Model):
     source = models.CharField("data source", max_length=20, choices=SOURCE_CHOICES)
 
     def __unicode__(self):
-        return '%s=%s' % (self.key_string,value_string)
+        return '%s=%s' % (self.key_string,self.value_string)
     
 
 # Log file request table. Each row is a request from a log file
@@ -323,4 +323,4 @@ class LogEntry(models.Model):
     tracking = models.ManyToManyField(Tracking, verbose_name="tracking on this entry")
     
     def __unicode__(self):
-        return '%s:%s' % (self.time_of_request,file_request)
+        return '%s:%s' % (self.time_of_request,self.file_request)
