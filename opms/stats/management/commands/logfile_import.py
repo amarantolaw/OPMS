@@ -16,9 +16,10 @@ class Command(BaseCommand):
     def __init__(self):
         self.geoip = pygeoip.GeoIP('/home/carl/Projects/opms_master/OPMS/data/geoip/GeoIP.dat',pygeoip.MMAP_CACHE)
         self.uasp = UASparser(cache_dir="/home/carl/Projects/opms_master/OPMS/opms/stats/ua_data/")
+        self.rdns_timeout = 0
+        self.debug = True
 
-    def _debug(self,error_str,enable=False):
-        self.debug = enable
+    def _debug(self,error_str):
         "Basic optional debug function. Print the string if enabled"
         if self.debug:
             print 'DEBUG:' + str(error_str) + '\n'
@@ -35,7 +36,7 @@ class Command(BaseCommand):
                raise CommandError("This file is still compressed. Uncompress and try again.\n\n")
                # sys.exit(1)
             else:
-               self._debug("################  Beginning IMPORT from" + str(filename),True)
+               self._debug("################  Beginning IMPORT from" + str(filename))
         
             # Assume mpoau logfiles
             format = r'%Y-%m-%dT%H:%M:%S%z %v %A:%p %h %l %u \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"'
