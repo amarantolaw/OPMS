@@ -189,12 +189,14 @@ class Command(BaseCommand):
         
         if created:
             # Attempt an RDNS lookup, and remember to save this back to the object
-            addr = reversename.from_address(rdns.get('ip_address'))
             try:
+                addr = reversename.from_address(rdns.get('ip_address'))
                 obj.resolved_name = str(resolver.query(addr,"PTR")[0])
             except resolver.NXDOMAIN:
                 print 'NXDOMAIN error trying to resolve:',addr
-                pass
+            
+            #Debugging
+            print '_ip_to_domainname(',adr,'): rdns=',obj.resolved_name
             
             # Go get the location for this address
             obj.country_code = self.geoip.country_code_by_addr(rdns.get('ip_address'))
