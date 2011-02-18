@@ -124,7 +124,7 @@ class Command(BaseCommand):
                     'user_agent': user_agent,
                 }
                 
-                self._debug('log_entry=' + log_entry)
+                self._debug('log_entry=' + str(log_entry))
                 
                 # Create if there isn't already a duplicate record in place
                 obj, created = LogEntry.objects.get_or_create(
