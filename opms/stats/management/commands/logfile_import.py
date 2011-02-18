@@ -156,7 +156,7 @@ class Command(BaseCommand):
                     self._errorlog("##### DUPLICATE RECORD DETECTED ##### \n" +\
                         "Logfile line:" + str(self.import_stats.get('line_counter')) + "\n" +\
                         "Database row id: " + str(obj.id) + "\n\n" +\
-                        "Log: " + str(log_entry)) + "\n" +\
+                        "Log: " + str(log_entry) + "\n" +\
                         "DB: " + str(obj))
                     self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
 
