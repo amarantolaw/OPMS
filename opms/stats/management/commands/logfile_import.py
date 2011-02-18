@@ -17,6 +17,16 @@ class Command(BaseCommand):
         self.geoip = pygeoip.GeoIP('/home/carl/Projects/opms_master/OPMS/data/geoip/GeoIP.dat',pygeoip.MMAP_CACHE)
         self.uasp = UASparser(cache_dir="/home/carl/Projects/opms_master/OPMS/opms/stats/ua_data/")
 
+    def _debug(self,error_str,enable=False):
+        self.debug = enable
+        "Basic optional debug function. Print the string if enabled"
+        if self.debug:
+            print 'DEBUG:' + str(error_str) + '\n'
+
+    def _errorlog(self,error_str):
+        "Do something about logging these errors"
+        print 'ERROR:' + str(error_str) + '\n'
+
     def handle(self, *args, **options):
 
         for filename in args:
@@ -25,7 +35,7 @@ class Command(BaseCommand):
                raise CommandError("This file is still compressed. Uncompress and try again.\n\n")
                # sys.exit(1)
             else:
-               print "################  Beginning IMPORT from", filename
+               self._debug("################  Beginning IMPORT from" + filename,True)
         
             # Assume mpoau logfiles
             format = r'%Y-%m-%dT%H:%M:%S%z %v %A:%p %h %l %u \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"'
@@ -38,8 +48,8 @@ class Command(BaseCommand):
             for line in log:
                 data = p.parse(line)
                 
-                print '============================\n'
-                print 'Data: %s\n' % data
+                self._debug('============================')
+                self._debug('Data: ' + data)
 # data.items()    
 #[('%Y-%m-%dT%H:%M:%S%z', '2009-01-14T06:20:59+0000'),
 # ('%l', '-'),
@@ -55,7 +65,7 @@ class Command(BaseCommand):
 
                 # Validate the data - Count the number of elements
                 if len(data) <> 11:
-                    print "#### Houston, we have a problem with this entry: %s" % data
+                    self._errorlog("#### Houston, we have a problem with this entry:" + data)
                 
                 
                 # Status code validation
@@ -64,7 +74,7 @@ class Command(BaseCommand):
                     if int(data.get('%>s')) == item[0]:
                         status_code = int(data.get('%>s'))
                 if status_code == 0:
-                    print "#### Houston, we have a STATUS CODE 0 problem with this entry: %s" % data
+                    self._errorlog("#### Houston, we have a STATUS CODE 0 problem with this entry: " + data)
                 
                 # Get or create the foreign key elements, Logfile, Rdns, FileRequest, Referer, UserAgent
                 remote_rdns = self._ip_to_domainname(data.get('%h'))
@@ -114,7 +124,7 @@ class Command(BaseCommand):
                     'user_agent': user_agent,
                 }
                 
-                print 'log_entry=%s\n' % log_entry
+                self._debug('log_entry=' + log_entry)
                 
                 # Create if there isn't already a duplicate record in place
                 obj, created = LogEntry.objects.get_or_create(
@@ -127,11 +137,10 @@ class Command(BaseCommand):
 
                 if created:
                     obj.save()
-                    print '#### Record imported \n', obj
+                    self._debug('#### Record imported\n' + str(obj))
                 else:
-                    print "DUPLICATE RECORD DETECTED: %s\n" % log_entry
+                    self._errorlog("DUPLICATE RECORD DETECTED:\n" + log_entry)
 
-                print '============================\n'
                 # TRACKING information needs to be parsed and stored now.
             
             # Bonus code here to split the arguments into tracking elements
@@ -140,8 +149,9 @@ class Command(BaseCommand):
             #    print "Key-Value = %s" % key_value
             # STORE THIS DATA EVENTUALLY!
 
+                self._debug('============================')
 
-            print "Import finished\n\n"
+            print "Import finished\n"
 
 
     def _logfile(self, filename):
@@ -172,7 +182,7 @@ class Command(BaseCommand):
 
     def _ip_to_domainname(self, ipaddress):
         "Returns the domain name for a given IP where known"
-        print 'DEBUG: _ip_to_domainname(',ipaddress,') called\n'
+        self._debug('_ip_to_domainname('+str(ipaddress)+') called')
         # validate IP address
         # try: 
         adr = IP(ipaddress)
@@ -182,22 +192,15 @@ class Command(BaseCommand):
         rdns = {}
         rdns['ip_address'] = adr.strNormal(0)
         # rdns['ip_int'] = int(adr.strDec(0)) - No Longer needed for GeoIP helping
-        rdns['resolved_name'] = 'No Resolved Name'
+        rdns['resolved_name'] = 'Unknown'
         rdns['last_updated'] = datetime.datetime.utcnow()
         
         # Now get or create an Rdns record for this IP address
         obj, created = Rdns.objects.get_or_create(ip_address=rdns.get('ip_address'), defaults=rdns)
         
         if created:
-            # Attempt an RDNS lookup, and remember to save this back to the object
-            try:
-                addr = reversename.from_address(rdns.get('ip_address'))
-                obj.resolved_name = str(resolver.query(addr,"PTR")[0])
-            except resolver.NXDOMAIN:
-                print 'NXDOMAIN error trying to resolve:',addr
-            
-            #Debugging
-            print 'DEBUG: _ip_to_domainname(',adr,'): rdns=',obj.resolved_name,'\n\n'
+            # Look for the RDNS string of this address
+            obj.resolved_name = self._rdns_lookup(rdns.get('ip_address'))
             
             # Go get the location for this address
             obj.country_code = self.geoip.country_code_by_addr(rdns.get('ip_address'))
@@ -207,6 +210,35 @@ class Command(BaseCommand):
 
         return obj
 
+
+    def _rdns_lookup(self, ipaddress):
+        "Attempt an RDNS lookup for this ipaddress"
+        # Default answer is the failure state of "Unknown"
+        resolved_name = 'Unknown'
+
+        # Has a timeout occurred already?
+        if self.rdns_timeout != 0:
+            # Was the timeout more than 30 seconds ago?
+            if (datetime.datetime.utcnow() - self.rdns_timeout).seconds > 30:
+                self.rdns_timeout = 0
+                # Attempt an RDNS lookup, and remember to save this back to the object
+                try:
+                    addr = reversename.from_address(ipaddress)
+                    resolved_name = str(resolver.query(addr,"PTR")[0])
+                    
+                except resolver.NXDOMAIN:
+                    self._errorlog('NXDOMAIN error trying to resolve:'+str(addr))
+                    resolved_name = 'No Resolved Name'
+                    
+                # Timeouts can be a problem with batch importing, use this to skip the issue for sorting later
+                except resolver.timeout:
+                    self.rdns_timeout = datetime.datetime.utcnow()
+                    self._errorlog('_rdns_lookup() FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
+            
+        #Debugging
+        self._debug('_rdns_lookup('+str(ipaddress)+'): rdns='+resolved_name)
+        
+        return resolved_name
 
 
     def _file_request(self, request_string):
