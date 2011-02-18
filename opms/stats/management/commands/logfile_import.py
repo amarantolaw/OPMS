@@ -152,7 +152,8 @@ class Command(BaseCommand):
                     obj.save()
                     self._debug('#### Record imported\n' + str(obj))
                 else:
-                    self._errorlog("DUPLICATE RECORD DETECTED - line:" + self.import_stats.get('line_counter') + "\n" +\
+                    self._errorlog("DUPLICATE RECORD DETECTED - line:" +\
+                        str(self.import_stats.get('line_counter')) + "\n" +\
                         str(log_entry))
                     self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
 
