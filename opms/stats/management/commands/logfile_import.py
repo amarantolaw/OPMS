@@ -278,12 +278,11 @@ class Command(BaseCommand):
     def _user_agent(self, agent_string):
         "Get or create a UserAgent record for the given string"
         user_agent = {}
-        ua = {}
-        os = {}
         
         # Store the full string for later analysis
         user_agent['full_string'] = agent_string
-        # Create some defaults that we'll likely overwrite
+        
+        # Create some defaults that we'll likely overwrite. OS and UA can be null, so ignore.
         user_agent['type'] = ""
         
         # Now get or create a UserAgent record for this string
@@ -294,39 +293,42 @@ class Command(BaseCommand):
         if created:
             # Parse the string to extract the easy bits
             uas_dict = self.uasp.parse(user_agent.get('full_string'))
-            user_agent.type = uas_dict.get('typ')
+
+            #Set the type string
+            obj.type = uas_dict.get('typ')
             
             # Deal with the OS record
+            os = {}
             os['company'] = uas_dict.get('os_company')
             os['family'] = uas_dict.get('os_family')
             os['name'] = uas_dict.get('os_name')
             
             # Now get or create an OS record
-            user_agent.os, created = OS.objects.get_or_create(
+            obj.os, created = OS.objects.get_or_create(
                 company = os.get('company'), 
                 family = os.get('family'), 
                 name = os.get('name'), 
                 defaults = os)
-            
             if created:
-                user_agent.os.save()
+                obj.os.save()
                 
             
             # Deal with the UA record
+            ua = {}
             ua['company'] = uas_dict.get('ua_company')
             ua['family'] = uas_dict.get('ua_family')
             ua['name'] = uas_dict.get('ua_name')
             
             # Now get or create an UA record
-            user_agent.ua, created = UA.objects.get_or_create(
+            obj.ua, created = UA.objects.get_or_create(
                 company = ua.get('company'), 
                 family = ua.get('family'), 
                 name = ua.get('name'), 
                 defaults = ua)
-            
             if created:
-                user_agent.ua.save()
+                obj.ua.save()
         
+            # Finally store the new and updated UserAgent object
             obj.save()
         
         return obj
