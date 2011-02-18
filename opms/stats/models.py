@@ -197,8 +197,8 @@ class UA(models.Model):
 class UserAgent(models.Model):
     full_string = models.TextField("full contents of user agent string")
     type = models.CharField("user agent type", max_length=50)
-    os = models.ForeignKey(OS, verbose_name="operating system information")
-    ua = models.ForeignKey(UA, verbose_name="user agent information")
+    os = models.ForeignKey(OS, verbose_name="operating system information", null=True)
+    ua = models.ForeignKey(UA, verbose_name="user agent information", null=True)
 
     def __unicode__(self):
         return self.full_string

@@ -285,8 +285,6 @@ class Command(BaseCommand):
         user_agent['full_string'] = agent_string
         # Create some defaults that we'll likely overwrite
         user_agent['type'] = ""
-        user_agent['os'] = 0
-        user_agent['ua'] = 0
         
         # Now get or create a UserAgent record for this string
         obj, created = UserAgent.objects.get_or_create(
