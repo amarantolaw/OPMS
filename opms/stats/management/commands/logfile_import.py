@@ -145,6 +145,7 @@ class Command(BaseCommand):
                     server_ip = log_entry.get('server_ip'),
                     remote_ip = log_entry.get('remote_ip'),
                     size_of_response = log_entry.get('size_of_response'),
+                    status_code = log_entry.get('status_code'),
                     file_request = log_entry.get('file_request'),
                     defaults = log_entry)
 
@@ -152,9 +153,11 @@ class Command(BaseCommand):
                     obj.save()
                     self._debug('#### Record imported\n' + str(obj))
                 else:
-                    self._errorlog("DUPLICATE RECORD DETECTED - line:" +\
-                        str(self.import_stats.get('line_counter')) + "\n" +\
-                        str(log_entry))
+                    self._errorlog("##### DUPLICATE RECORD DETECTED ##### \n" +\
+                        "Logfile line:" + str(self.import_stats.get('line_counter')) + "\n" +\
+                        "Database row id: " + str(obj.id) + "\n\n" +\
+                        "Log: " + str(log_entry)) + "\n" +\
+                        "DB: " + str(obj)
                     self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
 
                 # TRACKING information needs to be parsed and stored now.
