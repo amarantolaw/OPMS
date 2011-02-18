@@ -157,7 +157,7 @@ class Command(BaseCommand):
                         "Logfile line:" + str(self.import_stats.get('line_counter')) + "\n" +\
                         "Database row id: " + str(obj.id) + "\n\n" +\
                         "Log: " + str(log_entry)) + "\n" +\
-                        "DB: " + str(obj)
+                        "DB: " + str(obj))
                     self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
 
                 # TRACKING information needs to be parsed and stored now.
