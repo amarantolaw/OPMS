@@ -148,7 +148,6 @@ class Preview(models.Model):
 # Reverse DNS Lookup cache. Because we don't want to be always hitting DNS servers.
 class Rdns(models.Model):
     ip_address = models.IPAddressField("ip address")
-    ip_int = models.IntegerField("ip as an integer")
     resolved_name = models.TextField("resolved dns name")
     country_code = models.CharField("country code", max_length=2)
     country_name = models.CharField("country name", max_length=200)
