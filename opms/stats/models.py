@@ -313,7 +313,7 @@ class LogEntry(models.Model):
     remote_ip_int = models.IntegerField("remote ip address as integer")
     remote_logname = models.CharField("remote log name", max_length=200,)
     remote_user = models.CharField("remote user name", max_length=200,)
-    remote_rnds = models.ForeignKey(Rdns, verbose_name="remote reverse dns name")
+    remote_rdns = models.ForeignKey(Rdns, verbose_name="remote reverse dns name")
     status_code = models.IntegerField("status code")
     size_of_response = models.BigIntegerField("size of response in bytes")
     # The following three fields need expanding into separate tables and parsing for duplicates and indexing purposes

@@ -122,18 +122,20 @@ class Command(BaseCommand):
                 
                 # Create if there isn't already a duplicate record in place
                 obj, created = LogEntry.objects.get_or_create(
-                    time_of_request=log_entry.get('time_of_request'),
-                    server_ip=log_entry.get('server_ip'),
-                    remote_ip=log_entry.get('remote_ip'),
-                    size_of_response=log_entry.get('size_of_response'),
-                    file_request=log_entry.get('file_request'),
-                    defaults=log_entry)
+                    time_of_request = log_entry.get('time_of_request'),
+                    server_ip = log_entry.get('server_ip'),
+                    remote_ip = log_entry.get('remote_ip'),
+                    size_of_response = log_entry.get('size_of_response'),
+                    file_request = log_entry.get('file_request'),
+                    defaults = log_entry)
 
                 if created:
-                    print "Record imported: %s" % log_entry
+                    obj.save()
+                    print '#### Record imported \n', obj
                 else:
-                    print "DUPLICATE RECORD DETECTED: %s" % log_entry
+                    print "DUPLICATE RECORD DETECTED: %s\n" % log_entry
 
+                print '============================\n'
                 # TRACKING information needs to be parsed and stored now.
             
             # Bonus code here to split the arguments into tracking elements
