@@ -38,6 +38,8 @@ class Command(BaseCommand):
             for line in log:
                 data = p.parse(line)
                 
+                print '============================\n'
+                print 'Data: %s\n' % data
 # data.items()    
 #[('%Y-%m-%dT%H:%M:%S%z', '2009-01-14T06:20:59+0000'),
 # ('%l', '-'),
@@ -50,11 +52,7 @@ class Command(BaseCommand):
 # ('%u', '-'),
 # ('%v', 'media.podcasts.ox.ac.uk'),
 # ('%r', 'GET / HTTP/1.0')]
- 
- 
-# data.get('%{User-Agent}i')
-# 'check_http/1.96 (nagios-plugins 1.4.5)'
-                
+
                 # Validate the data - Count the number of elements
                 if len(data) <> 11:
                     print "#### Houston, we have a problem with this entry: %s" % data
@@ -116,8 +114,6 @@ class Command(BaseCommand):
                     'user_agent': user_agent,
                 }
                 
-                print '============================\n'
-                print 'Data: %s\n' % data
                 print 'log_entry=%s\n' % log_entry
                 
                 # Create if there isn't already a duplicate record in place
@@ -193,11 +189,12 @@ class Command(BaseCommand):
         
         if created:
             # Attempt an RDNS lookup, and remember to save this back to the object
-            addr=reversename.from_address(rdns['ip_address'])
+            addr = reversename.from_address(rdns.get('ip_address'))
             try:
                 obj.resolved_name = str(resolver.query(addr,"PTR")[0])
             except resolver.NXDOMAIN:
                 print 'NXDOMAIN error trying to resolve:',addr
+                pass
             
             # Go get the location for this address
             obj.country_code = self.geoip.country_code_by_addr(rdns.get('ip_address'))
