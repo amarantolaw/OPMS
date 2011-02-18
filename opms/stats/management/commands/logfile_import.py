@@ -14,10 +14,16 @@ class Command(BaseCommand):
     help = 'Imports the contents of the specified spreadsheet into the database'
     
     def __init__(self):
+        # Single GeoIP object for referencing
         self.geoip = pygeoip.GeoIP('/home/carl/Projects/opms_master/OPMS/data/geoip/GeoIP.dat',pygeoip.MMAP_CACHE)
+        # Single UASparser instand for referencing
         self.uasp = UASparser(cache_dir="/home/carl/Projects/opms_master/OPMS/opms/stats/ua_data/")
+        # datetime value for any rdns timeout problems
         self.rdns_timeout = 0
+        # Toggle debug statements on/off
         self.debug = False
+        # Record basic information about the import process for reporting
+        self.import_stats = {}
 
     def _debug(self,error_str):
         "Basic optional debug function. Print the string if enabled"
@@ -26,9 +32,10 @@ class Command(BaseCommand):
 
     def _errorlog(self,error_str):
         "Do something about logging these errors"
-        print 'ERROR:' + str(error_str) + '\n'
+        sys.stderr.write('ERROR:' + str(error_str) + '\n')
 
     def handle(self, *args, **options):
+        print "Import started at " + str(datetime.datetime.utcnow()) + "\n"
 
         for filename in args:
             # Some basic checking
@@ -37,10 +44,15 @@ class Command(BaseCommand):
                # sys.exit(1)
             else:
                self._debug("################  Beginning IMPORT from" + str(filename))
-        
+
             # Assume mpoau logfiles
             format = r'%Y-%m-%dT%H:%M:%S%z %v %A:%p %h %l %u \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"'
             p = apachelog.parser(format)
+
+            # Reset statistics
+            self.import_stats['filename'] = filename
+            self.import_stats['line_counter'] = 0
+            self.import_stats['duplicatecount'] = 0
             
             log = open(filename)
             # This only needs setting/getting the once per call of this function
@@ -140,7 +152,9 @@ class Command(BaseCommand):
                     obj.save()
                     self._debug('#### Record imported\n' + str(obj))
                 else:
-                    self._errorlog("DUPLICATE RECORD DETECTED:\n" + str(log_entry))
+                    self._errorlog("DUPLICATE RECORD DETECTED - line:" + self.import_stats.get('line_counter') + "\n" +\
+                        str(log_entry))
+                    self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
 
                 # TRACKING information needs to be parsed and stored now.
             
@@ -150,9 +164,15 @@ class Command(BaseCommand):
             #    print "Key-Value = %s" % key_value
             # STORE THIS DATA EVENTUALLY!
 
+                # Update stats and progress reporting
                 self._debug('============================')
+                self.import_stats['line_counter'] = self.import_stats.get('line_counter') + 1
+                if self.import_stats.get('line_counter') % 100 = 0:
+                    print str(datetime.datetime.utcnow()) + ":Parsed " + str(self.import_stats.get('line_counter')) + " lines\n")
 
-            print "Import finished\n"
+            print "Import finished at " + str(datetime.datetime.utcnow()) + "\n" +\
+                "Lines parsed: " + self.import_stats.get('line_counter') + "\n" +\
+                "Duplicates: " + self.import_stats.get('duplicatecount') + "\n" +\
 
 
     def _logfile(self, filename):
