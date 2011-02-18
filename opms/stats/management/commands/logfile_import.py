@@ -35,7 +35,7 @@ class Command(BaseCommand):
                raise CommandError("This file is still compressed. Uncompress and try again.\n\n")
                # sys.exit(1)
             else:
-               self._debug("################  Beginning IMPORT from" + filename,True)
+               self._debug("################  Beginning IMPORT from" + str(filename),True)
         
             # Assume mpoau logfiles
             format = r'%Y-%m-%dT%H:%M:%S%z %v %A:%p %h %l %u \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"'
@@ -49,7 +49,7 @@ class Command(BaseCommand):
                 data = p.parse(line)
                 
                 self._debug('============================')
-                self._debug('Data: ' + data)
+                self._debug('Data: ' + str(data))
 # data.items()    
 #[('%Y-%m-%dT%H:%M:%S%z', '2009-01-14T06:20:59+0000'),
 # ('%l', '-'),
@@ -65,7 +65,7 @@ class Command(BaseCommand):
 
                 # Validate the data - Count the number of elements
                 if len(data) <> 11:
-                    self._errorlog("#### Houston, we have a problem with this entry:" + data)
+                    self._errorlog("#### Houston, we have a problem with this entry:" + str(data))
                 
                 
                 # Status code validation
@@ -74,7 +74,7 @@ class Command(BaseCommand):
                     if int(data.get('%>s')) == item[0]:
                         status_code = int(data.get('%>s'))
                 if status_code == 0:
-                    self._errorlog("#### Houston, we have a STATUS CODE 0 problem with this entry: " + data)
+                    self._errorlog("#### Houston, we have a STATUS CODE 0 problem with this entry: " + str(data))
                 
                 # Get or create the foreign key elements, Logfile, Rdns, FileRequest, Referer, UserAgent
                 remote_rdns = self._ip_to_domainname(data.get('%h'))
@@ -139,7 +139,7 @@ class Command(BaseCommand):
                     obj.save()
                     self._debug('#### Record imported\n' + str(obj))
                 else:
-                    self._errorlog("DUPLICATE RECORD DETECTED:\n" + log_entry)
+                    self._errorlog("DUPLICATE RECORD DETECTED:\n" + str(log_entry))
 
                 # TRACKING information needs to be parsed and stored now.
             
