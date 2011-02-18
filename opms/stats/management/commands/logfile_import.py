@@ -172,6 +172,7 @@ class Command(BaseCommand):
 
     def _ip_to_domainname(self, ipaddress):
         "Returns the domain name for a given IP where known"
+        print 'DEBUG: _ip_to_domainname(',ipaddress,') called\n'
         # validate IP address
         # try: 
         adr = IP(ipaddress)
@@ -196,7 +197,7 @@ class Command(BaseCommand):
                 print 'NXDOMAIN error trying to resolve:',addr
             
             #Debugging
-            print '_ip_to_domainname(',adr,'): rdns=',obj.resolved_name
+            print 'DEBUG: _ip_to_domainname(',adr,'): rdns=',obj.resolved_name,'\n\n'
             
             # Go get the location for this address
             obj.country_code = self.geoip.country_code_by_addr(rdns.get('ip_address'))
