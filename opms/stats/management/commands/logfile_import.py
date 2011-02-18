@@ -17,7 +17,7 @@ class Command(BaseCommand):
         self.geoip = pygeoip.GeoIP('/home/carl/Projects/opms_master/OPMS/data/geoip/GeoIP.dat',pygeoip.MMAP_CACHE)
         self.uasp = UASparser(cache_dir="/home/carl/Projects/opms_master/OPMS/opms/stats/ua_data/")
         self.rdns_timeout = 0
-        self.debug = True
+        self.debug = False
 
     def _debug(self,error_str):
         "Basic optional debug function. Print the string if enabled"
@@ -235,6 +235,8 @@ class Command(BaseCommand):
                 except resolver.timeout:
                     self.rdns_timeout = datetime.datetime.utcnow()
                     self._errorlog('_rdns_lookup() FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
+            else:
+                self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
             
         #Debugging
         self._debug('_rdns_lookup('+str(ipaddress)+'): rdns='+resolved_name)
