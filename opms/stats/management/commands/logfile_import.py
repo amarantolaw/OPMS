@@ -194,10 +194,10 @@ class Command(BaseCommand):
         if created:
             # Attempt an RDNS lookup, and remember to save this back to the object
             addr=reversename.from_address(rdns['ip_address'])
-            # try:
-            obj.resolved_name = str(resolver.query(addr,"PTR")[0])
-            # else:
-            # PUT ERROR HANDLING IN HERE!
+            try:
+                obj.resolved_name = str(resolver.query(addr,"PTR")[0])
+            except NXDOMAIN:
+                print 'NXDOMAIN error trying to resolve:',addr
             
             # Go get the location for this address
             obj.country_code = self.geoip.country_code_by_addr(rdns.get('ip_address'))
