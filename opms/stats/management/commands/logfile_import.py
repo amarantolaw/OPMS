@@ -173,7 +173,7 @@ class Command(BaseCommand):
 
             print "Import finished at " + str(datetime.datetime.utcnow()) + "\n" +\
                 "Lines parsed: " + self.import_stats.get('line_counter') + "\n" +\
-                "Duplicates: " + self.import_stats.get('duplicatecount') + "\n" +\
+                "Duplicates: " + self.import_stats.get('duplicatecount') + "\n"
 
 
     def _logfile(self, filename):
