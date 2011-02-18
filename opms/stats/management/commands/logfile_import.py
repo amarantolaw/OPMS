@@ -196,7 +196,7 @@ class Command(BaseCommand):
             addr=reversename.from_address(rdns['ip_address'])
             try:
                 obj.resolved_name = str(resolver.query(addr,"PTR")[0])
-            except NXDOMAIN:
+            except resolver.NXDOMAIN:
                 print 'NXDOMAIN error trying to resolve:',addr
             
             # Go get the location for this address
