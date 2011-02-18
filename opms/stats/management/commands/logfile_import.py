@@ -168,7 +168,8 @@ class Command(BaseCommand):
                 self._debug('============================')
                 self.import_stats['line_counter'] = self.import_stats.get('line_counter') + 1
                 if (self.import_stats.get('line_counter') % 100) == 0:
-                    print str(datetime.datetime.utcnow()) + ":Parsed " + str(self.import_stats.get('line_counter')) + " lines\n")
+                    print str(datetime.datetime.utcnow()) + ":Parsed " +\
+                        str(self.import_stats.get('line_counter')) + " lines\n"
 
             print "Import finished at " + str(datetime.datetime.utcnow()) + "\n" +\
                 "Lines parsed: " + self.import_stats.get('line_counter') + "\n" +\
