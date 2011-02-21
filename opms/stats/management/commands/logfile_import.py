@@ -69,7 +69,7 @@ class Command(BaseCommand):
             # Attempt to determine the number of lines in the log
             for line in log:
                 self.import_stats['line_count'] = self.import_stats.get('line_count') + 1
-                
+            print str(self.import_stats.get('line_count')) + " lines to parse\n"
 
             previous_line = ""
             for line in log:
