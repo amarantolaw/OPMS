@@ -289,26 +289,24 @@ class Command(BaseCommand):
         resolved_name = 'Unknown'
 
         self._debug('_rdns_lookup('+str(ipaddress)+'): self.rdns_timeout=' + str(self.rdns_timeout))
-        # Has a timeout occurred already?
-        if self.rdns_timeout != 0:
-            # Was the timeout more than 30 seconds ago?
-            if (datetime.datetime.utcnow() - self.rdns_timeout).seconds > 30:
-                self.rdns_timeout = 0
-                # Attempt an RDNS lookup, and remember to save this back to the object
-                try:
-                    addr = reversename.from_address(ipaddress)
-                    resolved_name = str(resolver.query(addr,"PTR")[0])
+        # Has a timeout occurred already? Was the timeout more than 30 seconds ago?
+        if self.rdns_timeout == 0 or (datetime.datetime.utcnow() - self.rdns_timeout).seconds > 30:
+            self.rdns_timeout = 0
+            # Attempt an RDNS lookup, and remember to save this back to the object
+            try:
+                addr = reversename.from_address(ipaddress)
+                resolved_name = str(resolver.query(addr,"PTR")[0])
                     
-                except resolver.NXDOMAIN:
-                    self._errorlog('NXDOMAIN error trying to resolve:'+str(addr))
-                    resolved_name = 'No Resolved Name'
+            except resolver.NXDOMAIN:
+                self._errorlog('NXDOMAIN error trying to resolve:'+str(addr))
+                resolved_name = 'No Resolved Name'
                     
-                # Timeouts can be a problem with batch importing, use this to skip the issue for sorting later
-                except resolver.timeout:
-                    self.rdns_timeout = datetime.datetime.utcnow()
-                    self._errorlog('_rdns_lookup() FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
-            else:
-                self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
+            # Timeouts can be a problem with batch importing, use this to skip the issue for sorting later
+            except resolver.timeout:
+                self.rdns_timeout = datetime.datetime.utcnow()
+                self._errorlog('_rdns_lookup() FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
+        else:
+            self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
             
         #Debugging
         self._debug('_rdns_lookup('+str(ipaddress)+'): rdns='+resolved_name)
