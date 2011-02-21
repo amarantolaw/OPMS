@@ -53,6 +53,7 @@ class Command(BaseCommand):
             self.import_stats['filename'] = filename
             self.import_stats['line_counter'] = 0
             self.import_stats['duplicatecount'] = 0
+            self.import_stats['import_starttime'] = datetime.datetime.utcnow()
             
             log = open(filename)
             # This only needs setting/getting the once per call of this function
@@ -191,9 +192,12 @@ class Command(BaseCommand):
                 self._debug('============================')
                 self.import_stats['line_counter'] = self.import_stats.get('line_counter') + 1
                 if (self.import_stats.get('line_counter') % 100) == 0:
+                    self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
+                        float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
                     print str(datetime.datetime.utcnow()) + ":Parsed " +\
                         str(self.import_stats.get('line_counter')) + " lines\n" +\
-                        "Duplicate count: " + str(self.import_stats.get('duplicatecount')) + "\n"
+                        "Duplicate count: " + str(self.import_stats.get('duplicatecount')) + "\n" +\
+                        "Importing X line per second"
 
             # Update duplicate line string for next pass
             previous_line = line
