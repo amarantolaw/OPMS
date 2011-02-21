@@ -219,8 +219,11 @@ class Command(BaseCommand):
                 # End line by line import
             
             # Final stats output at end of file
-            self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
-                float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
+            try:
+                self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
+                    float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
+            except ZeroDivisionError:
+                self.import_stats['import_rate'] = 0
             print "Import finished at " + str(datetime.datetime.utcnow()) + "\n" +\
                 "Lines parsed: " + str(self.import_stats.get('line_counter')) + "\n" +\
                 "Duplicates: " + str(self.import_stats.get('duplicatecount')) + "\n" +\
