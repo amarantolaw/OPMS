@@ -21,7 +21,7 @@ class Command(BaseCommand):
         # datetime value for any rdns timeout problems
         self.rdns_timeout = 0
         # Toggle debug statements on/off
-        self.debug = False
+        self.debug = True
         # Record basic information about the import process for reporting
         self.import_stats = {}
         # Create a huge string for the error log
@@ -84,7 +84,7 @@ class Command(BaseCommand):
 
                 # Validate the data - Count the number of elements
                 if len(data) <> 11:
-                    self._errorlog("#### Houston, we have a problem with this entry:" + str(data))
+                    self._errorlog("#### TOO FEW ITEMS IN THIS ENTRY:\n" + str(data))
                     continue
                     
                 # Test for duplicate log entries. Compare this to the multitude of duplicates detected otherwise
@@ -95,7 +95,7 @@ class Command(BaseCommand):
                         "Line    : " + str(line) + "\n" +\
                         "--------------------" + "\n" +\
                         "Previous: " + str(previous_line)  + "\n" +\
-                        "====================")
+                        "====================\n\n")
                     self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
                     continue
                 
@@ -105,7 +105,7 @@ class Command(BaseCommand):
                     if int(data.get('%>s')) == item[0]:
                         status_code = int(data.get('%>s'))
                 if status_code == 0:
-                    self._errorlog("#### Houston, we have a STATUS CODE 0 problem with this entry: " + str(data))
+                    self._errorlog("#### STATUS CODE 0 PROBLEM WITH THIS ENTRY: " + str(data))
                     continue
                 
                 # Get or create the foreign key elements, Logfile, Rdns, FileRequest, Referer, UserAgent
@@ -288,6 +288,7 @@ class Command(BaseCommand):
         # Default answer is the failure state of "Unknown"
         resolved_name = 'Unknown'
 
+        self._debug('_rdns_lookup('+str(ipaddress)+'): self.rdns_timeout=' + str(self.rdns_timeout))
         # Has a timeout occurred already?
         if self.rdns_timeout != 0:
             # Was the timeout more than 30 seconds ago?
