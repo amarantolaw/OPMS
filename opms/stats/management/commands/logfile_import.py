@@ -194,10 +194,10 @@ class Command(BaseCommand):
                 if (self.import_stats.get('line_counter') % 100) == 0:
                     self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
                         float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
-                    print str(datetime.datetime.utcnow()) + ":Parsed " +\
-                        str(self.import_stats.get('line_counter')) + " lines\n" +\
+                    print "\n\n" + str(datetime.datetime.utcnow()) + ":\n" +\
+                        "Parsed " + str(self.import_stats.get('line_counter')) + " lines\n" +\
                         "Duplicate count: " + str(self.import_stats.get('duplicatecount')) + "\n" +\
-                        "Importing X line per second"
+                        "Importing " + str(self.import_stats.get('import_rate'))[0:6] + " line per second\n\n"
 
             # Update duplicate line string for next pass
             previous_line = line
