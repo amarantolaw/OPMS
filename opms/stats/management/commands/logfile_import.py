@@ -58,6 +58,7 @@ class Command(BaseCommand):
             # This only needs setting/getting the once per call of this function
             logfile = self._logfile(filename)
 
+            previous_line = ""
             for line in log:
                 data = p.parse(line)
                 
@@ -79,6 +80,17 @@ class Command(BaseCommand):
                 # Validate the data - Count the number of elements
                 if len(data) <> 11:
                     self._errorlog("#### Houston, we have a problem with this entry:" + str(data))
+                # Test for duplicate log entries. Compare this to the multitude of duplicates detected otherwise
+                if line == previous_line:
+                    self._errorlog("##### DUPLICATE LINE DETECTED ##### \n" +\
+                        "Logfile line:" + str(self.import_stats.get('line_counter')) + "\n" +\
+                        "====================" + "\n" +\
+                        "Line    : " + str(line) + "\n" +\
+                        "--------------------" + "\n" +\
+                        "Previous: " + str(previous_line)  + "\n" +\
+                        "====================")
+                    self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
+                    # SKIP PROCESSING THIS Line... somehow.
                 
                 
                 # Status code validation
@@ -153,11 +165,18 @@ class Command(BaseCommand):
                     obj.save()
                     self._debug('#### Record imported\n' + str(obj))
                 else:
-                    self._errorlog("##### DUPLICATE RECORD DETECTED ##### \n" +\
-                        "Logfile line:" + str(self.import_stats.get('line_counter')) + "\n" +\
-                        "Database row id: " + str(obj.id) + "\n\n" +\
+                    self._errorlog("##### DUPLICATE RECORD AT INSERTION DETECTED ##### \n" +\
+                        "Database row id: " + str(obj.id) + "\n" +\
+                        "====================" + "\n" +\
                         "Log: " + str(log_entry) + "\n" +\
-                        "DB: " + str(obj))
+                        "--------------------" + "\n" +\
+                        "DB : " + str(obj) + "\n\n" +\
+                        "Logfile line:" + str(self.import_stats.get('line_counter')) + "\n" +\
+                        "====================" + "\n" +\
+                        "Line    : " + str(line) + "\n" +\
+                        "--------------------" + "\n" +\
+                        "Previous: " + str(previous_line)  + "\n" +\
+                        "====================")
                     self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
 
                 # TRACKING information needs to be parsed and stored now.
@@ -173,8 +192,12 @@ class Command(BaseCommand):
                 self.import_stats['line_counter'] = self.import_stats.get('line_counter') + 1
                 if (self.import_stats.get('line_counter') % 100) == 0:
                     print str(datetime.datetime.utcnow()) + ":Parsed " +\
-                        str(self.import_stats.get('line_counter')) + " lines\n"
+                        str(self.import_stats.get('line_counter')) + " lines\n" +\
+                        "Duplicate count: " + str(self.import_stats.get('duplicatecount')) + "\n"
 
+            # Update duplicate line string for next pass
+            previous_line = line
+            
             print "Import finished at " + str(datetime.datetime.utcnow()) + "\n" +\
                 "Lines parsed: " + self.import_stats.get('line_counter') + "\n" +\
                 "Duplicates: " + self.import_stats.get('duplicatecount') + "\n"
