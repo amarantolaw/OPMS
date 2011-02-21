@@ -178,7 +178,8 @@ class Command(BaseCommand):
                         "--------------------" + "\n" +\
                         "Previous: " + str(previous_line)  + "\n" +\
                         "====================")
-                    self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
+                    if line != previous_line:
+                        self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
 
                 # TRACKING information needs to be parsed and stored now.
             
@@ -204,9 +205,13 @@ class Command(BaseCommand):
                 
                 # End line by line import
             
+            # Final stats output at end of file
+            self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
+                float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
             print "Import finished at " + str(datetime.datetime.utcnow()) + "\n" +\
-                "Lines parsed: " + self.import_stats.get('line_counter') + "\n" +\
-                "Duplicates: " + self.import_stats.get('duplicatecount') + "\n"
+                "Lines parsed: " + str(self.import_stats.get('line_counter')) + "\n" +\
+                "Duplicates: " + str(self.import_stats.get('duplicatecount')) + "\n" +\
+                "Imported at " + str(self.import_stats.get('import_rate'))[0:6] + " lines per second\n\n"
 
 
     def _logfile(self, filename):
