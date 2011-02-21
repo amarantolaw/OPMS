@@ -305,6 +305,10 @@ class Command(BaseCommand):
             except resolver.Timeout:
                 self.rdns_timeout = datetime.datetime.utcnow()
                 self._errorlog('_rdns_lookup() FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
+                
+            except resolver.NoAnswer:
+                self.rdns_timeout = datetime.datetime.utcnow() 
+                self._errorlog('_rdns_lookup() FAILED due to NO ANSWER at ' + str(self.rdns_timeout))
         else:
             self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
             
