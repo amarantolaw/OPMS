@@ -197,10 +197,12 @@ class Command(BaseCommand):
                     print "\n\n" + str(datetime.datetime.utcnow()) + ":\n" +\
                         "Parsed " + str(self.import_stats.get('line_counter')) + " lines\n" +\
                         "Duplicate count: " + str(self.import_stats.get('duplicatecount')) + "\n" +\
-                        "Importing " + str(self.import_stats.get('import_rate'))[0:6] + " line per second\n\n"
+                        "Importing " + str(self.import_stats.get('import_rate'))[0:6] + " lines per second\n\n"
 
-            # Update duplicate line string for next pass
-            previous_line = line
+                # Update duplicate line string for next pass
+                previous_line = line
+                
+                # End line by line import
             
             print "Import finished at " + str(datetime.datetime.utcnow()) + "\n" +\
                 "Lines parsed: " + self.import_stats.get('line_counter') + "\n" +\
