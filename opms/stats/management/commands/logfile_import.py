@@ -32,7 +32,13 @@ class Command(BaseCommand):
 
     def _errorlog(self,error_str):
         "Do something about logging these errors"
-        sys.stderr.write('ERROR:' + str(error_str) + '\n')
+        # sys.stderr.write('ERROR:' + str(error_str) + '\n')
+        self.error_log += 'ERROR:' + str(error_str) + '\n'
+    
+    def _errorlog_write(self):
+        f = open('./import_errors.txt','w')
+        f.write(self.error_log)
+        f.close()
 
     def handle(self, *args, **options):
         print "Import started at " + str(datetime.datetime.utcnow()) + "\n"
@@ -219,6 +225,9 @@ class Command(BaseCommand):
                 "Lines parsed: " + str(self.import_stats.get('line_counter')) + "\n" +\
                 "Duplicates: " + str(self.import_stats.get('duplicatecount')) + "\n" +\
                 "Imported at " + str(self.import_stats.get('import_rate'))[0:6] + " lines per second\n\n"
+        
+        # Import finished, so write out error log to file.
+        self._errorlog_write()
 
 
     def _logfile(self, filename):
