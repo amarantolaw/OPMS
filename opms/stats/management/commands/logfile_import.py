@@ -194,7 +194,7 @@ class Command(BaseCommand):
                         "--------------------" + "\n" +\
                         "Previous: " + str(previous_line)  + "\n" +\
                         "====================")
-                    if int(line) != int(previous_line):
+                    if line != previous_line:
                         self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
 
                 # TRACKING information needs to be parsed and stored now.
