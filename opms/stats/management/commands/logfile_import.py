@@ -208,7 +208,7 @@ class Command(BaseCommand):
                     self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
                         float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
                     print "\n\n" + str(datetime.datetime.utcnow()) + ":\n" +\
-                        str(float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100)[0:5] + "% completed\n" +\
+                        str((float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100)[0:5] + "% completed\n" +\
                         "Parsed " + str(self.import_stats.get('line_counter')) + " lines.\n" +\
                         "Duplicate count: " + str(self.import_stats.get('duplicatecount')) + "\n" +\
                         "Importing " + str(self.import_stats.get('import_rate'))[0:6] + " lines per second\n\n"
