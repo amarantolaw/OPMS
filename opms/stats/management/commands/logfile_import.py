@@ -81,22 +81,12 @@ class Command(BaseCommand):
                 
                 self._debug('============================')
                 self._debug('Data: ' + str(data))
-# data.items()    
-#[('%Y-%m-%dT%H:%M:%S%z', '2009-01-14T06:20:59+0000'),
-# ('%l', '-'),
-# ('%>s', '200'),
-# ('%h', '163.1.2.86'),
-# ('%A:%p', '163.1.3.25:80'),
-# ('%{User-Agent}i', 'check_http/1.96 (nagios-plugins 1.4.5)'),
-# ('%b', '207'),
-# ('%{Referer}i', '-'),
-# ('%u', '-'),
-# ('%v', 'media.podcasts.ox.ac.uk'),
-# ('%r', 'GET / HTTP/1.0')]
 
                 # Validate the data - Count the number of elements
                 if len(data) <> 11:
                     self._errorlog("#### Houston, we have a problem with this entry:" + str(data))
+                    continue
+                    
                 # Test for duplicate log entries. Compare this to the multitude of duplicates detected otherwise
                 if line == previous_line:
                     self._errorlog("##### DUPLICATE LINE DETECTED ##### \n" +\
@@ -116,6 +106,7 @@ class Command(BaseCommand):
                         status_code = int(data.get('%>s'))
                 if status_code == 0:
                     self._errorlog("#### Houston, we have a STATUS CODE 0 problem with this entry: " + str(data))
+                    continue
                 
                 # Get or create the foreign key elements, Logfile, Rdns, FileRequest, Referer, UserAgent
                 remote_rdns = self._ip_to_domainname(data.get('%h'))
@@ -190,7 +181,7 @@ class Command(BaseCommand):
                         "Line    : " + str(line) + "\n" +\
                         "--------------------" + "\n" +\
                         "Previous: " + str(previous_line)  + "\n" +\
-                        "====================")
+                        "====================\n\n")
                     if line != previous_line:
                         self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
 
