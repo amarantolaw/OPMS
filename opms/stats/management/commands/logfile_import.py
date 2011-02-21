@@ -107,8 +107,7 @@ class Command(BaseCommand):
                         "Previous: " + str(previous_line)  + "\n" +\
                         "====================")
                     self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
-                    # SKIP PROCESSING THIS Line... somehow.
-                
+                    continue
                 
                 # Status code validation
                 status_code = 0
@@ -123,9 +122,7 @@ class Command(BaseCommand):
                 file_request = self._file_request(data.get('%r'))
                 referer = self._referer(data.get('%{Referer}i'), status_code)
                 user_agent = self._user_agent(data.get('%{User-Agent}i'))
-                
-                # Tracking needs dealing with later...
-                
+                                
                 # Pull apart the date time string
                 date_string, time_string = data.get('%Y-%m-%dT%H:%M:%S%z').split('T')
                 date_yyyy, date_mm, date_dd = date_string.split('-')
@@ -205,9 +202,10 @@ class Command(BaseCommand):
             #    print "Key-Value = %s" % key_value
             # STORE THIS DATA EVENTUALLY!
 
-                # Update stats and progress reporting
                 self._debug('============================')
+                # Update stats
                 self.import_stats['line_counter'] = self.import_stats.get('line_counter') + 1
+                # Print progress report every 100 lines.
                 if (self.import_stats.get('line_counter') % 100) == 0:
                     self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
                         float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
@@ -228,10 +226,10 @@ class Command(BaseCommand):
                     float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
             except ZeroDivisionError:
                 self.import_stats['import_rate'] = 0
-            print "Import finished at " + str(datetime.datetime.utcnow()) + "\n" +\
-                "Lines parsed: " + str(self.import_stats.get('line_counter')) + "\n" +\
-                "Duplicates: " + str(self.import_stats.get('duplicatecount')) + "\n" +\
-                "Imported at " + str(self.import_stats.get('import_rate'))[0:6] + " lines per second\n\n"
+            print "\nImport finished at " + str(datetime.datetime.utcnow()) +\
+                "\nLines parsed: " + str(self.import_stats.get('line_counter')) +\
+                "\nDuplicates: " + str(self.import_stats.get('duplicatecount')) +\
+                "\nImported at " + str(self.import_stats.get('import_rate'))[0:6] + " lines per second\n"
         
         # Import finished, so write out error log to file.
         self._errorlog_write()
