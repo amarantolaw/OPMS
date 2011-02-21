@@ -21,7 +21,7 @@ class Command(BaseCommand):
         # datetime value for any rdns timeout problems
         self.rdns_timeout = 0
         # Toggle debug statements on/off
-        self.debug = True
+        self.debug = False
         # Record basic information about the import process for reporting
         self.import_stats = {}
         # Create a huge string for the error log
@@ -302,7 +302,7 @@ class Command(BaseCommand):
                 resolved_name = 'No Resolved Name'
                     
             # Timeouts can be a problem with batch importing, use this to skip the issue for sorting later
-            except resolver.timeout:
+            except resolver.Timeout:
                 self.rdns_timeout = datetime.datetime.utcnow()
                 self._errorlog('_rdns_lookup() FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
         else:
