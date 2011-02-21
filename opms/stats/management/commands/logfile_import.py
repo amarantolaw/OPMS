@@ -24,6 +24,8 @@ class Command(BaseCommand):
         self.debug = False
         # Record basic information about the import process for reporting
         self.import_stats = {}
+        # Create a huge string for the error log
+        self.error_log = "Log started at" + str(datetime.datetime.utcnow()) + "\n"
 
     def _debug(self,error_str):
         "Basic optional debug function. Print the string if enabled"
@@ -36,6 +38,7 @@ class Command(BaseCommand):
         self.error_log += 'ERROR:' + str(error_str) + '\n'
     
     def _errorlog_write(self):
+        self.error_log += "Log ended at" + str(datetime.datetime.utcnow()) + "\n"
         f = open('./import_errors.txt','w')
         f.write(self.error_log)
         f.close()
@@ -62,16 +65,17 @@ class Command(BaseCommand):
             self.import_stats['duplicatecount'] = 0
             self.import_stats['import_starttime'] = datetime.datetime.utcnow()
             
-            log = open(filename)
             # This only needs setting/getting the once per call of this function
             logfile = self._logfile(filename)
 
             # Attempt to determine the number of lines in the log
+            log = open(filename)
             for line in log:
                 self.import_stats['line_count'] = self.import_stats.get('line_count') + 1
             print str(self.import_stats.get('line_count')) + " lines to parse\n"
 
             previous_line = ""
+            log = open(filename)
             for line in log:
                 data = p.parse(line)
                 
