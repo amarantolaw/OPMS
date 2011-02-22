@@ -91,7 +91,7 @@ class Command(BaseCommand):
         previous_line = ""
         for line in log:
             # Update stats
-            self.import_stats['line_counter'] = self.import_stats.get('line_counter') + 1
+            self.import_stats['line_counter'] += 1
             
             # Test for duplicate log entries immediately preceding
             if line == previous_line:
@@ -102,7 +102,7 @@ class Command(BaseCommand):
                     "--------------------" + "\n" +\
                     "Previous: " + str(previous_line)  + "\n" +\
                     "====================\n\n")
-                self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
+                self.import_stats['duplicatecount'] += 1
             else:
                 # Parse and store the line
                 self._parseline(parser, line, logfile_obj)
@@ -113,16 +113,22 @@ class Command(BaseCommand):
                 self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
                     float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
                 # Calculate how long till finished
-                self.import_stats['estimated_finish_in_seconds'] = int(\
+                efs = int(\
                     (int(self.import_stats.get('line_count')) - int(self.import_stats.get('line_counter')))\
-                    / self.import_stats.get('import_rate')) 
+                    / self.import_stats.get('import_rate'))
+                efhr = efs // (60*60)
+                efs = efs % (60*60)
+                efmin = efs // 60
+                efsec = efs % 60
+                efstring = str(efhr) + "h " + str(efmin) + "m " + str(efsec) + "s."
+                
                 # Output the status
                 print str(datetime.datetime.utcnow()) + ": " +\
                     str((float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100)[0:5] + "% completed. " +\
                     "Parsed " + str(self.import_stats.get('line_counter')) + " lines. " +\
                     "Duplicates: " + str(self.import_stats.get('duplicatecount')) + ". " +\
                     "Rate: " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec. " +\
-                    "Est. finish in " + str(self.import_stats.get('estimated_finish_in_seconds')) + " seconds."
+                    "Est. finish in " + efstring
 
             # Update duplicate line string for next pass
             previous_line = line
@@ -255,7 +261,6 @@ class Command(BaseCommand):
     # STORE THIS DATA EVENTUALLY!
 
         # Analyse obj.file_request.argument_string & obj.referer.full_string
-
 
         # self._debug('============================')
         # End of parseline()
