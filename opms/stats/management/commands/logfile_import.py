@@ -8,7 +8,7 @@ from opms.stats.uasparser import UASparser
 import apachelog, datetime, sys, pygeoip
 from dns import resolver,reversename
 from IPy import IP
-        
+
 class Command(BaseCommand):
     args = '<spreadsheet.xls>'
     help = 'Imports the contents of the specified spreadsheet into the database'
@@ -25,25 +25,11 @@ class Command(BaseCommand):
         # Record basic information about the import process for reporting
         self.import_stats = {}
         # Create a huge string for the error log
-        self.error_log = "Log started at" + str(datetime.datetime.utcnow()) + "\n"
+        self.error_log = ""
 
-    def _debug(self,error_str):
-        "Basic optional debug function. Print the string if enabled"
-        if self.debug:
-            print 'DEBUG:' + str(error_str) + '\n'
-
-    def _errorlog(self,error_str):
-        "Do something about logging these errors"
-        # sys.stderr.write('ERROR:' + str(error_str) + '\n')
-        self.error_log += 'ERROR:' + str(error_str) + '\n'
-    
-    def _errorlog_write(self):
-        self.error_log += "Log ended at" + str(datetime.datetime.utcnow()) + "\n"
-        f = open('./import_errors.txt','w')
-        f.write(self.error_log)
-        f.close()
 
     def handle(self, *args, **options):
+        self._errorlog_start('./import_errors.txt')
         print "Import started at " + str(datetime.datetime.utcnow()) + "\n"
 
         for filename in args:
@@ -78,6 +64,8 @@ class Command(BaseCommand):
             log = open(filename)
             for line in log:
                 data = p.parse(line)
+                # Update stats
+                self.import_stats['line_counter'] = self.import_stats.get('line_counter') + 1
                 
                 self._debug('============================')
                 self._debug('Data: ' + str(data))
@@ -193,9 +181,10 @@ class Command(BaseCommand):
             #    print "Key-Value = %s" % key_value
             # STORE THIS DATA EVENTUALLY!
 
+                # Analyse obj.file_request.argument_string & obj.referer.full_string
+
+
                 self._debug('============================')
-                # Update stats
-                self.import_stats['line_counter'] = self.import_stats.get('line_counter') + 1
                 # Print progress report every 100 lines.
                 if (self.import_stats.get('line_counter') % 100) == 0:
                     self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
@@ -222,8 +211,8 @@ class Command(BaseCommand):
                 "\nDuplicates: " + str(self.import_stats.get('duplicatecount')) +\
                 "\nImported at " + str(self.import_stats.get('import_rate'))[0:6] + " lines per second\n"
         
-        # Import finished, so write out error log to file.
-        self._errorlog_write()
+        # Import finished, so close out error log file.
+        self._errorlog_stop()
 
 
     def _logfile(self, filename):
@@ -249,7 +238,6 @@ class Command(BaseCommand):
         obj.save()
 
         return obj
-
 
 
     def _ip_to_domainname(self, ipaddress):
@@ -365,7 +353,6 @@ class Command(BaseCommand):
         return obj
 
 
-
     def _referer(self, referer_string, status_code):
         "Get or create a Referer record for the given string"
         ref = {}
@@ -383,7 +370,6 @@ class Command(BaseCommand):
             obj.save()
         
         return obj
-
 
 
     def _user_agent(self, agent_string):
@@ -443,3 +429,30 @@ class Command(BaseCommand):
             obj.save()
         
         return obj
+
+
+    def _debug(self,error_str):
+        "Basic optional debug function. Print the string if enabled"
+        if self.debug:
+            print 'DEBUG:' + str(error_str) + '\n'
+            
+
+    def _errorlog(self,error_str):
+        "Write errors to a log file"
+        # sys.stderr.write('ERROR:' + str(error_str) + '\n')
+        self.error_log.write('ERROR:' + str(error_str) + '\n')
+
+
+    def _errorlog_start(self, path_to_file):
+        try:
+            self.error_log = open(path_to_file,'a') 
+        except IOError:
+            sys.stderr.write("WARNING: Could not open existing error file. New file being created")
+            self.error_log = open(path_to_file,'w')
+        
+        self.error_log.write("Log started at" + str(datetime.datetime.utcnow()) + "\n")
+
+
+    def _errorlog_stop(self):
+        self.error_log.write("Log ended at" + str(datetime.datetime.utcnow()) + "\n")
+        self.error_log.close()
