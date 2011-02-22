@@ -292,8 +292,9 @@ class Command(BaseCommand):
         obj, created = Rdns.objects.get_or_create(ip_address=rdns.get('ip_address'), defaults=rdns)
         
         if created:
-            # Look for the RDNS string of this address
-            obj.resolved_name = self._rdns_lookup(rdns.get('ip_address'))
+            # Look for the RDNS string of this address -- Removing this to test speed impact
+            # obj.resolved_name = self._rdns_lookup(rdns.get('ip_address'))
+            obj.resolved_name "Unknown"
             
             # Go get the location for this address
             obj.country_code = self.geoip.country_code_by_addr(rdns.get('ip_address'))
