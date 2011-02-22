@@ -59,6 +59,7 @@ class Command(BaseCommand):
             for line in log:
                 self.import_stats['line_count'] = self.import_stats.get('line_count') + 1
             print str(self.import_stats.get('line_count')) + " lines to parse\n"
+            log.close()
 
             previous_line = ""
             log = open(filename)
@@ -450,9 +451,10 @@ class Command(BaseCommand):
             sys.stderr.write("WARNING: Could not open existing error file. New file being created")
             self.error_log = open(path_to_file,'w')
         
-        self.error_log.write("Log started at" + str(datetime.datetime.utcnow()) + "\n")
+        self.error_log.write("Log started at " + str(datetime.datetime.utcnow()) + "\n")
+        print "Writing errors to: " + path_to_file
 
 
     def _errorlog_stop(self):
-        self.error_log.write("Log ended at" + str(datetime.datetime.utcnow()) + "\n")
+        self.error_log.write("Log ended at " + str(datetime.datetime.utcnow()) + "\n")
         self.error_log.close()
