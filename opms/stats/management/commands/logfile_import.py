@@ -260,7 +260,7 @@ class Command(BaseCommand):
         return obj
 
 
-    def _status_code_validation(self,status_code)
+    def _status_code_validation(self,status_code):
         "Check the supplied status code value against known good codes"
         for item in LogEntry.STATUS_CODE_CHOICES:
             if status_code == item[0]:
