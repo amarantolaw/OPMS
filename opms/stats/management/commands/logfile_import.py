@@ -111,8 +111,8 @@ class Command(BaseCommand):
                     float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
                 # Calculate how long till finished
                 self.import_stats['estimated_finish_in_seconds'] = int(\
-                    (int(self.import_stats.get('line_count')) - int(self.import_stats.get('line_counter'))) /\
-                    self.import_stats.get('import_rate'))) 
+                    (int(self.import_stats.get('line_count')) - int(self.import_stats.get('line_counter')))\
+                    / self.import_stats.get('import_rate')) 
                 # Output the status
                 print str(datetime.datetime.utcnow()) + ": " +\
                     str((float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100)[0:5] + "% completed. " +\
@@ -270,7 +270,7 @@ class Command(BaseCommand):
 
     def _ip_to_domainname(self, ipaddress):
         "Returns the domain name for a given IP where known"
-        self._debug('_ip_to_domainname('+str(ipaddress)+') called')
+        # self._debug('_ip_to_domainname('+str(ipaddress)+') called')
         # validate IP address
         # try: 
         adr = IP(ipaddress)
@@ -304,7 +304,7 @@ class Command(BaseCommand):
         # Default answer is the failure state of "Unknown"
         resolved_name = 'Unknown'
 
-        self._debug('_rdns_lookup('+str(ipaddress)+'): self.rdns_timeout=' + str(self.rdns_timeout))
+        # self._debug('_rdns_lookup('+str(ipaddress)+'): self.rdns_timeout=' + str(self.rdns_timeout))
         # Has a timeout occurred already? Was the timeout more than 30 seconds ago?
         if self.rdns_timeout == 0 or (datetime.datetime.utcnow() - self.rdns_timeout).seconds > 30:
             self.rdns_timeout = 0
@@ -328,8 +328,7 @@ class Command(BaseCommand):
         else:
             self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
             
-        #Debugging
-        self._debug('_rdns_lookup('+str(ipaddress)+'): rdns='+resolved_name)
+        # self._debug('_rdns_lookup('+str(ipaddress)+'): rdns='+resolved_name)
         
         return resolved_name
 
