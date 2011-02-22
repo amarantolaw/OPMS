@@ -52,7 +52,7 @@ class Command(BaseCommand):
             self.import_stats['import_starttime'] = datetime.datetime.utcnow()
             
             # Send the file off to be parsed
-            self._parsefile(logfile)
+            self._parsefile(filename)
 
             # Final stats output at end of file
             try:
@@ -68,13 +68,13 @@ class Command(BaseCommand):
             
         # Import finished, so close out error log file.
         self._errorlog_stop()
+        return None
 
 
 
-
-    def _parsefile(self, logfile):
+    def _parsefile(self, filename):
         # This only needs setting/getting the once per call of this function
-        logfile = self._logfile(filename)
+        logfile_obj = self._logfile(filename)
         
         # Attempt to determine the number of lines in the log
         log = open(filename)
@@ -102,7 +102,7 @@ class Command(BaseCommand):
                 self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
             else:
                 # Parse and store the line
-                self._parseline(line)
+                self._parseline(line, logfile_obj)
 
             # Print progress report every 500 lines.
             if (self.import_stats.get('line_counter') % 500) == 0:
@@ -128,8 +128,33 @@ class Command(BaseCommand):
 
 
 
+    def _logfile(self, filename):
+        "Get or create a LogFile record for the given filename"
+        
+        # Simple hack for this method initially...
+        logfile = {}
+        logfile['service_name'] = "mpoau"
+        logfile['file_name'] = "testname.log"
+        logfile['file_path'] = "/testpath/"
+        logfile['last_updated'] = datetime.datetime.utcnow()
+        
+        obj, created = LogFile.objects.get_or_create(
+            service_name = logfile.get('service_name'),
+            file_name = logfile.get('file_name'),
+            file_path = logfile.get('file_path'),
+            defaults = logfile)
+        
+        # If this isn't the first time, and the datetime is significantly different from last access, update the time
+        if not created and (logfile.get('last_updated') - obj.last_updated).days > 0:
+            obj.last_updated = logfile.get('last_updated')
+        
+        obj.save()
 
-    def _parseline(self, line):
+        return obj
+
+
+
+    def _parseline(self, line, logfile_obj):
         # Parse the raw line into a dictionary of data
         data = p.parse(line)
         
@@ -171,7 +196,7 @@ class Command(BaseCommand):
         
         # Build the log entry dictionary
         log_entry = {
-            'logfile': logfile,
+            'logfile': logfile_obj,
             'time_of_request': datetime.datetime(
                 int(date_yyyy), 
                 int(date_mm), 
@@ -235,29 +260,6 @@ class Command(BaseCommand):
 
 
 
-    def _logfile(self, filename):
-        "Get or create a LogFile record for the given filename"
-        
-        # Simple hack for this method initially...
-        logfile = {}
-        logfile['service_name'] = "mpoau"
-        logfile['file_name'] = "testname.log"
-        logfile['file_path'] = "/testpath/"
-        logfile['last_updated'] = datetime.datetime.utcnow()
-        
-        obj, created = LogFile.objects.get_or_create(
-            service_name = logfile.get('service_name'),
-            file_name = logfile.get('file_name'),
-            file_path = logfile.get('file_path'),
-            defaults = logfile)
-        
-        # If this isn't the first time, and the datetime is significantly different from last access, update the time
-        if not created and (logfile.get('last_updated') - obj.last_updated).days > 0:
-            obj.last_updated = logfile.get('last_updated')
-        
-        obj.save()
-
-        return obj
 
 
     def _status_code_validation(self,status_code):
