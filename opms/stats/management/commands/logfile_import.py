@@ -37,8 +37,8 @@ class Command(BaseCommand):
             if filename.endswith('.gz'):
                raise CommandError("This file is still compressed. Uncompress and try again.\n\n")
                # sys.exit(1)
-            else:
-               self._debug("################  Beginning IMPORT from" + str(filename))
+            #else:
+            #   self._debug("################  Beginning IMPORT from" + str(filename))
 
             # Assume mpoau logfiles
             format = r'%Y-%m-%dT%H:%M:%S%z %v %A:%p %h %l %u \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"'
@@ -51,169 +51,188 @@ class Command(BaseCommand):
             self.import_stats['duplicatecount'] = 0
             self.import_stats['import_starttime'] = datetime.datetime.utcnow()
             
-            # This only needs setting/getting the once per call of this function
-            logfile = self._logfile(filename)
+            # Send the file off to be parsed
+            self._parsefile(logfile)
 
-            # Attempt to determine the number of lines in the log
-            log = open(filename)
-            for line in log:
-                self.import_stats['line_count'] = self.import_stats.get('line_count') + 1
-            print str(self.import_stats.get('line_count')) + " lines to parse\n"
-            log.close()
-
-            previous_line = ""
-            log = open(filename)
-            for line in log:
-                data = p.parse(line)
-                # Update stats
-                self.import_stats['line_counter'] = self.import_stats.get('line_counter') + 1
-                
-                self._debug('============================')
-                self._debug('Data: ' + str(data))
-
-                # Validate the data - Count the number of elements
-                if len(data) <> 11:
-                    self._errorlog("#### TOO FEW ITEMS IN THIS ENTRY:\n" + str(data))
-                    continue
-                    
-                # Test for duplicate log entries. Compare this to the multitude of duplicates detected otherwise
-                if line == previous_line:
-                    self._errorlog("##### DUPLICATE LINE DETECTED ##### \n" +\
-                        "Logfile line:" + str(self.import_stats.get('line_counter')) + "\n" +\
-                        "====================" + "\n" +\
-                        "Line    : " + str(line) + "\n" +\
-                        "--------------------" + "\n" +\
-                        "Previous: " + str(previous_line)  + "\n" +\
-                        "====================\n\n")
-                    self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
-                    continue
-                
-                # Status code validation
-                status_code = 0
-                for item in LogEntry.STATUS_CODE_CHOICES:
-                    if int(data.get('%>s')) == item[0]:
-                        status_code = int(data.get('%>s'))
-                if status_code == 0:
-                    self._errorlog("#### STATUS CODE 0 PROBLEM WITH THIS ENTRY: " + str(data))
-                    continue
-                
-                # Get or create the foreign key elements, Logfile, Rdns, FileRequest, Referer, UserAgent
-                remote_rdns = self._ip_to_domainname(data.get('%h'))
-                file_request = self._file_request(data.get('%r'))
-                referer = self._referer(data.get('%{Referer}i'), status_code)
-                user_agent = self._user_agent(data.get('%{User-Agent}i'))
-                                
-                # Pull apart the date time string
-                date_string, time_string = data.get('%Y-%m-%dT%H:%M:%S%z').split('T')
-                date_yyyy, date_mm, date_dd = date_string.split('-')
-                time_hh, time_mm, time_ss = time_string.split(':')
-                
-                # Pull apart the server and port
-                server_ip, server_port = data.get('%A:%p').split(':')
-                
-                # Size of response validation. Can be '-' when status not 200
-                size_of_response = data.get('%b')
-                if size_of_response.isdigit():
-                    size_of_response = int(size_of_response)
-                else:
-                    size_of_response = 0
-                
-                # Build the log entry dictionary
-                log_entry = {
-                    'logfile': logfile,
-                    'time_of_request': datetime.datetime(
-                        int(date_yyyy), 
-                        int(date_mm), 
-                        int(date_dd), 
-                        int(time_hh), 
-                        int(time_mm), 
-                        int(time_ss[0:2]) # Cut off the +0000
-                        ),
-                    'server_name': data.get('%v'),
-                    'server_ip': IP(server_ip).strNormal(0),
-                    'server_port': int(server_port),
-                    'remote_ip': remote_rdns.ip_address,
-                    'remote_logname': data.get('%l'),
-                    'remote_user': data.get('%u'),
-                    'remote_rdns': remote_rdns,
-                    'status_code': status_code,
-                    'size_of_response': size_of_response,
-                    'file_request': file_request,
-                    'referer': referer,
-                    'user_agent': user_agent,
-                }
-                
-                self._debug('log_entry=' + str(log_entry))
-                
-                # Create if there isn't already a duplicate record in place
-                obj, created = LogEntry.objects.get_or_create(
-                    time_of_request = log_entry.get('time_of_request'),
-                    server_ip = log_entry.get('server_ip'),
-                    remote_ip = log_entry.get('remote_ip'),
-                    size_of_response = log_entry.get('size_of_response'),
-                    status_code = log_entry.get('status_code'),
-                    file_request = log_entry.get('file_request'),
-                    defaults = log_entry)
-
-                if created:
-                    obj.save()
-                    self._debug('#### Record imported\n' + str(obj))
-                else:
-                    self._errorlog("##### DUPLICATE RECORD AT INSERTION DETECTED ##### \n" +\
-                        "Database row id: " + str(obj.id) + "\n" +\
-                        "====================" + "\n" +\
-                        "Log: " + str(log_entry) + "\n" +\
-                        "--------------------" + "\n" +\
-                        "DB : " + str(obj) + "\n\n" +\
-                        "Logfile line:" + str(self.import_stats.get('line_counter')) + "\n" +\
-                        "====================" + "\n" +\
-                        "Line    : " + str(line) + "\n" +\
-                        "--------------------" + "\n" +\
-                        "Previous: " + str(previous_line)  + "\n" +\
-                        "====================\n\n")
-                    if line != previous_line:
-                        self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
-
-                # TRACKING information needs to be parsed and stored now.
-            
-            # Bonus code here to split the arguments into tracking elements
-            # tracking_list = fs[1].split('&')
-            # for key_value in tracking_list:
-            #    print "Key-Value = %s" % key_value
-            # STORE THIS DATA EVENTUALLY!
-
-                # Analyse obj.file_request.argument_string & obj.referer.full_string
-
-
-                self._debug('============================')
-                # Print progress report every 100 lines.
-                if (self.import_stats.get('line_counter') % 100) == 0:
-                    self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
-                        float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
-                    print str(datetime.datetime.utcnow()) + ": " +\
-                        str((float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100)[0:5] + "% completed. " +\
-                        "Parsed " + str(self.import_stats.get('line_counter')) + " lines. " +\
-                        "Duplicate count: " + str(self.import_stats.get('duplicatecount')) + ". " +\
-                        "Importing " + str(self.import_stats.get('import_rate'))[0:6] + " lines per second."
-
-                # Update duplicate line string for next pass
-                previous_line = line
-                
-                # End line by line import
-            
             # Final stats output at end of file
             try:
                 self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
                     float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
             except ZeroDivisionError:
-                self.import_stats['import_rate'] = 0
+                self.import_stats['import_rate'] = 0               
+            
             print "\nImport finished at " + str(datetime.datetime.utcnow()) +\
                 "\nLines parsed: " + str(self.import_stats.get('line_counter')) +\
                 "\nDuplicates: " + str(self.import_stats.get('duplicatecount')) +\
-                "\nImported at " + str(self.import_stats.get('import_rate'))[0:6] + " lines per second\n"
-        
+                "\nImported at " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec\n"
+            
         # Import finished, so close out error log file.
         self._errorlog_stop()
+
+
+
+
+    def _parsefile(self, logfile):
+        # This only needs setting/getting the once per call of this function
+        logfile = self._logfile(filename)
+        
+        # Attempt to determine the number of lines in the log
+        log = open(filename)
+        for line in log:
+            self.import_stats['line_count'] = self.import_stats.get('line_count') + 1
+        print str(self.import_stats.get('line_count')) + " lines to parse\n"
+        log.close()
+
+        log = open(filename)
+        
+        previous_line = ""
+        for line in log:
+            # Update stats
+            self.import_stats['line_counter'] = self.import_stats.get('line_counter') + 1
+            
+            # Test for duplicate log entries immediately preceding
+            if line == previous_line:
+                self._errorlog("##### DUPLICATE LINE DETECTED ##### \n" +\
+                    "Logfile line:" + str(self.import_stats.get('line_counter')) + "\n" +\
+                    "====================" + "\n" +\
+                    "Line    : " + str(line) + "\n" +\
+                    "--------------------" + "\n" +\
+                    "Previous: " + str(previous_line)  + "\n" +\
+                    "====================\n\n")
+                self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
+            else:
+                # Parse and store the line
+                self._parseline(line)
+
+            # Print progress report every 500 lines.
+            if (self.import_stats.get('line_counter') % 500) == 0:
+                # Calculate the average rate of import for the whole process
+                self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
+                    float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
+                # Calculate how long till finished
+                self.import_stats['estimated_finish_in_seconds'] = int(\
+                    (int(self.import_stats.get('line_count')) - int(self.import_stats.get('line_counter'))) /\
+                    self.import_stats.get('import_rate'))) 
+                # Output the status
+                print str(datetime.datetime.utcnow()) + ": " +\
+                    str((float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100)[0:5] + "% completed. " +\
+                    "Parsed " + str(self.import_stats.get('line_counter')) + " lines. " +\
+                    "Duplicates: " + str(self.import_stats.get('duplicatecount')) + ". " +\
+                    "Rate: " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec. " +\
+                    "Est. finish in " + str(self.import_stats.get('estimated_finish_in_seconds')) + " seconds."
+
+            # Update duplicate line string for next pass
+            previous_line = line
+            
+        return None
+
+
+
+
+    def _parseline(self, line):
+        # Parse the raw line into a dictionary of data
+        data = p.parse(line)
+        
+        #self._debug('============================')
+        #self._debug('Data: ' + str(data))
+
+        # Validate the data - Count the number of elements
+        if len(data) <> 11:
+            self._errorlog("#### TOO FEW ITEMS IN THIS ENTRY. Line: " + str(self.import_stats.get('line_counter'))\
+            + "Data:" + str(data))
+            return
+        
+        # Status code validation
+        status_code = self._status_code_validation(int(data.get('%>s')))
+        if status_code == 0:
+            self._errorlog("#### STATUS CODE 0 PROBLEM WITH THIS ENTRY: " + str(data))
+            return
+        
+        # Get or create the foreign key elements, Logfile, Rdns, FileRequest, Referer, UserAgent
+        remote_rdns = self._ip_to_domainname(data.get('%h'))
+        file_request = self._file_request(data.get('%r'))
+        referer = self._referer(data.get('%{Referer}i'), status_code)
+        user_agent = self._user_agent(data.get('%{User-Agent}i'))
+                        
+        # Pull apart the date time string
+        date_string, time_string = data.get('%Y-%m-%dT%H:%M:%S%z').split('T')
+        date_yyyy, date_mm, date_dd = date_string.split('-')
+        time_hh, time_mm, time_ss = time_string.split(':')
+        
+        # Pull apart the server and port
+        server_ip, server_port = data.get('%A:%p').split(':')
+        
+        # Size of response validation. Can be '-' when status not 200
+        size_of_response = data.get('%b')
+        if size_of_response.isdigit():
+            size_of_response = int(size_of_response)
+        else:
+            size_of_response = 0
+        
+        # Build the log entry dictionary
+        log_entry = {
+            'logfile': logfile,
+            'time_of_request': datetime.datetime(
+                int(date_yyyy), 
+                int(date_mm), 
+                int(date_dd), 
+                int(time_hh), 
+                int(time_mm), 
+                int(time_ss[0:2]) # Cut off the +0000
+                ),
+            'server_name': data.get('%v'),
+            'server_ip': IP(server_ip).strNormal(0),
+            'server_port': int(server_port),
+            'remote_ip': remote_rdns.ip_address,
+            'remote_logname': data.get('%l'),
+            'remote_user': data.get('%u'),
+            'remote_rdns': remote_rdns,
+            'status_code': status_code,
+            'size_of_response': size_of_response,
+            'file_request': file_request,
+            'referer': referer,
+            'user_agent': user_agent,
+        }
+        
+        # self._debug('log_entry=' + str(log_entry))
+        
+        # Create if there isn't already a duplicate record in place
+        obj, created = LogEntry.objects.get_or_create(
+            time_of_request = log_entry.get('time_of_request'),
+            server_ip = log_entry.get('server_ip'),
+            remote_ip = log_entry.get('remote_ip'),
+            size_of_response = log_entry.get('size_of_response'),
+            status_code = log_entry.get('status_code'),
+            file_request = log_entry.get('file_request'),
+            defaults = log_entry)
+
+        if created:
+            obj.save()
+            # self._debug('#### Record imported\n' + str(obj))
+        else:
+            self._errorlog("##### DUPLICATE RECORD AT INSERTION DETECTED ##### \n" +\
+                "Database row id: " + str(obj.id) + "\n" +\
+                "DB: " + str(obj) + "\n" +\
+                "--------------------" + "\n" +\
+                "Logfile line number:" + str(self.import_stats.get('line_counter')) + "\n" +\
+                "Line: " + str(line) + "\n\n")
+            self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
+
+        # TRACKING information needs to be parsed and stored now.
+    
+    # Bonus code here to split the arguments into tracking elements
+    # tracking_list = fs[1].split('&')
+    # for key_value in tracking_list:
+    #    print "Key-Value = %s" % key_value
+    # STORE THIS DATA EVENTUALLY!
+
+        # Analyse obj.file_request.argument_string & obj.referer.full_string
+
+
+        # self._debug('============================')
+        # End of parseline()
+        return None
+
 
 
     def _logfile(self, filename):
@@ -239,6 +258,14 @@ class Command(BaseCommand):
         obj.save()
 
         return obj
+
+
+    def _status_code_validation(self,status_code)
+        "Check the supplied status code value against known good codes"
+        for item in LogEntry.STATUS_CODE_CHOICES:
+            if status_code == item[0]:
+                return status_code
+        return 0
 
 
     def _ip_to_domainname(self, ipaddress):
@@ -436,12 +463,14 @@ class Command(BaseCommand):
         "Basic optional debug function. Print the string if enabled"
         if self.debug:
             print 'DEBUG:' + str(error_str) + '\n'
+        return None
             
 
     def _errorlog(self,error_str):
         "Write errors to a log file"
         # sys.stderr.write('ERROR:' + str(error_str) + '\n')
         self.error_log.write('ERROR:' + str(error_str) + '\n')
+        return None
 
 
     def _errorlog_start(self, path_to_file):
@@ -453,8 +482,10 @@ class Command(BaseCommand):
         
         self.error_log.write("Log started at " + str(datetime.datetime.utcnow()) + "\n")
         print "Writing errors to: " + path_to_file
+        return None
 
 
     def _errorlog_stop(self):
         self.error_log.write("Log ended at " + str(datetime.datetime.utcnow()) + "\n")
         self.error_log.close()
+        return None
