@@ -42,8 +42,7 @@ class Command(BaseCommand):
 
             # Assume mpoau logfiles
             format = r'%Y-%m-%dT%H:%M:%S%z %v %A:%p %h %l %u \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"'
-            p = apachelog.parser(format)
-
+            
             # Reset statistics
             self.import_stats['filename'] = filename
             self.import_stats['line_counter'] = 0
@@ -52,7 +51,7 @@ class Command(BaseCommand):
             self.import_stats['import_starttime'] = datetime.datetime.utcnow()
             
             # Send the file off to be parsed
-            self._parsefile(filename)
+            self._parsefile(filename, format)
 
             # Final stats output at end of file
             try:
@@ -72,9 +71,13 @@ class Command(BaseCommand):
 
 
 
-    def _parsefile(self, filename):
+    def _parsefile(self, filename, log_format):
         # This only needs setting/getting the once per call of this function
         logfile_obj = self._logfile(filename)
+        
+        # Create a parser for this file
+        parser = apachelog.parser(log_format)
+
         
         # Attempt to determine the number of lines in the log
         log = open(filename)
@@ -102,7 +105,7 @@ class Command(BaseCommand):
                 self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
             else:
                 # Parse and store the line
-                self._parseline(line, logfile_obj)
+                self._parseline(parser, line, logfile_obj)
 
             # Print progress report every 500 lines.
             if (self.import_stats.get('line_counter') % 500) == 0:
@@ -154,9 +157,9 @@ class Command(BaseCommand):
 
 
 
-    def _parseline(self, line, logfile_obj):
+    def _parseline(self, parser_obj, line, logfile_obj):
         # Parse the raw line into a dictionary of data
-        data = p.parse(line)
+        data = parser_obj.parse(line)
         
         #self._debug('============================')
         #self._debug('Data: ' + str(data))
