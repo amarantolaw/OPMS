@@ -21,7 +21,7 @@ class Command(BaseCommand):
         # datetime value for any rdns timeout problems
         self.rdns_timeout = 0
         # Toggle debug statements on/off
-        self.debug = True
+        self.debug = False
         # Record basic information about the import process for reporting
         self.import_stats = {}
         # Create a huge string for the error log
@@ -417,7 +417,7 @@ class Command(BaseCommand):
 
     def _file_request(self, request_string):
         "Get or create a FileRequest object for a given request string"
-        self._debug('_file_request(' + request_string + ')')
+        # self._debug('_file_request(' + request_string + ')')
         # Example request strings
         # GET /philfac/lockelectures/locke_album_cover.jpg HTTP/1.1
         # GET / HTTP/1.0
