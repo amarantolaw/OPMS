@@ -495,15 +495,15 @@ class Command(BaseCommand):
     def _server(self, server_name, server_ip, server_port):
         "Store the server information"
         server = {}
-        server['server_name'] = server_name
-        server['server_ip'] = server_ip
-        server['server_port'] = int(server_port)
+        server['name'] = server_name
+        server['ip_address'] = server_ip
+        server['port'] = int(server_port)
         
         # Now get or create a Referer record for this string
         obj, created = Server.objects.get_or_create(
-            name = server.get('server_name'),
-            ip_address = server.get('server_ip'),
-            port = server.get('server_port'),
+            name = server.get('name'),
+            ip_address = server.get('ip_address'),
+            port = server.get('port'),
             defaults = server)
         
         if created:
