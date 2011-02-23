@@ -272,7 +272,7 @@ class Command(BaseCommand):
         # the current timestamp (i.e. requests in the current second)
         if len(self.cache_log_entry) == 0 or self.cache_log_entry[0].time_of_request != time_of_request:
             # Reset cache
-            self.cache_log_entry = LogEntry.objects.filter(time_of_request=time_of_request)
+            self.cache_log_entry = list(LogEntry.objects.filter(time_of_request=time_of_request))
 
         # Attempt to locate in memory cache
         for item in self.cache_log_entry:
