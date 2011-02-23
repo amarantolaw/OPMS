@@ -24,8 +24,9 @@ class Command(BaseCommand):
         self.debug = False
         # Record basic information about the import process for reporting
         self.import_stats = {}
-        # Create a huge string for the error log
+        # Error logging file and string cache
         self.error_log = ""
+        self.error_cache = ""
         # Cache objects to hold subtables in memory 
         self.cache_user_agent = list(UserAgent.objects.all())
         self.cache_rdns = list(Rdns.objects.all())
@@ -138,6 +139,9 @@ class Command(BaseCommand):
                     "Duplicates: " + str(self.import_stats.get('duplicatecount')) + ". " +\
                     "Rate: " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec. " +\
                     "Est. finish in " + efstring
+                
+                # Write the error cache to disk
+                self._error_log_save()
 
             # Update duplicate line string for next pass
             previous_line = line
@@ -529,6 +533,7 @@ class Command(BaseCommand):
         return obj, True
 
 
+
     def _user_agent(self, agent_string):
         "Get or create a UserAgent record for the given string"
         user_agent = {}
@@ -658,7 +663,8 @@ class Command(BaseCommand):
     def _errorlog(self,error_str):
         "Write errors to a log file"
         # sys.stderr.write('ERROR:' + str(error_str) + '\n')
-        self.error_log.write('ERROR:' + str(error_str) + '\n')
+        #self.error_log.write('ERROR:' + str(error_str) + '\n')
+        self.error_cache += 'ERROR:' + str(error_str) + '\n'
         return None
 
 
@@ -671,6 +677,12 @@ class Command(BaseCommand):
         
         self.error_log.write("Log started at " + str(datetime.datetime.utcnow()) + "\n")
         print "Writing errors to: " + path_to_file
+        return None
+
+    def _error_log_save(self):
+        "Write errors to a log file"
+        self.error_log.write(self.error_cache)
+        self.error_cache = ""
         return None
 
 
