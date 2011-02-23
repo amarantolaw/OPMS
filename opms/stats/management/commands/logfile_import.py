@@ -276,9 +276,9 @@ class Command(BaseCommand):
 
     def _get_or_create_log_entry(self, time_of_request, server, remote_rdns, size_of_response, \
         status_code, file_request, defaults = {}):
-        # Trusting that items appear in chronological order, the cache only holds items matching 
-        # the current timestamp (i.e. requests in the current second)
-        if len(self.cache_log_entry) == 0 or self.cache_log_entry[0].time_of_request != time_of_request:
+        # Trusting that items appear in chronological order, the cache only holds requests in the current minute
+        if len(self.cache_log_entry) == 0 or \
+            self.cache_log_entry[0].time_of_request != time_of_request:
             # Reset cache
             self.cache_log_entry = list(LogEntry.objects.filter(time_of_request=time_of_request))
 
@@ -312,7 +312,7 @@ class Command(BaseCommand):
         obj.referer = defaults.get('referer')
         obj.user_agent = defaults.get('user_agent')
         obj.save()
-        self.cache_log_entry.append(obj)
+        self.cache_log_entry.insert(0,obj)
         
         return obj, True
 
@@ -374,7 +374,7 @@ class Command(BaseCommand):
         obj.resolved_name = defaults.get('resolved_name')
         obj.last_updated = defaults.get('last_updated')
         obj.save()
-        self.cache_rdns.append(obj)
+        self.cache_rdns.insert(0,obj)
         
         return obj, True
         
@@ -486,7 +486,7 @@ class Command(BaseCommand):
         obj.argument_string = defaults.get('argument_string')
         obj.file_type = defaults.get('file_type')
         obj.save()
-        self.cache_file_request.append(obj)
+        self.cache_file_request.insert(0,obj)
         
         return obj, True
 
@@ -523,7 +523,7 @@ class Command(BaseCommand):
         # Set this manually, longhand because the for key,value loop causes errors
         obj.full_string = defaults.get('full_string')
         obj.save()
-        self.cache_referer.append(obj)
+        self.cache_referer.insert(0,obj)
         
         return obj, True
 
@@ -600,7 +600,7 @@ class Command(BaseCommand):
         obj.full_string = defaults.get('full_string')
         obj.type = defaults.get('type')
         obj.save()
-        self.cache_user_agent.append(obj)
+        self.cache_user_agent.insert(0,obj)
         
         return obj, True
 
@@ -640,7 +640,7 @@ class Command(BaseCommand):
         obj.ip_address = defaults.get('ip_address')
         obj.port = defaults.get('port')
         obj.save()
-        self.cache_server.append(obj)
+        self.cache_server.insert(0,obj)
         
         return obj, True
 
