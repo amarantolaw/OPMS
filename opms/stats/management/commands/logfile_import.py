@@ -31,6 +31,7 @@ class Command(BaseCommand):
         self.cache_rdns = list(Rdns.objects.all())
         self.cache_referer = list(Referer.objects.all())
         self.cache_file_request = list(FileRequest.objects.all())
+        self.cache_server = list(Server.objects.all())
         self.cache_log_entry = []
 
 
@@ -570,10 +571,29 @@ class Command(BaseCommand):
             port = server.get('port'),
             defaults = server)
         
-        if created:
-            obj.save()
+        #if created:
+        #    obj.save()
         
         return obj
+
+
+
+    def _get_or_create_server(self, name, ip_address, port, defaults={}):
+        # Attempt to locate in memory cache
+        for item in self.cache_server:
+            if item.name == name and item.ip_address == ip_address and item.port == port and :
+                return item, False
+        
+        # Couldn't find it in the list, now create an object, write to database and to cache
+        obj = Server()
+        # Set this manually, longhand because the for key,value loop causes errors
+        obj.name = defaults.get('name')
+        obj.ip_address = defaults.get('ip_address')
+        obj.port = defaults.get('port')
+        obj.save()
+        self.cache_server.append(obj)
+        
+        return obj, True
 
 
     def _debug(self,error_str):
