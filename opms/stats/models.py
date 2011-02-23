@@ -256,6 +256,16 @@ class Tracking(models.Model):
     def __unicode__(self):
         return '%s=%s' % (self.key_string,self.value_string)
     
+    
+# Replace three repetative fields with one id
+class Server(models.Model):
+    name = models.CharField("server dns name", max_length=200)
+    ip_address = models.IPAddressField("server ip address")
+    port = models.IntegerField("server port number")
+
+    def __unicode__(self):
+        return '%s=%s' % (self.name,self.ip_address)
+        
 
 # Log file request table. Each row is a request from a log file
 class LogEntry(models.Model):
@@ -305,10 +315,11 @@ class LogEntry(models.Model):
     )
     logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
     time_of_request = models.DateTimeField("time of request")
-    server_name = models.CharField("server dns name", max_length=200)
-    server_ip = models.IPAddressField("server ip address")
-    server_port = models.IntegerField("server port number")
-    remote_ip = models.IPAddressField("remote ip address")
+    server = models.ForeignKey(Server, verbose_name="server")
+    #server_name = models.CharField("server dns name", max_length=200)
+    #server_ip = models.IPAddressField("server ip address")
+    #server_port = models.IntegerField("server port number")
+    #REDUNDANT, use remote_rdns.ip_address - remote_ip = models.IPAddressField("remote ip address")
     remote_logname = models.CharField("remote log name", max_length=200,)
     remote_user = models.CharField("remote user name", max_length=200,)
     remote_rdns = models.ForeignKey(Rdns, verbose_name="remote reverse dns name")
