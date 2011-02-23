@@ -318,7 +318,10 @@ class Command(LabelCommand):
         status_code, file_request, defaults = {}):
         # Trusting that items in the import log appear in chronological order
         if len(self.cache_log_entry) == 0 or len(self.cache_log_entry) > (self.cache_log_entry_size*2):
-            self.cache_log_entry = list(LogEntry.objects.filter(time_of_request__gte=time_of_request).order_by('time_of_request'))[0:self.cache_log_entry_size]
+            time_limit = time_of_request+datetime.timedelta(minutes=10)
+            self.cache_log_entry = list(LogEntry.objects.filter(\
+                time_of_request__gte=time_of_request, time_of_request__lte=time_limit, \
+                server=server).order_by('time_of_request')[:self.cache_log_entry_size])
 
         # Attempt to locate in memory cache
         for item in self.cache_log_entry:
