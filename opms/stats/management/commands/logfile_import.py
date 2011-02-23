@@ -14,7 +14,11 @@ class Command(LabelCommand):
     help = 'Imports the contents of the specified logfile into the database.'
     option_list = LabelCommand.option_list + (
         make_option('--startline', action='store', dest='start_at_line',
-            default=1, help='Optional start line to allow resumption of large log files'),
+            default=1, help='Optional start line to allow resumption of large log files. Default is 1.'),
+        make_option('--cache-size', action='store', dest='cache_size',
+            default=100, help='Number of records to prefetch in the LogEntry lookup. Default is 100.'),
+        make_option('--log-service', action='store', dest='log_service',
+            default='mpaou', help='What service has produced this log? Used to determine the apache format expression. Default is "mpoau".'),
     )
     
     def __init__(self):
@@ -22,6 +26,7 @@ class Command(LabelCommand):
         self.geoip = pygeoip.GeoIP('/home/carl/Projects/opms_master/OPMS/data/geoip/GeoIP.dat',pygeoip.MMAP_CACHE)
         # Single UASparser instand for referencing
         self.uasp = UASparser(cache_dir="/home/carl/Projects/opms_master/OPMS/opms/stats/ua_data/")
+        self.uasp_format = ""
         # datetime value for any rdns timeout problems
         self.rdns_timeout = 0
         # Toggle debug statements on/off
@@ -37,7 +42,9 @@ class Command(LabelCommand):
         self.cache_referer = list(Referer.objects.all())
         self.cache_file_request = list(FileRequest.objects.all())
         self.cache_server = list(Server.objects.all())
+        # Log entry cache only prefetches a set number of records from the current timestamp
         self.cache_log_entry = []
+        self.cache_log_entry_size = int(options.get('cache_size', 100)
 
 
     def handle_label(self, filename, **options):
@@ -49,9 +56,15 @@ class Command(LabelCommand):
 
         # Create an error log per import file
         self._errorlog_start(filename + '_import-error.log')
-    
-        # Assume mpoau logfiles
-        format = r'%Y-%m-%dT%H:%M:%S%z %v %A:%p %h %l %u \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"'
+     
+        # Test the log_service option is valid. Use the same list as LogFile.SERVICE_NAME_CHOICES
+        log_service = str(options.get('log_service', 'mpaou'))
+        # Add the remaining services here when we start testing with that data
+        if log_service == 'mpoau':
+            # Assume mpoau logfiles
+            self.uasp_format = r'%Y-%m-%dT%H:%M:%S%z %v %A:%p %h %l %u \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"'
+        else:
+            raise CommandError("This service name is unknown:" + log_service +".\n\n")
         
         # Reset statistics
         self.import_stats['filename'] = filename
@@ -62,8 +75,11 @@ class Command(LabelCommand):
         self.import_stats['import_startline'] = int(options.get('start_at_line', 1))
         
         
+        # This only needs setting/getting the once per call of this function
+        logfile_obj = self._logfile(filename, log_service)
+        
         # Send the file off to be parsed
-        self._parsefile(filename, format, self.import_stats.get('import_startline'))
+        self._parsefile(logfile_obj)
 
         # Final stats output at end of file
         try:
@@ -85,28 +101,57 @@ class Command(LabelCommand):
 
 
 
-    def _parsefile(self, filename, log_format, start_at_line):
-        # This only needs setting/getting the once per call of this function
-        logfile_obj = self._logfile(filename)
+    def _logfile(self, filename, log_service):
+        "Get or create a LogFile record for the given filename"
         
+        # Simple hack for this method initially...
+        logfile = {}
+        logfile['service_name'] = log_service
+        try:
+            logfile['file_name'] = filename[filename.rindex('/')+1:]
+            logfile['file_path'] = filename[:filename.rindex('/')]
+        except ValueError:
+            # Likely path doesn't feature any directories... so improvise
+            logfile['file_name'] = filename
+            logfile['file_path'] = "./"
+            
+        logfile['last_updated'] = datetime.datetime.utcnow()
+        
+        obj, created = LogFile.objects.get_or_create(
+            service_name = logfile.get('service_name'),
+            file_name = logfile.get('file_name'),
+            file_path = logfile.get('file_path'),
+            defaults = logfile)
+        
+        # If this isn't the first time, and the datetime is significantly different from last access, update the time
+        if not created and (logfile.get('last_updated') - obj.last_updated).days > 0:
+            obj.last_updated = logfile.get('last_updated')
+        
+        obj.save()
+
+        return obj
+
+
+
+    def _parsefile(self, logfile_obj):
         # Create a parser for this file
-        parser = apachelog.parser(log_format)
+        parser = apachelog.parser(self.uasp_format)
 
         
         # Attempt to determine the number of lines in the log
-        log = open(filename)
+        log = open(logfile_obj.file_name)
         for line in log:
             self.import_stats['line_count'] = self.import_stats.get('line_count') + 1
-        print str(self.import_stats.get('line_count')) + " lines to parse. Beginning at line " + str(start_at_line) + "\n"
+        print str(self.import_stats.get('line_count')) + " lines to parse. Beginning at line " + str(self.import_stats.get('import_startline')) + "\n"
         log.close()
 
-        log = open(filename)
+        log = open(logfile_obj.file_name)
         
         previous_line = ""
         for line in log:
             # Update stats
             self.import_stats['line_counter'] += 1
-            if int(self.import_stats.get('line_counter')) < start_at_line:
+            if self.import_stats.get('line_counter') < self.import_stats.get('import_startline'):
                 # Skip through to the specified line number
                 previous_line = line
                 continue
@@ -137,8 +182,8 @@ class Command(LabelCommand):
                 # Calculate how long till finished
                 try: 
                     efs = int(\
-                    float(self.import_stats.get('line_count') - self.import_stats.get('line_counter') -\
-                    self.import_stats.get('import_startline')) / float(self.import_stats.get('import_rate'))\
+                    float(self.import_stats.get('line_count') - self.import_stats.get('line_counter')) /\
+                    float(self.import_stats.get('import_rate'))\
                     )
                 except ZeroDivisionError:
                     efs = 1
@@ -160,32 +205,6 @@ class Command(LabelCommand):
             previous_line = line
             
         return None
-
-
-
-    def _logfile(self, filename):
-        "Get or create a LogFile record for the given filename"
-        
-        # Simple hack for this method initially...
-        logfile = {}
-        logfile['service_name'] = "mpoau"
-        logfile['file_name'] = "testname.log"
-        logfile['file_path'] = "/testpath/"
-        logfile['last_updated'] = datetime.datetime.utcnow()
-        
-        obj, created = LogFile.objects.get_or_create(
-            service_name = logfile.get('service_name'),
-            file_name = logfile.get('file_name'),
-            file_path = logfile.get('file_path'),
-            defaults = logfile)
-        
-        # If this isn't the first time, and the datetime is significantly different from last access, update the time
-        if not created and (logfile.get('last_updated') - obj.last_updated).days > 0:
-            obj.last_updated = logfile.get('last_updated')
-        
-        obj.save()
-
-        return obj
 
 
 
@@ -293,10 +312,9 @@ class Command(LabelCommand):
 
     def _get_or_create_log_entry(self, time_of_request, server, remote_rdns, size_of_response, \
         status_code, file_request, defaults = {}):
-        cache_size = 100
         # Trusting that items in the import log appear in chronological order
-        if len(self.cache_log_entry) == 0 or len(self.cache_log_entry) > (cache_size*2):
-            self.cache_log_entry = list(LogEntry.objects.filter(time_of_request__gte=time_of_request).order_by('time_of_request'))[0:cache_size]
+        if len(self.cache_log_entry) == 0 or len(self.cache_log_entry) > (self.cache_log_entry_size*2):
+            self.cache_log_entry = list(LogEntry.objects.filter(time_of_request__gte=time_of_request).order_by('time_of_request'))[0:self.cache_log_entry_size]
 
         # Attempt to locate in memory cache
         for item in self.cache_log_entry:
@@ -328,9 +346,7 @@ class Command(LabelCommand):
         obj.referer = defaults.get('referer')
         obj.user_agent = defaults.get('user_agent')
         obj.save()
-        
         self.cache_log_entry.append(obj)
-        
         
         return obj, True
 
