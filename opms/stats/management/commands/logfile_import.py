@@ -21,7 +21,7 @@ class Command(BaseCommand):
         # datetime value for any rdns timeout problems
         self.rdns_timeout = 0
         # Toggle debug statements on/off
-        self.debug = False
+        self.debug = True
         # Record basic information about the import process for reporting
         self.import_stats = {}
         # Create a huge string for the error log
@@ -203,6 +203,7 @@ class Command(BaseCommand):
         
         # Pull apart the server and port
         server_ip, server_port = data.get('%A:%p').split(':')
+        server = self._server(data.get('%v'), server_ip, server_port)
         
         # Size of response validation. Can be '-' when status not 200
         size_of_response = data.get('%b')
@@ -222,9 +223,7 @@ class Command(BaseCommand):
                 int(time_mm), 
                 int(time_ss[0:2]) # Cut off the +0000
                 ),
-            'server_name': data.get('%v'),
-            'server_ip': IP(server_ip).strNormal(0),
-            'server_port': int(server_port),
+            'server': server,
             'remote_ip': remote_rdns.ip_address,
             'remote_logname': data.get('%l'),
             'remote_user': data.get('%u'),
@@ -276,8 +275,6 @@ class Command(BaseCommand):
 
 
 
-
-
     def _status_code_validation(self,status_code):
         "Check the supplied status code value against known good codes"
         for item in LogEntry.STATUS_CODE_CHOICES:
@@ -319,6 +316,7 @@ class Command(BaseCommand):
         return obj
 
     def _get_or_create_rdns(self, ip_address, defaults={}):
+        self._debug("_get_or_create_rdns(" + str(ip_address) + "," + str(defaults) + ")")
         # Attempt to locate in memory cache
         for item in self.cache_rdns:
             if item.ip_address == ip_address:
@@ -489,6 +487,26 @@ class Command(BaseCommand):
                 obj.ua.save()
         
             # Finally store the new and updated UserAgent object
+            obj.save()
+        
+        return obj
+
+
+    def _server(server_name, server_ip, server_port):
+        "Store the server information"
+        server = {}
+        server['server_name'] = server_name
+        server['server_ip'] = server_ip
+        server['server_port'] = int(server_port)
+        
+        # Now get or create a Referer record for this string
+        obj, created = Server.objects.get_or_create(
+            server_name = server.get('server_name'),
+            server_ip = server.get('server_ip'),
+            server_port = server.get('server_port'),
+            defaults = server)
+        
+        if created:
             obj.save()
         
         return obj
