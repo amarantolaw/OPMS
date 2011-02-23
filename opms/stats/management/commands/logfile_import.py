@@ -501,9 +501,9 @@ class Command(BaseCommand):
         
         # Now get or create a Referer record for this string
         obj, created = Server.objects.get_or_create(
-            server_name = server.get('server_name'),
-            server_ip = server.get('server_ip'),
-            server_port = server.get('server_port'),
+            name = server.get('server_name'),
+            ip_address = server.get('server_ip'),
+            port = server.get('server_port'),
             defaults = server)
         
         if created:
