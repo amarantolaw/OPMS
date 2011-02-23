@@ -32,7 +32,7 @@ class Command(BaseCommand):
         self.cache_referer = list(Referer.objects.all())
         self.cache_file_request = list(FileRequest.objects.all())
         self.cache_server = list(Server.objects.all())
-        self.cache_log_entry = []
+        self.cache_log_entry = list(LogEntry.objects.all())
 
 
     def handle(self, *args, **options):
@@ -277,10 +277,10 @@ class Command(BaseCommand):
     def _get_or_create_log_entry(self, time_of_request, server, remote_rdns, size_of_response, \
         status_code, file_request, defaults = {}):
         # Trusting that items appear in chronological order, the cache only holds requests in the current minute
-        if len(self.cache_log_entry) == 0 or \
-            self.cache_log_entry[0].time_of_request != time_of_request:
-            # Reset cache
-            self.cache_log_entry = list(LogEntry.objects.filter(time_of_request=time_of_request))
+        #if len(self.cache_log_entry) == 0 or \
+        #    self.cache_log_entry[0].time_of_request != time_of_request:
+        #    # Reset cache
+        #    self.cache_log_entry = list(LogEntry.objects.filter(time_of_request=time_of_request))
 
         # Attempt to locate in memory cache
         for item in self.cache_log_entry:
