@@ -276,11 +276,10 @@ class Command(BaseCommand):
 
     def _get_or_create_log_entry(self, time_of_request, server, remote_rdns, size_of_response, \
         status_code, file_request, defaults = {}):
-        # Trusting that items appear in chronological order, the cache only holds requests in the current minute
-        #if len(self.cache_log_entry) == 0 or \
-        #    self.cache_log_entry[0].time_of_request != time_of_request:
-        #    # Reset cache
-        #    self.cache_log_entry = list(LogEntry.objects.filter(time_of_request=time_of_request))
+        cache_size = 100
+        # Trusting that items in the import log appear in chronological order
+        if len(self.cache_log_entry) == 0 or len(self.cache_log_entry) > (cache_size*2):
+            self.cache_log_entry = list(LogEntry.objects.filter(time_of_request__gte=time_of_request).order_by('time_of_request'))[0:cache_size]
 
         # Attempt to locate in memory cache
         for item in self.cache_log_entry:
@@ -312,7 +311,9 @@ class Command(BaseCommand):
         obj.referer = defaults.get('referer')
         obj.user_agent = defaults.get('user_agent')
         obj.save()
-        self.cache_log_entry.insert(0,obj)
+        
+        self.cache_log_entry.append(obj)
+        
         
         return obj, True
 
