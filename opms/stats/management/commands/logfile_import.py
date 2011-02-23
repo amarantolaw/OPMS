@@ -323,6 +323,7 @@ class Command(BaseCommand):
         
         # Couldn't find it in the list, now create an object, write to database and to cache
         obj = Rdns()
+        self._debug("_get_or_create_rdns() - NEW ITEM BEING CREATED")
         for key, value in defaults:
             setattr(obj, key, value)
         obj.save()
