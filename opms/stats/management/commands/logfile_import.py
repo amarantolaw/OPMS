@@ -10,7 +10,7 @@ from dns import resolver,reversename
 from IPy import IP
 
 class Command(LabelCommand):
-    args = 'filename [start_at_line]'
+    args = 'filename'
     help = 'Imports the contents of the specified logfile into the database, begining at the optionally supplied line number'
     option_list = LabelCommand.option_list + (
         make_option('--startline', action='store', dest='start_at_line',
@@ -46,9 +46,6 @@ class Command(LabelCommand):
         # Some basic checking
         if filename.endswith('.gz'):
            raise CommandError("This file is still compressed. Uncompress and try again.\n\n")
-           # sys.exit(1)
-        #else:
-        #   self._debug("################  Beginning IMPORT from" + str(filename))
 
         # Create an error log per import file
         self._errorlog_start(filename + '_import-error.log')
@@ -64,7 +61,7 @@ class Command(LabelCommand):
         self.import_stats['import_starttime'] = datetime.datetime.utcnow()
         
         # Send the file off to be parsed
-        self._parsefile(filename, format, options.get('start_at_line', 1))
+        self._parsefile(filename, format, int(options.get('start_at_line', 1)))
 
         # Final stats output at end of file
         try:
@@ -109,6 +106,7 @@ class Command(LabelCommand):
             self.import_stats['line_counter'] += 1
             if int(self.import_stats.get('line_counter')) < start_at_line:
                 # Skip through to the specified line number
+                previous_line = line
                 continue
             
             # Test for duplicate log entries immediately preceding
