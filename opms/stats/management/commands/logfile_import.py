@@ -188,13 +188,21 @@ class Command(BaseCommand):
         # Status code validation
         status_code = self._status_code_validation(int(data.get('%>s')))
         if status_code == 0:
-            self._errorlog("#### STATUS CODE 0 PROBLEM WITH THIS ENTRY: " + str(data))
+            self._errorlog("#### STATUS CODE 0 PROBLEM WITH THIS ENTRY. Line: " + str(self.import_stats.get('line_counter'))\
+            + "Data:" + str(data))
             return
         
         # Get or create the foreign key elements, Logfile, Rdns, FileRequest, Referer, UserAgent
         remote_rdns = self._ip_to_domainname(data.get('%h'))
+        
         file_request = self._file_request(data.get('%r'))
+        if file_request == None:
+            self._errorlog("#### INVALID REQUEST STRING IN THIS ENTRY. Line: " + str(self.import_stats.get('line_counter'))\
+            + "Data:" + str(data))
+            return
+        
         referer = self._referer(data.get('%{Referer}i'), status_code)
+        
         user_agent = self._user_agent(data.get('%{User-Agent}i'))
                         
         # Pull apart the date time string
@@ -416,12 +424,18 @@ class Command(BaseCommand):
         # GET /oucs/oxonian_interviews/300by300_interview.png HTTP/1.0
         # GET /robots.txt HTTP/1.0
         # GET /astro/introduction/astronomy_intro-medium-audio.mp3?CAMEFROM=podcastsGET HTTP/1.1
+        # \xc5^)         <--- Example bad data in log from 2011
+        
+        fr = {}
         
         # Crude splitting... first on spaces, then on file/querystring
         ts = request_string.split()
+        if len(ts) != 3:
+            # Something is wrong with this request string. Exit and stop processing this record
+            return None
+        
         fs = ts[1].split('?')
         
-        fr = {}
         fr['method'] = ts[0]
         fr['uri_string'] = fs[0]
         fr['protocol'] = ts[2]
