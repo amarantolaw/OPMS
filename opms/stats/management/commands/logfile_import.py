@@ -325,6 +325,7 @@ class Command(BaseCommand):
         obj = Rdns()
         self._debug("_get_or_create_rdns() - NEW ITEM BEING CREATED")
         for key, value in defaults:
+            self._debug("key:" + str(key) + "\nvalue:" + str(value))
             setattr(obj, key, value)
         obj.save()
         self.cache_rdns.append(obj)
