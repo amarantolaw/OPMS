@@ -128,8 +128,12 @@ class Command(LabelCommand):
             # Print progress report every 500 lines.
             if (self.import_stats.get('line_counter') % 500) == 0:
                 # Calculate the average rate of import for the whole process
-                self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')-self.import_stats.get('import_startline')) /\
+                try: 
+                    self.import_stats['import_rate'] = \
+                    float(self.import_stats.get('line_counter') - self.import_stats.get('import_startline')) /\
                     float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
+                except ZeroDivisionError:
+                    self.import_stats['import_rate'] = 1
                 # Calculate how long till finished
                 efs = int(\
                     (int(self.import_stats.get('line_count')) - int(self.import_stats.get('line_counter')))\
