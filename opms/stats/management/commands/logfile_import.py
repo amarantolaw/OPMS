@@ -44,7 +44,7 @@ class Command(LabelCommand):
         self.cache_server = list(Server.objects.all())
         # Log entry cache only prefetches a set number of records from the current timestamp
         self.cache_log_entry = []
-        self.cache_log_entry_size = int(options.get('cache_size', 100))
+        self.cache_log_entry_size = 100
 
 
     def handle_label(self, filename, **options):
@@ -73,6 +73,8 @@ class Command(LabelCommand):
         self.import_stats['duplicatecount'] = 0
         self.import_stats['import_starttime'] = datetime.datetime.utcnow()
         self.import_stats['import_startline'] = int(options.get('start_at_line', 1))
+        
+        self.cache_log_entry_size = int(options.get('cache_size', 100))
         
         
         # This only needs setting/getting the once per call of this function
@@ -141,7 +143,7 @@ class Command(LabelCommand):
         # Attempt to determine the number of lines in the log
         log = open(logfile_obj.file_name)
         for line in log:
-            self.import_stats['line_count'] = self.import_stats.get('line_count') + 1
+            self.import_stats['line_count'] += 1
         print str(self.import_stats.get('line_count')) + " lines to parse. Beginning at line " + str(self.import_stats.get('import_startline')) + "\n"
         log.close()
 
