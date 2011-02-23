@@ -113,7 +113,7 @@ class Command(LabelCommand):
         logfile['service_name'] = log_service
         try:
             logfile['file_name'] = filename[filename.rindex('/')+1:]
-            logfile['file_path'] = filename[:filename.rindex('/')]
+            logfile['file_path'] = filename[:filename.rindex('/')+1]
         except ValueError:
             # Likely path doesn't feature any directories... so improvise
             logfile['file_name'] = filename
