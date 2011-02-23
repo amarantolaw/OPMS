@@ -128,7 +128,7 @@ class Command(LabelCommand):
             # Print progress report every 500 lines.
             if (self.import_stats.get('line_counter') % 500) == 0:
                 # Calculate the average rate of import for the whole process
-                self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
+                self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')-self.import_stats.get('import_startline')) /\
                     float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
                 # Calculate how long till finished
                 efs = int(\
@@ -142,7 +142,7 @@ class Command(LabelCommand):
                 
                 # Output the status
                 print str(datetime.datetime.utcnow()) + ": " +\
-                    str((float(self.import_stats.get('line_counter')-self.import_stats.get('import_startline')) / float(self.import_stats.get('line_count')-self.import_stats.get('import_startline')))*100)[0:5] + "% completed. " +\
+                    str((float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100)[0:5] + "% completed. " +\
                     "Parsed " + str(self.import_stats.get('line_counter')) + " lines. " +\
                     "Duplicates: " + str(self.import_stats.get('duplicatecount')) + ". " +\
                     "Rate: " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec. " +\
