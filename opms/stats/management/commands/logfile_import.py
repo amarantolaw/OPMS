@@ -451,14 +451,31 @@ class Command(BaseCommand):
             ref['full_string'] = referer_string
         
         # Now get or create a Referer record for this string
-        obj, created = Referer.objects.get_or_create(
+        obj, created = self._get_or_create_referer(
             full_string = ref.get('full_string'),
             defaults = ref)
         
-        if created:
-            obj.save()
+        #if created:
+        #    obj.save()
         
         return obj
+        
+        
+
+    def _get_or_create_referer(self, full_string, defaults={}):
+        # Attempt to locate in memory cache
+        for item in self.cache_referer:
+            if item.full_string == full_string:
+                return item, False
+        
+        # Couldn't find it in the list, now create an object, write to database and to cache
+        obj = Referer()
+        # Set this manually, longhand because the for key,value loop causes errors
+        obj.full_string = defaults.get('full_string')
+        obj.save()
+        self.cache_referer.append(obj)
+        
+        return obj, True
 
 
     def _user_agent(self, agent_string):
