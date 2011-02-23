@@ -21,7 +21,7 @@ class Command(BaseCommand):
         # datetime value for any rdns timeout problems
         self.rdns_timeout = 0
         # Toggle debug statements on/off
-        self.debug = True
+        self.debug = False
         # Record basic information about the import process for reporting
         self.import_stats = {}
         # Create a huge string for the error log
@@ -315,7 +315,7 @@ class Command(BaseCommand):
         return obj
 
     def _get_or_create_rdns(self, ip_address, defaults={}):
-        self._debug("_get_or_create_rdns(" + str(ip_address) + "," + str(defaults) + ")")
+        # self._debug("_get_or_create_rdns(" + str(ip_address) + "," + str(defaults) + ")")
         # Attempt to locate in memory cache
         for item in self.cache_rdns:
             if item.ip_address == ip_address:
@@ -323,10 +323,10 @@ class Command(BaseCommand):
         
         # Couldn't find it in the list, now create an object, write to database and to cache
         obj = Rdns()
-        self._debug("_get_or_create_rdns() - NEW ITEM BEING CREATED")
-        for key, value in defaults:
-            self._debug("key:" + str(key) + "\nvalue:" + str(value))
-            setattr(obj, key, value)
+        # Set this manually, longhand because the for key,value loop causes errors
+        obj.ip_address = defaults.get('ip_address')
+        obj.resolved_name = defaults.get('resolved_name')
+        obj.last_updated = defaults.get('last_updated')
         obj.save()
         self.cache_rdns.append(obj)
         
