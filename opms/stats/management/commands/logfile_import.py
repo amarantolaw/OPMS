@@ -224,7 +224,6 @@ class Command(BaseCommand):
                 int(time_ss[0:2]) # Cut off the +0000
                 ),
             'server': server,
-            'remote_ip': remote_rdns.ip_address,
             'remote_logname': data.get('%l'),
             'remote_user': data.get('%u'),
             'remote_rdns': remote_rdns,
@@ -241,7 +240,7 @@ class Command(BaseCommand):
         obj, created = LogEntry.objects.get_or_create(
             time_of_request = log_entry.get('time_of_request'),
             server = log_entry.get('server'),
-            remote_ip = log_entry.get('remote_ip'),
+            remote_rdns = log_entry.get('remote_rdns'),
             size_of_response = log_entry.get('size_of_response'),
             status_code = log_entry.get('status_code'),
             file_request = log_entry.get('file_request'),
