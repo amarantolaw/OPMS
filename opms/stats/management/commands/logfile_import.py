@@ -238,7 +238,7 @@ class Command(BaseCommand):
         # self._debug('log_entry=' + str(log_entry))
         
         # Create if there isn't already a duplicate record in place
-        obj, created = LogEntry.objects.get_or_create(
+        obj, created = self._get_or_create_log_entry(
             time_of_request = log_entry.get('time_of_request'),
             server = log_entry.get('server'),
             remote_rdns = log_entry.get('remote_rdns'),
@@ -247,17 +247,9 @@ class Command(BaseCommand):
             file_request = log_entry.get('file_request'),
             defaults = log_entry)
 
-        if created:
-            obj.save()
+        #if created:
+            # obj.save()
             # self._debug('#### Record imported\n' + str(obj))
-        else:
-            self._errorlog("##### DUPLICATE RECORD AT INSERTION DETECTED ##### \n" +\
-                "Database row id: " + str(obj.id) + "\n" +\
-                "DB: " + str(obj) + "\n" +\
-                "--------------------" + "\n" +\
-                "Logfile line number:" + str(self.import_stats.get('line_counter')) + "\n" +\
-                "Line: " + str(line) + "\n\n")
-            self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
 
         # TRACKING information needs to be parsed and stored now.
     
@@ -270,8 +262,51 @@ class Command(BaseCommand):
         # Analyse obj.file_request.argument_string & obj.referer.full_string
 
         # self._debug('============================')
-        # End of parseline()
         return None
+
+
+
+    def _get_or_create_log_entry(self, time_of_request, server, remote_rdns, size_of_response, \
+        status_code, file_request, defaults = {}):
+        # Trusting that items appear in chronological order, the cache only holds items matching 
+        # the current timestamp (i.e. requests in the current second)
+        if len(self.cache_log_entry) == 0 or self.cache_log_entry[0].time_of_request != time_of_request:
+            # Reset cache
+            self.cache_log_entry = LogEntry.objects.filter(time_of_request=time_of_request)
+
+        # Attempt to locate in memory cache
+        for item in self.cache_log_entry:
+            if item.time_of_request == time_of_request and item.server == server and \
+                item.remote_rdns == remote_rdns and item.size_of_response == size_of_response and \
+                item.status_code == status_code and item.file_request == file_request:
+                    
+                self._errorlog("##### DUPLICATE RECORD AT INSERTION DETECTED ##### \n" +\
+                    "Database row id: " + str(item.id) + "\n" +\
+                    "DB: " + str(item) + "\n" +\
+                    "--------------------" + "\n" +\
+                    "Logfile line number:" + str(self.import_stats.get('line_counter')) + "\n\n")
+                self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
+                
+                return item, False
+        
+        # Couldn't find it in the list, now create an object, write to database and to cache
+        obj = LogEntry()
+        # Set this manually, longhand because the for key,value loop causes errors
+        obj.logfile = defaults.get('logfile')
+        obj.time_of_request = defaults.get('time_of_request')
+        obj.server = defaults.get('server')
+        obj.remote_logname = defaults.get('remote_logname')
+        obj.remote_user = defaults.get('remote_user')
+        obj.remote_rdns = defaults.get('remote_rdns')
+        obj.status_code = defaults.get('status_code')
+        obj.size_of_response = defaults.get('size_of_response')
+        obj.file_request = defaults.get('file_request')
+        obj.referer = defaults.get('referer')
+        obj.user_agent = defaults.get('user_agent')
+        obj.save()
+        self.cache_log_entry.append(obj)
+        
+        return obj, True
 
 
 
@@ -595,6 +630,8 @@ class Command(BaseCommand):
         
         return obj, True
 
+
+    # DEBUG AND INTERNAL HELP METHODS ==============================================================
 
     def _debug(self,error_str):
         "Basic optional debug function. Print the string if enabled"
