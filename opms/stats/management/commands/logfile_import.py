@@ -11,7 +11,7 @@ from IPy import IP
 
 class Command(LabelCommand):
     args = 'filename'
-    help = 'Imports the contents of the specified logfile into the database, begining at the optionally supplied line number'
+    help = 'Imports the contents of the specified logfile into the database.'
     option_list = LabelCommand.option_list + (
         make_option('--startline', action='store', dest='start_at_line',
             default=1, help='Optional start line to allow resumption of large log files'),
@@ -59,13 +59,15 @@ class Command(LabelCommand):
         self.import_stats['line_count'] = 0
         self.import_stats['duplicatecount'] = 0
         self.import_stats['import_starttime'] = datetime.datetime.utcnow()
+        self.import_stats['import_startline'] = int(options.get('start_at_line', 1))
+        
         
         # Send the file off to be parsed
-        self._parsefile(filename, format, int(options.get('start_at_line', 1)))
+        self._parsefile(filename, format, self.import_stats.get('import_startline'))
 
         # Final stats output at end of file
         try:
-            self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
+            self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')-self.import_stats.get('import_startline')) /\
                 float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
         except ZeroDivisionError:
             self.import_stats['import_rate'] = 0               
@@ -140,7 +142,7 @@ class Command(LabelCommand):
                 
                 # Output the status
                 print str(datetime.datetime.utcnow()) + ": " +\
-                    str((float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100)[0:5] + "% completed. " +\
+                    str((float(self.import_stats.get('line_counter')-self.import_stats.get('import_startline')) / float(self.import_stats.get('line_count')))*100)[0:5] + "% completed. " +\
                     "Parsed " + str(self.import_stats.get('line_counter')) + " lines. " +\
                     "Duplicates: " + str(self.import_stats.get('duplicatecount')) + ". " +\
                     "Rate: " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec. " +\
