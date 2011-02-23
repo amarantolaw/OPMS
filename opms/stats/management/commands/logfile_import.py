@@ -26,10 +26,15 @@ class Command(BaseCommand):
         self.import_stats = {}
         # Create a huge string for the error log
         self.error_log = ""
+        # Cache objects to hold subtables in memory 
+        self.cache_user_agent = list(UserAgent.objects.all())
+        self.cache_rdns = list(Rdns.objects.all())
+        self.cache_referer = list(Referer.objects.all())
+        self.cache_file_request = list(FileRequest.objects.all())
+        self.cache_log_entry = []
 
 
     def handle(self, *args, **options):
-        self._errorlog_start('./import_errors.txt')
         print "Import started at " + str(datetime.datetime.utcnow()) + "\n"
 
         for filename in args:
@@ -40,6 +45,9 @@ class Command(BaseCommand):
             #else:
             #   self._debug("################  Beginning IMPORT from" + str(filename))
 
+            # Create an error log per import file
+            self._errorlog_start(filename + '_import-error.log')
+        
             # Assume mpoau logfiles
             format = r'%Y-%m-%dT%H:%M:%S%z %v %A:%p %h %l %u \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"'
             
@@ -64,9 +72,9 @@ class Command(BaseCommand):
                 "\nLines parsed: " + str(self.import_stats.get('line_counter')) +\
                 "\nDuplicates: " + str(self.import_stats.get('duplicatecount')) +\
                 "\nImported at " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec\n"
+                
+            self._errorlog_stop()
             
-        # Import finished, so close out error log file.
-        self._errorlog_stop()
         return None
 
 
@@ -294,7 +302,8 @@ class Command(BaseCommand):
         rdns['last_updated'] = datetime.datetime.utcnow()
         
         # Now get or create an Rdns record for this IP address
-        obj, created = Rdns.objects.get_or_create(ip_address=rdns.get('ip_address'), defaults=rdns)
+        #obj, created = Rdns.objects.get_or_create(ip_address=rdns.get('ip_address'), defaults=rdns)
+        obj, created = self._get_or_create_rdns(ip_address=rdns.get('ip_address'), defaults=rdns)
         
         if created:
             # Look for the RDNS string of this address -- Removing this to test speed impact
@@ -308,6 +317,22 @@ class Command(BaseCommand):
             obj.save()
 
         return obj
+
+    def _get_or_create_rdns(self, ip_address, defaults={}):
+        # Attempt to locate in memory cache
+        for item in self.cache_rdns:
+            if item.ip_address == ip_address:
+                return item, False
+        
+        # Couldn't find it in the list, now create an object, write to database and to cache
+        obj = Rdns()
+        for key, value in defaults:
+            setattr(obj, key, value)
+        obj.save()
+        self.cache_rdns.append(obj)
+        
+        return obj, True
+        
 
 
     def _rdns_lookup(self, ipaddress):
