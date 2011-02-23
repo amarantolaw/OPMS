@@ -2,16 +2,16 @@
 # Author: Carl Marshall
 # Last Edited: 4-2-2011
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import LabelCommand, CommandError
 from opms.stats.models import *
 from opms.stats.uasparser import UASparser
 import apachelog, datetime, sys, pygeoip
 from dns import resolver,reversename
 from IPy import IP
 
-class Command(BaseCommand):
-    args = '<spreadsheet.xls>'
-    help = 'Imports the contents of the specified spreadsheet into the database'
+class Command(LabelCommand):
+    args = 'filename [start_at_line]'
+    help = 'Imports the contents of the specified logfile into the database, begining at the optionally supplied line number'
     
     def __init__(self):
         # Single GeoIP object for referencing
@@ -36,54 +36,53 @@ class Command(BaseCommand):
         self.cache_log_entry = list(LogEntry.objects.all())
 
 
-    def handle(self, *args, **options):
+    def handle_label(self, filename, start_at_line=1, **options):
         print "Import started at " + str(datetime.datetime.utcnow()) + "\n"
 
-        for filename in args:
-            # Some basic checking
-            if filename.endswith('.gz'):
-               raise CommandError("This file is still compressed. Uncompress and try again.\n\n")
-               # sys.exit(1)
-            #else:
-            #   self._debug("################  Beginning IMPORT from" + str(filename))
+        # Some basic checking
+        if filename.endswith('.gz'):
+           raise CommandError("This file is still compressed. Uncompress and try again.\n\n")
+           # sys.exit(1)
+        #else:
+        #   self._debug("################  Beginning IMPORT from" + str(filename))
 
-            # Create an error log per import file
-            self._errorlog_start(filename + '_import-error.log')
+        # Create an error log per import file
+        self._errorlog_start(filename + '_import-error.log')
+    
+        # Assume mpoau logfiles
+        format = r'%Y-%m-%dT%H:%M:%S%z %v %A:%p %h %l %u \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"'
         
-            # Assume mpoau logfiles
-            format = r'%Y-%m-%dT%H:%M:%S%z %v %A:%p %h %l %u \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"'
-            
-            # Reset statistics
-            self.import_stats['filename'] = filename
-            self.import_stats['line_counter'] = 0
-            self.import_stats['line_count'] = 0
-            self.import_stats['duplicatecount'] = 0
-            self.import_stats['import_starttime'] = datetime.datetime.utcnow()
-            
-            # Send the file off to be parsed
-            self._parsefile(filename, format)
+        # Reset statistics
+        self.import_stats['filename'] = filename
+        self.import_stats['line_counter'] = 0
+        self.import_stats['line_count'] = 0
+        self.import_stats['duplicatecount'] = 0
+        self.import_stats['import_starttime'] = datetime.datetime.utcnow()
+        
+        # Send the file off to be parsed
+        self._parsefile(filename, format, start_at_line)
 
-            # Final stats output at end of file
-            try:
-                self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
-                    float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
-            except ZeroDivisionError:
-                self.import_stats['import_rate'] = 0               
-            
-            print "\nImport finished at " + str(datetime.datetime.utcnow()) +\
-                "\nLines parsed: " + str(self.import_stats.get('line_counter')) +\
-                "\nDuplicates: " + str(self.import_stats.get('duplicatecount')) +\
-                "\nImported at " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec\n"
-            
-            # Write the error cache to disk
-            self._error_log_save()
-            self._errorlog_stop()
+        # Final stats output at end of file
+        try:
+            self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')) /\
+                float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
+        except ZeroDivisionError:
+            self.import_stats['import_rate'] = 0               
+        
+        print "\nImport finished at " + str(datetime.datetime.utcnow()) +\
+            "\nLines parsed: " + str(self.import_stats.get('line_counter')) +\
+            "\nDuplicates: " + str(self.import_stats.get('duplicatecount')) +\
+            "\nImported at " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec\n"
+        
+        # Write the error cache to disk
+        self._error_log_save()
+        self._errorlog_stop()
             
         return None
 
 
 
-    def _parsefile(self, filename, log_format):
+    def _parsefile(self, filename, log_format, start_at_line):
         # This only needs setting/getting the once per call of this function
         logfile_obj = self._logfile(filename)
         
@@ -95,7 +94,7 @@ class Command(BaseCommand):
         log = open(filename)
         for line in log:
             self.import_stats['line_count'] = self.import_stats.get('line_count') + 1
-        print str(self.import_stats.get('line_count')) + " lines to parse\n"
+        print str(self.import_stats.get('line_count')) + " lines to parse. Beginning at line " + str(start_at_line) + "\n"
         log.close()
 
         log = open(filename)
@@ -104,6 +103,9 @@ class Command(BaseCommand):
         for line in log:
             # Update stats
             self.import_stats['line_counter'] += 1
+            if int(self.import_stats.get('line_counter')) < start_at_line:
+                # Skip through to the specified line number
+                continue
             
             # Test for duplicate log entries immediately preceding
             if line == previous_line:
@@ -550,42 +552,46 @@ class Command(BaseCommand):
         
         if created:
             # Parse the string to extract the easy bits
-            uas_dict = self.uasp.parse(user_agent.get('full_string'))
-
-            #Set the type string
-            obj.type = uas_dict.get('typ')
-            
-            # Deal with the OS record
-            os = {}
-            os['company'] = uas_dict.get('os_company')
-            os['family'] = uas_dict.get('os_family')
-            os['name'] = uas_dict.get('os_name')
-            
-            # Now get or create an OS record
-            obj.os, created = OS.objects.get_or_create(
-                company = os.get('company'), 
-                family = os.get('family'), 
-                name = os.get('name'), 
-                defaults = os)
-            if created:
-                obj.os.save()
+            try:
+                uas_dict = self.uasp.parse(obj.full_string)
+    
+                #Set the type string
+                obj.type = uas_dict.get('typ')
                 
+                # Deal with the OS record
+                os = {}
+                os['company'] = uas_dict.get('os_company')
+                os['family'] = uas_dict.get('os_family')
+                os['name'] = uas_dict.get('os_name')
+                
+                # Now get or create an OS record
+                obj.os, created = OS.objects.get_or_create(
+                    company = os.get('company'), 
+                    family = os.get('family'), 
+                    name = os.get('name'), 
+                    defaults = os)
+                if created:
+                    obj.os.save()
+                    
+                
+                # Deal with the UA record
+                ua = {}
+                ua['company'] = uas_dict.get('ua_company')
+                ua['family'] = uas_dict.get('ua_family')
+                ua['name'] = uas_dict.get('ua_name')
+                
+                # Now get or create an UA record
+                obj.ua, created = UA.objects.get_or_create(
+                    company = ua.get('company'), 
+                    family = ua.get('family'), 
+                    name = ua.get('name'), 
+                    defaults = ua)
+                if created:
+                    obj.ua.save()
+                    
+            except uasparser.UASException:
+                self._errorlog('_user_agent() FAILED. agent_string=' + str(agent_string))
             
-            # Deal with the UA record
-            ua = {}
-            ua['company'] = uas_dict.get('ua_company')
-            ua['family'] = uas_dict.get('ua_family')
-            ua['name'] = uas_dict.get('ua_name')
-            
-            # Now get or create an UA record
-            obj.ua, created = UA.objects.get_or_create(
-                company = ua.get('company'), 
-                family = ua.get('family'), 
-                name = ua.get('name'), 
-                defaults = ua)
-            if created:
-                obj.ua.save()
-        
             # Finally store the new and updated UserAgent object
             obj.save()
         
