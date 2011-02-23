@@ -142,7 +142,7 @@ class Command(LabelCommand):
                 
                 # Output the status
                 print str(datetime.datetime.utcnow()) + ": " +\
-                    str((float(self.import_stats.get('line_counter')-self.import_stats.get('import_startline')) / float(self.import_stats.get('line_count')))*100)[0:5] + "% completed. " +\
+                    str((float(self.import_stats.get('line_counter')-self.import_stats.get('import_startline')) / float(self.import_stats.get('line_count')-self.import_stats.get('import_startline')))*100)[0:5] + "% completed. " +\
                     "Parsed " + str(self.import_stats.get('line_counter')) + " lines. " +\
                     "Duplicates: " + str(self.import_stats.get('duplicatecount')) + ". " +\
                     "Rate: " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec. " +\
