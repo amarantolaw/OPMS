@@ -18,7 +18,7 @@ class Command(LabelCommand):
         make_option('--cache-size', action='store', dest='cache_size',
             default=100, help='Number of records to prefetch in the LogEntry lookup. Default is 100.'),
         make_option('--log-service', action='store', dest='log_service',
-            default='mpaou', help='What service has produced this log? Used to determine the apache format expression. Default is "mpoau".'),
+            default='mpoau', help='What service has produced this log? Used to determine the apache format expression. Default is "mpoau".'),
     )
     
     def __init__(self):
@@ -60,7 +60,7 @@ class Command(LabelCommand):
         self._errorlog_start(filename + '_import-error.log')
      
         # Test the log_service option is valid. Use the same list as LogFile.SERVICE_NAME_CHOICES
-        log_service = str(options.get('log_service', 'mpaou'))
+        log_service = str(options.get('log_service', 'mpoau'))
         # Add the remaining services here when we start testing with that data
         if log_service == 'mpoau':
             # Assume mpoau logfiles
