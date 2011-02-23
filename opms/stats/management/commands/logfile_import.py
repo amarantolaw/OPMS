@@ -1,7 +1,7 @@
 # Import script for Apache Logfiles from media servers
 # Author: Carl Marshall
 # Last Edited: 4-2-2011
-
+from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
 from opms.stats.models import *
 from opms.stats.uasparser import UASparser
