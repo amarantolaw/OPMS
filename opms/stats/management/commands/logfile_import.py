@@ -135,10 +135,13 @@ class Command(LabelCommand):
                 except ZeroDivisionError:
                     self.import_stats['import_rate'] = 1
                 # Calculate how long till finished
-                efs = int(\
+                try: 
+                    efs = int(\
                     float(self.import_stats.get('line_count') - self.import_stats.get('line_counter') -\
                     self.import_stats.get('import_startline')) / float(self.import_stats.get('import_rate'))\
                     )
+                except ZeroDivisionError:
+                    efs = 1
                 efhr = efs // (60*60)
                 efs = efs % (60*60)
                 efmin = efs // 60
