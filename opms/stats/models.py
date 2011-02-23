@@ -314,7 +314,7 @@ class LogEntry(models.Model):
         (505, u'505 HTTP Version Not Supported')
     )
     logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
-    time_of_request = models.DateTimeField("time of request")
+    time_of_request = models.DateTimeField("time of request", db_index=True)
     server = models.ForeignKey(Server, verbose_name="server")
     #server_name = models.CharField("server dns name", max_length=200)
     #server_ip = models.IPAddressField("server ip address")
