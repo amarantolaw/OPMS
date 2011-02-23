@@ -44,7 +44,7 @@ class Command(LabelCommand):
         self.cache_server = list(Server.objects.all())
         # Log entry cache only prefetches a set number of records from the current timestamp
         self.cache_log_entry = []
-        self.cache_log_entry_size = int(options.get('cache_size', 100)
+        self.cache_log_entry_size = int(options.get('cache_size', 100))
 
 
     def handle_label(self, filename, **options):
