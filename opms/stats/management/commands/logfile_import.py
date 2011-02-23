@@ -136,8 +136,9 @@ class Command(LabelCommand):
                     self.import_stats['import_rate'] = 1
                 # Calculate how long till finished
                 efs = int(\
-                    (int(self.import_stats.get('line_count')) - int(self.import_stats.get('line_counter')))\
-                    / self.import_stats.get('import_rate'))
+                    float(self.import_stats.get('line_count') - self.import_stats.get('line_counter') -\
+                    self.import_stats.get('import_startline')) / float(self.import_stats.get('import_rate'))\
+                    )
                 efhr = efs // (60*60)
                 efs = efs % (60*60)
                 efmin = efs // 60
