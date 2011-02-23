@@ -313,6 +313,8 @@ class Command(BaseCommand):
             obj.save()
 
         return obj
+        
+        
 
     def _get_or_create_rdns(self, ip_address, defaults={}):
         # self._debug("_get_or_create_rdns(" + str(ip_address) + "," + str(defaults) + ")")
@@ -368,6 +370,7 @@ class Command(BaseCommand):
         return resolved_name
 
 
+
     def _file_request(self, request_string):
         "Get or create a FileRequest object for a given request string"
         
@@ -402,17 +405,41 @@ class Command(BaseCommand):
                 fr['file_type'] = ft
         
         # Now get or create a FileRequest record for this string
-        obj, created = FileRequest.objects.get_or_create(
+        obj, created = self._get_or_create_file_request(
             method = fr.get('method'), 
             uri_string = fr.get('uri_string'),
             argument_string = fr.get('argument_string'),
             protocol = fr.get('protocol'),
             defaults = fr)
         
-        if created:
-            obj.save()
+        # Redundant in this instance as nothing is modified after the get_or_create
+        #if created:
+        #    obj.save()
         
         return obj
+
+
+
+    def _get_or_create_file_request(self, method, uri_string, argument_string, protocol, defaults={}):
+        # Attempt to locate in memory cache
+        for item in self.cache_file_request:
+            if item.method == method and item.uri_string == uri_string and \
+                item.argument_string == argument_string and item.protocol == protocol:
+                return item, False
+        
+        # Couldn't find it in the list, now create an object, write to database and to cache
+        obj = FileRequest()
+        # Set this manually, longhand because the for key,value loop causes errors
+        obj.method = defaults.get('method')
+        obj.uri_string = defaults.get('uri_string')
+        obj.protocol = defaults.get('protocol')
+        obj.argument_string = defaults.get('argument_string')
+        obj.file_type = defaults.get('file_type')
+        obj.save()
+        self.cache_file_request.append(obj)
+        
+        return obj, True
+
 
 
     def _referer(self, referer_string, status_code):
