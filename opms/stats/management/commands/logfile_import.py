@@ -240,7 +240,7 @@ class Command(BaseCommand):
         # Create if there isn't already a duplicate record in place
         obj, created = LogEntry.objects.get_or_create(
             time_of_request = log_entry.get('time_of_request'),
-            server_ip = log_entry.get('server_ip'),
+            server = log_entry.get('server'),
             remote_ip = log_entry.get('remote_ip'),
             size_of_response = log_entry.get('size_of_response'),
             status_code = log_entry.get('status_code'),
