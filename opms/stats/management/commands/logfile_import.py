@@ -12,6 +12,10 @@ from IPy import IP
 class Command(LabelCommand):
     args = 'filename [start_at_line]'
     help = 'Imports the contents of the specified logfile into the database, begining at the optionally supplied line number'
+    option_list = LabelCommand.option_list + (
+        make_option('--startline', action='store', dest='start_at_line',
+            default=1, help='Optional start line to allow resumption of large log files'),
+    )
     
     def __init__(self):
         # Single GeoIP object for referencing
@@ -33,10 +37,10 @@ class Command(LabelCommand):
         self.cache_referer = list(Referer.objects.all())
         self.cache_file_request = list(FileRequest.objects.all())
         self.cache_server = list(Server.objects.all())
-        self.cache_log_entry = list(LogEntry.objects.all())
+        self.cache_log_entry = []
 
 
-    def handle_label(self, filename, start_at_line=1, **options):
+    def handle_label(self, filename, **options):
         print "Import started at " + str(datetime.datetime.utcnow()) + "\n"
 
         # Some basic checking
@@ -60,7 +64,7 @@ class Command(LabelCommand):
         self.import_stats['import_starttime'] = datetime.datetime.utcnow()
         
         # Send the file off to be parsed
-        self._parsefile(filename, format, start_at_line)
+        self._parsefile(filename, format, options.get('start_at_line', 1))
 
         # Final stats output at end of file
         try:
