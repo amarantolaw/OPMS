@@ -538,7 +538,7 @@ class Command(BaseCommand):
 
 
 
-    def _get_or_create_user_agent(self, full_string, type, defaults={}):
+    def _get_or_create_user_agent(self, full_string, defaults={}):
         # Attempt to locate in memory cache
         for item in self.cache_user_agent:
             if item.full_string == full_string:
