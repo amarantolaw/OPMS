@@ -581,7 +581,7 @@ class Command(BaseCommand):
     def _get_or_create_server(self, name, ip_address, port, defaults={}):
         # Attempt to locate in memory cache
         for item in self.cache_server:
-            if item.name == name and item.ip_address == ip_address and item.port == port and :
+            if item.name == name and item.ip_address == ip_address and item.port == port:
                 return item, False
         
         # Couldn't find it in the list, now create an object, write to database and to cache
