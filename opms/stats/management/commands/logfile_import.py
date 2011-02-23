@@ -489,7 +489,7 @@ class Command(BaseCommand):
         user_agent['type'] = ""
         
         # Now get or create a UserAgent record for this string
-        obj, created = UserAgent.objects.get_or_create(
+        obj, created = self._get_or_create_user_agent(
             full_string = user_agent.get('full_string'), 
             defaults = user_agent)
         
@@ -535,6 +535,25 @@ class Command(BaseCommand):
             obj.save()
         
         return obj
+
+
+
+    def _get_or_create_user_agent(self, full_string, type, defaults={}):
+        # Attempt to locate in memory cache
+        for item in self.cache_user_agent:
+            if item.full_string == full_string:
+                return item, False
+        
+        # Couldn't find it in the list, now create an object, write to database and to cache
+        obj = UserAgent()
+        # Set this manually, longhand because the for key,value loop causes errors
+        obj.full_string = defaults.get('full_string')
+        obj.type = defaults.get('type')
+        obj.save()
+        self.cache_user_agent.append(obj)
+        
+        return obj, True
+
 
 
     def _server(self, server_name, server_ip, server_port):
