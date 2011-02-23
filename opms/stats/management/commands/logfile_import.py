@@ -492,7 +492,7 @@ class Command(BaseCommand):
         return obj
 
 
-    def _server(server_name, server_ip, server_port):
+    def _server(self, server_name, server_ip, server_port):
         "Store the server information"
         server = {}
         server['server_name'] = server_name
