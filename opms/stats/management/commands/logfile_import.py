@@ -140,16 +140,16 @@ class Command(LabelCommand):
     def _parsefile(self, logfile_obj):
         # Create a parser for this file
         parser = apachelog.parser(self.uasp_format)
-
+        filename = logfile_obj.file_path + logfile_obj.file_name
         
         # Attempt to determine the number of lines in the log
-        log = open(logfile_obj.file_name)
+        log = open(filename)
         for line in log:
             self.import_stats['line_count'] += 1
         print str(self.import_stats.get('line_count')) + " lines to parse. Beginning at line " + str(self.import_stats.get('import_startline')) + "\n"
         log.close()
 
-        log = open(logfile_obj.file_name)
+        log = open(filename)
         
         previous_line = ""
         for line in log:
