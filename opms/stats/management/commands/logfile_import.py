@@ -304,29 +304,6 @@ class Command(LabelCommand):
 
     def _get_or_create_log_entry(self, time_of_request, server, remote_rdns, size_of_response, \
         status_code, file_request, defaults = {}):
-        # Trusting that items in the import log appear in chronological order
-        if len(self.cache_log_entry) == 0 or len(self.cache_log_entry) > (self.cache_log_entry_size*2):
-            time_limit = time_of_request+datetime.timedelta(minutes=10)
-            self.cache_log_entry = list(LogEntry.objects.filter(\
-                time_of_request__gte=time_of_request, time_of_request__lte=time_limit, \
-                server=server).order_by('time_of_request')[:self.cache_log_entry_size])
-
-        # Attempt to locate in memory cache
-        for item in self.cache_log_entry:
-            if item.time_of_request == time_of_request and item.server == server and \
-                item.remote_rdns == remote_rdns and item.size_of_response == size_of_response and \
-                item.status_code == status_code and item.file_request == file_request:
-                    
-                self._errorlog("##### DUPLICATE RECORD AT INSERTION DETECTED ##### \n" +\
-                    "Database row id: " + str(item.id) + "\n" +\
-                    "DB: " + str(item) + "\n" +\
-                    "--------------------" + "\n" +\
-                    "Logfile line number:" + str(self.import_stats.get('line_counter')) + "\n\n")
-                self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
-                
-                return item, False
-        
-        # Couldn't find it in the list, now create an object, write to database and to cache
         obj = LogEntry()
         # Set this manually, longhand because the for key,value loop causes errors
         obj.logfile = defaults.get('logfile')
@@ -340,7 +317,37 @@ class Command(LabelCommand):
         obj.file_request = defaults.get('file_request')
         obj.referer = defaults.get('referer')
         obj.user_agent = defaults.get('user_agent')
-        obj.save()
+        
+        # Trusting that items in the import log appear in chronological order
+        if len(self.cache_log_entry) == 0 or len(self.cache_log_entry) > (self.cache_log_entry_size*2):
+            time_limit = time_of_request+datetime.timedelta(minutes=10)
+            self.cache_log_entry = list(LogEntry.objects.filter(\
+                time_of_request__gte=time_of_request, time_of_request__lte=time_limit, \
+                server=server).order_by('time_of_request')[:self.cache_log_entry_size])
+
+        # Attempt to locate in memory cache
+        for item in self.cache_log_entry:
+            if item.time_of_request == obj.time_of_request and item.server == obj.server and \
+                item.remote_rdns == obj.remote_rdns and item.size_of_response == obj.size_of_response and \
+                item.status_code == obj.status_code and item.file_request == obj.file_request:
+                    
+                self._errorlog("##### DUPLICATE RECORD AT INSERTION DETECTED ##### \n" +\
+                    "Database row id: " + str(item.id) + "\n" +\
+                    "DB: " + str(item) + "\n" +\
+                    "--------------------" + "\n" +\
+                    "Logfile line number:" + str(self.import_stats.get('line_counter')) + "\n\n")
+                self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
+                
+                return item, False
+        
+        # Couldn't find it in the list, check the database incase another process has added it
+        try:
+            obj = LogEntry.objects.get(time_of_request = obj.time_of_request, server = obj.server, 
+                remote_rdns = obj.remote_rdns, size_of_response = obj.size_of_response,
+                status_code = obj.status_code, file_request = obj.file_request)
+        except LogEntry.DoesNotExist:
+            obj.save()
+            
         self.cache_log_entry.append(obj)
         
         return obj, True
