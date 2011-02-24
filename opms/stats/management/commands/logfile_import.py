@@ -295,19 +295,7 @@ class Command(LabelCommand):
             file_request = log_entry.get('file_request'),
             defaults = log_entry)
 
-        #if created:
-            # obj.save()
-            # self._debug('#### Record imported\n' + str(obj))
-
-        # TRACKING information needs to be parsed and stored now.
-    
-    # Bonus code here to split the arguments into tracking elements
-    # tracking_list = fs[1].split('&')
-    # for key_value in tracking_list:
-    #    print "Key-Value = %s" % key_value
-    # STORE THIS DATA EVENTUALLY!
-
-        # Analyse obj.file_request.argument_string & obj.referer.full_string
+        # Analyse obj.file_request.argument_string & obj.referer.full_string as part of another process
 
         # self._debug('============================')
         return None
@@ -367,107 +355,55 @@ class Command(LabelCommand):
         return 0
 
 
+
+
     def _ip_to_domainname(self, ipaddress):
         "Returns the domain name for a given IP where known"
         # self._debug('_ip_to_domainname('+str(ipaddress)+') called')
         # validate IP address
         # try: 
         adr = IP(ipaddress)
-        # else:
         # PUT ERROR HANDLING IN HERE!
         
-        rdns = {}
-        rdns['ip_address'] = adr.strNormal(0)
-        # rdns['ip_int'] = int(adr.strDec(0)) - No Longer needed for GeoIP helping
-        rdns['resolved_name'] = 'Unknown'
-        rdns['last_updated'] = datetime.datetime.utcnow()
+        rdns = Rdns()
+        rdns.ip_address = adr.strNormal(0)
+        rdns.resolved_name = 'Unknown'
+        rdns.last_updated = datetime.datetime.utcnow()
         
-        # Now get or create an Rdns record for this IP address
-        #obj, created = Rdns.objects.get_or_create(ip_address=rdns.get('ip_address'), defaults=rdns)
-        obj, created = self._get_or_create_rdns(ip_address=rdns.get('ip_address'), defaults=rdns)
-        
-        if created:
-            # Look for the RDNS string of this address -- Removing this to test speed impact
-            # obj.resolved_name = self._rdns_lookup(rdns.get('ip_address'))
-            obj.resolved_name = "Unknown"
-            
-            # Go get the location for this address
-            obj.country_code = self.geoip.country_code_by_addr(rdns.get('ip_address'))
-            obj.country_name = self.geoip.country_name_by_addr(rdns.get('ip_address'))
-            
-            obj.save()
-
-        return obj
-        
-        
-
-    def _get_or_create_rdns(self, ip_address, defaults={}):
-        # self._debug("_get_or_create_rdns(" + str(ip_address) + "," + str(defaults) + ")")
         # Attempt to locate in memory cache
         for item in self.cache_rdns:
-            if item.ip_address == ip_address:
-                return item, False
+            if item.ip_address == rdns.ip_address:
+                return item
         
-        # Couldn't find it in the list, now create an object, write to database and to cache
-        obj = Rdns()
-        # Set this manually, longhand because the for key,value loop causes errors
-        obj.ip_address = defaults.get('ip_address')
-        obj.resolved_name = defaults.get('resolved_name')
-        obj.last_updated = defaults.get('last_updated')
-        obj.save()
-        self.cache_rdns.insert(0,obj)
-        
-        return obj, True
-        
-
-
-    def _rdns_lookup(self, ipaddress):
-        "Attempt an RDNS lookup for this ipaddress"
-        # Default answer is the failure state of "Unknown"
-        resolved_name = 'Unknown'
-
-        # self._debug('_rdns_lookup('+str(ipaddress)+'): self.rdns_timeout=' + str(self.rdns_timeout))
-        # Has a timeout occurred already? Was the timeout more than 30 seconds ago?
-        if self.rdns_timeout == 0 or (datetime.datetime.utcnow() - self.rdns_timeout).seconds > 30:
-            self.rdns_timeout = 0
-            # Attempt an RDNS lookup, and remember to save this back to the object
-            try:
-                addr = reversename.from_address(ipaddress)
-                resolved_name = str(resolver.query(addr,"PTR")[0])
-                    
-            except resolver.NXDOMAIN:
-                self._errorlog('NXDOMAIN error trying to resolve:'+str(addr))
-                resolved_name = 'No Resolved Name'
-                    
-            # Timeouts can be a problem with batch importing, use this to skip the issue for sorting later
-            except resolver.Timeout:
-                self.rdns_timeout = datetime.datetime.utcnow()
-                self._errorlog('_rdns_lookup() FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
-                
-            except resolver.NoAnswer:
-                self.rdns_timeout = datetime.datetime.utcnow() 
-                self._errorlog('_rdns_lookup() FAILED due to NO ANSWER at ' + str(self.rdns_timeout))
-        else:
-            self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
+        # Couldn't find it in the list, check the database incase another process has added it
+        try:
+            rdns = Rdns.objects.get(ip_address == rdns.ip_address)
+        except Rdns.DoesNotExist:
+            # Go get the location for this address
+            rdns.country_code = self.geoip.country_code_by_addr(rdns.ip_address)
+            rdns.country_name = self.geoip.country_name_by_addr(rdns.ip_address)
+            rdns.save()
             
-        # self._debug('_rdns_lookup('+str(ipaddress)+'): rdns='+resolved_name)
+        self.cache_rdns.insert(0,rdns)
         
-        return resolved_name
+        return rdns
+        
+        
 
 
 
     def _file_request(self, request_string):
         "Get or create a FileRequest object for a given request string"
         # self._debug('_file_request(' + request_string + ')')
+        
         # Example request strings
         # GET /philfac/lockelectures/locke_album_cover.jpg HTTP/1.1
         # GET / HTTP/1.0
-        # GET /oucs/oxonian_interviews/300by300_interview.png HTTP/1.0
         # GET /robots.txt HTTP/1.0
         # GET /astro/introduction/astronomy_intro-medium-audio.mp3?CAMEFROM=podcastsGET HTTP/1.1
         # \xc5^)         <--- Example bad data in log from 2011
         
-        fr = {}
+        fr = FileRequest()
         
         # Crude splitting... first on spaces, then on file/querystring
         ts = request_string.split()
@@ -478,99 +414,72 @@ class Command(LabelCommand):
         fs = ts[1].split('?')
         
         # Validate method: Either GET or POST or corrupted
-        fr['method'] = ts[0]
-        if fr.get('method') != "GET" and fr.get('method') != "POST":
+        fr.method = ts[0]
+        if fr.method != "GET" and fr.method != "POST":
             return None
         
-        fr['uri_string'] = fs[0]
-        fr['protocol'] = ts[2]
+        fr.uri_string = fs[0]
+        fr.protocol = ts[2]
         
         # Querystring is optional, so test for it first.
         if len(fs)==2:
-            fr['argument_string'] = fs[1]
+            fr.argument_string = fs[1]
         else:
-            fr['argument_string'] = ""
+            fr.argument_string = ""
         
         # Crude file typing (in lieu of an actual file database...)
         # Take the last three letters of the filename and compare to known types
-        ft = fr.get('uri_string')[-3:].lower()
-        fr['file_type'] = ""
+        ft = fr.uri_string[-3:].lower()
+        fr.file_type = ""
         for item in FileRequest.FILE_TYPE_CHOICES:
             if ft == item[0]:
-                fr['file_type'] = ft
+                fr.file_type = ft
         
-        # Now get or create a FileRequest record for this string
-        obj, created = self._get_or_create_file_request(
-            method = fr.get('method'), 
-            uri_string = fr.get('uri_string'),
-            argument_string = fr.get('argument_string'),
-            protocol = fr.get('protocol'),
-            defaults = fr)
-        
-        # Redundant in this instance as nothing is modified after the get_or_create
-        #if created:
-        #    obj.save()
-        
-        return obj
-
-
-
-    def _get_or_create_file_request(self, method, uri_string, argument_string, protocol, defaults={}):
         # Attempt to locate in memory cache
         for item in self.cache_file_request:
-            if item.method == method and item.uri_string == uri_string and \
-                item.argument_string == argument_string and item.protocol == protocol:
-                return item, False
+            if item.method == fr.method and item.uri_string == fr.uri_string and \
+                item.argument_string == fr.argument_string and item.protocol == fr.protocol:
+                return item
         
-        # Couldn't find it in the list, now create an object, write to database and to cache
-        obj = FileRequest()
-        # Set this manually, longhand because the for key,value loop causes errors
-        obj.method = defaults.get('method')
-        obj.uri_string = defaults.get('uri_string')
-        obj.protocol = defaults.get('protocol')
-        obj.argument_string = defaults.get('argument_string')
-        obj.file_type = defaults.get('file_type')
-        obj.save()
-        self.cache_file_request.insert(0,obj)
+        # Couldn't find it in the list, check the database incase another process has added it
+        try:
+            fr = FileRequest.objects.get(method = fr.method, uri_string = fr.uri_string,
+                argument_string = fr.argument_string, protocol = fr.protocol)
+        except FileRequest.DoesNotExist:
+            fr.save()
+            
+        self.cache_file_request.insert(0,fr)
         
-        return obj, True
+        return fr
+
+
 
 
 
     def _referer(self, referer_string, status_code):
         "Get or create a Referer record for the given string"
-        ref = {}
-        ref['full_string'] = ""
+        ref = Referer()
+        ref.full_string = ""
         
         if status_code in (200,206,304):
-            ref['full_string'] = referer_string
+            ref.full_string = referer_string
         
-        # Now get or create a Referer record for this string
-        obj, created = self._get_or_create_referer(
-            full_string = ref.get('full_string'),
-            defaults = ref)
-        
-        #if created:
-        #    obj.save()
-        
-        return obj
-        
-        
-
-    def _get_or_create_referer(self, full_string, defaults={}):
         # Attempt to locate in memory cache
         for item in self.cache_referer:
-            if item.full_string == full_string:
-                return item, False
+            if item.full_string == ref.full_string:
+                return item
+                
+        # Couldn't find it in the list, check the database incase another process has added it
+        try:
+            ref = Referer.objects.get(full_string=ref.full_string)
+        except Referer.DoesNotExist:
+            ref.save()
         
-        # Couldn't find it in the list, now create an object, write to database and to cache
-        obj = Referer()
-        # Set this manually, longhand because the for key,value loop causes errors
-        obj.full_string = defaults.get('full_string')
-        obj.save()
-        self.cache_referer.insert(0,obj)
+        self.cache_referer.insert(0,ref)
         
-        return obj, True
+        return ref
+        
+        
 
 
 
