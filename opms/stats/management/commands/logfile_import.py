@@ -477,7 +477,11 @@ class Command(LabelCommand):
         
         fs = ts[1].split('?')
         
+        # Validate method: Either GET or POST or corrupted
         fr['method'] = ts[0]
+        if fr.get('method') != "GET" and fr.get('method') != "POST":
+            return None
+        
         fr['uri_string'] = fs[0]
         fr['protocol'] = ts[2]
         
@@ -572,26 +576,29 @@ class Command(LabelCommand):
 
     def _user_agent(self, agent_string):
         "Get or create a UserAgent record for the given string"
-        user_agent = {}
+        user_agent = UserAgent()
         
         # Store the full string for later analysis
-        user_agent['full_string'] = agent_string
+        user_agent.full_string = agent_string
         
         # Create some defaults that we'll likely overwrite. OS and UA can be null, so ignore.
-        user_agent['type'] = ""
-        
-        # Now get or create a UserAgent record for this string
-        obj, created = self._get_or_create_user_agent(
-            full_string = user_agent.get('full_string'), 
-            defaults = user_agent)
-        
-        if created:
+        user_agent.type = ""            
+            
+        # Attempt to locate in memory cache
+        for item in self.cache_user_agent:
+            if item.full_string == user_agent.full_string:
+                return item
+                
+        # Couldn't find it in the list, check the database incase another process has added it
+        try:
+            user_agent = UserAgent.objects.get(full_string=user_agent.full_string)
+        except UserAgent.DoesNotExist:
             # Parse the string to extract the easy bits
             try:
                 uas_dict = self.uasp.parse(obj.full_string)
     
                 #Set the type string
-                obj.type = uas_dict.get('typ')
+                user_agent.type = uas_dict.get('typ')
                 
                 # Deal with the OS record
                 os = {}
@@ -600,13 +607,13 @@ class Command(LabelCommand):
                 os['name'] = uas_dict.get('os_name')
                 
                 # Now get or create an OS record
-                obj.os, created = OS.objects.get_or_create(
+                user_agent.os, created = OS.objects.get_or_create(
                     company = os.get('company'), 
                     family = os.get('family'), 
                     name = os.get('name'), 
                     defaults = os)
                 if created:
-                    obj.os.save()
+                    user_agent.os.save()
                     
                 
                 # Deal with the UA record
@@ -616,79 +623,52 @@ class Command(LabelCommand):
                 ua['name'] = uas_dict.get('ua_name')
                 
                 # Now get or create an UA record
-                obj.ua, created = UA.objects.get_or_create(
+                user_agent.ua, created = UA.objects.get_or_create(
                     company = ua.get('company'), 
                     family = ua.get('family'), 
                     name = ua.get('name'), 
                     defaults = ua)
                 if created:
-                    obj.ua.save()
+                    user_agent.ua.save()
                     
             except uasparser.UASException:
-                self._errorlog('_user_agent() FAILED. agent_string=' + str(agent_string))
+                self._errorlog('_user_agent() parsing FAILED. agent_string=' + str(agent_string))
             
-            # Finally store the new and updated UserAgent object
-            obj.save()
+            #Not there, so write to database
+            user_agent.save()
+        
+        # Update the cache
+        self.cache_user_agent.insert(0,user_agent)
         
         return obj
 
-
-
-    def _get_or_create_user_agent(self, full_string, defaults={}):
-        # Attempt to locate in memory cache
-        for item in self.cache_user_agent:
-            if item.full_string == full_string:
-                return item, False
-        
-        # Couldn't find it in the list, now create an object, write to database and to cache
-        obj = UserAgent()
-        # Set this manually, longhand because the for key,value loop causes errors
-        obj.full_string = defaults.get('full_string')
-        obj.type = defaults.get('type')
-        obj.save()
-        self.cache_user_agent.insert(0,obj)
-        
-        return obj, True
 
 
 
     def _server(self, server_name, server_ip, server_port):
         "Store the server information"
-        server = {}
-        server['name'] = server_name
-        server['ip_address'] = server_ip
-        server['port'] = int(server_port)
-        
-        # Now get or create a Referer record for this string
-        obj, created = Server.objects.get_or_create(
-            name = server.get('name'),
-            ip_address = server.get('ip_address'),
-            port = server.get('port'),
-            defaults = server)
-        
-        #if created:
-        #    obj.save()
-        
-        return obj
+        obj = Server()
+        obj.name = server_name
+        obj.ip_address = server_ip
+        obj.port = int(server_port)
 
-
-
-    def _get_or_create_server(self, name, ip_address, port, defaults={}):
         # Attempt to locate in memory cache
         for item in self.cache_server:
-            if item.name == name and item.ip_address == ip_address and item.port == port:
-                return item, False
+            if item.name == obj.name and item.ip_address == obj.ip_address and \
+                item.port == obj.port:
+                return item
+
+        # Couldn't find it in the list, check the database incase another process has added it
+        try:
+            obj = Server.objects.get(name=obj.name, ip_address=obj.ip_address, port=obj.port)
+        except Server.DoesNotExist:
+            #Not there, so write to database and to cache
+            obj.save()
         
-        # Couldn't find it in the list, now create an object, write to database and to cache
-        obj = Server()
-        # Set this manually, longhand because the for key,value loop causes errors
-        obj.name = defaults.get('name')
-        obj.ip_address = defaults.get('ip_address')
-        obj.port = defaults.get('port')
-        obj.save()
         self.cache_server.insert(0,obj)
-        
-        return obj, True
+
+        return obj
+
 
 
     # DEBUG AND INTERNAL HELP METHODS ==============================================================
