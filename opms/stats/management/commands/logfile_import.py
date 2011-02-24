@@ -360,7 +360,7 @@ class Command(LabelCommand):
                 status_code = obj.status_code, file_request = obj.file_request)
         except LogEntry.DoesNotExist:
             obj.save()
-        except MultipleObjectsReturned:
+        except LogEntry.MultipleObjectsReturned:
             self._errorlog("Funky shit just happened(!). MultipleObjectsReturned: " + str(obj))
             
         self.cache_log_entry.append(obj)
