@@ -595,7 +595,7 @@ class Command(LabelCommand):
         except UserAgent.DoesNotExist:
             # Parse the string to extract the easy bits
             try:
-                uas_dict = self.uasp.parse(obj.full_string)
+                uas_dict = self.uasp.parse(user_agent.full_string)
     
                 #Set the type string
                 user_agent.type = uas_dict.get('typ')
