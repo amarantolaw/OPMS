@@ -4,7 +4,7 @@
 from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
 from opms.stats.models import *
-from opms.stats.uasparser import UASparser
+from opms.stats.uasparser import UASparser, UASException
 import apachelog, datetime, sys, pygeoip
 from dns import resolver,reversename
 from IPy import IP
@@ -631,7 +631,7 @@ class Command(LabelCommand):
                 if created:
                     user_agent.ua.save()
                     
-            except uasparser.UASException:
+            except UASException:
                 self._errorlog('_user_agent() parsing FAILED. agent_string=' + str(agent_string))
             
             #Not there, so write to database
