@@ -640,34 +640,34 @@ class Command(LabelCommand):
         # Update the cache
         self.cache_user_agent.insert(0,user_agent)
         
-        return obj
+        return user_agent
 
 
 
 
     def _server(self, server_name, server_ip, server_port):
         "Store the server information"
-        obj = Server()
-        obj.name = server_name
-        obj.ip_address = server_ip
-        obj.port = int(server_port)
+        server = Server()
+        server.name = server_name
+        server.ip_address = server_ip
+        server.port = int(server_port)
 
         # Attempt to locate in memory cache
         for item in self.cache_server:
-            if item.name == obj.name and item.ip_address == obj.ip_address and \
-                item.port == obj.port:
+            if item.name == server.name and item.ip_address == server.ip_address and \
+                item.port == server.port:
                 return item
 
         # Couldn't find it in the list, check the database incase another process has added it
         try:
-            obj = Server.objects.get(name=obj.name, ip_address=obj.ip_address, port=obj.port)
+            server = Server.objects.get(name=server.name, ip_address=server.ip_address, port=server.port)
         except Server.DoesNotExist:
             #Not there, so write to database and to cache
-            obj.save()
+            server.save()
         
-        self.cache_server.insert(0,obj)
+        self.cache_server.insert(0,server)
 
-        return obj
+        return server
 
 
 
