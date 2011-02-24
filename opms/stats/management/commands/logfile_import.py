@@ -19,6 +19,8 @@ class Command(LabelCommand):
             default=100, help='Number of records to prefetch in the LogEntry lookup. Default is 100.'),
         make_option('--log-service', action='store', dest='log_service',
             default='mpoau', help='What service has produced this log? Used to determine the apache format expression. Default is "mpoau".'),
+        make_option('--single-import', action='store', dest='single_import',
+            default=False, help='Speeds up import rate by disabling support for parallel imports.'),
     )
     
     def __init__(self):
@@ -45,6 +47,9 @@ class Command(LabelCommand):
         # Log entry cache only prefetches a set number of records from the current timestamp
         self.cache_log_entry = []
         self.cache_log_entry_size = 100
+        # Option flag to enable or disable the parallel import safety checks
+        self.single_import = False
+        
         
         super(Command, self).__init__()
 
@@ -77,6 +82,8 @@ class Command(LabelCommand):
         self.import_stats['import_startline'] = int(options.get('start_at_line', 1))
         
         self.cache_log_entry_size = int(options.get('cache_size', 100))
+        if options.get('single_import', False) != False:
+            self.single_import = True
         
         
         # This only needs setting/getting the once per call of this function
@@ -339,6 +346,12 @@ class Command(LabelCommand):
                 self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
                 
                 return item, False
+        
+        # Shortcut to escape if this is purely a single process import
+        if self.single_import:
+            obj.save()
+            self.cache_log_entry.append(obj)
+            return obj, True
         
         # Couldn't find it in the list, check the database incase another process has added it
         try:
