@@ -377,7 +377,7 @@ class Command(LabelCommand):
         
         # Couldn't find it in the list, check the database incase another process has added it
         try:
-            rdns = Rdns.objects.get(ip_address == rdns.ip_address)
+            rdns = Rdns.objects.get(ip_address = rdns.ip_address)
         except Rdns.DoesNotExist:
             # Go get the location for this address
             rdns.country_code = self.geoip.country_code_by_addr(rdns.ip_address)
