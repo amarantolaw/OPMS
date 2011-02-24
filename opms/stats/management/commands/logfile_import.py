@@ -357,12 +357,13 @@ class Command(LabelCommand):
         try:
             obj = LogEntry.objects.get(time_of_request = obj.time_of_request, server = obj.server, 
                 remote_rdns = obj.remote_rdns, size_of_response = obj.size_of_response,
-                status_code = obj.status_code, file_request = obj.file_request)[:1]
+                status_code = obj.status_code, file_request = obj.file_request)
         except LogEntry.DoesNotExist:
             obj.save()
+        except MultipleObjectsReturned:
+            self._errorlog("Funky shit just happened(!). MultipleObjectsReturned: " + str(obj)
             
         self.cache_log_entry.append(obj)
-        
         return obj, True
 
 
