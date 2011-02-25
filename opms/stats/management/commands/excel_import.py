@@ -1,14 +1,6 @@
-#Import script
-# from django.core.management import setup_environ, execute_manager
-# try:
-#     import settings # Assumed to be in the same directory.
-# except ImportError:
-#     import sys
-#    sys.stderr.write("Error: Can't find the file 'settings.py' in the directory containing %r. It appears you've customized things.\nYou'll have to run django-admin.py, passing it your settings module.\n(If the file settings.py does indeed exist, it's causing an ImportError somehow.)\n" % __file__)
-#     sys.exit(1)
-
-# setup_environ(settings)
-
+# Import script for Apple iTunes U supplied Excel spreadsheets
+# Author: Carl Marshall
+# Last Edited: 4-2-2011
 
 from django.core.management.base import BaseCommand, CommandError
 from opms.stats.models import *
