@@ -18,12 +18,13 @@ def summary_index(request):
 def pr_report1(request, sort_by=''):
     # return HttpResponse("PR Report 1")
     if sort_by == 'count':
-        listing = Track.objects.grouped_by_feed('-count')
+        listing = Track.objects.grouped_by_feed('1 DESC')
     else:
-        listing = Track.objects.grouped_by_feed('substring(guid,52)')
-
+        listing = Track.objects.grouped_by_feed('2 ASC')
 
     return render_to_response('stats/reports/pr1.html',{'listing':listing})
+
+
 
 def pr_report2(request, partial_guid):
     # return HttpResponse("PR Report 2 for '%s'." % partial_guid)
@@ -33,12 +34,13 @@ def pr_report2(request, partial_guid):
     summary['total'] = 0
     summary['max']   = 0
     for row in listing:
-        summary['total'] = summary.get('total') + row.count
-        if row.count > summary.get('max'): summary['max'] = row.count
+        summary['total'] += row.count
+        if row.count > summary.get('max'): 
+            summary['max'] = row.count
     summary['avg'] = summary.get('total') // summary.get('count')
-  
 
     return render_to_response('stats/reports/pr2.html',{'listing':listing, 'ref':partial_guid, 'summary':summary})
+
 
 
 def pr_report3(request, guid):
