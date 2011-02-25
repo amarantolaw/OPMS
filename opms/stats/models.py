@@ -63,7 +63,7 @@ class TrackManager(models.Manager):
         cursor = connection.cursor()
 
         cursor.execute('''
-            SELECT id, sum(count) AS count, week_ending, path, handle, guid 
+            SELECT min(id), sum(count) AS count, max(week_ending), max(path), max(handle), min(guid) 
             FROM stats_track
             GROUP BY substring(guid,52)
             ORDER BY %s''' % sort_by)
