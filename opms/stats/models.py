@@ -63,7 +63,7 @@ class TrackManager(models.Manager):
         cursor = connection.cursor()
 
         cursor.execute('''
-            SELECT sum(count) AS count, min(guid) 
+            SELECT sum(count) AS count, substring(guid,52) 
             FROM stats_track
             GROUP BY substring(guid,52)
             ORDER BY %s''' % sort_by)
@@ -71,10 +71,7 @@ class TrackManager(models.Manager):
         result_list = []
         for row in cursor.fetchall():
             t = self.model(count=row[0], guid=row[1])
-            if len(row[1]) > 50:
-                t.psudeo_feed = row[1][51:]
-            else:
-                t.psudeo_feed = row[1]
+            t.psudeo_feed = row[1]
             result_list.append(t)
 
         return result_list
