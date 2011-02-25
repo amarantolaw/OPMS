@@ -83,6 +83,7 @@ class Command(LabelCommand):
         
         self.cache_log_entry_size = int(options.get('cache_size', 100))
         if options.get('single_import', False) != False:
+            print "Processing file with parallel import safties disabled."
             self.single_import = True
         
         
@@ -398,6 +399,10 @@ class Command(LabelCommand):
         
         # Couldn't find it in the list, check the database incase another process has added it
         try:
+            if self.single_import:
+                # Shortcut if parallel import disabled
+                raise Rdns.DoesNotExist
+                
             rdns = Rdns.objects.get(ip_address = rdns.ip_address)
         except Rdns.DoesNotExist:
             # Go get the location for this address
@@ -464,6 +469,10 @@ class Command(LabelCommand):
         
         # Couldn't find it in the list, check the database incase another process has added it
         try:
+            if self.single_import:
+                # Shortcut if parallel import disabled
+                raise FileRequest.DoesNotExist
+                
             fr = FileRequest.objects.get(method = fr.method, uri_string = fr.uri_string,
                 argument_string = fr.argument_string, protocol = fr.protocol)
         except FileRequest.DoesNotExist:
@@ -492,6 +501,10 @@ class Command(LabelCommand):
                 
         # Couldn't find it in the list, check the database incase another process has added it
         try:
+            if self.single_import:
+                # Shortcut if parallel import disabled
+                raise Referer.DoesNotExist
+                
             ref = Referer.objects.get(full_string=ref.full_string)
         except Referer.DoesNotExist:
             ref.save()
@@ -521,6 +534,10 @@ class Command(LabelCommand):
                 
         # Couldn't find it in the list, check the database incase another process has added it
         try:
+            if self.single_import:
+                # Shortcut if parallel import disabled
+                raise UserAgent.DoesNotExist
+            
             user_agent = UserAgent.objects.get(full_string=user_agent.full_string)
         except UserAgent.DoesNotExist:
             # Parse the string to extract the easy bits
@@ -590,6 +607,10 @@ class Command(LabelCommand):
 
         # Couldn't find it in the list, check the database incase another process has added it
         try:
+            if self.single_import:
+                # Shortcut if parallel import disabled
+                raise Server.DoesNotExist
+            
             server = Server.objects.get(name=server.name, ip_address=server.ip_address, port=server.port)
         except Server.DoesNotExist:
             #Not there, so write to database and to cache
