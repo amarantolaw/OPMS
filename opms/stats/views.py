@@ -18,9 +18,9 @@ def summary_index(request):
 def pr_report1(request, sort_by=''):
     # return HttpResponse("PR Report 1")
     if sort_by == 'count':
-        listing = Track.objects.grouped_by_feed('-count')
+        listing = Track.objects.grouped_by_feed('1 DESC')
     else:
-        listing = Track.objects.grouped_by_feed('substring(guid,52)')
+        listing = Track.objects.grouped_by_feed('2 ASC')
 
 
     return render_to_response('stats/reports/pr1.html',{'listing':listing})

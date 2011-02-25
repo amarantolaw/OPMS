@@ -63,18 +63,18 @@ class TrackManager(models.Manager):
         cursor = connection.cursor()
 
         cursor.execute('''
-            SELECT min(id), sum(count) AS count, max(week_ending), max(path), max(handle), min(guid) 
+            SELECT sum(count) AS count, min(guid) 
             FROM stats_track
             GROUP BY substring(guid,52)
             ORDER BY %s''' % sort_by)
 
         result_list = []
         for row in cursor.fetchall():
-            t = self.model(id=row[0], count=row[1], week_ending=row[2], path=row[3], handle=row[4], guid=row[5])
-            if len(row[5]) > 50:
-                t.psudeo_feed = row[5][51:]
+            t = self.model(count=row[0], guid=row[1])
+            if len(row[1]) > 50:
+                t.psudeo_feed = row[1][51:]
             else:
-                t.psudeo_feed = row[5]
+                t.psudeo_feed = row[1]
             result_list.append(t)
 
         return result_list
