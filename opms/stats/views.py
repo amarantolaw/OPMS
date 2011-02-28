@@ -45,6 +45,7 @@ def pr_report2(request, partial_guid):
 
 def pr_report3(request, guid):
     # return HttpResponse("PR Report 3 for '%s'." % guid)
+    guid = 'http://' + guid[6:]
     listing = Track.objects.all().filter(guid=guid).order_by('week_ending')
     return render_to_response('stats/reports/pr3.html',{'listing':listing, 'ref':guid})
 

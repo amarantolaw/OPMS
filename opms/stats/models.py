@@ -76,6 +76,8 @@ class TrackManager(models.Manager):
 
         return result_list
 
+
+
     def items_by_feed(self, partial_guid):
         from django.db import connection, transaction
         cursor = connection.cursor()
@@ -176,6 +178,7 @@ class OS(models.Model):
     def __unicode__(self):
         return self.name
 
+
 # Lookup table for User Agents and versions
 class UA(models.Model):
     company = models.CharField("user agent company", max_length=200)
@@ -184,6 +187,7 @@ class UA(models.Model):
     
     def __unicode__(self):
         return self.name
+
 
 # Lookup table for User Agent entries
 class UserAgent(models.Model):
@@ -195,6 +199,7 @@ class UserAgent(models.Model):
     def __unicode__(self):
         return self.full_string
 
+
 # Lookup table for Referer entries
 # awk -F\" '{print $4}' access.log-20110201 | sort | uniq -c | sort -fr > referer2.txt
 class Referer(models.Model):
@@ -202,6 +207,7 @@ class Referer(models.Model):
 
     def __unicode__(self):
         return self.full_string
+
 
 # Lookup table for request string entries
 class FileRequest(models.Model):
@@ -232,6 +238,7 @@ class FileRequest(models.Model):
     def __unicode__(self):
         return self.uri_string
 
+
 # Because we're specically interested in doing tracking activities, we can duplicate and extract
 # some key value pairs related to tracking terms.
 # e.g. CAMEFROM=value; lfi=value; DESTINATION=value;
@@ -248,7 +255,7 @@ class Tracking(models.Model):
 
     def __unicode__(self):
         return '%s=%s' % (self.key_string,self.value_string)
-    
+
     
 # Replace three repetative fields with one id
 class Server(models.Model):
