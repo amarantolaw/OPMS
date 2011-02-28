@@ -1,7 +1,5 @@
 from django.db import models
 
-# Create your models here.
-
 # Summary record based on a column of data from the Summary tab
 class Summary(models.Model):
     # Date from the column - typically from yyyy-mm-dd format
@@ -55,6 +53,8 @@ class Summary(models.Model):
     
     def __unicode__(self):
         return self.week_ending
+
+
 
 # Track record based on Aug 2010 Excel "yyyy-mm-dd Tracks" datastructure. Each record is a line in the sheet
 class TrackManager(models.Manager):
@@ -123,6 +123,7 @@ class Browse(models.Model):
         return '%s:%s' % (self.week_ending,self.guid)
 
 
+
 # Preview record based on Aug 2010 Excel "yyyy-mm-dd Previews" datastructure. Each record is a line in the sheet
 class Preview(models.Model):
     week_ending = models.DateField("week ending")
@@ -150,7 +151,8 @@ class Rdns(models.Model):
     
     def __unicode__(self):
         return self.resolved_name
-    
+
+
 # Quite possible to have multiple log file sources, use this as a lookup table
 class LogFile(models.Model):
     SERVICE_NAME_CHOICES = (
@@ -228,7 +230,6 @@ class FileRequest(models.Model):
         (u'jpg', u'Image JPG'),
         (u'', u'Unknown'),
     )
-    #full_string = models.TextField("first line of request")
     method = models.CharField("request method", max_length=5, choices=METHOD_CHOICES)
     uri_string = models.TextField("uri path in request string")
     argument_string = models.TextField("arguments in request string")
@@ -316,16 +317,11 @@ class LogEntry(models.Model):
     logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
     time_of_request = models.DateTimeField("time of request", db_index=True)
     server = models.ForeignKey(Server, verbose_name="server")
-    #server_name = models.CharField("server dns name", max_length=200)
-    #server_ip = models.IPAddressField("server ip address")
-    #server_port = models.IntegerField("server port number")
-    #REDUNDANT, use remote_rdns.ip_address - remote_ip = models.IPAddressField("remote ip address")
     remote_logname = models.CharField("remote log name", max_length=200,)
     remote_user = models.CharField("remote user name", max_length=200,)
     remote_rdns = models.ForeignKey(Rdns, verbose_name="remote reverse dns name")
     status_code = models.IntegerField("status code")
     size_of_response = models.BigIntegerField("size of response in bytes")
-    # The following three fields need expanding into separate tables and parsing for duplicates and indexing purposes
     file_request = models.ForeignKey(FileRequest, verbose_name="first line of request string")
     referer = models.ForeignKey(Referer, verbose_name="referer string")
     user_agent = models.ForeignKey(UserAgent, verbose_name="user agent string")
