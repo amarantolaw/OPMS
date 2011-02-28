@@ -212,6 +212,9 @@ class Command(LabelCommand):
                     "Duplicates: " + str(self.import_stats.get('duplicatecount')) + ". " +\
                     "Rate: " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec. " +\
                     "Est. finish in " + efstring
+                    
+                # Write the error cache to disk
+                self._error_log_save()
 
             # Update duplicate line string for next pass
             previous_line = line
