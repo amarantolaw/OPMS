@@ -1,3 +1,8 @@
+{% extends "base.html" %}
+
+{% block title %}Summary Data from Apple iTU Reporting{% endblock %}
+
+{% block content %}
 <h1>Summary Data</h1>
 {% if latest_summary_data %}
 <h2>User Actions</h2>
@@ -118,3 +123,4 @@
     <p>No summary data to display here</p>
 
 {% endif %}
+{% endblock %}
