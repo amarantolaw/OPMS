@@ -7,7 +7,8 @@ from django.core.management.base import LabelCommand, CommandError
 
 from opms.stats.models import *
 from xlrd import open_workbook
-import time, datetime, sys
+from datetime import time, datetime
+import sys
         
 class Command(LabelCommand):
     args = '<spreadsheet.xls>'
@@ -187,7 +188,7 @@ class Command(LabelCommand):
             
             # Check the cache
             for item in cache:
-                if item.week_ending == time.strptime(report.week_ending,'%Y-%m-%d') and item.handle == report.handle:
+                if item.week_ending == datetime.strptime(report.week_ending,'%Y-%m-%d').date() and item.handle == report.handle:
                     self._debug('Match FOUND')
                     self._errorlog("Track row "+str(row_id)+" has already been imported")
                     created = False
