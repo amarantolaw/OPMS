@@ -186,7 +186,7 @@ class Command(LabelCommand):
             
             # Check the cache
             for item in cache:
-                if item.week_ending == report.week_ending and item.week_ending == report.week_ending:
+                if item.week_ending == report.week_ending and item.handle == report.handle:
                     self._errorlog("Track row "+str(row_id)+" has already been imported")
                     created = False
 
@@ -219,7 +219,7 @@ class Command(LabelCommand):
 
             # Check the cache
             for item in cache:
-                if item.week_ending == report.week_ending and item.week_ending == report.week_ending and item.count == report.count:
+                if item.week_ending == report.week_ending and item.handle == report.handle and item.count == report.count:
                     self._errorlog("Browse row "+str(row_id)+" has already been imported")
                     created = False
 
@@ -258,7 +258,7 @@ class Command(LabelCommand):
 
             # Check the cache
             for item in cache:
-                if item.week_ending == report.week_ending and item.week_ending == report.week_ending:
+                if item.week_ending == report.week_ending and item.handle == report.handle:
                     self._errorlog("Preview row "+str(row_id)+" has already been imported")
                     created = False
 
