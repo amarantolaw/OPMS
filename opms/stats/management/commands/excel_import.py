@@ -261,6 +261,7 @@ class Command(LabelCommand):
 
             # Check the cache
             for item in cache:
+                print "item:" + str(item.handle) + ". report:" + str(report.handle) + " Match=" + str(item.handle == report.handle)
                 if item.handle == report.handle:
                     self._errorlog("Preview row "+str(row_id)+" has already been imported")
                     created = False
