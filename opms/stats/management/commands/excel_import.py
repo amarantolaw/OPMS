@@ -20,7 +20,7 @@ class Command(LabelCommand):
     
     def __init__(self):
         # Toggle debug statements on/off
-        self.debug = False
+        self.debug = True
         # Record basic information about the import process for reporting
         self.import_stats = {}
         # Error logging file and string cache
@@ -208,7 +208,19 @@ class Command(LabelCommand):
                 print "Data for week ending",obj.week_ending,", has been added to the database"
                 obj.save()
             else:
-                print "Data for week ending",obj.week_ending,", was found in the database. Not updated."
+                if self.merge:
+                    # take the values in report[] and merge with the values in obj
+                    for k,v in report.items():
+                        try:
+                            merged_value = int(getattr(obj, k)) + int(v)
+                            self._debug("obj-v:" + str(int(getattr(obj, k))) + ". new-v:" + str(int(v)) + ". Merged result:" + str(merged_value)
+                            setattr(obj, k, merged_value)
+                        except TypeError:
+                            pass # Because all we're testing for is whether these are two integers to sum
+                    print "Data for week ending",obj.week_ending,", has been merged into the database"
+                    obj.save()
+                else:
+                    print "Data for week ending",obj.week_ending,", was found in the database. Not updated."
         return None
 
 
