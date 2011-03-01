@@ -1,6 +1,6 @@
 # Import script for Apple iTunes U supplied Excel spreadsheets
 # Author: Carl Marshall
-# Last Edited: 4-2-2011
+# Last Edited: 1-3-2011
 
 from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
@@ -12,6 +12,10 @@ import time, datetime, sys
 class Command(LabelCommand):
     args = '<spreadsheet.xls>'
     help = 'Imports the contents of the specified spreadsheet into the database'
+    option_list = LabelCommand.option_list + (
+        make_option('--merge', action='store', dest='merge',
+            default=False, help='Use this option to add this data to exisiting data, thus summing counts for records.'),
+    )
     
     def __init__(self):
         # Toggle debug statements on/off
@@ -183,46 +187,48 @@ class Command(LabelCommand):
             # Check the cache
             for item in cache:
                 if item.week_ending == report.week_ending and item.week_ending == report.week_ending:
-                    self._errorlog("Track row"+str(row_id)+"has already been imported")
+                    self._errorlog("Track row "+str(row_id)+" has already been imported")
                     created = False
 
-            if not created:
+            if created:
                 count += 1
                 report.save()
                 cache.append(report)
             
-        print "Imported TRACK data for " + str(report.week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
+        print "Imported TRACK data for " + str(week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
         return None
 
 
 
     def _parse_browses(self, sheet, week_ending):
         # print "Beginning import for BROWSE:", sheet_name
+        cache = list(Browse.objects.filter(week_ending=week_ending))
         # Reset variables
-        report = {}
-        report['week_ending'] = week_ending
         count = 0
+        
+        report = Browse()
+        report.week_ending = time.strptime(week_ending,'%Y-%m-%d')
 
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
-            report['path'] = sheet.cell(row_id,0).value
-            report['count'] = sheet.cell(row_id,1).value
-            report['handle'] = sheet.cell(row_id,2).value
-            report['guid'] = sheet.cell(row_id,3).value
+            created = True
+            report.path = sheet.cell(row_id,0).value
+            report.count = int(sheet.cell(row_id,1).value)
+            report.handle = long(sheet.cell(row_id,2).value)
+            report.guid = sheet.cell(row_id,3).value
 
-            # Now test to see if this has been imported already. Note, use date and handle beucase Guid isn't present for tracks thathave been deleted, thus they show up as errors, even though there is valid data.
-            obj, created = Browse.objects.get_or_create(
-                week_ending=report.get('week_ending'), 
-                handle=report.get('handle'),
-                count=report.get('count'), # Because there are so many duplicates in Browse, add the data, we'll sort it later
-                defaults=report)
+            # Check the cache
+            for item in cache:
+                if item.week_ending == report.week_ending and item.week_ending == report.week_ending and item.count == report.count:
+                    self._errorlog("Browse row "+str(row_id)+" has already been imported")
+                    created = False
 
             if created:
                 count += 1
-                obj.save()
-            else:
-                self._errorlog("Browse row"+ str(row_id) + "has already been imported")
-        print "Imported Browse data for", report.get('week_ending'), "with", count, "out of", sheet.nrows-1, "added."
+                report.save()
+                cache.append(report)
+                
+        print "Imported BROWSE data for " + str(week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
         return None
 
 
@@ -235,27 +241,33 @@ class Command(LabelCommand):
 
     def _parse_previews(self, sheet, week_ending):
         # print "Beginning import for PREVIEW:", sheet_name
+        cache = list(Browse.objects.filter(week_ending=week_ending))
         # Reset variables
-        report = {}
-        report['week_ending'] = week_ending
         count = 0
-                                           
+        
+        report = Preview()
+        report.week_ending = time.strptime(week_ending,'%Y-%m-%d')
+
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
-            report['path'] = sheet.cell(row_id,0).value
-            report['count'] = sheet.cell(row_id,1).value
-            report['handle'] = sheet.cell(row_id,2).value
-            report['guid'] = sheet.cell(row_id,3).value
+            created = True
+            report.path = sheet.cell(row_id,0).value
+            report.count = int(sheet.cell(row_id,1).value)
+            report.handle = long(sheet.cell(row_id,2).value)
+            report.guid = sheet.cell(row_id,3).value
 
-            # Now test to see if this has been imported already. Note, use date and handle beucase Guid isn't present for tracks thathave been deleted, thus they show up as errors, even though there is valid data.
-            obj, created = Preview.objects.get_or_create(week_ending=report.get('week_ending'), handle=report.get('handle'), defaults=report)
+            # Check the cache
+            for item in cache:
+                if item.week_ending == report.week_ending and item.week_ending == report.week_ending:
+                    self._errorlog("Preview row "+str(row_id)+" has already been imported")
+                    created = False
 
             if created:
                 count += 1
-                obj.save()
-            else:
-                self._errorlog("Preview row" + str(row_id) + "has already been imported")
-        print "Imported Preview data for", report.get('week_ending'), "with", count, "out of", sheet.nrows-1, "added."
+                report.save()
+                cache.append(report)
+                
+        print "Imported PREVIEW data for " + str(week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
         return None
 
 
