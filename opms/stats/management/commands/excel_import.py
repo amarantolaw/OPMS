@@ -223,7 +223,7 @@ class Command(LabelCommand):
 
 
     def _parse_edits(self, sheet, week_ending):
-        print "Found EDITS:",sheet_name,". Skipping edit import."
+        print "Found 'EDITS " + str(week_ending) + "'. Skipping edit import."
         return None
 
 
@@ -256,7 +256,7 @@ class Command(LabelCommand):
 
 
     def _parse_users(self, sheet, week_ending):
-        print "Found USERS:", sheet_name, ". Skipping user import."
+        print "Found 'USERS " + str(week_ending) + "'. Skipping user import."
         return None
 
 
