@@ -20,7 +20,7 @@ class Command(LabelCommand):
     
     def __init__(self):
         # Toggle debug statements on/off
-        self.debug = True
+        self.debug = False
         # Record basic information about the import process for reporting
         self.import_stats = {}
         # Error logging file and string cache
@@ -171,7 +171,6 @@ class Command(LabelCommand):
     def _parse_tracks(self, sheet, week_ending):
         # print "Beginning import for TRACKS:", sheet_name
         cache = list(Track.objects.filter(week_ending=week_ending))
-        self._debug('Track cache len='+str(len(cache)))
         # Reset variables
         count = 0
 
@@ -184,22 +183,18 @@ class Command(LabelCommand):
             report.count = int(sheet.cell(row_id,1).value)
             report.handle = long(sheet.cell(row_id,2).value)
             report.guid = sheet.cell(row_id,3).value
-            self._debug("Processing line " + str(row_id) + ". report=" + str(report))
             
             # Check the cache
             for item in cache:
                 if item.week_ending == datetime.strptime(report.week_ending,'%Y-%m-%d').date() and item.handle == report.handle:
-                    self._debug('Match FOUND')
                     self._errorlog("Track row "+str(row_id)+" has already been imported")
                     created = False
                     continue
 
-            self._debug('Finished scanning cache. Created=' + str(created))
             if created:
                 count += 1
                 report.save()
                 cache.insert(0,report)
-                self._debug('Report saved and added to cache')
             
         print "Imported TRACK data for " + str(week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
         return None
@@ -225,7 +220,7 @@ class Command(LabelCommand):
 
             # Check the cache
             for item in cache:
-                if item.week_ending == report.week_ending and item.handle == report.handle and item.count == report.count:
+                if item.week_ending == datetime.strptime(report.week_ending,'%Y-%m-%d').date() and item.handle == report.handle and item.count == report.count:
                     self._errorlog("Browse row "+str(row_id)+" has already been imported")
                     created = False
                     continue
@@ -265,7 +260,7 @@ class Command(LabelCommand):
 
             # Check the cache
             for item in cache:
-                if item.week_ending == report.week_ending and item.handle == report.handle:
+                if item.week_ending == datetime.strptime(report.week_ending,'%Y-%m-%d').date() and item.handle == report.handle:
                     self._errorlog("Preview row "+str(row_id)+" has already been imported")
                     created = False
                     continue
