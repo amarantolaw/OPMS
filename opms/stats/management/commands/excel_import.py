@@ -104,7 +104,7 @@ class Command(LabelCommand):
             
         print "\nImport finished at " + str(datetime.datetime.utcnow())
         self._errorlog_stop()
-    return None
+        return None
 
 
     def _parse_summary(self, summary):
