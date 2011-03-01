@@ -26,6 +26,8 @@ class Command(LabelCommand):
         # Error logging file and string cache
         self.error_log = ""
         self.error_cache = ""
+        # To allow for report files to overlap, we have a merge option that will add to the counts
+        self.merge = False
         # Define mapping between spreadsheet and model
         self.modelmapping = {
             # Spreadsheet -> Model
@@ -55,8 +57,38 @@ class Command(LabelCommand):
             'iTunes-iPod/3.1/?':'cs_itunes_ipod_3_1',
             'iTunes-iPod/4.0/?':'cs_itunes_ipod_4_0',
             'iTunes-iPod/4.1/?':'cs_itunes_ipod_4_1',
-            'iTunes/10.0/Macintosh':'cs_itunes_10_0_macintosh',
-            'iTunes/10.0/Windows':'cs_itunes_10_0_windows',
+            'iTunes/4.4/Macintosh':'cs_itunes_4_4_macintosh',
+            'iTunes/4.4/Windows':'cs_itunes_4_4_windows',
+            'iTunes/4.5/Macintosh':'cs_itunes_4_5_macintosh',
+            'iTunes/4.5/Windows':'cs_itunes_4_5_windows',
+            'iTunes/4.6/Macintosh':'cs_itunes_4_6_macintosh',
+            'iTunes/4.6/Windows':'cs_itunes_4_6_windows',
+            'iTunes/4.7/Macintosh':'cs_itunes_4_7_macintosh',
+            'iTunes/4.7/Windows':'cs_itunes_4_7_windows',
+            'iTunes/4.8/Macintosh':'cs_itunes_4_8_macintosh',
+            'iTunes/4.8/Windows':'cs_itunes_4_8_windows',
+            'iTunes/4.9/Macintosh':'cs_itunes_4_9_macintosh',
+            'iTunes/4.9/Windows':'cs_itunes_4_9_windows',
+            'iTunes/5.0/Macintosh':'cs_itunes_5_0_macintosh',
+            'iTunes/5.0/Windows':'cs_itunes_5_0_windows',
+            'iTunes/6.0/Macintosh':'cs_itunes_6_0_macintosh',
+            'iTunes/6.0/Windows':'cs_itunes_6_0_windows',
+            'iTunes/7.0/Macintosh':'cs_itunes_7_0_macintosh',
+            'iTunes/7.0/Windows':'cs_itunes_7_0_windows',
+            'iTunes/7.1/Macintosh':'cs_itunes_7_1_macintosh',
+            'iTunes/7.1/Windows':'cs_itunes_7_1_windows',
+            'iTunes/7.2/Macintosh':'cs_itunes_7_2_macintosh',
+            'iTunes/7.2/Windows':'cs_itunes_7_2_windows',
+            'iTunes/7.3/Macintosh':'cs_itunes_7_3_macintosh',
+            'iTunes/7.3/Windows':'cs_itunes_7_3_windows',
+            'iTunes/7.4/Macintosh':'cs_itunes_7_4_macintosh',
+            'iTunes/7.4/Windows':'cs_itunes_7_4_windows',
+            'iTunes/7.5/Macintosh':'cs_itunes_7_5_macintosh',
+            'iTunes/7.5/Windows':'cs_itunes_7_5_windows',
+            'iTunes/7.6/Macintosh':'cs_itunes_7_6_macintosh',
+            'iTunes/7.6/Windows':'cs_itunes_7_6_windows',
+            'iTunes/7.7/Macintosh':'cs_itunes_7_7_macintosh',
+            'iTunes/7.7/Windows':'cs_itunes_7_7_windows',
             'iTunes/8.0/Macintosh':'cs_itunes_8_0_macintosh',
             'iTunes/8.0/Windows':'cs_itunes_8_0_windows',
             'iTunes/8.1/Macintosh':'cs_itunes_8_1_macintosh',
@@ -68,7 +100,9 @@ class Command(LabelCommand):
             'iTunes/9.1/Macintosh':'cs_itunes_9_1_macintosh',
             'iTunes/9.1/Windows':'cs_itunes_9_1_windows',
             'iTunes/9.2/Macintosh':'cs_itunes_9_2_macintosh',
-            'iTunes/9.2/Windows':'cs_itunes_9_2_windows'
+            'iTunes/9.2/Windows':'cs_itunes_9_2_windows',
+            'iTunes/10.0/Macintosh':'cs_itunes_10_0_macintosh',
+            'iTunes/10.0/Windows':'cs_itunes_10_0_windows',
         }
         return None
 
@@ -78,7 +112,11 @@ class Command(LabelCommand):
         
         # Create an error log per import file
         self._errorlog_start(filename + '_import-error.log')
-        
+
+        if options.get('merge', False) != False:
+            print "WARNING: Processing file to combine with existing records."
+            self.merge = True
+
         # Some basic checking
         if filename.endswith('.xls') == False:
            raise CommandError("This is not a valid Excel 1998-2002 file. Must end in .xls\n\n")        
@@ -144,14 +182,20 @@ class Command(LabelCommand):
                                 else:
                                     header = 'cs_not_listed'
                             else:
-                                self._errorlog("Key not recognised in col B - " + str(summary.cell(row_id,heading_col1).value))
+                                err_str = "Key not recognised in col B, row " + str(row_id) + " - " + str(summary.cell(row_id,heading_col1).value)
+                                self._errorlog(err_str)
+                                raise CommandError(err_str)
                         elif summary.cell(row_id,heading_col2).value != '':
                             if summary.cell(row_id,heading_col2).value in self.modelmapping:
                                 header = self.modelmapping.get(summary.cell(row_id,heading_col2).value)
                             else:
-                                self._errorlog("Key not recognised in col A - " + str(summary.cell(row_id,heading_col2).value))
+                                err_str = "Key not recognised in col A, row " + str(row_id) + " - " + str(summary.cell(row_id,heading_col2).value)
+                                self._errorlog(err_str)
+                                raise CommandError(err_str)
                         else:
-                            header = 'ERROR: UNKNOWN HEADER'
+                            err_str = "UNKNOWN HEADER: Missing key row " + str(row_id)
+                            self._errorlog(err_str)
+                            raise CommandError(err_str)
 
                         # Now store the sheet value in the dictionary against the model fieldname
                         report[header] = col_value
