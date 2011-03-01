@@ -132,15 +132,32 @@ class TrackManager(models.Manager):
 
 class Track(models.Model):
     week_ending = models.DateField("week ending")
-    path = models.TextField("path")
+    path = models.ForeignKey(TrackPath, verbose_name="path")
     count = models.IntegerField("count")
-    handle = models.BigIntegerField("handle")
+    handle = models.ForeignKey(TrackHandle, verbose_name="handle")
     guid = models.CharField("GUID", max_length=255,blank=True, null=True)
 
     objects = TrackManager()
     
     def __unicode__(self):
         return '%s:%s' % (self.week_ending,self.guid)
+
+# Track Paths have changed as the system has evolved and migrated
+class TrackPath(models.Model):
+    path = models.TextField("path")
+    updated_week_ending = models.DateField("week ending")
+    
+    def __unicode__(self):
+        return '%s:%s' % (self.updated_week_ending,self.path)
+
+# Track Handles change from time to time due to tweaks in the system, but ideally we want to keep them related
+class TrackHandle(models.Model):
+    handle = models.BigIntegerField("handle")
+    updated_week_ending = models.DateField("week ending")
+    
+    def __unicode__(self):
+        return '%s:%s' % (self.updated_week_ending,self.handle)
+
 
 
 
@@ -160,13 +177,29 @@ class Browse(models.Model):
 # Preview record based on Aug 2010 Excel "yyyy-mm-dd Previews" datastructure. Each record is a line in the sheet
 class Preview(models.Model):
     week_ending = models.DateField("week ending")
-    path = models.TextField("path")
+    path = models.ForeignKey(PreviewPath, verbose_name="path")
     count = models.IntegerField("count")
-    handle = models.BigIntegerField("handle")
+    handle = models.ForeignKey(PreviewHandle, verbose_name="handle")
     guid = models.CharField("GUID", max_length=255,blank=True, null=True)
     
     def __unicode__(self):
         return '%s:%s' % (self.week_ending,self.guid)
+
+# Preview Paths have changed as the system has evolved and migrated
+class PreviewPath(models.Model):
+    path = models.TextField("path")
+    updated_week_ending = models.DateField("week ending")
+    
+    def __unicode__(self):
+        return '%s:%s' % (self.updated_week_ending,self.path)
+
+# Preview Handles change from time to time due to tweaks in the system, but ideally we want to keep them related
+class PreviewHandle(models.Model):
+    handle = models.BigIntegerField("handle")
+    updated_week_ending = models.DateField("week ending")
+    
+    def __unicode__(self):
+        return '%s:%s' % (self.updated_week_ending,self.handle)
 
 
 ######
