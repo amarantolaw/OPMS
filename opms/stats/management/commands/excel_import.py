@@ -174,7 +174,7 @@ class Command(LabelCommand):
         count = 0
         
         report = Track()
-        report.week_ending = time.strptime(week_ending,'%Y-%m-%d')
+        report.week_ending = week_ending #Not: time.strptime(week_ending,'%Y-%m-%d')
 
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
@@ -207,7 +207,7 @@ class Command(LabelCommand):
         count = 0
         
         report = Browse()
-        report.week_ending = time.strptime(week_ending,'%Y-%m-%d')
+        report.week_ending = week_ending #Not: time.strptime(week_ending,'%Y-%m-%d')
 
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
@@ -246,7 +246,7 @@ class Command(LabelCommand):
         count = 0
         
         report = Preview()
-        report.week_ending = time.strptime(week_ending,'%Y-%m-%d')
+        report.week_ending = week_ending #Not: time.strptime(week_ending,'%Y-%m-%d')
 
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
