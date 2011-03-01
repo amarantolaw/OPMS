@@ -170,7 +170,7 @@ class Command(LabelCommand):
 
     def _parse_tracks(self, sheet, week_ending):
         # print "Beginning import for TRACKS:", sheet_name
-        cache = list(Track.objects.filter(week_ending=week_ending)).order_by('handle')
+        cache = list(Track.objects.filter(week_ending=week_ending).order_by('handle'))
         # Reset variables
         count = 0
 
@@ -206,7 +206,7 @@ class Command(LabelCommand):
 
     def _parse_browses(self, sheet, week_ending):
         # print "Beginning import for BROWSE:", sheet_name
-        cache = list(Browse.objects.filter(week_ending=week_ending)).order_by('handle')
+        cache = list(Browse.objects.filter(week_ending=week_ending).order_by('handle'))
         # Reset variables
         count = 0
         
@@ -246,7 +246,7 @@ class Command(LabelCommand):
 
     def _parse_previews(self, sheet, week_ending):
         # print "Beginning import for PREVIEW:", sheet_name
-        cache = list(Browse.objects.filter(week_ending=week_ending)).order_by('handle')
+        cache = list(Browse.objects.filter(week_ending=week_ending).order_by('handle'))
         # Reset variables
         count = 0
         
