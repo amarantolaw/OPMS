@@ -284,8 +284,8 @@ class Command(LabelCommand):
                 int(time_ss[0:2]) # Cut off the +0000
                 ),
             'server': server,
-            'remote_logname': data.get('%l'),
-            'remote_user': data.get('%u'),
+            'remote_logname': str(data.get('%l'))[:200],
+            'remote_user': str(data.get('%u'))[:200],
             'remote_rdns': remote_rdns,
             'status_code': status_code,
             'size_of_response': size_of_response,
@@ -447,8 +447,8 @@ class Command(LabelCommand):
         if fr.method != "GET" and fr.method != "POST":
             return None
         
-        fr.uri_string = fs[0]
-        fr.protocol = ts[2]
+        fr.uri_string = str(fs[0])
+        fr.protocol = str(ts[2])[:20]
         
         # Querystring is optional, so test for it first.
         if len(fs)==2:
@@ -548,13 +548,13 @@ class Command(LabelCommand):
                 uas_dict = self.uasp.parse(user_agent.full_string)
     
                 #Set the type string
-                user_agent.type = uas_dict.get('typ')
+                user_agent.type = uas_dict.get('typ')[:50]
                 
                 # Deal with the OS record
                 os = {}
-                os['company'] = uas_dict.get('os_company')
-                os['family'] = uas_dict.get('os_family')
-                os['name'] = uas_dict.get('os_name')
+                os['company'] = uas_dict.get('os_company')[:200]
+                os['family'] = uas_dict.get('os_family')[:100]
+                os['name'] = uas_dict.get('os_name')[:200]
                 
                 # Now get or create an OS record
                 user_agent.os, created = OS.objects.get_or_create(
@@ -568,9 +568,9 @@ class Command(LabelCommand):
                 
                 # Deal with the UA record
                 ua = {}
-                ua['company'] = uas_dict.get('ua_company')
-                ua['family'] = uas_dict.get('ua_family')
-                ua['name'] = uas_dict.get('ua_name')
+                ua['company'] = uas_dict.get('ua_company')[:200]
+                ua['family'] = uas_dict.get('ua_family')[:100]
+                ua['name'] = uas_dict.get('ua_name')[:200]
                 
                 # Now get or create an UA record
                 user_agent.ua, created = UA.objects.get_or_create(
@@ -598,7 +598,7 @@ class Command(LabelCommand):
     def _server(self, server_name, server_ip, server_port):
         "Store the server information"
         server = Server()
-        server.name = server_name
+        server.name = server_name[:200]
         server.ip_address = server_ip
         server.port = int(server_port)
 
