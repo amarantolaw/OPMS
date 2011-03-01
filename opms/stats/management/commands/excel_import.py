@@ -19,7 +19,7 @@ class Command(LabelCommand):
     
     def __init__(self):
         # Toggle debug statements on/off
-        self.debug = False
+        self.debug = True
         # Record basic information about the import process for reporting
         self.import_stats = {}
         # Error logging file and string cache
@@ -170,9 +170,9 @@ class Command(LabelCommand):
     def _parse_tracks(self, sheet, week_ending):
         # print "Beginning import for TRACKS:", sheet_name
         cache = list(Track.objects.filter(week_ending=week_ending))
+        self._debug('Track cache len='+str(len(cache)))
         # Reset variables
         count = 0
-        
 
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
@@ -183,18 +183,23 @@ class Command(LabelCommand):
             report.count = int(sheet.cell(row_id,1).value)
             report.handle = long(sheet.cell(row_id,2).value)
             report.guid = sheet.cell(row_id,3).value
+            self._debug("Processing line " + str(row_id) + ". report=" + str(report))
             
             # Check the cache
             for item in cache:
+                self._debug('Scanning cache. Created=' + str(created))
                 if item.week_ending == time.strptime(report.week_ending,'%Y-%m-%d') and item.handle == report.handle:
+                    self._debug('Match FOUND')
                     self._errorlog("Track row "+str(row_id)+" has already been imported")
                     created = False
                     continue
 
+            self._debug('Finished scanning cache. Created=' + str(created))
             if created:
                 count += 1
                 report.save()
                 cache.insert(0,report)
+                self._debug('Report saved and added to cache')
             
         print "Imported TRACK data for " + str(week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
         return None
