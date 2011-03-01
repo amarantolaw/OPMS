@@ -244,7 +244,7 @@ class Command(LabelCommand):
 
     def _parse_previews(self, sheet, week_ending):
         # print "Beginning import for PREVIEW:", sheet_name
-        cache = list(Browse.objects.filter(week_ending=week_ending).order_by('handle'))
+        cache = list(Preview.objects.filter(week_ending=week_ending).order_by('handle'))
         # Reset variables
         count = 0
         
@@ -268,11 +268,9 @@ class Command(LabelCommand):
                     continue
 
             if created:
-                print "report:" + str(report.handle) + " created"
                 count += 1
                 report.save()
                 cache.insert(0,report)
-                print "report:" + str(report.handle) + " saved"
                 
         print "Imported PREVIEW data for " + str(week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
         return None
