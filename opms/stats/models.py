@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import date
 
 # Summary record based on a column of data from the Summary tab
 class Summary(models.Model):
@@ -84,7 +85,7 @@ class Summary(models.Model):
     cs_not_listed = models.IntegerField("not listed", blank=True, null=True)
     
     def __unicode__(self):
-        return self.week_ending
+        return str(date.strftime(self.week_ending,"%Y-%m-%d")) + ": Total Downloads=" + str(self.total_track_downloads)
 
 
 
