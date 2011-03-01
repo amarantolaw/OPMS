@@ -213,7 +213,7 @@ class Command(LabelCommand):
                     for k,v in report.items():
                         try:
                             merged_value = int(getattr(obj, k)) + int(v)
-                            self._debug("obj-v:" + str(int(getattr(obj, k))) + ". new-v:" + str(int(v)) + ". Merged result:" + str(merged_value)
+                            self._debug("obj-v:" + str(int(getattr(obj, k))) + ". new-v:" + str(int(v)) + ". Merged result:" + str(merged_value))
                             setattr(obj, k, merged_value)
                         except TypeError:
                             pass # Because all we're testing for is whether these are two integers to sum
