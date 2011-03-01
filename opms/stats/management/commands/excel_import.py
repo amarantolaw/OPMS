@@ -74,7 +74,7 @@ class Command(LabelCommand):
 
 
     def handle_label(self, filename, **options):
-        print "Import started at " + str(datetime.datetime.utcnow()) + "\n"
+        print "Import started at " + str(datetime.utcnow()) + "\n"
         
         # Create an error log per import file
         self._errorlog_start(filename + '_import-error.log')
@@ -107,7 +107,7 @@ class Command(LabelCommand):
             # Write the error cache to disk
             self._error_log_save()
             
-        print "\nImport finished at " + str(datetime.datetime.utcnow())
+        print "\nImport finished at " + str(datetime.utcnow())
         self._errorlog_stop()
         return None
 
@@ -309,7 +309,7 @@ class Command(LabelCommand):
             sys.stderr.write("WARNING: Could not open existing error file. New file being created")
             self.error_log = open(path_to_file,'w')
         
-        self.error_log.write("Log started at " + str(datetime.datetime.utcnow()) + "\n")
+        self.error_log.write("Log started at " + str(datetime.utcnow()) + "\n")
         print "Writing errors to: " + path_to_file
         return None
 
@@ -321,6 +321,6 @@ class Command(LabelCommand):
 
 
     def _errorlog_stop(self):
-        self.error_log.write("Log ended at " + str(datetime.datetime.utcnow()) + "\n")
+        self.error_log.write("Log ended at " + str(datetime.utcnow()) + "\n")
         self.error_log.close()
         return None
