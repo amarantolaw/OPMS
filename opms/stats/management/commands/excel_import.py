@@ -173,12 +173,12 @@ class Command(LabelCommand):
         # Reset variables
         count = 0
         
-        report = Track()
-        report.week_ending = week_ending #Not: time.strptime(week_ending,'%Y-%m-%d')
 
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
             created = True
+            report = Track()
+            report.week_ending = week_ending #Not: time.strptime(week_ending,'%Y-%m-%d')
             report.path = sheet.cell(row_id,0).value
             report.count = int(sheet.cell(row_id,1).value)
             report.handle = long(sheet.cell(row_id,2).value)
@@ -189,11 +189,12 @@ class Command(LabelCommand):
                 if item.week_ending == report.week_ending and item.handle == report.handle:
                     self._errorlog("Track row "+str(row_id)+" has already been imported")
                     created = False
+                    continue
 
             if created:
                 count += 1
                 report.save()
-                cache.append(report)
+                cache.insert(0,report)
             
         print "Imported TRACK data for " + str(week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
         return None
@@ -206,12 +207,12 @@ class Command(LabelCommand):
         # Reset variables
         count = 0
         
-        report = Browse()
-        report.week_ending = week_ending #Not: time.strptime(week_ending,'%Y-%m-%d')
 
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
             created = True
+            report = Browse()
+            report.week_ending = week_ending #Not: time.strptime(week_ending,'%Y-%m-%d')
             report.path = sheet.cell(row_id,0).value
             report.count = int(sheet.cell(row_id,1).value)
             report.handle = long(sheet.cell(row_id,2).value)
@@ -222,11 +223,12 @@ class Command(LabelCommand):
                 if item.week_ending == report.week_ending and item.handle == report.handle and item.count == report.count:
                     self._errorlog("Browse row "+str(row_id)+" has already been imported")
                     created = False
+                    continue
 
             if created:
                 count += 1
                 report.save()
-                cache.append(report)
+                cache.insert(0,report)
                 
         print "Imported BROWSE data for " + str(week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
         return None
@@ -245,12 +247,12 @@ class Command(LabelCommand):
         # Reset variables
         count = 0
         
-        report = Preview()
-        report.week_ending = week_ending #Not: time.strptime(week_ending,'%Y-%m-%d')
 
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
             created = True
+            report = Preview()
+            report.week_ending = week_ending #Not: time.strptime(week_ending,'%Y-%m-%d')
             report.path = sheet.cell(row_id,0).value
             report.count = int(sheet.cell(row_id,1).value)
             report.handle = long(sheet.cell(row_id,2).value)
@@ -261,11 +263,12 @@ class Command(LabelCommand):
                 if item.week_ending == report.week_ending and item.handle == report.handle:
                     self._errorlog("Preview row "+str(row_id)+" has already been imported")
                     created = False
+                    continue
 
             if created:
                 count += 1
                 report.save()
-                cache.append(report)
+                cache.insert(0,report)
                 
         print "Imported PREVIEW data for " + str(week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
         return None
