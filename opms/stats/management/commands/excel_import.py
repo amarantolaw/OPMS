@@ -7,7 +7,7 @@ from django.core.management.base import LabelCommand, CommandError
 
 from opms.stats.models import *
 from xlrd import open_workbook
-import time, sys
+import time, datetime, sys
         
 class Command(LabelCommand):
     args = '<spreadsheet.xls>'
