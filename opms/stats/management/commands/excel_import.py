@@ -186,7 +186,7 @@ class Command(LabelCommand):
             
             # Check the cache
             for item in cache:
-                if item.week_ending == datetime.strptime(report.week_ending,'%Y-%m-%d').date() and item.handle == report.handle:
+                if item.week_ending == datetime.strptime(week_ending,'%Y-%m-%d').date() and item.handle == report.handle:
                     self._errorlog("Track row "+str(row_id)+" has already been imported")
                     created = False
                     continue
@@ -195,6 +195,8 @@ class Command(LabelCommand):
                 count += 1
                 report.save()
                 cache.insert(0,report)
+                
+            print "track " + str(row_id) + ". created=" + str(created)
             
         print "Imported TRACK data for " + str(week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
         return None
@@ -220,7 +222,7 @@ class Command(LabelCommand):
 
             # Check the cache
             for item in cache:
-                if item.week_ending == datetime.strptime(report.week_ending,'%Y-%m-%d').date() and item.handle == report.handle and item.count == report.count:
+                if item.week_ending == datetime.strptime(week_ending,'%Y-%m-%d').date() and item.handle == report.handle and item.count == report.count:
                     self._errorlog("Browse row "+str(row_id)+" has already been imported")
                     created = False
                     continue
@@ -260,7 +262,7 @@ class Command(LabelCommand):
 
             # Check the cache
             for item in cache:
-                if item.week_ending == datetime.strptime(report.week_ending,'%Y-%m-%d').date() and item.handle == report.handle:
+                if item.week_ending == datetime.strptime(week_ending,'%Y-%m-%d').date() and item.handle == report.handle:
                     self._errorlog("Preview row "+str(row_id)+" has already been imported")
                     created = False
                     continue
