@@ -196,8 +196,6 @@ class Command(LabelCommand):
                 count += 1
                 report.save()
                 cache.append(report)
-                
-            print "track " + str(row_id) + ". created=" + str(created)
             
         print "Imported TRACK data for " + str(week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
         return None
