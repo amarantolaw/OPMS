@@ -187,7 +187,6 @@ class Command(LabelCommand):
             
             # Check the cache
             for item in cache:
-                self._debug('Scanning cache. Created=' + str(created))
                 if item.week_ending == time.strptime(report.week_ending,'%Y-%m-%d') and item.handle == report.handle:
                     self._debug('Match FOUND')
                     self._errorlog("Track row "+str(row_id)+" has already been imported")
