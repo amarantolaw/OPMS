@@ -186,7 +186,7 @@ class Command(LabelCommand):
             
             # Check the cache
             for item in cache:
-                if item.week_ending == report.week_ending and item.handle == report.handle:
+                if item.week_ending == time.strptime(report.week_ending,'%Y-%m-%d') and item.handle == report.handle:
                     self._errorlog("Track row "+str(row_id)+" has already been imported")
                     created = False
                     continue
