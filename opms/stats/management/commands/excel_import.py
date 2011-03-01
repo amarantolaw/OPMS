@@ -261,16 +261,18 @@ class Command(LabelCommand):
 
             # Check the cache
             for item in cache:
-                print "item:" + str(item.handle) + ". report:" + str(report.handle) + " Match=" + str(item.handle == report.handle)
+                # print "item:" + str(item.handle) + ". report:" + str(report.handle) + " Match=" + str(item.handle == report.handle)
                 if item.handle == report.handle:
                     self._errorlog("Preview row "+str(row_id)+" has already been imported")
                     created = False
                     continue
 
             if created:
+                print "report:" + str(report.handle) + " created"
                 count += 1
                 report.save()
                 cache.insert(0,report)
+                print "report:" + str(report.handle) + " saved"
                 
         print "Imported PREVIEW data for " + str(week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
         return None
