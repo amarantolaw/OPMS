@@ -165,28 +165,33 @@ class Command(LabelCommand):
 
     def _parse_tracks(self, sheet, week_ending):
         # print "Beginning import for TRACKS:", sheet_name
+        cache = list(Track.objects.filter(week_ending=week_ending))
         # Reset variables
-        report = {}
-        report['week_ending'] = week_ending
         count = 0
+        
+        report = Track()
+        report.week_ending = time.strptime(week_ending,'%Y-%m-%d')
 
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
-            report['path'] = sheet.cell(row_id,0).value
-            report['count'] = sheet.cell(row_id,1).value
-            report['handle'] = sheet.cell(row_id,2).value
-            report['guid'] = sheet.cell(row_id,3).value
+            created = True
+            report.path = sheet.cell(row_id,0).value
+            report.count = int(sheet.cell(row_id,1).value)
+            report.handle = long(sheet.cell(row_id,2).value)
+            report.guid = sheet.cell(row_id,3).value
+            
+            # Check the cache
+            for item in cache:
+                if item.week_ending == report.week_ending and item.week_ending == report.week_ending:
+                    self._errorlog("Track row"+str(row_id)+"has already been imported")
+                    created = False
 
-            # Now test to see if this has been imported already. Note, use date and handle beucase Guid isn't present for tracks thathave been deleted, thus they show up as errors, even though there is valid data.
-            obj, created = Track.objects.get_or_create(week_ending=report.get('week_ending'), handle=report.get('handle'), defaults=report)
-            
-            if created:
+            if not created:
                 count += 1
-                obj.save()
-            else:
-                self._errorlog("Track row"+str(row_id)+"has already been imported")
+                report.save()
+                cache.append(report)
             
-        print "Imported TRACK data for", report.get('week_ending'), "with", count, "out of", sheet.nrows-1, "added."
+        print "Imported TRACK data for " + str(report.week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
         return None
 
 
