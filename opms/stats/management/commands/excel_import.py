@@ -170,7 +170,7 @@ class Command(LabelCommand):
 
     def _parse_tracks(self, sheet, week_ending):
         # print "Beginning import for TRACKS:", sheet_name
-        cache = list(Track.objects.filter(week_ending=week_ending))
+        cache = list(Track.objects.filter(week_ending=week_ending)).order_by('handle')
         # Reset variables
         count = 0
 
@@ -186,7 +186,8 @@ class Command(LabelCommand):
             
             # Check the cache
             for item in cache:
-                if item.week_ending == datetime.strptime(week_ending,'%Y-%m-%d').date() and item.handle == report.handle:
+                # Don't need to check the date! Data can only be for this date...
+                if item.handle == report.handle:
                     self._errorlog("Track row "+str(row_id)+" has already been imported")
                     created = False
                     continue
@@ -194,7 +195,7 @@ class Command(LabelCommand):
             if created:
                 count += 1
                 report.save()
-                cache.insert(0,report)
+                cache.append(report)
                 
             print "track " + str(row_id) + ". created=" + str(created)
             
@@ -205,7 +206,7 @@ class Command(LabelCommand):
 
     def _parse_browses(self, sheet, week_ending):
         # print "Beginning import for BROWSE:", sheet_name
-        cache = list(Browse.objects.filter(week_ending=week_ending))
+        cache = list(Browse.objects.filter(week_ending=week_ending)).order_by('handle')
         # Reset variables
         count = 0
         
@@ -222,7 +223,7 @@ class Command(LabelCommand):
 
             # Check the cache
             for item in cache:
-                if item.week_ending == datetime.strptime(week_ending,'%Y-%m-%d').date() and item.handle == report.handle and item.count == report.count:
+                if item.handle == report.handle and item.count == report.count:
                     self._errorlog("Browse row "+str(row_id)+" has already been imported")
                     created = False
                     continue
@@ -245,7 +246,7 @@ class Command(LabelCommand):
 
     def _parse_previews(self, sheet, week_ending):
         # print "Beginning import for PREVIEW:", sheet_name
-        cache = list(Browse.objects.filter(week_ending=week_ending))
+        cache = list(Browse.objects.filter(week_ending=week_ending)).order_by('handle')
         # Reset variables
         count = 0
         
@@ -262,7 +263,7 @@ class Command(LabelCommand):
 
             # Check the cache
             for item in cache:
-                if item.week_ending == datetime.strptime(week_ending,'%Y-%m-%d').date() and item.handle == report.handle:
+                if item.handle == report.handle:
                     self._errorlog("Preview row "+str(row_id)+" has already been imported")
                     created = False
                     continue
