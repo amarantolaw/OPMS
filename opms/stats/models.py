@@ -28,7 +28,7 @@ class LogFile(models.Model):
 class Summary(models.Model):
     logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
     # Date from the column - typically from yyyy-mm-dd format
-    week_ending = models.DateField("week ending")
+    week_ending = models.DateField("week ending", db_index=True)
     # User Actions section
     ua_browse = models.IntegerField("browse")
     ua_download_preview  = models.IntegerField("download preview")
@@ -113,6 +113,7 @@ class Summary(models.Model):
 
 
 
+
 # Track record based on Aug 2010 Excel "yyyy-mm-dd Tracks" datastructure. Each record is a line in the sheet
 class TrackManager(models.Manager):
     def grouped_by_feed(self, sort_by):
@@ -151,11 +152,10 @@ class TrackManager(models.Manager):
         return result_list
         
 
-
-
 # Track Paths have changed as the system has evolved and migrated
 class TrackPath(models.Model):
     logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
+    track = models.ForeignKey(Track, verbose_name="track item for this path")
     path = models.TextField("path")
     updated_week_ending = models.DateField("week ending")
     
@@ -166,6 +166,7 @@ class TrackPath(models.Model):
 # Track Handles change from time to time due to tweaks in the system, but ideally we want to keep them related
 class TrackHandle(models.Model):
     logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
+    track = models.ForeignKey(Track, verbose_name="track item for this handle")
     handle = models.BigIntegerField("handle")
     updated_week_ending = models.DateField("week ending")
     
@@ -174,12 +175,10 @@ class TrackHandle(models.Model):
 
 
 class Track(models.Model):
+    guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
     logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
     week_ending = models.DateField("week ending")
-    path = models.ForeignKey(TrackPath, verbose_name="path")
     count = models.IntegerField("count")
-    handle = models.ForeignKey(TrackHandle, verbose_name="handle")
-    guid = models.CharField("GUID", max_length=255,blank=True, null=True)
 
     objects = TrackManager()
     
@@ -207,6 +206,7 @@ class Browse(models.Model):
 # Preview Paths have changed as the system has evolved and migrated
 class PreviewPath(models.Model):
     logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
+    track = models.ForeignKey(Track, verbose_name="track item for this path")
     path = models.TextField("path")
     updated_week_ending = models.DateField("week ending")
     
@@ -217,6 +217,7 @@ class PreviewPath(models.Model):
 # Preview Handles change from time to time due to tweaks in the system, but ideally we want to keep them related
 class PreviewHandle(models.Model):
     logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
+    track = models.ForeignKey(Track, verbose_name="track item for this handle")
     handle = models.BigIntegerField("handle")
     updated_week_ending = models.DateField("week ending")
     
@@ -226,12 +227,10 @@ class PreviewHandle(models.Model):
         
 # Preview record based on Aug 2010 Excel "yyyy-mm-dd Previews" datastructure. Each record is a line in the sheet
 class Preview(models.Model):
+    guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
     logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
     week_ending = models.DateField("week ending")
-    path = models.ForeignKey(PreviewPath, verbose_name="path")
     count = models.IntegerField("count")
-    handle = models.ForeignKey(PreviewHandle, verbose_name="handle")
-    guid = models.CharField("GUID", max_length=255,blank=True, null=True)
     
     def __unicode__(self):
         return '%s:%s' % (self.week_ending,self.guid)
