@@ -1,8 +1,32 @@
 from django.db import models
 from datetime import date
 
+
+
+# Quite possible to have multiple log file sources, use this as a lookup table
+class LogFile(models.Model):
+    SERVICE_NAME_CHOICES = (
+        (u'mpoau', u'Media.podcasts Hosting'),
+        (u'poau1', u'Podcasts.ox v1'),
+        (u'poau-beta', u'beta.podcasts.ox.uk'),
+        (u'oxitems', u'OxItems'),
+        (u'mox', u'mobile.ox.ac.uk'),
+        (u'itu', u'iTunes U v1'),
+        (u'itu-psm', u'iTunes U PSM'),
+    )
+    service_name = models.CharField("service name associate with this log", max_length=20, choices=SERVICE_NAME_CHOICES)
+    file_name = models.TextField("file name")
+    file_path = models.TextField("path to file")
+    last_updated = models.DateTimeField("last updated") # Acts as date of import
+    
+    def __unicode__(self):
+        return self.file_name
+        
+
+
 # Summary record based on a column of data from the Summary tab
 class Summary(models.Model):
+    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
     # Date from the column - typically from yyyy-mm-dd format
     week_ending = models.DateField("week ending")
     # User Actions section
@@ -131,6 +155,7 @@ class TrackManager(models.Manager):
 
 # Track Paths have changed as the system has evolved and migrated
 class TrackPath(models.Model):
+    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
     path = models.TextField("path")
     updated_week_ending = models.DateField("week ending")
     
@@ -140,6 +165,7 @@ class TrackPath(models.Model):
 
 # Track Handles change from time to time due to tweaks in the system, but ideally we want to keep them related
 class TrackHandle(models.Model):
+    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
     handle = models.BigIntegerField("handle")
     updated_week_ending = models.DateField("week ending")
     
@@ -148,6 +174,7 @@ class TrackHandle(models.Model):
 
 
 class Track(models.Model):
+    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
     week_ending = models.DateField("week ending")
     path = models.ForeignKey(TrackPath, verbose_name="path")
     count = models.IntegerField("count")
@@ -164,6 +191,7 @@ class Track(models.Model):
 
 # Browse record based on Aug 2010 Excel "yyyy-mm-dd Browse" datastructure. Each record is a line in the sheet
 class Browse(models.Model):
+    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
     week_ending = models.DateField("week ending")
     path = models.TextField("path")
     count = models.IntegerField("count")
@@ -178,6 +206,7 @@ class Browse(models.Model):
 
 # Preview Paths have changed as the system has evolved and migrated
 class PreviewPath(models.Model):
+    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
     path = models.TextField("path")
     updated_week_ending = models.DateField("week ending")
     
@@ -187,6 +216,7 @@ class PreviewPath(models.Model):
 
 # Preview Handles change from time to time due to tweaks in the system, but ideally we want to keep them related
 class PreviewHandle(models.Model):
+    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
     handle = models.BigIntegerField("handle")
     updated_week_ending = models.DateField("week ending")
     
@@ -196,6 +226,7 @@ class PreviewHandle(models.Model):
         
 # Preview record based on Aug 2010 Excel "yyyy-mm-dd Previews" datastructure. Each record is a line in the sheet
 class Preview(models.Model):
+    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
     week_ending = models.DateField("week ending")
     path = models.ForeignKey(PreviewPath, verbose_name="path")
     count = models.IntegerField("count")
@@ -221,24 +252,6 @@ class Rdns(models.Model):
     
     def __unicode__(self):
         return self.resolved_name
-
-
-# Quite possible to have multiple log file sources, use this as a lookup table
-class LogFile(models.Model):
-    SERVICE_NAME_CHOICES = (
-        (u'mpoau', u'Media.podcasts Hosting'),
-        (u'poau1', u'Podcasts.ox v1'),
-        (u'poau-beta', u'beta.podcasts.ox.uk'),
-        (u'oxitems', u'OxItems'),
-        (u'mox', u'mobile.ox.ac.uk'),
-    )
-    service_name = models.CharField("service name associate with this log", max_length=20, choices=SERVICE_NAME_CHOICES)
-    file_name = models.TextField("file name")
-    file_path = models.TextField("path to file")
-    last_updated = models.DateTimeField("last updated") # Acts as date of import
-    
-    def __unicode__(self):
-        return self.file_name
 
 
 # Lookup table for Operating Systems and versions
