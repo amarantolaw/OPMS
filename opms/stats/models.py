@@ -29,8 +29,8 @@ class LogFile(models.Model):
 
 # A 'virtual' Summary record based on a column of data from the Summary tab split across several tables
 class Summary(models.Model):
-    user_actions = models.ManyToManyField(LogFile, through='UserActions')
-    client_software = models.ManyToManyField(LogFile, through='ClientSoftware')
+    # user_actions = models.ManyToManyField(LogFile, through='UserActions')
+    # client_software = models.ManyToManyField(LogFile, through='ClientSoftware')
     # Date from the column - typically from yyyy-mm-dd format
     week_ending = models.DateField("week ending", db_index=True)
     # The total as calculated by Apple
