@@ -27,6 +27,18 @@ class LogFile(models.Model):
 # Apple Summary Data
 ####
 
+# A 'virtual' Summary record based on a column of data from the Summary tab split across several tables
+class Summary(models.Model):
+    user_actions = models.ManyToManyField(LogFile, through='UserActions')
+    client_software = models.ManyToManyField(Logfile, through='ClientSoftware')
+    # Date from the column - typically from yyyy-mm-dd format
+    week_ending = models.DateField("week ending", db_index=True)
+    # The total as calculated by Apple
+    total_track_downloads = models.IntegerField("total track downloads")
+    
+    def __unicode__(self):
+        return str(date.strftime(self.week_ending,"%Y-%m-%d")) + ": Total Downloads=" + str(self.total_track_downloads)
+
 class UserActions(models.Model):
     summary = models.ForeignKey(Summary)
     logfile = models.ForeignKey(LogFile)
@@ -65,27 +77,13 @@ class ClientSoftware(models.Model):
     count = models.IntegerField("count")
 
 
-# A 'virtual' Summary record based on a column of data from the Summary tab split across several tables
-class Summary(models.Model):
-    user_actions = models.ManyToManyField(LogFile, through='UserActions')
-    client_software = models.ManyToManyField(Logfile, through='ClientSoftware')
-    # Date from the column - typically from yyyy-mm-dd format
-    week_ending = models.DateField("week ending", db_index=True)
-    # The total as calculated by Apple
-    total_track_downloads = models.IntegerField("total track downloads")
-    
-    def __unicode__(self):
-        return str(date.strftime(self.week_ending,"%Y-%m-%d")) + ": Total Downloads=" + str(self.total_track_downloads)
-
-
 
 ####
 # Apple Track Records
 ####
 
-
-# Track record based on Aug 2010 Excel "yyyy-mm-dd Tracks" datastructure. Each record is a line in the sheet
 class TrackManager(models.Manager):
+# THIS IS LIKELY REDUNDANT ALREADY!
     def grouped_by_feed(self, sort_by):
         from django.db import connection, transaction
         cursor = connection.cursor()
@@ -120,6 +118,21 @@ class TrackManager(models.Manager):
             result_list.append(t)
 
         return result_list
+    
+
+# This is a 'virtual' track entity, which will have multiple handles, paths and counts associated with it
+class Track(models.Model):
+    counts = models.ManyToManyField(LogFile, through='TrackCount', verbose_name="count values")
+    handles = models.ManyToManyField(LogFile, through='TrackHandle', verbose_name="handle values")
+    paths = models.ManyToManyField(LogFile, through='TrackPath', verbose_name="path values")
+    week_ending = models.DateField("week ending")
+    guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
+    # Eventually there will be a link here to a File record from the FFM module
+
+    objects = TrackManager()
+    
+    def __unicode__(self):
+        return '%s:%s' % (self.week_ending,self.guid)
         
 
 # Track Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific track
@@ -150,27 +163,23 @@ class TrackCount(models.Model):
     
     def __unicode__(self):
         return str(self.count)
-    
-
-# This is a 'virtual' track entity, which will have multiple handles, paths and counts associated with it
-class Track(models.Model):
-    counts = models.ManyToManyField(LogFile, through='TrackCount', verbose_name="count values")
-    handles = models.ManyToManyField(LogFile, through='TrackHandle', verbose_name="handle values")
-    paths = models.ManyToManyField(LogFile, through='TrackPath', verbose_name="path values")
-    week_ending = models.DateField("week ending")
-    guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
-    # Eventually there will be a link here to a File record from the FFM module
-
-    objects = TrackManager()
-    
-    def __unicode__(self):
-        return '%s:%s' % (self.week_ending,self.guid)
 
 
 
 ####
 # Apple Browse Records
 ####
+    
+# This is a 'virtual' track entity, which will have multiple handles, paths and counts associated with it
+class Browse(models.Model):
+    counts = models.ManyToManyField(LogFile, through='BrowseCount', verbose_name="count values")
+    handles = models.ManyToManyField(LogFile, through='BrowseHandle', verbose_name="handle values")
+    paths = models.ManyToManyField(LogFile, through='BrowsePath', verbose_name="path values")
+    week_ending = models.DateField("week ending")
+    guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
+    
+    def __unicode__(self):
+        return '%s:%s' % (self.week_ending,self.guid)
 
 # Browse Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific page
 class BrowsePath(models.Model):
@@ -200,24 +209,24 @@ class BrowseCount(models.Model):
     
     def __unicode__(self):
         return str(self.count)
-    
-
-# This is a 'virtual' track entity, which will have multiple handles, paths and counts associated with it
-class Browse(models.Model):
-    counts = models.ManyToManyField(LogFile, through='BrowseCount', verbose_name="count values")
-    handles = models.ManyToManyField(LogFile, through='BrowseHandle', verbose_name="handle values")
-    paths = models.ManyToManyField(LogFile, through='BrowsePath', verbose_name="path values")
-    week_ending = models.DateField("week ending")
-    guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
-    
-    def __unicode__(self):
-        return '%s:%s' % (self.week_ending,self.guid)
 
 
 
 ####
 # Apple Preview Records
 ####
+
+# This is a 'virtual' track entity, which will have multiple handles, paths and counts associated with it
+class Preview(models.Model):
+    counts = models.ManyToManyField(LogFile, through='PreviewCount', verbose_name="count values")
+    handles = models.ManyToManyField(LogFile, through='PreviewHandle', verbose_name="handle values")
+    paths = models.ManyToManyField(LogFile, through='PreviewPath', verbose_name="path values")
+    week_ending = models.DateField("week ending")
+    guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
+    # Eventually there will be a link here to a File record from the FFM module
+    
+    def __unicode__(self):
+        return '%s:%s' % (self.week_ending,self.guid)
 
 # Preview Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific track preview
 class PreviewPath(models.Model):
@@ -247,19 +256,6 @@ class PreviewCount(models.Model):
     
     def __unicode__(self):
         return str(self.count)
-    
-
-# This is a 'virtual' track entity, which will have multiple handles, paths and counts associated with it
-class Preview(models.Model):
-    counts = models.ManyToManyField(LogFile, through='PreviewCount', verbose_name="count values")
-    handles = models.ManyToManyField(LogFile, through='PreviewHandle', verbose_name="handle values")
-    paths = models.ManyToManyField(LogFile, through='PreviewPath', verbose_name="path values")
-    week_ending = models.DateField("week ending")
-    guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
-    # Eventually there will be a link here to a File record from the FFM module
-    
-    def __unicode__(self):
-        return '%s:%s' % (self.week_ending,self.guid)
         
 
 
