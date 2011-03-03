@@ -29,8 +29,10 @@ class LogFile(models.Model):
 
 # A 'virtual' Summary record based on a column of data from the Summary tab split across several tables
 class Summary(models.Model):
+    # These ManyToMany references are causing problems
     # user_actions = models.ManyToManyField(LogFile, through='UserActions')
     # client_software = models.ManyToManyField(LogFile, through='ClientSoftware')
+    
     # Date from the column - typically from yyyy-mm-dd format
     week_ending = models.DateField("week ending", db_index=True)
     # The total as calculated by Apple
@@ -122,9 +124,9 @@ class TrackManager(models.Manager):
 
 # This is a 'virtual' track entity, which will have multiple handles, paths and counts associated with it
 class Track(models.Model):
-    counts = models.ManyToManyField(LogFile, through='TrackCount', verbose_name="count values")
-    handles = models.ManyToManyField(LogFile, through='TrackHandle', verbose_name="handle values")
-    paths = models.ManyToManyField(LogFile, through='TrackPath', verbose_name="path values")
+    #counts = models.ManyToManyField(LogFile, through='TrackCount', verbose_name="count values")
+    #handles = models.ManyToManyField(LogFile, through='TrackHandle', verbose_name="handle values")
+    #paths = models.ManyToManyField(LogFile, through='TrackPath', verbose_name="path values")
     week_ending = models.DateField("week ending")
     guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
     # Eventually there will be a link here to a File record from the FFM module
@@ -172,9 +174,9 @@ class TrackCount(models.Model):
     
 # This is a 'virtual' track entity, which will have multiple handles, paths and counts associated with it
 class Browse(models.Model):
-    counts = models.ManyToManyField(LogFile, through='BrowseCount', verbose_name="count values")
-    handles = models.ManyToManyField(LogFile, through='BrowseHandle', verbose_name="handle values")
-    paths = models.ManyToManyField(LogFile, through='BrowsePath', verbose_name="path values")
+    #counts = models.ManyToManyField(LogFile, through='BrowseCount', verbose_name="count values")
+    #handles = models.ManyToManyField(LogFile, through='BrowseHandle', verbose_name="handle values")
+    #paths = models.ManyToManyField(LogFile, through='BrowsePath', verbose_name="path values")
     week_ending = models.DateField("week ending")
     guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
     
@@ -218,9 +220,9 @@ class BrowseCount(models.Model):
 
 # This is a 'virtual' track entity, which will have multiple handles, paths and counts associated with it
 class Preview(models.Model):
-    counts = models.ManyToManyField(LogFile, through='PreviewCount', verbose_name="count values")
-    handles = models.ManyToManyField(LogFile, through='PreviewHandle', verbose_name="handle values")
-    paths = models.ManyToManyField(LogFile, through='PreviewPath', verbose_name="path values")
+    #counts = models.ManyToManyField(LogFile, through='PreviewCount', verbose_name="count values")
+    #handles = models.ManyToManyField(LogFile, through='PreviewHandle', verbose_name="handle values")
+    #paths = models.ManyToManyField(LogFile, through='PreviewPath', verbose_name="path values")
     week_ending = models.DateField("week ending")
     guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
     # Eventually there will be a link here to a File record from the FFM module
