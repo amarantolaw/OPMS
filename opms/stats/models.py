@@ -23,95 +23,65 @@ class LogFile(models.Model):
         return self.file_name
         
 
+####
+# Apple Summary Data
+####
 
-# Summary record based on a column of data from the Summary tab
+class UserActions(models.Model):
+    summary = models.ForeignKeyField(Summary)
+    logfile = models.ForeignKeyField(LogFile)
+    # User Actions section
+    browse = models.IntegerField("browse")
+    download_preview  = models.IntegerField("download preview")
+    download_preview_ios = models.IntegerField("download preview iOS", blank=True, null=True)
+    download_track = models.IntegerField("download track")
+    download_tracks = models.IntegerField("download tracks")
+    download_ios = models.IntegerField("download iOS", blank=True, null=True)
+    edit_files = models.IntegerField("edit files")
+    edit_page = models.IntegerField("edit page")
+    logout = models.IntegerField("logout")
+    search_results_page = models.IntegerField("search results page")
+    subscription = models.IntegerField("subscription")
+    subscription_enclosure = models.IntegerField("subscription enclosure")
+    subscription_feed = models.IntegerField("subscription feed")
+    upload = models.IntegerField("upload")
+    not_listed = models.IntegerField("not listed")
+
+class ClientSoftware(models.Model):
+    PLATFORM_CHOICES = (
+        (u'ipad', u'iTunes on iPad'),
+        (u'ipod', u'iTunes on iPod'),
+        (u'iphone', u'iTunes on iPhone'),
+        (u'macintosh', u'iTunes on Macintosh'),
+        (u'windows', u'iTunes on Windows'),
+        (u'not listed', u'Unknown'),
+    )
+    summary = models.ForeignKeyField(Summary)
+    logfile = models.ForeignKeyField(LogFile)
+    # Client Software section
+    platform = models.CharField("platform", max_length=20, choices=PLATFORM_CHOICES)
+    version_major = models.IntegerField("major version number")
+    version_minor = models.IntegerField("minor version number")
+    count = models.IntegerField("count")
+
+
+# A 'virtual' Summary record based on a column of data from the Summary tab split across several tables
 class Summary(models.Model):
-    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
+    user_actions = models.ManyToManyField(LogFile, through='UserActions')
+    client_software = models.ManyToManyField(Logfile, through='ClientSoftware')
     # Date from the column - typically from yyyy-mm-dd format
     week_ending = models.DateField("week ending", db_index=True)
-    # User Actions section
-    ua_browse = models.IntegerField("browse")
-    ua_download_preview  = models.IntegerField("download preview")
-    ua_download_preview_ios = models.IntegerField("download preview iOS", blank=True, null=True)
-    ua_download_track = models.IntegerField("download track")
-    ua_download_tracks = models.IntegerField("download tracks")
-    ua_download_ios = models.IntegerField("download iOS", blank=True, null=True)
-    ua_edit_files = models.IntegerField("edit files")
-    ua_edit_page = models.IntegerField("edit page")
-    ua_logout = models.IntegerField("logout")
-    ua_search_results_page = models.IntegerField("search results page")
-    ua_subscription = models.IntegerField("subscription")
-    ua_subscription_enclosure = models.IntegerField("subscription enclosure")
-    ua_subscription_feed = models.IntegerField("subscription feed")
-    ua_upload = models.IntegerField("upload")
-    ua_not_listed = models.IntegerField("not listed")
     # The total as calculated by Apple
     total_track_downloads = models.IntegerField("total track downloads")
-    # Client Software section
-    # note: the number of options here changes over time in the data, hence the blank=True option to allow for gaps in data import.
-    cs_macintosh = models.IntegerField("?/?/Macintosh", blank=True, null=True)
-    cs_windows = models.IntegerField("?/?/Windows", blank=True, null=True)
-    cs_itunes_ipad_3_2 = models.IntegerField("iTunes-iPad/3.2/?", blank=True, null=True)
-    cs_itunes_iphone_3_0 = models.IntegerField("iTunes-iPhone/3.0/?", blank=True, null=True)
-    cs_itunes_iphone_3_1 = models.IntegerField("iTunes-iPhone/3.1/?", blank=True, null=True)
-    cs_itunes_iphone_4_0 = models.IntegerField("iTunes-iPhone/4.0/?", blank=True, null=True)
-    cs_itunes_iphone_4_1 = models.IntegerField("iTunes-iPhone/4.1/?", blank=True, null=True)
-    cs_itunes_ipod_3_0 = models.IntegerField("iTunes-iPod/3.0/?", blank=True, null=True)
-    cs_itunes_ipod_3_1 = models.IntegerField("iTunes-iPod/3.1/?", blank=True, null=True)
-    cs_itunes_ipod_4_0 = models.IntegerField("iTunes-iPod/4.0/?", blank=True, null=True)
-    cs_itunes_ipod_4_1 = models.IntegerField("iTunes-iPod/4.1/?", blank=True, null=True)
-    cs_itunes_4_4_macintosh = models.IntegerField("iTunes/4.4/Macintosh", blank=True, null=True)
-    cs_itunes_4_4_windows = models.IntegerField("iTunes/4.4/Windows", blank=True, null=True)
-    cs_itunes_4_5_macintosh = models.IntegerField("iTunes/4.5/Macintosh", blank=True, null=True)
-    cs_itunes_4_5_windows = models.IntegerField("iTunes/4.5/Windows", blank=True, null=True)
-    cs_itunes_4_6_macintosh = models.IntegerField("iTunes/4.6/Macintosh", blank=True, null=True)
-    cs_itunes_4_6_windows = models.IntegerField("iTunes/4.6/Windows", blank=True, null=True)
-    cs_itunes_4_7_macintosh = models.IntegerField("iTunes/4.7/Macintosh", blank=True, null=True)
-    cs_itunes_4_7_windows = models.IntegerField("iTunes/4.7/Windows", blank=True, null=True)
-    cs_itunes_4_8_macintosh = models.IntegerField("iTunes/4.8/Macintosh", blank=True, null=True)
-    cs_itunes_4_8_windows = models.IntegerField("iTunes/4.8/Windows", blank=True, null=True)
-    cs_itunes_4_9_macintosh = models.IntegerField("iTunes/4.9/Macintosh", blank=True, null=True)
-    cs_itunes_4_9_windows = models.IntegerField("iTunes/4.9/Windows", blank=True, null=True)
-    cs_itunes_5_0_macintosh = models.IntegerField("iTunes/5.0/Macintosh", blank=True, null=True)
-    cs_itunes_5_0_windows = models.IntegerField("iTunes/5.0/Windows", blank=True, null=True)
-    cs_itunes_6_0_macintosh = models.IntegerField("iTunes/6.0/Macintosh", blank=True, null=True)
-    cs_itunes_6_0_windows = models.IntegerField("iTunes/6.0/Windows", blank=True, null=True)
-    cs_itunes_7_0_macintosh = models.IntegerField("iTunes/7.0/Macintosh", blank=True, null=True)
-    cs_itunes_7_0_windows = models.IntegerField("iTunes/7.0/Windows", blank=True, null=True)
-    cs_itunes_7_1_macintosh = models.IntegerField("iTunes/7.1/Macintosh", blank=True, null=True)
-    cs_itunes_7_1_windows = models.IntegerField("iTunes/7.1/Windows", blank=True, null=True)
-    cs_itunes_7_2_macintosh = models.IntegerField("iTunes/7.2/Macintosh", blank=True, null=True)
-    cs_itunes_7_2_windows = models.IntegerField("iTunes/7.2/Windows", blank=True, null=True)
-    cs_itunes_7_3_macintosh = models.IntegerField("iTunes/7.3/Macintosh", blank=True, null=True)
-    cs_itunes_7_3_windows = models.IntegerField("iTunes/7.3/Windows", blank=True, null=True)
-    cs_itunes_7_4_macintosh = models.IntegerField("iTunes/7.4/Macintosh", blank=True, null=True)
-    cs_itunes_7_4_windows = models.IntegerField("iTunes/7.4/Windows", blank=True, null=True)
-    cs_itunes_7_5_macintosh = models.IntegerField("iTunes/7.5/Macintosh", blank=True, null=True)
-    cs_itunes_7_5_windows = models.IntegerField("iTunes/7.5/Windows", blank=True, null=True)
-    cs_itunes_7_6_macintosh = models.IntegerField("iTunes/7.6/Macintosh", blank=True, null=True)
-    cs_itunes_7_6_windows = models.IntegerField("iTunes/7.6/Windows", blank=True, null=True)
-    cs_itunes_7_7_macintosh = models.IntegerField("iTunes/7.7/Macintosh", blank=True, null=True)
-    cs_itunes_7_7_windows = models.IntegerField("iTunes/7.7/Windows", blank=True, null=True)
-    cs_itunes_8_0_macintosh = models.IntegerField("iTunes/8.0/Macintosh", blank=True, null=True)
-    cs_itunes_8_0_windows = models.IntegerField("iTunes/8.0/Windows", blank=True, null=True)
-    cs_itunes_8_1_macintosh = models.IntegerField("iTunes/8.1/Macintosh", blank=True, null=True)
-    cs_itunes_8_1_windows = models.IntegerField("iTunes/8.1/Windows", blank=True, null=True)
-    cs_itunes_8_2_macintosh = models.IntegerField("iTunes/8.2/Macintosh", blank=True, null=True)
-    cs_itunes_8_2_windows = models.IntegerField("iTunes/8.2/Windows", blank=True, null=True)
-    cs_itunes_9_0_macintosh = models.IntegerField("iTunes/9.0/Macintosh", blank=True, null=True)
-    cs_itunes_9_0_windows = models.IntegerField("iTunes/9.0/Windows", blank=True, null=True)
-    cs_itunes_9_1_macintosh = models.IntegerField("iTunes/9.1/Macintosh", blank=True, null=True)
-    cs_itunes_9_1_windows = models.IntegerField("iTunes/9.1/Windows", blank=True, null=True)
-    cs_itunes_9_2_macintosh = models.IntegerField("iTunes/9.2/Macintosh", blank=True, null=True)
-    cs_itunes_9_2_windows = models.IntegerField("iTunes/9.2/Windows", blank=True, null=True)
-    cs_itunes_10_0_macintosh = models.IntegerField("iTunes/10.0/Macintosh", blank=True, null=True)
-    cs_itunes_10_0_windows = models.IntegerField("iTunes/10.0/Windows", blank=True, null=True)
-    cs_not_listed = models.IntegerField("not listed", blank=True, null=True)
     
     def __unicode__(self):
         return str(date.strftime(self.week_ending,"%Y-%m-%d")) + ": Total Downloads=" + str(self.total_track_downloads)
 
 
+
+####
+# Apple Track Records
+####
 
 
 # Track record based on Aug 2010 Excel "yyyy-mm-dd Tracks" datastructure. Each record is a line in the sheet
@@ -152,33 +122,44 @@ class TrackManager(models.Manager):
         return result_list
         
 
-# Track Paths have changed as the system has evolved and migrated
+# Track Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific track
 class TrackPath(models.Model):
-    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
-    track = models.ForeignKey(Track, verbose_name="track item for this path")
+    track = models.ForeignKey(Track)
+    logfile = models.ForeignKey(LogFile)
     path = models.TextField("path")
-    updated_week_ending = models.DateField("week ending")
     
     def __unicode__(self):
-        return '%s:%s' % (self.updated_week_ending,self.path)
+        return str(self.path)
 
 
-# Track Handles change from time to time due to tweaks in the system, but ideally we want to keep them related
+# Track Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific track
 class TrackHandle(models.Model):
-    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
-    track = models.ForeignKey(Track, verbose_name="track item for this handle")
+    track = models.ForeignKey(Track)
+    logfile = models.ForeignKey(LogFile)
     handle = models.BigIntegerField("handle")
-    updated_week_ending = models.DateField("week ending")
     
     def __unicode__(self):
-        return '%s:%s' % (self.updated_week_ending,self.handle)
+        return str(self.handle)
 
 
-class Track(models.Model):
-    guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
-    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
-    week_ending = models.DateField("week ending")
+# A count is collected for each service (logfile.service_name) in the records
+class TrackCount(models.Model):
+    track = models.ForeignKey(Track)
+    logfile = models.ForeignKey(LogFile)
     count = models.IntegerField("count")
+    
+    def __unicode__(self):
+        return str(self.count)
+    
+
+# This is a 'virtual' track entity, which will have multiple handles, paths and counts associated with it
+class Track(models.Model):
+    counts = models.ManyToManyField(LogFile, through='TrackCount', verbose_name="count values")
+    handles = models.ManyToManyField(LogFile, through='TrackHandle', verbose_name="handle values")
+    paths = models.ManyToManyField(LogFile, through='TrackPath', verbose_name="path values")
+    week_ending = models.DateField("week ending")
+    guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
+    # Eventually there will be a link here to a File record from the FFM module
 
     objects = TrackManager()
     
@@ -187,53 +168,100 @@ class Track(models.Model):
 
 
 
+####
+# Apple Browse Records
+####
 
-# Browse record based on Aug 2010 Excel "yyyy-mm-dd Browse" datastructure. Each record is a line in the sheet
+# Browse Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific page
+class BrowsePath(models.Model):
+    browse = models.ForeignKey(Browse)
+    logfile = models.ForeignKey(LogFile)
+    path = models.TextField("path")
+    
+    def __unicode__(self):
+        return str(self.path)
+
+
+# Browse Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific page
+class BrowseHandle(models.Model):
+    browse = models.ForeignKey(Browse)
+    logfile = models.ForeignKey(LogFile)
+    handle = models.BigIntegerField("handle")
+    
+    def __unicode__(self):
+        return str(self.handle)
+
+
+# A count is collected for each service (logfile.service_name) in the records
+class BrowseCount(models.Model):
+    browse = models.ForeignKey(Browse)
+    logfile = models.ForeignKey(LogFile)
+    count = models.IntegerField("count")
+    
+    def __unicode__(self):
+        return str(self.count)
+    
+
+# This is a 'virtual' track entity, which will have multiple handles, paths and counts associated with it
 class Browse(models.Model):
-    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
+    counts = models.ManyToManyField(LogFile, through='BrowseCount', verbose_name="count values")
+    handles = models.ManyToManyField(LogFile, through='BrowseHandle', verbose_name="handle values")
+    paths = models.ManyToManyField(LogFile, through='BrowsePath', verbose_name="path values")
     week_ending = models.DateField("week ending")
-    path = models.TextField("path")
-    count = models.IntegerField("count")
-    handle = models.BigIntegerField("handle")
-    guid = models.CharField("GUID", max_length=255,blank=True, null=True)
-    
-    def __unicode__(self):
-        return '%s:%s' % (self.week_ending,self.guid)
-
-
-
-
-# Preview Paths have changed as the system has evolved and migrated
-class PreviewPath(models.Model):
-    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
-    track = models.ForeignKey(Track, verbose_name="track item for this path")
-    path = models.TextField("path")
-    updated_week_ending = models.DateField("week ending")
-    
-    def __unicode__(self):
-        return '%s:%s' % (self.updated_week_ending,self.path)
-
-
-# Preview Handles change from time to time due to tweaks in the system, but ideally we want to keep them related
-class PreviewHandle(models.Model):
-    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
-    track = models.ForeignKey(Track, verbose_name="track item for this handle")
-    handle = models.BigIntegerField("handle")
-    updated_week_ending = models.DateField("week ending")
-    
-    def __unicode__(self):
-        return '%s:%s' % (self.updated_week_ending,self.handle)
-        
-        
-# Preview record based on Aug 2010 Excel "yyyy-mm-dd Previews" datastructure. Each record is a line in the sheet
-class Preview(models.Model):
     guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
-    logfile = models.ForeignKey(LogFile, verbose_name="log file this entry is taken from")
-    week_ending = models.DateField("week ending")
-    count = models.IntegerField("count")
     
     def __unicode__(self):
         return '%s:%s' % (self.week_ending,self.guid)
+
+
+
+####
+# Apple Preview Records
+####
+
+# Preview Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific track preview
+class PreviewPath(models.Model):
+    preview = models.ForeignKey(Preview)
+    logfile = models.ForeignKey(LogFile)
+    path = models.TextField("path")
+    
+    def __unicode__(self):
+        return str(self.path)
+
+
+# Preview Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific track preview
+class PreviewHandle(models.Model):
+    preview = models.ForeignKey(Preview)
+    logfile = models.ForeignKey(LogFile)
+    handle = models.BigIntegerField("handle")
+    
+    def __unicode__(self):
+        return str(self.handle)
+
+
+# A count is collected for each service (logfile.service_name) in the records
+class PreviewCount(models.Model):
+    preview = models.ForeignKey(Preview)
+    logfile = models.ForeignKey(LogFile)
+    count = models.IntegerField("count")
+    
+    def __unicode__(self):
+        return str(self.count)
+    
+
+# This is a 'virtual' track entity, which will have multiple handles, paths and counts associated with it
+class Preview(models.Model):
+    counts = models.ManyToManyField(LogFile, through='PreviewCount', verbose_name="count values")
+    handles = models.ManyToManyField(LogFile, through='PreviewHandle', verbose_name="handle values")
+    paths = models.ManyToManyField(LogFile, through='PreviewPath', verbose_name="path values")
+    week_ending = models.DateField("week ending")
+    guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
+    # Eventually there will be a link here to a File record from the FFM module
+    
+    def __unicode__(self):
+        return '%s:%s' % (self.week_ending,self.guid)
+        
+
 
 
 ######
@@ -298,6 +326,7 @@ class FileRequest(models.Model):
     METHOD_CHOICES = (
         (u'GET', u'GET'),
         (u'POST', u'POST'),
+        (u'HEAD', u'HEAD'),
     )
     FILE_TYPE_CHOICES = (
         (u'mp3', u'Audio MP3'),
