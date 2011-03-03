@@ -28,8 +28,8 @@ class LogFile(models.Model):
 ####
 
 class UserActions(models.Model):
-    summary = models.ForeignKeyField(Summary)
-    logfile = models.ForeignKeyField(LogFile)
+    summary = models.ForeignKey(Summary)
+    logfile = models.ForeignKey(LogFile)
     # User Actions section
     browse = models.IntegerField("browse")
     download_preview  = models.IntegerField("download preview")
@@ -56,8 +56,8 @@ class ClientSoftware(models.Model):
         (u'windows', u'iTunes on Windows'),
         (u'not listed', u'Unknown'),
     )
-    summary = models.ForeignKeyField(Summary)
-    logfile = models.ForeignKeyField(LogFile)
+    summary = models.ForeignKey(Summary)
+    logfile = models.ForeignKey(LogFile)
     # Client Software section
     platform = models.CharField("platform", max_length=20, choices=PLATFORM_CHOICES)
     version_major = models.IntegerField("major version number")
