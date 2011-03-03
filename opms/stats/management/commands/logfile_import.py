@@ -171,12 +171,8 @@ class Command(LabelCommand):
             # Test for duplicate log entries immediately preceding
             if line == previous_line:
                 self._errorlog("##### DUPLICATE LINE DETECTED ##### \n" +\
-                    "Logfile line:" + str(self.import_stats.get('line_counter')) + "\n" +\
-                    "====================" + "\n" +\
-                    "Line    : " + str(line) + "\n" +\
-                    "--------------------" + "\n" +\
-                    "Previous: " + str(previous_line)  + "\n" +\
-                    "====================\n\n")
+                    "Line # :" + str(self.import_stats.get('line_counter')) + "\n" +\
+                    "Line   : " + str(line) + "\n")
                 self.import_stats['duplicatecount'] += 1
             else:
                 # Parse and store the line
@@ -232,15 +228,15 @@ class Command(LabelCommand):
 
         # Validate the data - Count the number of elements
         if len(data) <> 11:
-            self._errorlog("#### TOO FEW ITEMS IN THIS ENTRY. Line: " + str(self.import_stats.get('line_counter'))\
-            + "Data:" + str(data))
+            self._errorlog("#### TOO FEW ITEMS IN THIS ENTRY. Line: " + str(self.import_stats.get('line_counter')) + "\n"\
+            + "Data:" + str(data) + "\n")
             return
         
         # Status code validation
         status_code = self._status_code_validation(int(data.get('%>s')))
         if status_code == 0:
-            self._errorlog("#### STATUS CODE 0 PROBLEM WITH THIS ENTRY. Line: " + str(self.import_stats.get('line_counter'))\
-            + "Data:" + str(data))
+            self._errorlog("#### STATUS CODE 0 PROBLEM WITH THIS ENTRY. Line: " + str(self.import_stats.get('line_counter')) + "\n"\
+            + "Data:" + str(data) + "\n")
             return
         
         # Get or create the foreign key elements, Logfile, Rdns, FileRequest, Referer, UserAgent
@@ -248,8 +244,8 @@ class Command(LabelCommand):
         
         file_request = self._file_request(data.get('%r'))
         if file_request == None:
-            self._errorlog("#### INVALID REQUEST STRING IN THIS ENTRY. Line: " + str(self.import_stats.get('line_counter'))\
-            + "Data:" + str(data))
+            self._errorlog("#### INVALID REQUEST STRING IN THIS ENTRY. Line: " + str(self.import_stats.get('line_counter')) + "\n"\
+            + "Data:" + str(data) + "\n")
             return
         
         referer = self._referer(data.get('%{Referer}i'), status_code)
@@ -345,8 +341,7 @@ class Command(LabelCommand):
                 self._errorlog("##### DUPLICATE RECORD AT INSERTION DETECTED ##### \n" +\
                     "Database row id: " + str(item.id) + "\n" +\
                     "DB: " + str(item) + "\n" +\
-                    "--------------------" + "\n" +\
-                    "Logfile line number:" + str(self.import_stats.get('line_counter')) + "\n\n")
+                    "Logfile line number:" + str(self.import_stats.get('line_counter')) + "\n")
                 self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
                 
                 return item, False
@@ -365,7 +360,7 @@ class Command(LabelCommand):
         except LogEntry.DoesNotExist:
             obj.save()
         except LogEntry.MultipleObjectsReturned:
-            self._errorlog("Funky shit just happened(!). MultipleObjectsReturned: " + str(obj))
+            self._errorlog("Funky shit just happened(!). MultipleObjectsReturned: " + str(obj) + "\n")
             
         self.cache_log_entry.append(obj)
         return obj, True
@@ -442,9 +437,9 @@ class Command(LabelCommand):
         
         fs = ts[1].split('?')
         
-        # Validate method: Either GET or POST or corrupted
+        # Validate method: Either GET or POST or HEAD or corrupted
         fr.method = ts[0]
-        if fr.method != "GET" and fr.method != "POST":
+        if fr.method != "GET" and fr.method != "POST" and fr.method != "HEAD":
             return None
         
         fr.uri_string = str(fs[0])
@@ -582,7 +577,7 @@ class Command(LabelCommand):
                     user_agent.ua.save()
                     
             except UASException:
-                self._errorlog('_user_agent() parsing FAILED. agent_string=' + str(agent_string))
+                self._errorlog('_user_agent() parsing FAILED. agent_string=' + str(agent_string) + "\n")
             
             #Not there, so write to database
             user_agent.save()
