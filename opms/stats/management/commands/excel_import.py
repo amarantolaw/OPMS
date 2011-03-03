@@ -119,7 +119,25 @@ class Command(LabelCommand):
 
         # Some basic checking
         if filename.endswith('.xls') == False:
-           raise CommandError("This is not a valid Excel 1998-2002 file. Must end in .xls\n\n")        
+           raise CommandError("This is not a valid Excel 1998-2002 file. Must end in .xls\n\n")
+        
+        # Test the log_service option is valid. Use the same list as LogFile.SERVICE_NAME_CHOICES
+        # Guess the service based on the filename
+        try:
+            xls =filename[filename.rindex('/')+1:]
+        except ValueError:
+            # Likely path doesn't feature any directories... so improvise
+            xls = filename
+        # This may be Oxford specific?
+        if xls.find('-dz-') > 0:
+            log_service = 'itu-psm'
+        elif xls.find('-public-') > 0:
+            log_service = 'itu'
+        else:
+            raise CommandError("The service can not be determined from the filename.")
+        
+        # This only needs setting/getting the once per call of this function
+        logfile_obj = self._logfile(filename, log_service)
         
         # Read the Worksheet
         wb = open_workbook(filename)
@@ -127,17 +145,17 @@ class Command(LabelCommand):
         # Scan through the worksheets
         for sheet_name in wb.sheet_names():
             if sheet_name == 'Summary':
-                self._parse_summary(wb.sheet_by_name(sheet_name))
+                self._parse_summary(logfile_obj, wb.sheet_by_name(sheet_name))
             elif sheet_name.endswith(" Tracks"):
-                self._parse_tracks(wb.sheet_by_name(sheet_name), sheet_name[0:10])
+                self._parse_tracks(logfile_obj, wb.sheet_by_name(sheet_name), sheet_name[0:10])
             elif sheet_name.endswith(" Browse"):
-                self._parse_browses(wb.sheet_by_name(sheet_name), sheet_name[0:10])
+                self._parse_browses(logfile_obj, wb.sheet_by_name(sheet_name), sheet_name[0:10])
             elif sheet_name.endswith(" Edits"):
-                self._parse_edits(wb.sheet_by_name(sheet_name), sheet_name[0:10])
+                self._parse_edits(logfile_obj, wb.sheet_by_name(sheet_name), sheet_name[0:10])
             elif sheet_name.endswith(" Previews"):
-                self._parse_previews(wb.sheet_by_name(sheet_name), sheet_name[0:10])
+                self._parse_previews(logfile_obj, wb.sheet_by_name(sheet_name), sheet_name[0:10])
             elif sheet_name.endswith(" Users"):
-                self._parse_users(wb.sheet_by_name(sheet_name), sheet_name[0:10])
+                self._parse_users(logfile_obj, wb.sheet_by_name(sheet_name), sheet_name[0:10])
             else:
                 err_str = "Unidentified Worksheet in this report (" + str(sheet_name) + "). Please investigate"
                 self._errorlog(err_str)
@@ -150,7 +168,38 @@ class Command(LabelCommand):
         return None
 
 
-    def _parse_summary(self, summary):
+
+    def _logfile(self, filename, log_service):
+        "Get or create a LogFile record for the given filename"
+        logfile = {}
+        logfile['service_name'] = log_service
+        try:
+            logfile['file_name'] = filename[filename.rindex('/')+1:]
+            logfile['file_path'] = filename[:filename.rindex('/')+1]
+        except ValueError:
+            # Likely path doesn't feature any directories... so improvise
+            logfile['file_name'] = filename
+            logfile['file_path'] = "./"
+            
+        logfile['last_updated'] = datetime.datetime.utcnow()
+        
+        obj, created = LogFile.objects.get_or_create(
+            service_name = logfile.get('service_name'),
+            file_name = logfile.get('file_name'),
+            file_path = logfile.get('file_path'),
+            defaults = logfile)
+        
+        # If this isn't the first time, and the datetime is significantly different from last access, update the time
+        if not created and (logfile.get('last_updated') - obj.last_updated).days > 0:
+            obj.last_updated = logfile.get('last_updated')
+        
+        obj.save()
+
+        return obj
+        
+
+
+    def _parse_summary(self, logfile_obj, summary):
         # Define some constants
         heading_col1 = 1
         heading_col2 = 0
@@ -159,6 +208,7 @@ class Command(LabelCommand):
         for col_id in range(2,6):
             # Iterate through this week of data matching cell heading to model and assigning the value
             report = {}
+            report['logfile'] = logfile_obj
             week_ending = ''
             first_not_listed = True
             obj = ''
@@ -208,12 +258,12 @@ class Command(LabelCommand):
                 print "Data for week ending",obj.week_ending,", has been added to the database"
                 obj.save()
             else:
-                if self.merge:
+                if self.merge or report.get('logfile').service_name != obj.logfile.service_name:
                     # take the values in report[] and merge with the values in obj
                     for k,v in report.items():
                         try:
                             merged_value = int(getattr(obj, k)) + int(v)
-                            self._debug("obj-v:" + str(int(getattr(obj, k))) + ". new-v:" + str(int(v)) + ". Merged result:" + str(merged_value))
+                            self._debug("k:"+ str(k) +". obj-v:" + str(int(getattr(obj, k))) + ". new-v:" + str(int(v)) + ". Merged result:" + str(merged_value))
                             setattr(obj, k, merged_value)
                         except TypeError:
                             pass # Because all we're testing for is whether these are two integers to sum
@@ -224,41 +274,103 @@ class Command(LabelCommand):
         return None
 
 
-    def _parse_tracks(self, sheet, week_ending):
-        # print "Beginning import for TRACKS:", sheet_name
-        cache = list(Track.objects.filter(week_ending=week_ending).order_by('handle'))
-        # Reset variables
-        count = 0
-
+    def _parse_tracks(self, logfile_obj, sheet, week_ending):
+        # week_ending is a given from the sheet name
+        # count may need to be added to if this is from a duplicate data source (e.g. excel sheets from two different sites)
+        # if present, treat guid as the key, and add subsquent path and handle codes, noting when the oldest date for them 
+        #    arises (i.e. just after they changed)
+        # guid may not be present in early data, if missing... match on handle and path. If handle exists, add a new path. 
+        # If no handle found, look for an existing path and add handle, otherwise create new.
+        
+        track_cache = list(Track.objects.filter(week_ending=week_ending).order_by('guid'))
+    
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
-            created = True
+            # Put together a basic model structure from the raw data
             report = Track()
+            report.logfile = logfile_obj
             report.week_ending = week_ending #Not: time.strptime(week_ending,'%Y-%m-%d')
-            report.path = sheet.cell(row_id,0).value
             report.count = int(sheet.cell(row_id,1).value)
-            report.handle = long(sheet.cell(row_id,2).value)
-            report.guid = sheet.cell(row_id,3).value
+            report.guid = sheet.cell(row_id,3).value[:255]
             
-            # Check the cache
-            for item in cache:
-                # Don't need to check the date! Data can only be for this date...
-                if item.handle == report.handle:
-                    self._errorlog("Track row "+str(row_id)+" has already been imported")
-                    created = False
-                    continue
+            report.path = TrackPath()
+            report.path.logfile = logfile_obj
+            report.path.path = sheet.cell(row_id,0).value
+            report.path.week_ending = week_ending
+            
+            report.handle = TrackHandle()
+            report.handle.logfile = logfile_obj
+            report.handle.handle = long(sheet.cell(row_id,2).value)
+            report.handle.week_ending = week_ending
+            # Create a holder for and existing track object, to be found in the cache
+            track_obj = ''
+        
+            if report.guid != '':    
+                # Check the cache
+                for item in cache:
+                    # Look to see if this data come from an alternative service or merge has been forced
+                    if report.logfile.service_name != item.logfile.service_name or self.merge:
+                        # Leave logfile
+                    
+                    # Don't need to check the date! Data can only be for this date...
+                    if item.guid == report.guid:
+                        self._errorlog("Track row "+str(row_id)+" has already been imported")
+                        
+                        tp = item.path
+                        # Test if path matches, then update the date to find the earliest example of this path
+                        if tp.path == report.path.path and \
+                        tp.week_ending > datetime.strptime(report.path.week_ending,'%Y-%m-%d').date():
+                            # compare dates, if this path existed earlier than the date shows, update the date and logfile
+                            tp.week_ending = report.path.week_ending
+                            tp.logfile = report.path.logfile
+                            tp.save()
+                        # If the path doesn't match, then it has changed, so we should create another path object
+                        elif tp.path != report.path.path:
+                        
+                        th = item.handle
+                        if th.handle == report.handle.handle and \
+                        th.week_ending > datetime.strptime(report.handle.week_ending,'%Y-%m-%d').date():
+                            # compare dates, if this path existed earlier than the date shows, update the date and logfile
+                            th.week_ending = report.handle.week_ending
+                            th.logfile = report.handle.logfile
+                            th.save()
+                        
+                        track_obj = item
+                        continue
 
-            if created:
+
+            # If created...
+            if track_obj == '':
                 count += 1
                 report.save()
                 cache.append(report)
+                
+    
+        # print "Beginning import for TRACKS:", sheet_name
+        # Reset variables
+        count = 0
+
+            
+
+            if created:
+            elif self.merge:
+                try:
+                    merged_value = int(obj.count) + report.count
+                    self._debug("obj.count:" + str(obj.count) + ". report.count:" + str(report.count) + ". Merged result:" + str(merged_value))
+                    obj.count = merged_value
+                    
+                    obj.save()
+                    count += 1
+                except TypeError:
+                    pass # Because all we're testing for is whether these are two integers to sum
+                
             
         print "Imported TRACK data for " + str(week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
         return None
 
 
 
-    def _parse_browses(self, sheet, week_ending):
+    def _parse_browses(self, logfile_obj, sheet, week_ending):
         # print "Beginning import for BROWSE:", sheet_name
         cache = list(Browse.objects.filter(week_ending=week_ending).order_by('handle'))
         # Reset variables
@@ -292,13 +404,13 @@ class Command(LabelCommand):
 
 
 
-    def _parse_edits(self, sheet, week_ending):
+    def _parse_edits(self, logfile_obj, sheet, week_ending):
         print "Found 'EDITS " + str(week_ending) + "'. Skipping edit import."
         return None
 
 
 
-    def _parse_previews(self, sheet, week_ending):
+    def _parse_previews(self, logfile_obj, sheet, week_ending):
         # print "Beginning import for PREVIEW:", sheet_name
         cache = list(Preview.objects.filter(week_ending=week_ending).order_by('handle'))
         # Reset variables
@@ -333,7 +445,7 @@ class Command(LabelCommand):
 
 
 
-    def _parse_users(self, sheet, week_ending):
+    def _parse_users(self, logfile_obj, sheet, week_ending):
         print "Found 'USERS " + str(week_ending) + "'. Skipping user import."
         return None
 
