@@ -51,10 +51,10 @@ class Command(NoArgsCommand):
             self.update_stats['update_count'] += 1
             if record.resolved_name == 'Unknown':
                 self.update_stats['update_timeoutskips'] += 1
-            else:
-                # Update the record!
-                record.last_updated = datetime.datetime.utcnow()
-                record.save()
+            
+            # Update the record! - even if it comes back as Unknown, as the timestamp needs updating.
+            record.last_updated = datetime.datetime.utcnow()
+            record.save()
             
             if (self.update_stats.get('update_count') % 10) == 0:
                 # Output the status
