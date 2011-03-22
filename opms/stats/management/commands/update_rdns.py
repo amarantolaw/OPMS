@@ -64,7 +64,7 @@ class Command(NoArgsCommand):
                 print str(datetime.datetime.utcnow()) + ": " +\
                     "Parsed " + str(self.update_stats.get('update_count')) + " IP Addresses. " +\
                     "Skipped " + str(self.update_stats.get('update_timeoutskips')) + " IP Addresses. " +\
-                    "Rate: " + str(self.update_stats.get('import_rate'))[0:6] + " IP Addresses/sec. "
+                    "Rate: " + str(self.update_stats.get('update_rate'))[0:6] + " IP Addresses/sec. "
                     
                 # Write the error cache to disk
                 self._error_log_save()        
