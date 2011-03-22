@@ -48,7 +48,7 @@ class Command(NoArgsCommand):
             if record.resolved_name == 'Unknown':
                 self.update_stats['update_timeoutskips'] += 1
             
-            if (self.import_stats.get('update_count') % 10) == 0:
+            if (self.update_stats.get('update_count') % 10) == 0:
                 # Output the status
                 try:
                     self.update_stats['update_rate'] = float(self.update_stats.get('update_count')) /\
