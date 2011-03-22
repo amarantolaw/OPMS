@@ -7,6 +7,7 @@ from opms.stats.models import *
 import datetime, sys
 from dns import resolver,reversename
 from IPy import IP
+from time import sleep
 
 class Command(NoArgsCommand):
     help = 'Scan through stats.rdns entries and attempt to resolve the Unknown IP addresses to a domain name'
@@ -112,7 +113,10 @@ class Command(NoArgsCommand):
                 self.rdns_timeout = datetime.datetime.utcnow() 
                 self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to NO ANSWER at ' + str(self.rdns_timeout))
         else:
-            self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
+            self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to TIMEOUT at ' + str(self.rdns_timeout) + '. PAUSING for 30')
+            if self.rdns_timeout != 0:
+                sleep(30)
+                
             
         # self._debug('_rdns_lookup('+str(ipaddress)+'): rdns='+resolved_name)
         
