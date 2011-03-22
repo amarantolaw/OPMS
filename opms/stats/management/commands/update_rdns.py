@@ -105,8 +105,8 @@ class Command(NoArgsCommand):
 
         # self._debug('_rdns_lookup('+str(ipaddress)+'): self.rdns_timeout=' + str(self.rdns_timeout))
         # Has a timeout occurred already? Was the timeout more than 30 seconds ago?
-        if self.rdns_timeout == 0 or (datetime.datetime.utcnow() - self.rdns_timeout).seconds > 30:
-            self.rdns_timeout = 0
+        #if self.rdns_timeout == 0
+        if True:
             # Attempt an RDNS lookup, and remember to save this back to the object
             try:
                 addr = reversename.from_address(ipaddress)
@@ -116,18 +116,19 @@ class Command(NoArgsCommand):
                 self._errorlog('NXDOMAIN error trying to resolve:'+str(addr))
                 resolved_name = 'No Resolved Name'
                     
-            # Timeouts can be a problem with batch importing, use this to skip the issue for sorting later
+            # Timeouts can be a problem with batch updating, use this to skip the issue for sorting later
             except resolver.Timeout:
                 self.rdns_timeout = datetime.datetime.utcnow()
                 self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
                 
             except resolver.NoAnswer:
-                self.rdns_timeout = datetime.datetime.utcnow() 
                 self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to NO ANSWER at ' + str(self.rdns_timeout))
-        else:
-            self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to TIMEOUT at ' + str(self.rdns_timeout) + '. PAUSING for 30')
-            if self.rdns_timeout != 0:
-                sleep(30)
+                
+        # elif (datetime.datetime.utcnow() - self.rdns_timeout).seconds > 30:
+        #    # Not entirely sure this delay is needed...
+        #    sleep(30)
+        #    self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to TIMEOUT at ' + str(self.rdns_timeout) + '. PAUSING for 30')
+        #    self.rdns_timeout = 0
                 
             
         # self._debug('_rdns_lookup('+str(ipaddress)+'): rdns='+resolved_name)
