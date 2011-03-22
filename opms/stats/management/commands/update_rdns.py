@@ -7,7 +7,6 @@ from opms.stats.models import *
 import datetime, sys
 from dns import resolver,reversename
 from IPy import IP
-from time import sleep
 
 class Command(NoArgsCommand):
     help = 'Scan through stats.rdns entries and attempt to resolve the Unknown IP addresses to a domain name'
@@ -47,7 +46,7 @@ class Command(NoArgsCommand):
         
         
         # Loop through stats.rdns entries that show as Unknown, attempt rdns lookup
-        for record in Rdns.objects.filter(resolved_name='Unknown'):
+        for record in Rdns.objects.filter(resolved_name='Unknown').order_by('last_updated'):
             record.resolved_name = self._rdns_lookup(record.ip_address)
             self.update_stats['update_count'] += 1
             if record.resolved_name == 'Unknown':
@@ -103,36 +102,23 @@ class Command(NoArgsCommand):
         # Default answer is the failure state of "Unknown"
         resolved_name = 'Unknown'
 
-        # self._debug('_rdns_lookup('+str(ipaddress)+'): self.rdns_timeout=' + str(self.rdns_timeout))
-        # Has a timeout occurred already? Was the timeout more than 30 seconds ago?
-        #if self.rdns_timeout == 0
-        if True:
-            # Attempt an RDNS lookup, and remember to save this back to the object
-            try:
-                addr = reversename.from_address(ipaddress)
-                resolved_name = str(resolver.query(addr,"PTR")[0])
-                    
-            except resolver.NXDOMAIN:
-                self._errorlog('NXDOMAIN error trying to resolve:'+str(addr))
-                resolved_name = 'No Resolved Name'
-                    
-            # Timeouts can be a problem with batch updating, use this to skip the issue for sorting later
-            except resolver.Timeout:
-                self.rdns_timeout = datetime.datetime.utcnow()
-                self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
+        # Attempt an RDNS lookup
+        try:
+            addr = reversename.from_address(ipaddress)
+            resolved_name = str(resolver.query(addr,"PTR")[0])
                 
-            except resolver.NoAnswer:
-                self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to NO ANSWER at ' + str(self.rdns_timeout))
+        except resolver.NXDOMAIN:
+            self._errorlog('NXDOMAIN error trying to resolve:'+str(addr))
+            resolved_name = 'No Resolved Name'
                 
-        # elif (datetime.datetime.utcnow() - self.rdns_timeout).seconds > 30:
-        #    # Not entirely sure this delay is needed...
-        #    sleep(30)
-        #    self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to TIMEOUT at ' + str(self.rdns_timeout) + '. PAUSING for 30')
-        #    self.rdns_timeout = 0
-                
+        # Timeouts can be a problem with batch updating, use this to skip the issue for sorting later
+        except resolver.Timeout:
+            self.rdns_timeout = datetime.datetime.utcnow()
+            self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to TIMEOUT at ' + str(self.rdns_timeout))
             
-        # self._debug('_rdns_lookup('+str(ipaddress)+'): rdns='+resolved_name)
-        
+        except resolver.NoAnswer:
+            self._errorlog('_rdns_lookup('+str(ipaddress)+') FAILED due to NO ANSWER at ' + str(self.rdns_timeout))
+            
         return resolved_name
 
 
