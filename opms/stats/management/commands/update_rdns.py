@@ -57,9 +57,9 @@ class Command(NoArgsCommand):
                     self.update_stats['update_rate'] = 0
                 
                 print str(datetime.datetime.utcnow()) + ": " +\
-                    "Parsed " + str(self.import_stats.get('update_count')) + " IP Addresses. " +\
-                    "Skipped " + str(self.import_stats.get('update_timeoutskips')) + " IP Addresses. " +\
-                    "Rate: " + str(self.import_stats.get('import_rate'))[0:6] + " IP Addresses/sec. "
+                    "Parsed " + str(self.update_stats.get('update_count')) + " IP Addresses. " +\
+                    "Skipped " + str(self.update_stats.get('update_timeoutskips')) + " IP Addresses. " +\
+                    "Rate: " + str(self.update_stats.get('import_rate'))[0:6] + " IP Addresses/sec. "
                     
                 # Write the error cache to disk
                 self._error_log_save()        
@@ -72,7 +72,7 @@ class Command(NoArgsCommand):
             self.update_stats['update_rate'] = 0               
         
         print "\nUpdate finished at " + str(datetime.datetime.utcnow()) +\
-            "\nSkipped " + str(self.import_stats.get('update_timeoutskips')) + " IP Addresses. " +\
+            "\nSkipped " + str(self.update_stats.get('update_timeoutskips')) + " IP Addresses. " +\
             "\nIP addresses parsed: " + str(self.update_stats.get('update_count')) +\
             "\nImported at " + str(self.update_stats.get('update_rate'))[0:6] + " IP Addresses/sec\n"
         
