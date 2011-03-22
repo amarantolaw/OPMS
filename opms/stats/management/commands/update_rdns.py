@@ -108,7 +108,7 @@ class Command(NoArgsCommand):
             resolved_name = str(resolver.query(addr,"PTR")[0])
                 
         except resolver.NXDOMAIN:
-            self._errorlog('NXDOMAIN error trying to resolve:'+str(addr))
+            self._errorlog('_rdns_lookup('+str(ipaddress)+') NXDOMAIN error trying to resolve:'+str(addr))
             resolved_name = 'No Resolved Name'
                 
         # Timeouts can be a problem with batch updating, use this to skip the issue for sorting later
