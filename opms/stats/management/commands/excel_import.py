@@ -1,6 +1,6 @@
 # Import script for Apple iTunes U supplied Excel spreadsheets
 # Author: Carl Marshall
-# Last Edited: 1-3-2011
+# Last Edited: 22-3-2011
 
 from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
@@ -200,6 +200,25 @@ class Command(LabelCommand):
 
 
     def _parse_summary(self, logfile_obj, summary):
+        # Scan down the sheet, looking for the four columns of data and matching to header data
+        # Work between modes, saving the results at the end.
+        section = ''
+        for row_id in range(summary.nrows):
+            if section == '':
+                # Should only happen at the start, and we're looking for week_ending dates, and then User Actions
+            elif section == 'User Actions':
+            elif section == 'Total Track Downloads':
+            elif section == 'Client Software':
+            
+            
+            
+            
+            
+            
+            
+            
+    
+    
         # Define some constants
         heading_col1 = 1
         heading_col2 = 0
@@ -222,19 +241,18 @@ class Command(LabelCommand):
                         # Get header by looking in column B first, then in  column A if nothing present
                         header = ''
                         if summary.cell(row_id,heading_col1).value != '':
-                            if summary.cell(row_id,heading_col1).value in self.modelmapping:
-                                header = self.modelmapping.get(summary.cell(row_id,heading_col1).value)
                             # There are two rows labelled "Not Listed". The first is a User Action, the second a Client Software field.
-                            elif summary.cell(row_id,heading_col1).value == "Not Listed":
+                            if summary.cell(row_id,heading_col1).value == "Not Listed":
                                 if first_not_listed:
                                     header = 'ua_not_listed' 
                                     first_not_listed = False
                                 else:
                                     header = 'cs_not_listed'
                             else:
-                                err_str = "Key not recognised in col B, row " + str(row_id) + " - " + str(summary.cell(row_id,heading_col1).value)
-                                self._errorlog(err_str)
-                                raise CommandError(err_str)
+                                header = summary.cell(row_id,heading_col1).value
+                                #err_str = "Key not recognised in col B, row " + str(row_id) + " - " + str(summary.cell(row_id,heading_col1).value)
+                                #self._errorlog(err_str)
+                                #raise CommandError(err_str)
                         elif summary.cell(row_id,heading_col2).value != '':
                             if summary.cell(row_id,heading_col2).value in self.modelmapping:
                                 header = self.modelmapping.get(summary.cell(row_id,heading_col2).value)

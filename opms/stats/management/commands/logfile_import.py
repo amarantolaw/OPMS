@@ -1,12 +1,11 @@
 # Import script for Apache Logfiles from media servers
 # Author: Carl Marshall
-# Last Edited: 4-2-2011
+# Last Edited: 22-3-2011
 from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
 from opms.stats.models import *
 from opms.stats.uasparser import UASparser, UASException
 import apachelog, datetime, sys, pygeoip
-from dns import resolver,reversename
 from IPy import IP
 
 class Command(LabelCommand):
