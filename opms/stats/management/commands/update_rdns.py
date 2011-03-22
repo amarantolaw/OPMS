@@ -74,7 +74,7 @@ class Command(NoArgsCommand):
             
             if self.stopcount > 0 and self.update_stats.get('update_count') > self.stopcount:
                 print 'Stopping now having reached update limit\n'
-                continue
+                break
         
         # Final stats output at end of file
         try:
