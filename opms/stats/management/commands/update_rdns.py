@@ -11,7 +11,7 @@ from time import sleep
 
 class Command(NoArgsCommand):
     help = 'Scan through stats.rdns entries and attempt to resolve the Unknown IP addresses to a domain name'
-    option_list = LabelCommand.option_list + (
+    option_list = NoArgsCommand.option_list + (
         make_option('--stop-at', action='store', dest='stopcount',
             default=0, help='Optional limit to the number of IP addresses to parse'),
     )
