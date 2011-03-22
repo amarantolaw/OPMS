@@ -73,7 +73,7 @@ class Command(NoArgsCommand):
                 # Write the error cache to disk
                 self._error_log_save()
             
-            if self.stopcount > 0 and self.update_stats.get('update_count')) > self.stopcount:
+            if self.stopcount > 0 and self.update_stats.get('update_count') > self.stopcount:
                 print 'Stopping now having reached update limit\n'
                 continue
         
