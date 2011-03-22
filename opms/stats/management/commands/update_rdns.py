@@ -11,16 +11,18 @@ from time import sleep
 
 class Command(NoArgsCommand):
     help = 'Scan through stats.rdns entries and attempt to resolve the Unknown IP addresses to a domain name'
-    #option_list = LabelCommand.option_list + (
-    #    make_option('--startline', action='store', dest='start_at_line',
-    #        default=1, help='Optional start line to allow resumption of large log files. Default is 1.'),
-    #)
+    option_list = LabelCommand.option_list + (
+        make_option('--stop-at', action='store', dest='stopcount',
+            default=0, help='Optional limit to the number of IP addresses to parse'),
+    )
     
     def __init__(self):
         # datetime value for any rdns timeout problems
         self.rdns_timeout = 0
         # Toggle debug statements on/off
         self.debug = False
+        # Optional limit to the number of IP addresses to parse
+        self.stopcount = 0
         # Record basic information about the import process for reporting
         self.update_stats = {}
         # Error logging file and string cache
@@ -40,6 +42,8 @@ class Command(NoArgsCommand):
         self.update_stats['update_count'] = 0
         self.update_stats['update_timeoutskips'] = 0
         self.update_stats['update_starttime'] = datetime.datetime.utcnow()
+        
+        self.stopcount = int(options.get('stopcount', 0))
         
         
         # Loop through stats.rdns entries that show as Unknown, attempt rdns lookup
@@ -67,7 +71,11 @@ class Command(NoArgsCommand):
                     "Rate: " + str(self.update_stats.get('update_rate'))[0:6] + " IP Addresses/sec. "
                     
                 # Write the error cache to disk
-                self._error_log_save()        
+                self._error_log_save()
+            
+            if self.stopcount > 0 and self.update_stats.get('update_count')) > self.stopcount:
+                print 'Stopping now having reached update limit\n'
+                continue
         
         # Final stats output at end of file
         try:
