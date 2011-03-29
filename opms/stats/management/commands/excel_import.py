@@ -1,6 +1,6 @@
 # Import script for Apple iTunes U supplied Excel spreadsheets
 # Author: Carl Marshall
-# Last Edited: 22-3-2011
+# Last Edited: 29-3-2011
 
 from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
@@ -201,94 +201,114 @@ class Command(LabelCommand):
 
     def _parse_summary(self, logfile_obj, summary):
         # Scan down the sheet, looking for the four columns of data and matching to header data
-        # Work between modes, saving the results at the end.
+        # Work between modes, saving the results to the db at the end.
+        
+        # Some reference constants
+        headings1 = 1 # Most headings are in Col B, hence this is headings1
+        headings2 = 0
+        week1 = 2
+        week2 = 3
+        week3 = 4
+        week4 = 5 # Ignoring the totals column after this week
+        # List of Dictionaries to hold the data scanned in from the sheet
+        summaryUA = [{},{},{},{}] # Four columns of data on each sheet, we'll scan in parallel
+        summaryCS = [{},{},{},{}] # Four columns of data on each sheet, we'll scan in parallel
+        # Mode switch
         section = ''
+        
+        def _summaryUA_set(key, row_id):
+            summaryUA[0][key] = summary.cell(row_id,week1).value
+            summaryUA[1][key] = summary.cell(row_id,week2).value
+            summaryUA[2][key] = summary.cell(row_id,week3).value
+            summaryUA[3][key] = summary.cell(row_id,week4).value
+            return None
+        
+        def _summaryCS_set(key, row_id):
+            summaryCS[0][key] = summary.cell(row_id,week1).value
+            summaryCS[1][key] = summary.cell(row_id,week2).value
+            summaryCS[2][key] = summary.cell(row_id,week3).value
+            summaryCS[3][key] = summary.cell(row_id,week4).value
+            return None
+        
         for row_id in range(summary.nrows):
-            if section == '':
-                # Should only happen at the start, and we're looking for week_ending dates, and then User Actions
-            elif section == 'User Actions':
-            elif section == 'Total Track Downloads':
+            if section == 'User Actions':
+                if summary.cell(row_id,headings1).value == 'Total Track Downloads' or 
+                    summary.cell(row_id,headings2).value == 'Total Track Downloads':
+                    self._summaryUA_set('Total Track Downloads',row_id)
+                    section = 'Client Software'
+                    
+                elif summary.cell(row_id,week1).value != '':
+                    self._summaryUA_set(summary.cell(row_id,headings1).value,row_id)
+            
             elif section == 'Client Software':
-            
-            
-            
-            
-            
-            
-            
-            
-    
-    
-        # Define some constants
-        heading_col1 = 1
-        heading_col2 = 0
-
-        # Iterate through the four columns of data
-        for col_id in range(2,6):
-            # Iterate through this week of data matching cell heading to model and assigning the value
-            report = {}
-            report['logfile'] = logfile_obj
-            week_ending = ''
-            first_not_listed = True
-            obj = ''
-            created = False
-            for row_id, col_value in enumerate(summary.col_values(col_id)):
-                if col_value != '':
-                    if week_ending == '':
-                        week_ending = col_value # test using a sting in place of a datetime object
-                        report['week_ending'] = week_ending
-                    else:
-                        # Get header by looking in column B first, then in  column A if nothing present
-                        header = ''
-                        if summary.cell(row_id,heading_col1).value != '':
-                            # There are two rows labelled "Not Listed". The first is a User Action, the second a Client Software field.
-                            if summary.cell(row_id,heading_col1).value == "Not Listed":
-                                if first_not_listed:
-                                    header = 'ua_not_listed' 
-                                    first_not_listed = False
-                                else:
-                                    header = 'cs_not_listed'
-                            else:
-                                header = summary.cell(row_id,heading_col1).value
-                                #err_str = "Key not recognised in col B, row " + str(row_id) + " - " + str(summary.cell(row_id,heading_col1).value)
-                                #self._errorlog(err_str)
-                                #raise CommandError(err_str)
-                        elif summary.cell(row_id,heading_col2).value != '':
-                            if summary.cell(row_id,heading_col2).value in self.modelmapping:
-                                header = self.modelmapping.get(summary.cell(row_id,heading_col2).value)
-                            else:
-                                err_str = "Key not recognised in col A, row " + str(row_id) + " - " + str(summary.cell(row_id,heading_col2).value)
-                                self._errorlog(err_str)
-                                raise CommandError(err_str)
-                        else:
-                            err_str = "UNKNOWN HEADER: Missing key row " + str(row_id)
-                            self._errorlog(err_str)
-                            raise CommandError(err_str)
-
-                        # Now store the sheet value in the dictionary against the model fieldname
-                        report[header] = col_value
-    
-            # Now try and save this week's worth of data
-            obj, created = Summary.objects.get_or_create(week_ending=report.get('week_ending'), defaults=report)
-
-            # Summary report for keeping track of progress
-            if created:
-                print "Data for week ending",obj.week_ending,", has been added to the database"
-                obj.save()
+                if summary.cell(row_id,week1).value != '':
+                    self._summaryCS_set(summary.cell(row_id,headings1).value,row_id)
+                    
             else:
-                if self.merge or report.get('logfile').service_name != obj.logfile.service_name:
-                    # take the values in report[] and merge with the values in obj
-                    for k,v in report.items():
-                        try:
-                            merged_value = int(getattr(obj, k)) + int(v)
-                            self._debug("k:"+ str(k) +". obj-v:" + str(int(getattr(obj, k))) + ". new-v:" + str(int(v)) + ". Merged result:" + str(merged_value))
-                            setattr(obj, k, merged_value)
-                        except TypeError:
-                            pass # Because all we're testing for is whether these are two integers to sum
-                    print "Data for week ending",obj.week_ending,", has been merged into the database"
-                    obj.save()
+                # Should only happen at the start, and we're looking for week_ending dates, and then User Actions
+                if summary.cell(row_id,week1).value == '':
+                    section = summary.cell(row_id,headings2).value
                 else:
-                    print "Data for week ending",obj.week_ending,", was found in the database. Not updated."
+                    self._summaryUA_set('week_ending',row_id)
+                    self._summaryCS_set('week_ending',row_id)
+                
+            
+        # Should now have 8 lists of dictionaries - 4 for Client Software, 4 for UserActions
+        for i in range(0,3):
+            week = summaryUA[i]
+            
+            summary_object, summary_created = Summary.objects.get_or_create(week_ending=week.get('week_ending'))
+            
+            if summary_created:
+                ua_object = UserActions()
+                ua_object.logfile = logfile_obj
+                ua_object.summary = summary_object
+                ua_object.browse = week.get('Browse', default=0)
+                ua_object.download_preview = week.get('DownloadPreview', default=0)
+                ua_object.download_preview_ios = week.get('DownloadPreviewiOS', default=0)
+                ua_object.download_track = week.get('DownloadTrack', default=0)
+                ua_object.download_tracks = week.get('DownloadTracks', default=0)
+                ua_object.download_ios = week.get('DownloadiOS', default=0)
+                ua_object.edit_files = week.get('EditFiles', default=0)
+                ua_object.edit_page = week.get('EditPage', default=0)
+                ua_object.logout = week.get('Logout', default=0)
+                ua_object.search_results_page = week.get('SearchResultsPage', default=0)
+                ua_object.subscription = week.get('Subscription', default=0)
+                ua_object.subscription_enclosure = week.get('SubscriptionEnclosure', default=0)
+                ua_object.subscription_feed = week.get('SubscriptionFeed', default=0)
+                ua_object.upload = week.get('Upload', default=0)
+                ua_object.not_listed = week.get('Not Listed', default=0)
+                ua_object.save()
+                
+                for k,v in summaryCS[i].items():
+                    # Parse each key to create a related ClientSoftware object
+                    cs_object = ClientSoftware()
+                    cs_object.logfile = logfile_obj
+                    cs_object.summary = summary_object
+                    cs_object.version_major = 0
+                    cs_object.version_minor = 0
+                    cs_object.count = int(v)
+                    
+                    strings = k.split('/')
+                    if len(strings) > 1:
+                        version = strings[1].split('.')
+                        if len(version) > 1:
+                            # Most items will fall into this pattern Application/M.m/Platform
+                            if strings[2] == '?':
+                                cs_object.platform = str(strings[0])[:20] #iTunes-iPod, etc
+                            else:
+                                cs_object.platform = str(strings[2])[:20] #Macintosh, Windows
+                            cs_object.version_major = int(version[0])
+                            cs_object.version_minor = int(version[1])
+                        else:
+                            # This is likely to be the ?/?/Platform
+                            cs_object.platform = str(strings[2])[:20] #Macintosh, Windows
+                    else:
+                        # Likely to be 'Not Listed'
+                        cs_object.platform = 'Unknown'
+                    
+                    cs_object.save()
+        
         return None
 
 
