@@ -337,6 +337,11 @@ class FileRequest(models.Model):
         (u'gif', u'Image GIF'),
         (u'png', u'Image PNG'),
         (u'jpg', u'Image JPG'),
+        (u'pdf', u'Portable Document Format'),
+        (u'pub', u'Electronic Book'),
+        (u'htm', u'Webpage'),
+        (u'tml', u'Webpage'),
+        (u'php', u'php Webpage'),
         (u'', u'Unknown'),
     )
     method = models.CharField("request method", max_length=5, choices=METHOD_CHOICES)
