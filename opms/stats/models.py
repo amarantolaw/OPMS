@@ -27,23 +27,13 @@ class LogFile(models.Model):
 # Apple Summary Data
 ####
 
-# A 'virtual' Summary record based on a column of data from the Summary tab split across several tables
-class Summary(models.Model):
-    # These ManyToMany references are causing problems
-    # user_actions = models.ManyToManyField(LogFile, through='UserActions')
-    # client_software = models.ManyToManyField(LogFile, through='ClientSoftware')
-    
+# A Summary record based on a column of data from the Summary tab. Note there can be more than one for a given week (iTU + iTUPSM)
+class Summary(models.Model):    
+    logfile = models.ForeignKey(LogFile)
     # Date from the column - typically from yyyy-mm-dd format
     week_ending = models.DateField("week ending", db_index=True)
     # The total as calculated by Apple
     total_track_downloads = models.IntegerField("total track downloads")
-    
-    def __unicode__(self):
-        return str(date.strftime(self.week_ending,"%Y-%m-%d")) + ": Total Downloads=" + str(self.total_track_downloads)
-
-class UserActions(models.Model):
-    summary = models.ForeignKey(Summary)
-    logfile = models.ForeignKey(LogFile)
     # User Actions section
     browse = models.IntegerField("browse")
     download_preview  = models.IntegerField("download preview")
@@ -60,20 +50,14 @@ class UserActions(models.Model):
     subscription_feed = models.IntegerField("subscription feed")
     upload = models.IntegerField("upload")
     not_listed = models.IntegerField("not listed")
+    
+    def __unicode__(self):
+        return str(date.strftime(self.week_ending,"%Y-%m-%d")) + ": Total Downloads=" + str(self.total_track_downloads)
 
 class ClientSoftware(models.Model):
-    PLATFORM_CHOICES = (
-        (u'ipad', u'iTunes on iPad'),
-        (u'ipod', u'iTunes on iPod'),
-        (u'iphone', u'iTunes on iPhone'),
-        (u'macintosh', u'iTunes on Macintosh'),
-        (u'windows', u'iTunes on Windows'),
-        (u'not listed', u'Unknown'),
-    )
     summary = models.ForeignKey(Summary)
-    logfile = models.ForeignKey(LogFile)
     # Client Software section
-    platform = models.CharField("platform", max_length=20, choices=PLATFORM_CHOICES)
+    platform = models.CharField("platform", max_length=20)
     version_major = models.IntegerField("major version number")
     version_minor = models.IntegerField("minor version number")
     count = models.IntegerField("count")

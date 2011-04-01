@@ -203,6 +203,11 @@ class Command(LabelCommand):
         # Scan down the sheet, looking for the four columns of data and matching to header data
         # Work between modes, saving the results to the db at the end.
         
+        
+        MODEL HAS BEEN CHANGED AGAIN!!!!! THE BELOW IS NOT VALID!!!!
+        
+        
+        
         # Some reference constants
         headings1 = 1 # Most headings are in Col B, hence this is headings1
         headings2 = 0
@@ -288,7 +293,7 @@ class Command(LabelCommand):
                     cs_object.version_major = 0
                     cs_object.version_minor = 0
                     cs_object.count = int(v)
-                    
+                                 
                     strings = k.split('/')
                     if len(strings) > 1:
                         version = strings[1].split('.')
