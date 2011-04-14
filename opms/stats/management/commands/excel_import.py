@@ -213,7 +213,7 @@ class Command(LabelCommand):
             # This needs to account for different types of import file (public vs public_dz)
             summary_object, summary_created = Summary.objects.get_or_create(
                 week_ending=week.get('week_ending'), 
-                service_name=logfile_obj.service_name
+                service_name=logfile_obj.service_name,
                 defaults=week)
             summary_object.logfile = logfile_obj
             summary_object.save()
