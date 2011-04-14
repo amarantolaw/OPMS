@@ -6,7 +6,7 @@ from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
 
 from opms.stats.models import *
-from xlrd import open_workbook, biffh.XLRDError
+from xlrd import open_workbook, biffh
 from datetime import time, datetime
 import sys, uuid
         
