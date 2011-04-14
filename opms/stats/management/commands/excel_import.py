@@ -178,14 +178,14 @@ class Command(LabelCommand):
         for row_id in range(summary.nrows):
             if section == 'User Actions':
                 if summary.cell(row_id,headings1).value == 'Total Track Downloads' or \
-                    summary.cell(row_id,headings2).value == 'Total Track Downloads':
-                    self._summaryUA_set('total_track_downloads',row_id)
+                  summary.cell(row_id,headings2).value == 'Total Track Downloads':
+                    _summaryUA_set('total_track_downloads',row_id)
                     section = 'Client Software'
                     
                 elif summary.cell(row_id,week1).value != '':
                     if summary.cell(row_id,heading_col2).value in self.modelmapping:
                         header = self.modelmapping.get(summary.cell(row_id,heading_col2).value)
-                        self._summaryUA_set(header,row_id)
+                        _summaryUA_set(header,row_id)
                     else:
                         err_str = "Key not recognised in col A, row " + str(row_id) + " - " + str(summary.cell(row_id,heading_col2).value)
                         self._errorlog(err_str)
@@ -193,15 +193,15 @@ class Command(LabelCommand):
 
             elif section == 'Client Software':
                 if summary.cell(row_id,week1).value != '':
-                    self._summaryCS_set(summary.cell(row_id,headings1).value,row_id)
+                    _summaryCS_set(summary.cell(row_id,headings1).value,row_id)
                     
             else:
                 # Should only happen at the start, and we're looking for week_ending dates, and then User Actions
                 if summary.cell(row_id,week1).value == '':
                     section = summary.cell(row_id,headings2).value
                 else:
-                    self._summaryUA_set('week_ending',row_id)
-                    self._summaryCS_set('week_ending',row_id)
+                    _summaryUA_set('week_ending',row_id)
+                    _summaryCS_set('week_ending',row_id)
 
             # Write the error cache to disk
             self._error_log_save()
