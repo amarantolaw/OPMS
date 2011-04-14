@@ -241,7 +241,7 @@ class Command(LabelCommand):
                         cs_object.platform = 'Unknown'
                     
                     cs_object.save()
-                self._debug('Summary week ' + str(i) + ' stored')
+                print "Imported SUMMARY data for " + str(week.get('week_ending'))
                 
                 # Now work through the related week's worth of Tracks, Browses and Previews. These sheets might be missing in early files.
                 try:
