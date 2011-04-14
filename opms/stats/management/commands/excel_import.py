@@ -205,7 +205,8 @@ class Command(LabelCommand):
 
             # Write the error cache to disk
             self._error_log_save()
-            
+        
+        self._debug('Summary data parsed')
         # Should now have 8 lists of dictionaries - 4 for Client Software, 4 for UserActions
         for i in range(0,3):
             week = summaryUA[i]
@@ -247,10 +248,12 @@ class Command(LabelCommand):
                         cs_object.platform = 'Unknown'
                     
                     cs_object.save()
-                
+                    
+                self._debug('Summary week ' + str(i) + ' stored')
                 # Parse this week's tracks
                 self._parse_tracks(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Tracks'))
                 self._error_log_save()
+                self._debug('Summary week ' + str(i) + ' Tracks parsed')
                 # Parse this week's previews
                 # self._parse_previews(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Previews'))
                 # self._error_log_save()
@@ -258,7 +261,7 @@ class Command(LabelCommand):
                 # self._parse_browses(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Browse'))
                 # self._error_log_save()
             else:
-                print "Data has already been imported for " str(logfile_obj.service_name) + "@" + str(week.get('week_ending'))
+                print "Data has already been imported for " + str(logfile_obj.service_name) + "@" + str(week.get('week_ending'))
         
         return None
 
