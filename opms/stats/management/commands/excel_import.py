@@ -201,7 +201,6 @@ class Command(LabelCommand):
                     section = summary.cell(row_id,headings2).value
                 else:
                     _summaryUA_set('week_ending',row_id)
-                    _summaryCS_set('week_ending',row_id)
 
             # Write the error cache to disk
             self._error_log_save()
