@@ -80,19 +80,6 @@ class ClientSoftware(models.Model):
 ####
 # Apple Track Records
 ####
-# This is a track count record, which will have multiple handles, paths and guids/files associated with it
-class TrackCount(models.Model):
-    summary = models.ForeignKey(Summary) # aka: AppleEntry
-    count = models.IntegerField("count")
-    # A count record has a handle, path and guid associated. GUIDs may have been created by OPMS
-    path = models.ForeignKey(TrackPath)
-    handle = models.ForeignKey(TrackHandle)
-    guid = models.ForeignKey(TrackGUID)
-    
-    def __unicode__(self):
-        return '%s:%s' % (self.week_ending,self.count)
-        
-
 # Track Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific track
 class TrackPath(models.Model):
     path = models.TextField("path")
@@ -122,24 +109,22 @@ class TrackGUID(models.Model):
         return str(self.guid)
 
 
+# This is a track count record, which will have multiple handles, paths and guids/files associated with it
+class TrackCount(models.Model):
+    summary = models.ForeignKey(Summary) # aka: AppleEntry
+    count = models.IntegerField("count")
+    # A count record has a handle, path and guid associated. GUIDs may have been created by OPMS
+    path = models.ForeignKey(TrackPath)
+    handle = models.ForeignKey(TrackHandle)
+    guid = models.ForeignKey(TrackGUID)
+    
+    def __unicode__(self):
+        return '%s:%s' % (self.week_ending,self.count)
 
 
 ####
 # Apple Browse Records
 ####
-# This is a browse count record, which will have multiple handles, paths and guids/files associated with it
-class BrowseCount(models.Model):
-    summary = models.ForeignKey(Summary)
-    count = models.IntegerField("count")
-    # A count record has a handle and path associated, and may have a guid also
-    path = models.ForeignKey(BrowsePath)
-    handle = models.ForeignKey(BrowseHandle)
-    guid = models.ForeignKey(BrowseGUID, null=True)
-    
-    def __unicode__(self):
-        return '%s:%s' % (self.week_ending,self.count)
-        
-
 # Browse Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific browse
 class BrowsePath(models.Model):
     path = models.TextField("path")
@@ -164,6 +149,19 @@ class BrowseGUID(models.Model):
     
     def __unicode__(self):
         return str(self.guid)
+        
+
+# This is a browse count record, which will have multiple handles, paths and guids/files associated with it
+class BrowseCount(models.Model):
+    summary = models.ForeignKey(Summary)
+    count = models.IntegerField("count")
+    # A count record has a handle and path associated, and may have a guid also
+    path = models.ForeignKey(BrowsePath)
+    handle = models.ForeignKey(BrowseHandle)
+    guid = models.ForeignKey(BrowseGUID, null=True)
+    
+    def __unicode__(self):
+        return '%s:%s' % (self.week_ending,self.count)
 
 
 
@@ -171,19 +169,6 @@ class BrowseGUID(models.Model):
 ####
 # Apple Preview Records
 ####
-# This is a preview count record, which will have multiple handles, paths and guids/files associated with it
-class PreviewCount(models.Model):
-    summary = models.ForeignKey(Summary)
-    count = models.IntegerField("count")
-    # A count record has a handle and path associated, and may have a guid also
-    path = models.ForeignKey(PreviewPath)
-    handle = models.ForeignKey(PreviewHandle)
-    guid = models.ForeignKey(PreviewGUID)
-    
-    def __unicode__(self):
-        return '%s:%s' % (self.week_ending,self.count)
-        
-
 # Preview Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific preview
 class PreviewPath(models.Model):
     path = models.TextField("path")
@@ -212,6 +197,18 @@ class PreviewGUID(models.Model):
     def __unicode__(self):
         return str(self.guid)
         
+
+# This is a preview count record, which will have multiple handles, paths and guids/files associated with it
+class PreviewCount(models.Model):
+    summary = models.ForeignKey(Summary)
+    count = models.IntegerField("count")
+    # A count record has a handle and path associated, and may have a guid also
+    path = models.ForeignKey(PreviewPath)
+    handle = models.ForeignKey(PreviewHandle)
+    guid = models.ForeignKey(PreviewGUID)
+    
+    def __unicode__(self):
+        return '%s:%s' % (self.week_ending,self.count)
 
 
 
