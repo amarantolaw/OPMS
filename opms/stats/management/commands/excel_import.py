@@ -322,7 +322,7 @@ class Command(LabelCommand):
 
         # Attempt to locate in memory cache
         for item in self.track_handle_cache:
-            if item.path == th.handle:
+            if item.handle == th.handle:
                 # Check if the import path appears earlier than the stored path and update if needed
                 if item.logfile.last_updated > logfile_object.last_updated:
                     # Update the database
