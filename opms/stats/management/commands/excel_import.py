@@ -183,11 +183,11 @@ class Command(LabelCommand):
                     section = 'Client Software'
                     
                 elif summary.cell(row_id,week1).value != '':
-                    if summary.cell(row_id,heading_col2).value in self.modelmapping:
-                        header = self.modelmapping.get(summary.cell(row_id,heading_col2).value)
+                    if summary.cell(row_id,headings1).value in self.modelmapping:
+                        header = self.modelmapping.get(summary.cell(row_id,headings1).value)
                         _summaryUA_set(header,row_id)
                     else:
-                        err_str = "Key not recognised in col A, row " + str(row_id) + " - " + str(summary.cell(row_id,heading_col2).value)
+                        err_str = "Key not recognised in col A, row " + str(row_id) + " - " + str(summary.cell(row_id,headings1).value)
                         self._errorlog(err_str)
                         raise CommandError(err_str)
 
