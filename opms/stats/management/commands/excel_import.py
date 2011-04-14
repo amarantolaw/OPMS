@@ -13,10 +13,10 @@ import sys, uuid
 class Command(LabelCommand):
     args = '<spreadsheet.xls>'
     help = 'Imports the contents of the specified spreadsheet into the database'
-    option_list = LabelCommand.option_list + (
-        make_option('--merge', action='store', dest='merge',
-            default=False, help='Use this option to add this data to exisiting data, thus summing counts for records.'),
-    )
+    #option_list = LabelCommand.option_list + (
+    #    make_option('--merge', action='store', dest='merge',
+    #        default=False, help='Use this option to add this data to exisiting data, thus summing counts for records.'),
+    #)
     
     def __init__(self):
         # Toggle debug statements on/off
@@ -177,7 +177,7 @@ class Command(LabelCommand):
         
         for row_id in range(summary.nrows):
             if section == 'User Actions':
-                if summary.cell(row_id,headings1).value == 'Total Track Downloads' or 
+                if summary.cell(row_id,headings1).value == 'Total Track Downloads' or \
                     summary.cell(row_id,headings2).value == 'Total Track Downloads':
                     self._summaryUA_set('total_track_downloads',row_id)
                     section = 'Client Software'
