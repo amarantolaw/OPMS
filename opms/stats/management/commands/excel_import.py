@@ -207,7 +207,7 @@ class Command(LabelCommand):
         
         self._debug('Summary data parsed')
         # Should now have 8 lists of dictionaries - 4 for Client Software, 4 for UserActions
-        for i in range(0,3):
+        for i in range(0,4):
             week = summaryUA[i]
             
             # This needs to account for different types of import file (public vs public_dz)
