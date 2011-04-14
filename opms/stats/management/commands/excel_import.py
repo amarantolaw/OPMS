@@ -120,7 +120,7 @@ class Command(LabelCommand):
             logfile['file_name'] = filename
             logfile['file_path'] = "./"
             
-        logfile['last_updated'] = datetime.datetime.utcnow()
+        logfile['last_updated'] = datetime.utcnow()
         
         obj, created = LogFile.objects.get_or_create(
             service_name = logfile.get('service_name'),
