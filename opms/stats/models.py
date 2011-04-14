@@ -87,7 +87,7 @@ class TrackPath(models.Model):
     logfile = models.ForeignKey(LogFile) # Where was this path first found?
     
     def __unicode__(self):
-        return smart_str(self.path)
+        return smart_unicode(self.path)
 
 
 # Track Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific track
@@ -107,7 +107,7 @@ class TrackGUID(models.Model):
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
     
     def __unicode__(self):
-        return smart_str(self.guid)
+        return smart_unicode(self.guid)
 
 
 # This is a track count record, which will have multiple handles, paths and guids/files associated with it
@@ -132,7 +132,7 @@ class BrowsePath(models.Model):
     logfile = models.ForeignKey(LogFile) # Where was this path first found?
     
     def __unicode__(self):
-        return smart_str(self.path)
+        return smart_unicode(self.path)
 
 
 # Browse Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific browse
@@ -149,7 +149,7 @@ class BrowseGUID(models.Model):
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
     
     def __unicode__(self):
-        return smart_str(self.guid)
+        return smart_unicode(self.guid)
         
 
 # This is a browse count record, which will have multiple handles, paths and guids/files associated with it
@@ -176,7 +176,7 @@ class PreviewPath(models.Model):
     logfile = models.ForeignKey(LogFile) # Where was this path first found?
     
     def __unicode__(self):
-        return smart_str(self.path)
+        return smart_unicode(self.path)
 
 
 # Preview Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific preview
@@ -196,7 +196,7 @@ class PreviewGUID(models.Model):
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
     
     def __unicode__(self):
-        return smart_str(self.guid)
+        return smart_unicode(self.guid)
         
 
 # This is a preview count record, which will have multiple handles, paths and guids/files associated with it
