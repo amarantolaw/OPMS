@@ -152,10 +152,10 @@ class Command(LabelCommand):
         week4 = 5 # Ignoring the totals column after this week
         # List of Dictionaries to hold the data scanned in from the sheet
         summaryUA = [
-          {'service_name':logfile_obj.service_name},
-          {'service_name':logfile_obj.service_name},
-          {'service_name':logfile_obj.service_name},
-          {'service_name':logfile_obj.service_name},
+          {'service_name':logfile_obj.service_name, 'logfile':logfile_obj},
+          {'service_name':logfile_obj.service_name, 'logfile':logfile_obj},
+          {'service_name':logfile_obj.service_name, 'logfile':logfile_obj},
+          {'service_name':logfile_obj.service_name, 'logfile':logfile_obj},
         ] # Four columns of data on each sheet, we'll scan in parallel
         summaryCS = [{},{},{},{}] # Four columns of data on each sheet, we'll scan in parallel
         # Mode switch
@@ -216,7 +216,7 @@ class Command(LabelCommand):
                 week_ending=week.get('week_ending'), 
                 service_name=logfile_obj.service_name,
                 defaults=week)
-            summary_object.logfile = logfile_obj
+            # summary_object.logfile = logfile_obj
             summary_object.save()
             
             if summary_created:
