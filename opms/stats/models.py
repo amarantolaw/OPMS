@@ -28,12 +28,20 @@ class LogFile(models.Model):
 ####
 
 # A Summary record based on a column of data from the Summary tab. Note there can be more than one for a given week (iTU + iTUPSM)
-class Summary(models.Model):    
-    logfile = models.ForeignKey(LogFile)
+# aka: "AppleEntry", like LogEntry, but for Apple data.
+class Summary(models.Model):
+    SERVICE_NAME_CHOICES = (
+        (u'itu', u'iTunes U v1'),
+        (u'itu-psm', u'iTunes U PSM'),
+    )    
     # Date from the column - typically from yyyy-mm-dd format
     week_ending = models.DateField("week ending", db_index=True)
-    # The total as calculated by Apple
-    total_track_downloads = models.IntegerField("total track downloads")
+    
+    # Logfile this data was pulled from
+    logfile = models.ForeignKey(LogFile)
+    # Repeating this field as a necessary evil for the sake of duplication checking on import
+    service_name = models.CharField("service name associate with this log", max_length=20, choices=SERVICE_NAME_CHOICES)
+    
     # User Actions section
     browse = models.IntegerField("browse")
     download_preview  = models.IntegerField("download preview")
@@ -50,9 +58,13 @@ class Summary(models.Model):
     subscription_feed = models.IntegerField("subscription feed")
     upload = models.IntegerField("upload")
     not_listed = models.IntegerField("not listed")
+    # The total as calculated by Apple
+    total_track_downloads = models.IntegerField("total track downloads")
     
     def __unicode__(self):
         return str(date.strftime(self.week_ending,"%Y-%m-%d")) + ": Total Downloads=" + str(self.total_track_downloads)
+
+
 
 class ClientSoftware(models.Model):
     summary = models.ForeignKey(Summary)
@@ -64,68 +76,27 @@ class ClientSoftware(models.Model):
 
 
 
+
 ####
 # Apple Track Records
 ####
-
-class TrackManager(models.Manager):
-# THIS IS LIKELY REDUNDANT ALREADY!
-    def grouped_by_feed(self, sort_by):
-        from django.db import connection, transaction
-        cursor = connection.cursor()
-
-        cursor.execute('''
-            SELECT sum(count) AS count, substring(guid,52) 
-            FROM stats_track
-            GROUP BY substring(guid,52)
-            ORDER BY %s''' % sort_by)
-
-        result_list = []
-        for row in cursor.fetchall():
-            t = self.model(count=row[0], guid=row[1])
-            t.psudeo_feed = row[1]
-            result_list.append(t)
-
-        return result_list
-
-    def items_by_feed(self, partial_guid):
-        from django.db import connection, transaction
-        cursor = connection.cursor()
-
-        cursor.execute('''
-            SELECT sum(count), min(path), min(guid)
-            FROM stats_track
-            WHERE substring(guid,52) = %s
-            GROUP BY guid''', [partial_guid])
-
-        result_list = []
-        for row in cursor.fetchall():
-            t = self.model(count=row[0], path=row[1], guid=row[2])
-            result_list.append(t)
-
-        return result_list
-    
-
-# This is a 'virtual' track entity, which will have multiple handles, paths and counts associated with it
-class Track(models.Model):
-    #counts = models.ManyToManyField(LogFile, through='TrackCount', verbose_name="count values")
-    #handles = models.ManyToManyField(LogFile, through='TrackHandle', verbose_name="handle values")
-    #paths = models.ManyToManyField(LogFile, through='TrackPath', verbose_name="path values")
-    week_ending = models.DateField("week ending")
-    guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
-    # Eventually there will be a link here to a File record from the FFM module
-
-    objects = TrackManager()
+# This is a track count record, which will have multiple handles, paths and guids/files associated with it
+class TrackCount(models.Model):
+    summary = models.ForeignKey(Summary) # aka: AppleEntry
+    count = models.IntegerField("count")
+    # A count record has a handle, path and guid associated. GUIDs may have been created by OPMS
+    path = models.ForeignKey(TrackPath)
+    handle = models.ForeignKey(TrackHandle)
+    guid = models.ForeignKey(TrackGUID)
     
     def __unicode__(self):
-        return '%s:%s' % (self.week_ending,self.guid)
+        return '%s:%s' % (self.week_ending,self.count)
         
 
 # Track Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific track
 class TrackPath(models.Model):
-    track = models.ForeignKey(Track)
-    logfile = models.ForeignKey(LogFile)
     path = models.TextField("path")
+    logfile = models.ForeignKey(LogFile) # Where was this path first found?
     
     def __unicode__(self):
         return str(self.path)
@@ -133,115 +104,113 @@ class TrackPath(models.Model):
 
 # Track Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific track
 class TrackHandle(models.Model):
-    track = models.ForeignKey(Track)
-    logfile = models.ForeignKey(LogFile)
     handle = models.BigIntegerField("handle")
+    logfile = models.ForeignKey(LogFile) # Where was this handle first found?
     
     def __unicode__(self):
         return str(self.handle)
 
 
-# A count is collected for each service (logfile.service_name) in the records
-class TrackCount(models.Model):
-    track = models.ForeignKey(Track)
-    logfile = models.ForeignKey(LogFile)
-    count = models.IntegerField("count")
+# Track GUIDs change from time to time due to OxItems changes, but we want to keep them related to a specific track
+# NB: This data should eventually be migrated to the FFM app, as it comes from the rss source, and is copied into the stats data by Apple
+class TrackGUID(models.Model):
+    guid = models.CharField("GUID", max_length=255,db_index=True)
+    # Eventually there will be a link here to a File record from the FFM module
+    logfile = models.ForeignKey(LogFile) # Where was this guid first found?
     
     def __unicode__(self):
-        return str(self.count)
+        return str(self.guid)
+
 
 
 
 ####
 # Apple Browse Records
 ####
-    
-# This is a 'virtual' track entity, which will have multiple handles, paths and counts associated with it
-class Browse(models.Model):
-    #counts = models.ManyToManyField(LogFile, through='BrowseCount', verbose_name="count values")
-    #handles = models.ManyToManyField(LogFile, through='BrowseHandle', verbose_name="handle values")
-    #paths = models.ManyToManyField(LogFile, through='BrowsePath', verbose_name="path values")
-    week_ending = models.DateField("week ending")
-    guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
+# This is a browse count record, which will have multiple handles, paths and guids/files associated with it
+class BrowseCount(models.Model):
+    summary = models.ForeignKey(Summary)
+    count = models.IntegerField("count")
+    # A count record has a handle and path associated, and may have a guid also
+    path = models.ForeignKey(BrowsePath)
+    handle = models.ForeignKey(BrowseHandle)
+    guid = models.ForeignKey(BrowseGUID, null=True)
     
     def __unicode__(self):
-        return '%s:%s' % (self.week_ending,self.guid)
+        return '%s:%s' % (self.week_ending,self.count)
+        
 
-# Browse Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific page
+# Browse Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific browse
 class BrowsePath(models.Model):
-    browse = models.ForeignKey(Browse)
-    logfile = models.ForeignKey(LogFile)
     path = models.TextField("path")
+    logfile = models.ForeignKey(LogFile) # Where was this path first found?
     
     def __unicode__(self):
         return str(self.path)
 
 
-# Browse Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific page
+# Browse Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific browse
 class BrowseHandle(models.Model):
-    browse = models.ForeignKey(Browse)
-    logfile = models.ForeignKey(LogFile)
     handle = models.BigIntegerField("handle")
+    logfile = models.ForeignKey(LogFile) # Where was this handle first found?
     
     def __unicode__(self):
         return str(self.handle)
 
-
-# A count is collected for each service (logfile.service_name) in the records
-class BrowseCount(models.Model):
-    browse = models.ForeignKey(Browse)
-    logfile = models.ForeignKey(LogFile)
-    count = models.IntegerField("count")
+# GUIDs for Browses are optional
+class BrowseGUID(models.Model):
+    guid = models.CharField("GUID", max_length=255)
+    logfile = models.ForeignKey(LogFile) # Where was this guid first found?
     
     def __unicode__(self):
-        return str(self.count)
+        return str(self.guid)
+
 
 
 
 ####
 # Apple Preview Records
 ####
-
-# This is a 'virtual' track entity, which will have multiple handles, paths and counts associated with it
-class Preview(models.Model):
-    #counts = models.ManyToManyField(LogFile, through='PreviewCount', verbose_name="count values")
-    #handles = models.ManyToManyField(LogFile, through='PreviewHandle', verbose_name="handle values")
-    #paths = models.ManyToManyField(LogFile, through='PreviewPath', verbose_name="path values")
-    week_ending = models.DateField("week ending")
-    guid = models.CharField("GUID", max_length=255,blank=True, null=True, db_index=True)
-    # Eventually there will be a link here to a File record from the FFM module
+# This is a preview count record, which will have multiple handles, paths and guids/files associated with it
+class PreviewCount(models.Model):
+    summary = models.ForeignKey(Summary)
+    count = models.IntegerField("count")
+    # A count record has a handle and path associated, and may have a guid also
+    path = models.ForeignKey(PreviewPath)
+    handle = models.ForeignKey(PreviewHandle)
+    guid = models.ForeignKey(PreviewGUID)
     
     def __unicode__(self):
-        return '%s:%s' % (self.week_ending,self.guid)
+        return '%s:%s' % (self.week_ending,self.count)
+        
 
-# Preview Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific track preview
+# Preview Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific preview
 class PreviewPath(models.Model):
-    preview = models.ForeignKey(Preview)
-    logfile = models.ForeignKey(LogFile)
     path = models.TextField("path")
+    logfile = models.ForeignKey(LogFile) # Where was this path first found?
     
     def __unicode__(self):
         return str(self.path)
 
 
-# Preview Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific track preview
+# Preview Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific preview
 class PreviewHandle(models.Model):
-    preview = models.ForeignKey(Preview)
-    logfile = models.ForeignKey(LogFile)
     handle = models.BigIntegerField("handle")
+    logfile = models.ForeignKey(LogFile) # Where was this handle first found?
     
     def __unicode__(self):
         return str(self.handle)
 
 
-# A count is collected for each service (logfile.service_name) in the records
-class PreviewCount(models.Model):
-    preview = models.ForeignKey(Preview)
-    logfile = models.ForeignKey(LogFile)
-    count = models.IntegerField("count")
+# Preview GUIDs change from time to time due to OxItems changes, but we want to keep them related to a specific preview
+# NB: This data should eventually be migrated to the FFM app, as it comes from the rss source, and is copied into the stats data by Apple
+class PreviewGUID(models.Model):
+    guid = models.CharField("GUID", max_length=255,db_index=True)
+    # Eventually there will be a link here to a File record from the FFM module
+    logfile = models.ForeignKey(LogFile) # Where was this guid first found?
     
     def __unicode__(self):
-        return str(self.count)
+        return str(self.guid)
         
 
 
