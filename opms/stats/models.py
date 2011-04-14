@@ -157,7 +157,7 @@ class BrowseHandle(models.Model):
     def __unicode__(self):
         return str(self.handle)
 
-# GUIDs for Browses are optional
+# GUIDs for Browses are optional
 class BrowseGUID(models.Model):
     guid = models.CharField("GUID", max_length=255)
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
