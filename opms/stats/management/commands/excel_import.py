@@ -249,10 +249,13 @@ class Command(LabelCommand):
                     cs_object.save()
                     
                 self._debug('Summary week ' + str(i) + ' stored')
-                # Parse this week's tracks
-                self._parse_tracks(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Tracks'))
-                self._error_log_save()
-                self._debug('Summary week ' + str(i) + ' Tracks parsed')
+                try:
+                    # Parse this week's tracks
+                    self._parse_tracks(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Tracks'))
+                    self._error_log_save()
+                    self._debug('Summary week ' + str(i) + ' Tracks parsed')
+                except biffh.XLRDError:
+                    print "Sheet does not exist for " + str(week.get('week_ending')) + ' Tracks'
                 # Parse this week's previews
                 # self._parse_previews(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Previews'))
                 # self._error_log_save()
