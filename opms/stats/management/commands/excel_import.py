@@ -457,7 +457,7 @@ class Command(LabelCommand):
             except IndexError:
                 pc.guid = self._previewguid(summary_object.logfile, '', pc)
             
-            tc.save()
+            pc.save()
             count += 1
             
         print "Imported TRACK data for " + str(summary_object.week_ending) + " with " + str(count) + " rows added."
