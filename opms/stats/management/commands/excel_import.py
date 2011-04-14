@@ -20,14 +20,12 @@ class Command(LabelCommand):
     
     def __init__(self):
         # Toggle debug statements on/off
-        self.debug = True
+        self.debug = False
         # Record basic information about the import process for reporting
         self.import_stats = {}
         # Error logging file and string cache
         self.error_log = ""
         self.error_cache = ""
-        # To allow for report files to overlap, we have a merge option that will add to the counts
-        self.merge = False
         # Define mapping between spreadsheet and model
         self.modelmapping = {
             # Spreadsheet -> Model
@@ -201,9 +199,9 @@ class Command(LabelCommand):
 
             # Write the error cache to disk
             self._error_log_save()
-        
         self._debug('Summary data parsed')
-        # Should now have 8 lists of dictionaries - 4 for Client Software, 4 for UserActions
+        
+        # Should now have 8 lists of dictionaries - 4 for Client Software, 4 for UserActions/Summarys
         for i in range(0,4):
             week = summaryUA[i]
             
@@ -212,7 +210,6 @@ class Command(LabelCommand):
                 week_ending=week.get('week_ending'), 
                 service_name=logfile_obj.service_name,
                 defaults=week)
-            # summary_object.logfile = logfile_obj
             summary_object.save()
             
             if summary_created:
@@ -244,30 +241,34 @@ class Command(LabelCommand):
                         cs_object.platform = 'Unknown'
                     
                     cs_object.save()
-                    
                 self._debug('Summary week ' + str(i) + ' stored')
+                
+                # Now work through the related week's worth of Tracks, Browses and Previews. These sheets might be missing in early files.
                 try:
-                    # Parse this week's tracks
                     self._parse_tracks(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Tracks'))
                     self._debug('Summary week ' + str(i) + ' Tracks parsed')
                 except biffh.XLRDError:
-                    self._errorlog("Sheet does not exist for " + str(week.get('week_ending')) + " Tracks")
-                # Parse this week's browses
+                    err_msg = "Sheet does not exist for " + str(week.get('week_ending')) + " Tracks"
+                    self._errorlog(err_msg)
+                    print err_msg
                 try:
-                    # Parse this week's browses
                     self._parse_browses(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Browse'))
                     self._debug('Summary week ' + str(i) + ' Browses parsed')
                 except biffh.XLRDError:
-                    self._errorlog("Sheet does not exist for " + str(week.get('week_ending')) + " Browse")
-                # Parse this week's previews
+                    err_msg = "Sheet does not exist for " + str(week.get('week_ending')) + " Browse"
+                    self._errorlog(err_msg)
+                    print err_msg
                 try:
-                    # Parse this week's previews
                     self._parse_previews(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Previews'))
                     self._debug('Summary week ' + str(i) + ' Previews parsed')
                 except biffh.XLRDError:
-                    self._errorlog("Sheet does not exist for " + str(week.get('week_ending')) + " Previews")
+                    err_msg = "Sheet does not exist for " + str(week.get('week_ending')) + " Previews"
+                    self._errorlog(err_msg)
+                    print err_msg
+                
                 self._error_log_save()
             else:
+                # Lazy duplication skipping. If the summary data has been imported, we assume the rest of it has too.
                 print "NOTE: Data has previously been imported for " + str(logfile_obj.service_name) + "@" + str(week.get('week_ending'))
         
         return None
