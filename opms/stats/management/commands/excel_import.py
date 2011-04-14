@@ -69,10 +69,6 @@ class Command(LabelCommand):
         
         # Create an error log per import file
         self._errorlog_start(filename + '_import-error.log')
-
-        if options.get('merge', False) != False:
-            print "WARNING: Processing file to combine with existing records."
-            self.merge = True
         
         # This only needs setting/getting the once per call of this function
         logfile_obj = self._logfile(filename)
@@ -137,6 +133,7 @@ class Command(LabelCommand):
         return obj
         
 
+    # ===================================================== SUMMARY ================================
 
     def _parse_summary(self, logfile_obj, wb):
         # Scan down the sheet, looking for the four columns of data and matching to header data
@@ -252,26 +249,31 @@ class Command(LabelCommand):
                 try:
                     # Parse this week's tracks
                     self._parse_tracks(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Tracks'))
-                    self._error_log_save()
                     self._debug('Summary week ' + str(i) + ' Tracks parsed')
                 except biffh.XLRDError:
-                    print "Sheet does not exist for " + str(week.get('week_ending')) + ' Tracks'
-                # Parse this week's previews
-                # self._parse_previews(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Previews'))
-                # self._error_log_save()
+                    self._errorlog("Sheet does not exist for " + str(week.get('week_ending')) + " Tracks")
                 # Parse this week's browses
                 # self._parse_browses(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Browse'))
-                # self._error_log_save()
+                # Parse this week's previews
+                try:
+                    # Parse this week's tracks
+                    #self._parse_previews(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Previews'))
+                    self._debug('Summary week ' + str(i) + ' Previews parsed?')
+                except biffh.XLRDError:
+                    self._errorlog("Sheet does not exist for " + str(week.get('week_ending')) + " Previews")
+                self._error_log_save()
             else:
-                print "Data has already been imported for " + str(logfile_obj.service_name) + "@" + str(week.get('week_ending'))
+                print "NOTE: Data has previously been imported for " + str(logfile_obj.service_name) + "@" + str(week.get('week_ending'))
         
         return None
 
 
-
+    # ===================================================== TRACKS =================================
+    
     def _parse_tracks(self, summary_object, sheet):
         "Parse a Tracks sheet for counts."
         # Can assume data duplication has already been accounted for in the parse_summary() process, so if we're here, import...
+        count = 0
         
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
@@ -283,11 +285,17 @@ class Command(LabelCommand):
             # Now link to path and handle
             tc.path = self._trackpath(summary_object.logfile, sheet.cell(row_id,0).value)
             tc.handle = self._trackhandle(summary_object.logfile, sheet.cell(row_id,2).value)
-            tc.guid = self._trackguid(summary_object.logfile, sheet.cell(row_id,3).value[:255], tc)
+            
+            # Guids don't appear until 24-05-2009. Prior to that there was no guid column, so this call will fail initially.
+            try: 
+                tc.guid = self._trackguid(summary_object.logfile, sheet.cell(row_id,3).value[:255], tc)
+            except IndexError:
+                tc.guid = self._trackguid(summary_object.logfile, '', tc)
             
             tc.save()
+            count += 1
             
-        # print "Imported TRACK data for " + str(week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
+        print "Imported TRACK data for " + str(summary_object.week_ending) + " with " + str(count) + " rows added."
         return None
 
 
@@ -344,7 +352,7 @@ class Command(LabelCommand):
         
 
     def _trackguid(self, logfile_object, guid, trackcount_object):
-        "Get or Create the TrackHandle information"
+        "Get or Create the TrackGUID information"
         tg = TrackGUID()
         tg.logfile = logfile_object
         
@@ -377,6 +385,8 @@ class Command(LabelCommand):
                 except TrackPath.DoesNotExist:
                     # No path match found, really must be new, so generate a GUID (UUID)
                     tg.guid = str(uuid.uuid4())
+                    self._errorlog("No GUID found for " +str(trackcount_object.path)+ "(" + str(trackcount_object.handle) + "). " +\
+                      "Created: " + str(tg.guid))
 
         # Nothing found, so save and update the cache
         tg.save()
@@ -386,6 +396,7 @@ class Command(LabelCommand):
 
 
 
+    # ===================================================== BROWSES ================================
 
     def _parse_browses(self, logfile_obj, sheet, week_ending):
         # print "Beginning import for BROWSE:", sheet_name
@@ -422,6 +433,7 @@ class Command(LabelCommand):
 
 
 
+    # ===================================================== PREVIEWS ===============================
 
     def _parse_previews(self, logfile_obj, sheet, week_ending):
         # print "Beginning import for PREVIEW:", sheet_name
