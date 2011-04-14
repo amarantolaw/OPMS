@@ -119,7 +119,7 @@ class TrackCount(models.Model):
     guid = models.ForeignKey(TrackGUID)
     
     def __unicode__(self):
-        return '%s:%s' % (self.week_ending,self.count)
+        return '%s:%s' % (self.summary.week_ending,self.count)
 
 
 ####
@@ -161,7 +161,7 @@ class BrowseCount(models.Model):
     guid = models.ForeignKey(BrowseGUID, null=True)
     
     def __unicode__(self):
-        return '%s:%s' % (self.week_ending,self.count)
+        return '%s:%s' % (self.summary.week_ending,self.count)
 
 
 
@@ -208,7 +208,7 @@ class PreviewCount(models.Model):
     guid = models.ForeignKey(PreviewGUID)
     
     def __unicode__(self):
-        return '%s:%s' % (self.week_ending,self.count)
+        return '%s:%s' % (self.summary.week_ending,self.count)
 
 
 
