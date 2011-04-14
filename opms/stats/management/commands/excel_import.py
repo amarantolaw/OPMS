@@ -257,8 +257,8 @@ class Command(LabelCommand):
                 # Parse this week's previews
                 try:
                     # Parse this week's tracks
-                    #self._parse_previews(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Previews'))
-                    self._debug('Summary week ' + str(i) + ' Previews parsed?')
+                    self._parse_previews(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Previews'))
+                    self._debug('Summary week ' + str(i) + ' Previews parsed')
                 except biffh.XLRDError:
                     self._errorlog("Sheet does not exist for " + str(week.get('week_ending')) + " Previews")
                 self._error_log_save()
@@ -434,42 +434,130 @@ class Command(LabelCommand):
 
 
     # ===================================================== PREVIEWS ===============================
-
-    def _parse_previews(self, logfile_obj, sheet, week_ending):
-        # print "Beginning import for PREVIEW:", sheet_name
-        cache = list(Preview.objects.filter(week_ending=week_ending).order_by('handle'))
-        # Reset variables
+    
+    def _parse_previews(self, summary_object, sheet):
+        "Parse a Previews sheet for counts."
+        # Can assume data duplication has already been accounted for in the parse_summary() process, so if we're here, import...
         count = 0
         
-
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
-            created = True
-            report = Preview()
-            report.week_ending = week_ending #Not: time.strptime(week_ending,'%Y-%m-%d')
-            report.path = sheet.cell(row_id,0).value
-            report.count = int(sheet.cell(row_id,1).value)
-            report.handle = long(sheet.cell(row_id,2).value)
-            report.guid = sheet.cell(row_id,3).value
-
-            # Check the cache
-            for item in cache:
-                # print "item:" + str(item.handle) + ". report:" + str(report.handle) + " Match=" + str(item.handle == report.handle)
-                if item.handle == report.handle:
-                    self._errorlog("Preview row "+str(row_id)+" has already been imported")
-                    created = False
-                    continue
-
-            if created:
-                count += 1
-                report.save()
-                cache.insert(0,report)
-                
-        print "Imported PREVIEW data for " + str(week_ending) + " with " + str(count) + " out of " + str(sheet.nrows-1) + " added."
+            # Setup the basic count record
+            pc = PreviewCount()
+            pc.summary = summary_object
+            pc.count = int(sheet.cell(row_id,1).value)
+            
+            # Now link to path and handle
+            pc.path = self._previewpath(summary_object.logfile, sheet.cell(row_id,0).value)
+            pc.handle = self._previewhandle(summary_object.logfile, sheet.cell(row_id,2).value)
+            
+            # Guids don't appear until 24-05-2009. Prior to that there was no guid column, so this call will fail initially.
+            try: 
+                pc.guid = self._previewguid(summary_object.logfile, sheet.cell(row_id,3).value[:255], pc)
+            except IndexError:
+                pc.guid = self._previewguid(summary_object.logfile, '', pc)
+            
+            tc.save()
+            count += 1
+            
+        print "Imported TRACK data for " + str(summary_object.week_ending) + " with " + str(count) + " rows added."
         return None
 
 
+    def _previewpath(self, logfile_object, path):
+        "Get or Create the PreviewPath information"
+        pp = PreviewPath()
+        pp.path = path
+        pp.logfile = logfile_object
 
+        # Attempt to locate in memory cache
+        for item in self.preview_path_cache:
+            if item.path == pp.path:
+                # Check if the import path appears earlier than the stored path and update if needed
+                if item.logfile.last_updated > logfile_object.last_updated:
+                    # Update the database
+                    pp = PreviewPath.objects.get(id=item.id)
+                    pp.logfile = logfile_object   
+                    pp.save()
+                    # Update the cache
+                    item.logfile = logfile_object 
+                return item
+        
+        # Nothing found, so save and update the cache
+        pp.save()
+        self.preview_path_cache.append(pp)
+        
+        return pp
+
+
+    def _previewhandle(self, logfile_object, handle):
+        "Get or Create the PreviewHandle information"
+        ph = PreviewHandle()
+        ph.handle = handle
+        ph.logfile = logfile_object
+
+        # Attempt to locate in memory cache
+        for item in self.preview_handle_cache:
+            if item.handle == ph.handle:
+                # Check if the import path appears earlier than the stored path and update if needed
+                if item.logfile.last_updated > logfile_object.last_updated:
+                    # Update the database
+                    ph = PreviewHandle.objects.get(id=item.id)
+                    ph.logfile = logfile_object   
+                    ph.save()
+                    # Update the cache
+                    item.logfile = logfile_object 
+                return item
+        
+        # Nothing found, so save and update the cache
+        ph.save()
+        self.preview_handle_cache.append(ph)
+        
+        return ph
+        
+
+    def _previewguid(self, logfile_object, guid, previewcount_object):
+        "Get or Create the PreviewGUID information"
+        pg = PreviewGUID()
+        pg.logfile = logfile_object
+        
+        # If guid provided, use. If not, find one. If none available, make one.
+        if guid != '':
+            pg.guid = guid
+            # Attempt to locate in memory cache
+            for item in self.preview_guid_cache:
+                if item.guid == pg.guid:
+                    # Check if the import path appears earlier than the stored path and update if needed
+                    if item.logfile.last_updated > logfile_object.last_updated:
+                        # Update the database
+                        pg = PreviewGUID.objects.get(id=item.id)
+                        pg.logfile = logfile_object   
+                        pg.save()
+                        # Update the cache
+                        item.logfile = logfile_object 
+                    return item
+        else:
+            # Match on handle (trust Apple to make these unique), or then path
+            try:
+                # Any existing PreviewCount object should have a guid associated with it, thus, find one that has this handle, you've got it's guid
+                pc = PreviewCount.objects.filter(handle=previewcount_object.handle.id)[0]
+                pg.guid = pc.guid.guid
+            except IndexError:
+                # First time this handle has been seen, so look for a path match
+                try:
+                    pc = PreviewCount.objects.filter(path=previewcount_object.path.id)[0]
+                    pg.guid = pc.guid.guid
+                except IndexError:
+                    # No path match found, really must be new, so generate a GUID (UUID)
+                    pg.guid = str(uuid.uuid4())
+                    self._errorlog("No GUID found for " +str(previewcount_object.path)+ "(" + str(previewcount_object.handle) + "). " +\
+                      "Created: " + str(pg.guid))
+
+        # Nothing found, so save and update the cache
+        pg.save()
+        self.preview_guid_cache.append(pg)
+        
+        return pg
 
 
 
