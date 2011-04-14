@@ -375,14 +375,14 @@ class Command(LabelCommand):
             # Match on handle (trust Apple to make these unique), or then path
             try:
                 # Any existing TrackCount object should have a guid associated with it, thus, find one that has this handle, you've got it's guid
-                tc = TrackCount.objects.get(handle=trackcount_object.handle.id)
+                tc = TrackCount.objects.filter(handle=trackcount_object.handle.id)[0]
                 tg.guid = tc.guid.guid
-            except TrackCount.DoesNotExist:
+            except IndexError:
                 # First time this handle has been seen, so look for a path match
                 try:
-                    tc = TrackCount.objects.get(path=trackcount_object.path.id)
+                    tc = TrackCount.objects.filter(path=trackcount_object.path.id)[0]
                     tg.guid = tc.guid.guid
-                except TrackPath.DoesNotExist:
+                except IndexError:
                     # No path match found, really must be new, so generate a GUID (UUID)
                     tg.guid = str(uuid.uuid4())
                     self._errorlog("No GUID found for " +str(trackcount_object.path)+ "(" + str(trackcount_object.handle) + "). " +\
