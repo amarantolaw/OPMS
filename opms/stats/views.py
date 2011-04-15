@@ -5,7 +5,8 @@ from stats.models import Summary
 
 # Default Stats module homepage
 def index(request):
-    return HttpResponse("Hello World. You're at the OPMS:Stats Homepage.")
+    # return HttpResponse("Hello World. You're at the OPMS:Stats Homepage.")
+    return render_to_response('base.html', {})
 
 
 def summary_index(request):
