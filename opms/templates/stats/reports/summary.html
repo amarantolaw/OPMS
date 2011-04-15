@@ -36,16 +36,16 @@
   <tr>
     <td>{{ row.week_ending }}</td>
     <td>{{ row.total_track_downloads }}</td>
-    <td>{{ row.ua_download_preview }}</td> 
-    <td>{{ row.ua_download_preview_ios }}</td> 
-    <td>{{ row.ua_download_track }}</td> 
-    <td>{{ row.ua_download_tracks }}</td> 
-    <td>{{ row.ua_download_ios }}</td> 
-    <td>{{ row.ua_subscription }}</td> 
-    <td>{{ row.ua_subscription_enclosure }}</td> 
-    <td>{{ row.ua_subscription_feed }}</td>        
-    <td>{{ row.ua_browse }}</td>
-    <td>{{ row.ua_search_results_page }}</td> 
+    <td>{{ row.download_preview }}</td> 
+    <td>{{ row.download_preview_ios }}</td> 
+    <td>{{ row.download_track }}</td> 
+    <td>{{ row.download_tracks }}</td> 
+    <td>{{ row.download_ios }}</td> 
+    <td>{{ row.subscription }}</td> 
+    <td>{{ row.subscription_enclosure }}</td> 
+    <td>{{ row.subscription_feed }}</td>        
+    <td>{{ row.browse }}</td>
+    <td>{{ row.search_results_page }}</td> 
   </tr>
     {% endfor %}
 </table>
@@ -55,67 +55,7 @@
 
 <p>GRAPH</p>
 
-<table>
-  <tr>
-    <th rowspan="2">Week Ending</th>
-    <th colspan="1">iPad</th>
-    <th colspan="4">iPhone</th>
-    <th colspan="4">iPod</th>
-    <th colspan="7">iTunes (Mac/Win)</th>
-    <th colspan="3">Unknown</th>
-  </tr>
-  <tr>
-    <!-- Rowspan - week_ending -->
-    <!-- iPad -->
-    <th>3.2</th>
-    <!-- iPhone -->
-    <th>3.0</th>
-    <th>3.1</th>
-    <th>4.0</th>
-    <th>4.1</th>
-    <!-- iPod -->
-    <th>3.0</th>
-    <th>3.1</th>
-    <th>4.0</th>
-    <th>4.1</th>
-    <!-- iTunes Mac/Win -->
-    <th>8.0</th>
-    <th>8.1</th>
-    <th>8.2</th>
-    <th>9.0</th>
-    <th>9.1</th>
-    <th>9.2</th>
-    <th>10.0</th>
-    <!-- Unknowns -->
-    <th>Macintosh</th>
-    <th>Windows</th>
-    <th>Not Listed</th>
-  </tr>
-    {% for row in latest_summary_data %}
-  <tr>
-    <td>{{ row.week_ending }}</td>
-    <td>{{ row.cs_itunes_ipad_3_2 }}</td>
-    <td>{{ row.cs_itunes_iphone_3_0 }}</td>
-    <td>{{ row.cs_itunes_iphone_3_1 }}</td>
-    <td>{{ row.cs_itunes_iphone_4_0 }}</td>
-    <td>{{ row.cs_itunes_iphone_4_1 }}</td>
-    <td>{{ row.cs_itunes_ipod_3_0 }}</td>
-    <td>{{ row.cs_itunes_ipod_3_1 }}</td>
-    <td>{{ row.cs_itunes_ipod_4_0 }}</td>
-    <td>{{ row.cs_itunes_ipod_4_1 }}</td>
-    <td>{{ row.cs_itunes_8_0_macintosh }} / {{ row.cs_itunes_8_0_windows }}</td>
-    <td>{{ row.cs_itunes_8_1_macintosh }} / {{ row.cs_itunes_8_1_windows }}</td>
-    <td>{{ row.cs_itunes_8_2_macintosh }} / {{ row.cs_itunes_8_2_windows }}</td>
-    <td>{{ row.cs_itunes_9_0_macintosh }} / {{ row.cs_itunes_9_0_windows }}</td>
-    <td>{{ row.cs_itunes_9_1_macintosh }} / {{ row.cs_itunes_9_1_windows }}</td>
-    <td>{{ row.cs_itunes_9_2_macintosh }} / {{ row.cs_itunes_9_2_windows }}</td>
-    <td>{{ row.cs_itunes_10_0_macintosh }} / {{ row.cs_itunes_10_0_windows }}</td>
-    <td>{{ row.cs_macintosh }}</td>
-    <td>{{ row.cs_windows }}</td>
-    <td>{{ row.cs_not_listed }}</td>
-  </tr>
-    {% endfor %}
-</table>
+
 
 
 
