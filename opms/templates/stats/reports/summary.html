@@ -1,4 +1,8 @@
 {% extends "base.html" %}
+{% block head %}
+    <script src="/static/scripts/jquery-1.5.2.min.js"></script>
+    <script src="static/scripts/jquery.tablesorter.js"></script>
+{% endblock %}
 
 {% block title %}Summary Data from Apple iTU Reporting{% endblock %}
 
@@ -8,7 +12,15 @@
 <h2>User Actions</h2>
 <p>GRAPH</p>
 
-<table>
+<script>
+$(document).ready(function() 
+    { 
+        $("#summaryTable").tablesorter( {sortList: [[0,0], [1,0]]} ); 
+    } 
+);
+</script>
+<table id="summaryTable" class="tablesorter">
+  <thead>
   <tr>
     <th rowspan="2">Week Ending</th>
     <th rowspan="2">Service</th>
@@ -34,6 +46,8 @@
     <!-- Browse -->
     <!-- Search Results -->
   </tr>
+  </thead>
+  <tbody>
     {% for row in latest_summary_data %}
   <tr>
     <td>{{ row.week_ending }}</td>
@@ -51,6 +65,7 @@
     <td>{{ row.search_results_page }}</td> 
   </tr>
     {% endfor %}
+  </tbody>
 </table>
 
 
