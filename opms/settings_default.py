@@ -41,7 +41,9 @@ ADMIN_MEDIA_PREFIX = '/media/'
 
 # Many projects will also have static assets that aren't tied to a particular app; you can give 
 # staticfiles additional directories to search via the STATICFILES_DIRS setting .
-STATICFILES_DIRS = '/static/'
+STATICFILES_DIRS = (
+    '/static/',
+)
 STATIC_URL = '/static/'
 
 # List of callables that know how to import templates from various sources.
