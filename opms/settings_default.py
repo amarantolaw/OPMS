@@ -39,7 +39,7 @@ MEDIA_URL = ''
 # Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = '/media/'
 
-# Many projects will also have static assets that aren’t tied to a particular app; you can give 
+# Many projects will also have static assets that aren't tied to a particular app; you can give 
 # staticfiles additional directories to search via the STATICFILES_DIRS setting .
 STATICFILES_DIRS = '/static/'
 STATIC_URL = '/static/'
