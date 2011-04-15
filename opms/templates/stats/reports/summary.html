@@ -46,7 +46,7 @@ $(document).ready(function()
   <tbody>
     {% for row in latest_summary_data %}
   <tr>
-    <td>{{ row.week_ending }}</td>
+    <td>{{ row.week_ending|date:"Y-n-d" }}</td>
     <td>{{ row.service_name }}</td>
     <td>{{ row.total_track_downloads }}</td>
     <td>{{ row.download_preview }}</td> 
