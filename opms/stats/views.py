@@ -10,9 +10,13 @@ def index(request):
 
 
 def summary_index(request):
+    "Show the Apple 'Summary' User Action results"
     # return HttpResponse("Summary Report")
-    latest_summary_data = Summary.objects.all().order_by('-week_ending')
+    latest_summary_data = Summary.objects.all()
     return render_to_response('stats/reports/summary.html', {'latest_summary_data': latest_summary_data,})
 
 
+def summary_weekof(request):
+    "Show the results for a given week"
+    return HttpResponse("Hello World. You're at the  Week of Results page.")
 

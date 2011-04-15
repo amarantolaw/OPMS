@@ -9,7 +9,7 @@
 {% block title %}Summary Data from Apple iTU Reporting{% endblock %}
 
 {% block content %}
-<h1>Summary Data</h1>
+<h1>Apple supplied Summary Data</h1>
 {% if latest_summary_data %}
 <h2>User Actions</h2>
 <p>GRAPH</p>
@@ -48,7 +48,7 @@ $(document).ready(function()
   <tbody>
     {% for row in latest_summary_data %}
   <tr>
-    <td>{{ row.week_ending|date:"Y-n-d" }}</td>
+    <td>{{ row.week_ending|date:"Y-m-d" }}</td>
     <td>{{ row.service_name }}</td>
     <td>{{ row.total_track_downloads }}</td>
     <td>{{ row.download_preview }}</td> 
@@ -66,17 +66,8 @@ $(document).ready(function()
   </tbody>
 </table>
 
-
-<h2>Client Software</h2>
-
-<p>GRAPH</p>
-
-
-
-
-
 {% else %}
     <p>No summary data to display here</p>
-
 {% endif %}
+
 {% endblock %}
