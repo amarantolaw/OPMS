@@ -11,6 +11,7 @@
 <table>
   <tr>
     <th rowspan="2">Week Ending</th>
+    <th rowspan="2">Service</th>
     <th colspan="6">Downloads</th>
     <th colspan="3">Subscriptions</th>
     <th rowspan="2">Browse</th>
@@ -18,6 +19,7 @@
   </tr>
   <tr>
     <!-- Week_ending -->
+    <!-- Service -->
     <!-- downloads -->
     <th>TOTAL</th>
     <th>Preview</th>
@@ -35,6 +37,7 @@
     {% for row in latest_summary_data %}
   <tr>
     <td>{{ row.week_ending }}</td>
+    <td>{{ row.service_name }}</td>
     <td>{{ row.total_track_downloads }}</td>
     <td>{{ row.download_preview }}</td> 
     <td>{{ row.download_preview_ios }}</td> 
