@@ -8,7 +8,7 @@ div#mainnav, div#mainnav2
 {
 height: 1.9em;
 position: absolute;
-top:10em;
+top:8.5em;
 left:0px;
 width: 100%;
 border-width: 0px;
@@ -19,27 +19,25 @@ letter-spacing: 0.15em;
 }
 div#mainnav2 
 {
-top:11.9em;
+top:10.4em;
 }
 
-div#mainnav h2, div#mainnav h3
+div#mainnav h2, div#mainnav2 h3
 {
 position: absolute;
 left: -2100px;
 
 }
 
-#mainnav ul 
+#mainnav ul, #mainnav2 ul
 {
     width: 50em;
     padding:0;
     display:block;
     margin:0;  
-  
-
 }
 
-#mainnav ul li 
+#mainnav ul li, #mainnav2 ul li
 {
 	list-style-type: none;
     height:2em;
@@ -49,9 +47,10 @@ left: -2100px;
     font-weight: bold;
 }
 
-#mainnav ul li a, #mainnav ul li a.currentsection, #mainnav ul li span.youarehere { 
-
- height:2em;
+#mainnav ul li a, #mainnav ul li a.currentsection, #mainnav ul li span.youarehere,
+#mainnav2 ul li a, #mainnav2 ul li a.currentsection, #mainnav2 ul li span.youarehere
+{ 
+    height:2em;
     float:left;
     white-space:nowrap;
     border:none;
@@ -73,13 +72,14 @@ left: -2100px;
 
 
 
-div#mainnav ul li a:hover, div#mainnav ul li a:focus
+div#mainnav ul li a:hover, div#mainnav ul li a:focus,
+div#mainnav2 ul li a:hover, div#mainnav2 ul li a:focus
 {
-
 background-color: #666;
 }
 
- div#mainnav ul li span.youarehere, div#mainnav ul li a.currentsection, div#mainnav ul li a.selected
+div#mainnav ul li span.youarehere, div#mainnav ul li a.currentsection, div#mainnav ul li a.selected,
+div#mainnav2 ul li span.youarehere, div#mainnav2 ul li a.currentsection, div#mainnav2 ul li a.selected
 {
 color: #333;
 background-color: #fff;
@@ -92,13 +92,6 @@ background-color: #fff;
 
 
 /* styles for sub nav  */
-
-div#additional h3
-{
-position: absolute;
-left: -2100px;
-
-}
 
 div#additional ul
 {
