@@ -1,15 +1,11 @@
-
-
-
 /* header styling (in the new style, Aug 2008) */
 
-
-/* make room for the siteinfo header ath tetop of the page*/
+/* make room for the siteinfo header at the top of the page*/
 body
 {
 padding: 0px;
 margin:0px;
-padding-top: 120px;
+padding-top: 12.5em;
 
 }
 div#content
@@ -135,8 +131,6 @@ div#site-info dl dd#unitName
 position: absolute;
 top: 0px;
 left: 615px;
-
-
 display: block;
 height: 105px;
 width: 90px;

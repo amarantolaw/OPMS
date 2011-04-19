@@ -6,27 +6,26 @@ This stylesheet provides styling for the main navigation elements in your site
 
 div#mainnav, div#mainnav2
 {
-height: 1.9em;
-position: absolute;
-top:8.5em;
-left:0px;
-width: 100%;
-border-width: 0px;
-border-top: 1px solid #fff;
-padding-bottom: 1px;
-background-color: #ccc;
-letter-spacing: 0.15em;
+    height: 1.9em;
+    position: absolute;
+    top:8.5em;
+    left:0px;
+    width: 100%;
+    border-width: 0px;
+    border-top: 1px solid #fff;
+    padding-bottom: 1px;
+    background-color: #ccc;
+    letter-spacing: 0.15em;
 }
 div#mainnav2 
 {
-top:10.4em;
+    top:10.4em;
 }
 
 div#mainnav h2, div#mainnav2 h3
 {
-position: absolute;
-left: -2100px;
-
+    position: absolute;
+    left: -2100px;
 }
 
 #mainnav ul, #mainnav2 ul
@@ -39,9 +38,9 @@ left: -2100px;
 
 #mainnav ul li, #mainnav2 ul li
 {
-	list-style-type: none;
+    list-style-type: none;
     height:2em;
-	display: inline;
+    display: inline;
     padding:0;
     margin:0;
     font-weight: bold;
@@ -62,11 +61,11 @@ left: -2100px;
     padding-left: 1em;
     padding-right: 1em;
     text-decoration:none;
-	color:#fff;
-	border-color: white;
-	border-width: 0px ;
-	border-left: 1px solid white;
-	border-right: 1px solid white;
+    color:#fff;
+    border-color: white;
+    border-width: 0px ;
+    border-left: 1px solid white;
+    border-right: 1px solid white;
 
 }
 
@@ -75,15 +74,14 @@ left: -2100px;
 div#mainnav ul li a:hover, div#mainnav ul li a:focus,
 div#mainnav2 ul li a:hover, div#mainnav2 ul li a:focus
 {
-background-color: #666;
+    background-color: #666;
 }
 
 div#mainnav ul li span.youarehere, div#mainnav ul li a.currentsection, div#mainnav ul li a.selected,
 div#mainnav2 ul li span.youarehere, div#mainnav2 ul li a.currentsection, div#mainnav2 ul li a.selected
 {
-color: #333;
-background-color: #fff;
-
+    color: #333;
+    background-color: #fff;
 }
 
 
@@ -95,74 +93,66 @@ background-color: #fff;
 
 div#additional ul
 {
-
-padding: 0px;
-margin: 5px;
-margin-left: 10px;
-margin-top: 20px;
-margin-bottom: 30px;
-border-width: 0px;
-border-bottom: 2px solid #ccc;
-border-top: 2px solid #ccc;
-
-	
-padding-bottom: 0px;
+    padding: 0px;
+    margin: 5px;
+    margin-left: 10px;
+    margin-top: 20px;
+    margin-bottom: 30px;
+    border-width: 0px;
+    border-bottom: 2px solid #ccc;
+    border-top: 2px solid #ccc;
+    padding-bottom: 0px;
 }
 
 div#additional ul li
 {
-	padding: 0px;
-	margin: 0px;
-	padding-bottom: 0px;	
-	margin-bottom:0px;
-	list-style: none;
-	border-width: 0px;
- 
+    padding: 0px;
+    margin: 0px;
+    padding-bottom: 0px;    
+    margin-bottom:0px;
+    list-style: none;
+    border-width: 0px;
 }
 
 div#additional ul li a
 {
-	background-color: #fff;
-	color: #000;
- 
+    background-color: #fff;
+    color: #000;
 }
+
  div#additional ul li.currentsection a
 {
-	background-color: #eee;
-	color: #000;
-	border-bottom: 1px solid #ccc;
-
+    background-color: #eee;
+    color: #000;
+    border-bottom: 1px solid #ccc;
 }
 
 div#additional ul li a:hover, div#additional ul li a:focus
 {
-	background-color: #666;
-	color: #fff;
+    background-color: #666;
+    color: #fff;
 }
 
 
- div#additional ul li span.youarehere
- 
- {
-	background-color: #ddd;
-	color: #000;
+div#additional ul li span.youarehere
+{
+    background-color: #ddd;
+    color: #000;
 }
 
 
 
 div#additional ul li a, div#additional ul li a#currentsection, div#additional ul li span.youarehere
 {
-
-	text-align: right;   
-	display: block;
-	
-	border-width: 0px;
-	border-top: 1px solid #ccc;
-	
-	font-size:0.95em;
-	padding: 0.7em 0.7em;
-	text-decoration: none;
-	
+    text-align: right;   
+    display: block;
+    
+    border-width: 0px;
+    border-top: 1px solid #ccc;
+    
+    font-size:0.95em;
+    padding: 0.7em 0.7em;
+    text-decoration: none;
 }
 
 
@@ -173,30 +163,28 @@ div#additional ul li a#currentsection
 
 div#additional ul li# a, div#additional ul li, div#additional ul li span.youarehere
 {
- border-top: 1px solid #ccc;
+    border-top: 1px solid #ccc;
 }
 
 
 div#additional ul li ul li a, div#additional ul li ul li span.youarehere
 {
-	padding-top: 3px;
-	padding-bottom: 3px;
-	font-weight: normal;
-	border-width: 0px ;
-	padding-right: 1.8em;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    font-weight: normal;
+    border-width: 0px ;
+    padding-right: 1.8em;
 }
 
 
 div#additional ul li.currentsection
 {
-border-left: 1px solid #ccc;
-border-right: 1px solid #ccc;
-
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
 }
 
 div#additional ul li ul
 {
-margin: 0px;
-padding: 0px;
-
+    margin: 0px;
+    padding: 0px;
 }
