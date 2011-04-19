@@ -49,8 +49,8 @@ table.tablesorter thead tr th, table.tablesorter tfoot tr th {
     /* background-color: #e6EEEE; */
     background-color: #00274f; 
     color: #fff;
-    border: 1px solid #FFF;
-    font-size: 0.8em;
+    /* border: 1px solid #FFF; */
+    /* font-size: 0.8em; */
     padding: 0.2em;
     padding-right: 1em;
 }
