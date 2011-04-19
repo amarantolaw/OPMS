@@ -19,7 +19,7 @@ letter-spacing: 0.15em;
 
 }
 
-div#mainnav h2
+div#mainnav h2, div#mainnav h3
 {
 position: absolute;
 left: -2100px;
