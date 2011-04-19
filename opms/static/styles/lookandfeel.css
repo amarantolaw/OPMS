@@ -46,10 +46,13 @@ table.tablesorter {
     text-align: left;
 }
 table.tablesorter thead tr th, table.tablesorter tfoot tr th {
-    background-color: #e6EEEE;
+    /* background-color: #e6EEEE; */
+    background-color: #00274f; 
+    color: #fff;
     border: 1px solid #FFF;
     font-size: 0.8em;
-    padding: 4px 10px 4px 4px;
+    padding: 0.2em;
+    padding-right: 1em;
 }
 table.tablesorter thead tr .header {
     background-image: url(/static/images/bg.gif);
@@ -58,8 +61,8 @@ table.tablesorter thead tr .header {
     cursor: pointer;
 }
 table.tablesorter tbody td {
-    color: #3D3D3D;
-    padding: 4px;
+    color: #333;
+    padding: 0.2em;
     background-color: #FFF;
     vertical-align: top;
 }
@@ -74,6 +77,6 @@ table.tablesorter thead tr .headerSortDown {
 }
 table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
 /* background-color: #8dbdd8; */
-    background-color: #00274f; 
-    color: #fff;
+    background-color: #ccc; 
+    color: #000;
 }
