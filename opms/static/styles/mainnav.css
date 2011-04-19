@@ -4,19 +4,22 @@ This stylesheet provides styling for the main navigation elements in your site
 
 */
 
-div#mainnav
+div#mainnav, div#mainnav2
 {
 height: 1.9em;
 position: absolute;
-top:120px;
+top:10em;
 left:0px;
 width: 100%;
-  border-width: 0px;
+border-width: 0px;
 border-top: 1px solid #fff;
 padding-bottom: 1px;
 background-color: #ccc;
 letter-spacing: 0.15em;
-
+}
+div#mainnav2 
+{
+top:11.9em;
 }
 
 div#mainnav h2, div#mainnav h3
