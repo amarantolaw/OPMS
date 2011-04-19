@@ -51,7 +51,7 @@ table.tablesorter thead tr th, table.tablesorter tfoot tr th {
     color: #fff;
     /* border: 1px solid #FFF; */
     /* font-size: 0.8em; */
-    padding: 0.2em;
+    padding: 0.5em;
     padding-right: 1em;
 }
 table.tablesorter thead tr .header {
@@ -62,7 +62,7 @@ table.tablesorter thead tr .header {
 }
 table.tablesorter tbody td {
     color: #333;
-    padding: 0.2em;
+    padding: 0.5em;
     background-color: #FFF;
     vertical-align: top;
 }
