@@ -2,23 +2,26 @@
  * Layout elements for OPMS
  */
  
-#navbar ul {
+#navbar ul.level1 {
     list-style-type: none;
     background-color: #990000;
 }
 
-#navbar ul li {
+#navbar ul.level1 li {
     display: inline;
 }
 
-#navbar ul li ul {
-    float: left;
+#navbar ul.level1 li a {
+    display: inline;
+    height:1.5em;
+}
+
+#navbar ul.level2 {
     list-style-type: none;
     background-color: #000099;
 
 }
 
-#navbar ul li ul li {
+#navbar ul.level2 li {
     display: inline;
-    
 }

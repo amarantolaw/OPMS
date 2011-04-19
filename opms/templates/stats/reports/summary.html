@@ -8,6 +8,20 @@
 
 {% block title %}Summary Data from Apple iTU Reporting{% endblock %}
 
+{% block navbar %}
+        <ul class="level1">
+            <li><a href="/">Home</a></li>
+            <li><a href="/admin/">Admin</a></li>
+            <li class="currentsection"><a href="/stats/">Statistics</a></li>
+            <li><a href="#">Files and Feeds</a></li>
+        </ul>
+        <ul class="level2">
+            <li class="currentsection"><a href="/stats/report/summary/">Summary</a></li>
+            <li><a href="#">Feeds</a></li>
+        </ul>
+{% endblock %}
+
+
 {% block content %}
 <h1>Apple supplied Summary Data</h1>
 {% if latest_summary_data %}
