@@ -9,16 +9,24 @@
 {% block title %}Summary Data from Apple iTU Reporting{% endblock %}
 
 {% block navbar %}
-        <ul class="level1">
-            <li><a href="/">Home</a></li>
-            <li><a href="/admin/">Admin</a></li>
-            <li class="currentsection"><a href="/stats/">Statistics</a></li>
-            <li><a href="#">Files and Feeds</a></li>
-        </ul>
-        <ul class="level2">
-            <li class="currentsection"><a href="/stats/report/summary/">Summary</a></li>
-            <li><a href="#">Feeds</a></li>
-        </ul>
+<div id="mainnav">
+    <h2>Main sections</h2>
+    <ul class="level-1">
+        <li><a href="/">Home</a></li>
+        <li><a href="/admin/">Admin</a></li>
+        <li><a href="#">Files &amp; Feeds</a></li>
+        <li><span class="youarehere">Statistics</span></li>
+    </ul>
+</div>
+<div id="additional">
+    <h3>Sub sections for Statistics</h3>
+    <ul class="level-2">
+        <li><span class="youarehere">Summary</span></li>
+        <li><a href="#">Feeds</a></li>
+        <li><a href="#">Platforms</a></li>
+        <li><a href="#">Geography</a></li>
+    </ul>
+</div>
 {% endblock %}
 
 

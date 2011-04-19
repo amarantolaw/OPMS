@@ -11,6 +11,7 @@
     <link media="all" href="/static/styles/basic.css" rel="stylesheet" type="text/css"/>
     <link media="print" href="/static/styles/print.css" rel="stylesheet" type="text/css"/>
     <link media="screen,projection" href="/static/styles/oxService.css" rel="stylesheet" type="text/css"/>
+    <link media="screen,projection" href="/static/styles/mainnav.css" rel="stylesheet" type="text/css"/>
     <link media="screen,projection" href="/static/styles/lookandfeel.css" rel="stylesheet" type="text/css"/>
     <link media="screen,projection" href="/static/styles/layout.css" rel="stylesheet" type="text/css"/>
     
@@ -24,10 +25,8 @@
 </head>
 
 <body>
-    <div id="navbar">
-        {% block navbar %}            
-        {% endblock %}
-    </div>
+{% block navbar %}            
+{% endblock %}
     
     <div id="content" >
 {% block content %}
