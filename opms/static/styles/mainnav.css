@@ -19,7 +19,8 @@ div#mainnav, div#mainnav2
 }
 div#mainnav2 
 {
-    top:10.4em;
+    top:10.5em;
+    background-color: #00274F;
 }
 
 div#mainnav h2, div#mainnav2 h3
@@ -53,7 +54,6 @@ div#mainnav h2, div#mainnav2 h3
     float:left;
     white-space:nowrap;
     border:none;
-    color:#fff;
     font-size:0.95em;
     line-height: 1.9em;
     padding: 0px;
@@ -66,18 +66,24 @@ div#mainnav h2, div#mainnav2 h3
     border-width: 0px ;
     border-left: 1px solid white;
     border-right: 1px solid white;
-
 }
 
 
 
-div#mainnav ul li a:hover, div#mainnav ul li a:focus,
+div#mainnav ul li a:hover, div#mainnav ul li a:focus
+{
+    background-color: #666;
+}
 div#mainnav2 ul li a:hover, div#mainnav2 ul li a:focus
 {
     background-color: #666;
 }
 
-div#mainnav ul li span.youarehere, div#mainnav ul li a.currentsection, div#mainnav ul li a.selected,
+div#mainnav ul li span.youarehere, div#mainnav ul li a.currentsection, div#mainnav ul li a.selected
+{
+    color: #333;
+    background-color: #fff;
+}
 div#mainnav2 ul li span.youarehere, div#mainnav2 ul li a.currentsection, div#mainnav2 ul li a.selected
 {
     color: #333;
