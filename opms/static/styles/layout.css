@@ -2,7 +2,22 @@
  * Layout elements for OPMS
  */
  
- #navbar ul {
-     
- }
- 
+#navbar ul {
+    list-style-type: none;
+    background-color: #ff0000;
+}
+
+#navbar ul li {
+    display: inline;
+}
+
+#navbar ul li ul {
+    list-style-type: none;
+    background-color: #0000ff;
+
+}
+
+#navbar ul li ul li {
+    display: inline;
+    
+}
