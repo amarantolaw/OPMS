@@ -12,6 +12,7 @@
 }
 
 #navbar ul li ul {
+    float: left;
     list-style-type: none;
     background-color: #000099;
 
