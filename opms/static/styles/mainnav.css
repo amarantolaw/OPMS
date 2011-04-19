@@ -47,7 +47,8 @@ div#mainnav h2, div#mainnav2 h3
     font-weight: bold;
 }
 
-#mainnav ul li a, #mainnav ul li a.currentsection, #mainnav ul li span.youarehere
+#mainnav ul li a, #mainnav ul li a.currentsection, #mainnav ul li span.youarehere,
+#mainnav2 ul li a, #mainnav2 ul li a.currentsection, #mainnav2 ul li span.youarehere
 { 
     height:2em;
     float:left;
