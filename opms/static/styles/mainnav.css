@@ -47,8 +47,7 @@ div#mainnav h2, div#mainnav2 h3
     font-weight: bold;
 }
 
-#mainnav ul li a, #mainnav ul li a.currentsection, #mainnav ul li span.youarehere,
-#mainnav2 ul li a, #mainnav2 ul li a.currentsection, #mainnav2 ul li span.youarehere
+#mainnav ul li a, #mainnav ul li a.currentsection, #mainnav ul li span.youarehere
 { 
     height:2em;
     float:left;
@@ -67,12 +66,20 @@ div#mainnav h2, div#mainnav2 h3
     border-left: 1px solid white;
     border-right: 1px solid white;
 }
+#mainnav2 ul li a, #mainnav2 ul li a.currentsection, #mainnav2 ul li span.youarehere
+{ 
+    color:#fff;
+    border-color: #00274f;
+    border-width: 0px ;
+    border-left: 1px solid #00274f;
+    border-right: 1px solid #00274f;
+}
 
 
 
 div#mainnav ul li a:hover, div#mainnav ul li a:focus
 {
-    background-color: #666;
+    background-color: #00274f;
 }
 div#mainnav2 ul li a:hover, div#mainnav2 ul li a:focus
 {
@@ -87,7 +94,7 @@ div#mainnav ul li span.youarehere, div#mainnav ul li a.currentsection, div#mainn
 div#mainnav2 ul li span.youarehere, div#mainnav2 ul li a.currentsection, div#mainnav2 ul li a.selected
 {
     color: #333;
-    background-color: #fff;
+    background-color: #ccc;
 }
 
 
