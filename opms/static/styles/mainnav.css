@@ -62,18 +62,18 @@ div#mainnav h2, div#mainnav2 h3
     padding-right: 1em;
     text-decoration:none;
     color:#fff;
-    border-color: white;
-    border-width: 0px ;
-    border-left: 1px solid white;
-    border-right: 1px solid white;
-}
-#mainnav2 ul li a, #mainnav2 ul li a.currentsection, #mainnav2 ul li span.youarehere
-{ 
-    color:#fff;
     border-color: #00274f;
     border-width: 0px ;
     border-left: 1px solid #00274f;
     border-right: 1px solid #00274f;
+}
+#mainnav2 ul li a, #mainnav2 ul li a.currentsection, #mainnav2 ul li span.youarehere
+{
+    color:#fff;
+    border-color: white;
+    border-width: 0px ;
+    border-left: 1px solid white;
+    border-right: 1px solid white;
 }
 
 
