@@ -25,7 +25,16 @@
 </head>
 
 <body>
-{% block navbar %}            
+{% block navbar %}
+<div id="mainnav">
+    <h2>Main sections</h2>
+    <ul class="level-1">
+        <li><span class="youarehere">Home</span></li>
+        <li><a href="/admin/">Admin</a></li>
+        <li><a href="/ffm/">Files &amp; Feeds</a></li>
+        <li><a href="/stats/">Statistics</a></li>
+    </ul>
+</div>
 {% endblock %}
     
     <div id="content" >

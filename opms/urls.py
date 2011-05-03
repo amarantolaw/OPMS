@@ -16,4 +16,7 @@ urlpatterns = patterns('',
 
     # Stats module urls
     (r'^stats/', include('opms.stats.urls')),
+    
+    # FFM module urls
+    (r'^ffm/', include('opms.ffm.urls')),
 )
