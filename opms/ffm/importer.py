@@ -129,9 +129,9 @@ class RSSPodcastsProvider(object):
                 url = attrib.get('url', attrib.get('href'))
                 podcast_enc, updated = PodcastEnclosure.objects.get_or_create(podcast_item=podcast_item, url=url)
                 try:
-                    podcast_enc.length = int(attrib['length']) 
+                    podcast_enc.size = int(attrib['length']) 
                 except ValueError:
-                    podcast_enc.length = None
+                    podcast_enc.size = None
                 podcast_enc.mimetype = attrib['type']
                 podcast_enc.save()
                 enc_urls.append(url)

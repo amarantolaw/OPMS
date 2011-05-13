@@ -2,66 +2,23 @@ from django.db import models
 from django.core.urlresolvers import reverse
 from opms.ffm.data import licenses
 
-MEDIUM_CHOICES = (
-    ('audio', 'audio'),
-    ('video', 'video'),
-    ('document', 'document'),
-)
-
-class PodcastCategory(models.Model):
-    slug = models.SlugField()
+class Tag(models.Model):    
     name = models.TextField()
-    order = models.IntegerField(null=True)
-    
-    def get_absolute_url(self):
-        return reverse('podcasts:category', args=[self.slug])
-        
-    def __unicode__(self):
-        return self.name or ''
-    class Meta:
-        verbose_name = 'Podcast category'
-        verbose_name_plural = 'Podcast categories'
-        ordering = ('order','name',)
 
-class Podcast(models.Model):
-    slug = models.SlugField(unique=True)
+class Person(models.Model):
+    name = models.TextField()
+
+class Item(models.Model):
     title = models.TextField(null=True)
     description = models.TextField(null=True)
-    rss_url = models.URLField()
-    last_updated = models.DateTimeField(auto_now=True)
-    category = models.ForeignKey(PodcastCategory, null=True)
-    most_recent_item_date = models.DateTimeField(null=True)
-    medium = models.CharField(max_length=8, choices=MEDIUM_CHOICES, null=True)
-    provider = models.TextField()
-    license = models.URLField(null=True)
-    logo = models.URLField(null=True)
-    
-    def get_absolute_url(self):
-        return reverse('podcasts:podcast', args=[self.slug])
-        
-    def __unicode__(self):
-        return self.title or ''
-        
-    @property
-    def license_data(self):
-        return licenses.get(self.license)
-
-    class Meta:
-        verbose_name = 'Podcast feed'
-        verbose_name_plural = 'Podcast feeds'
-        ordering = ('title',)
-
-
-class PodcastItem(models.Model):
-    podcast = models.ForeignKey(Podcast)
-    title = models.TextField(null=True)
-    description = models.TextField(null=True)
-    published_date = models.DateTimeField(null=True)
-    author = models.TextField(null=True, blank=True)
-    duration = models.PositiveIntegerField(null=True)
+    publish_date = models.DateTimeField(null=True)
     guid = models.TextField()
-    order = models.IntegerField(null=True)
+    people = models.ManyToManyField(Role, through='Role')
     license = models.URLField(null=True)
+    tags = models.ManyToManyField(Tag)
+    recording_date = models.DateField(null=True)
+    owning_unit = models.IntegerField()
+    publish_status = models.TextField(default='published')
 
     def __unicode__(self):
         return self.title or ''
@@ -73,6 +30,11 @@ class PodcastItem(models.Model):
     class Meta:
         verbose_name = 'Podcast item'
         verbose_name_plural = 'Podcast items'
+
+class Role(models.Model):
+    person = models.ForeignKey(Person)
+    item = models.ForeignKey(Item)
+    role = models.TextField()
 
 MIMETYPES = {
     'audio/x-mpeg': 'MP3 audio',
@@ -91,11 +53,17 @@ MIMETYPES = {
     'application/epub+zip': 'ePub eBook'
 }    
 
-class PodcastEnclosure(models.Model):
-    podcast_item = models.ForeignKey(PodcastItem)
+class FileFunction(models.Model):
+    purpose = models.TextField()
+
+class File(models.Model):
+    item = models.ForeignKey(Item)
+    guid = models.TextField()
     url = models.URLField()
-    length = models.IntegerField(null=True)
+    size = models.IntegerField(null=True)
+    duration = models.IntegerField(null=True)
     mimetype = models.TextField(null=True)
+    function = models.ForeignKey(FileFunction)
     
     @property
     def medium(self):
@@ -118,3 +86,33 @@ class PodcastEnclosure(models.Model):
         verbose_name = 'Podcast enclosed data'
         verbose_name_plural = 'Podcast enclosed data'
 
+class Feed(models.Model):
+    slug = models.SlugField(unique=True)
+    title = models.TextField(null=True)
+    description = models.TextField(null=True)
+    source_url = models.URLField()
+    last_updated = models.DateTimeField(auto_now=True)
+    owning_unit = models.IntegerField()
+    publish_date = models.DateField()
+    source_service = models.TextField()
+    logo = models.ForeignKey(File)
+    files = models.ManyToManyField(File, through='FileInFeed')
+        
+    def __unicode__(self):
+        return self.title or ''
+        
+    @property
+    def license_data(self):
+        return licenses.get(self.license)
+
+    class Meta:
+        verbose_name = 'Podcast feed'
+        verbose_name_plural = 'Podcast feeds'
+        ordering = ('title',)
+
+class FileInFeed(models.Model):
+    file = models.ForeignKey(File)
+    feed = models.ForeignKey(Feed)
+    order = models.IntegerField(default=0)
+    itunesu_category = models.IntegerField(default=112)
+    jacs_code = models.TextField(null=True)
