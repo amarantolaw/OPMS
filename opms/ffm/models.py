@@ -96,7 +96,7 @@ class Feed(models.Model):
     owning_unit = models.IntegerField()
     publish_date = models.DateField()
     source_service = models.TextField()
-    feedart = models.ForeignKey(File)
+    feedart = models.ForeignKey(File, related_name='albumartfor')
     files = models.ManyToManyField(File, through='FileInFeed')
         
     def __unicode__(self):
