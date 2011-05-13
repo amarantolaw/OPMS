@@ -12,7 +12,7 @@ def index(request):
 def summary_index(request):
     "Show the Apple 'Summary' User Action results"
     # return HttpResponse("Summary Report")
-    latest_summary_data = Summary.objects.all()
+    latest_summary_data = Summary.objects.all().order_by('-week_ending','-service_name')
     return render_to_response('stats/reports/summary.html', {'latest_summary_data': latest_summary_data,})
 
 
