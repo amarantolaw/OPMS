@@ -13,7 +13,7 @@ class Item(models.Model):
     description = models.TextField(null=True)
     publish_date = models.DateTimeField(null=True)
     guid = models.TextField()
-    people = models.ManyToManyField(Role, through='Role')
+    people = models.ManyToManyField(Person, through='Role')
     license = models.URLField(null=True)
     tags = models.ManyToManyField(Tag)
     recording_date = models.DateField(null=True)
@@ -51,19 +51,20 @@ MIMETYPES = {
     'video/x-m4v': 'MP4 video',
     'audio/x-m4a': 'MP4 audio',
     'application/epub+zip': 'ePub eBook'
-}    
-
-class FileFunction(models.Model):
-    purpose = models.TextField()
+}
 
 class File(models.Model):
     item = models.ForeignKey(Item)
-    guid = models.TextField()
-    url = models.URLField()
+    guid = models.TextField(null=True)
+    url = models.URLField(null=True)
     size = models.IntegerField(null=True)
     duration = models.IntegerField(null=True)
     mimetype = models.TextField(null=True)
-    function = models.ForeignKey(FileFunction)
+    function = models.TextField(default='Unknown',
+                                choices=(
+                                        ('Unknown', 'Unknown'),
+                                        ('FeedArt', 'Feed art'),
+                                    ))
     
     @property
     def medium(self):
@@ -95,7 +96,7 @@ class Feed(models.Model):
     owning_unit = models.IntegerField()
     publish_date = models.DateField()
     source_service = models.TextField()
-    logo = models.ForeignKey(File)
+    feedart = models.ForeignKey(File)
     files = models.ManyToManyField(File, through='FileInFeed')
         
     def __unicode__(self):
