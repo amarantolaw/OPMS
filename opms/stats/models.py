@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.encoding import smart_str, smart_unicode
 from datetime import date
+from opms.ffm import models as ffm_models
 
 
 
@@ -104,6 +105,7 @@ class TrackHandle(models.Model):
 class TrackGUID(models.Model):
     guid = models.CharField("GUID", max_length=255,db_index=True)
     # Eventually there will be a link here to a File record from the FFM module
+    file = models.ForeignKey(ffm_models.File, null=True)
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
     
     def __unicode__(self):
@@ -299,7 +301,10 @@ class FileRequest(models.Model):
     uri_string = models.TextField("uri path in request string")
     argument_string = models.TextField("arguments in request string")
     protocol = models.CharField("request protocol", max_length=20)
-    file_type = models.CharField("file type", max_length=3, choices=FILE_TYPE_CHOICES)
+    # Eventually there will be a link here to a File record from the FFM module
+    file = models.ForeignKey(ffm_models.File, null=True)
+    # No longer need file type as this comes from FFM.File
+    # file_type = models.CharField("file type", max_length=3, choices=FILE_TYPE_CHOICES)
 
     def __unicode__(self):
         return self.uri_string
