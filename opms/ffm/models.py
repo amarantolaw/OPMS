@@ -94,17 +94,13 @@ class Feed(models.Model):
     source_url = models.URLField()
     last_updated = models.DateTimeField(auto_now=True)
     owning_unit = models.IntegerField()
-    publish_date = models.DateField()
+    publish_date = models.DateField(null=True)
     source_service = models.TextField()
-    feedart = models.ForeignKey(File, related_name='albumartfor')
+    feedart = models.ForeignKey(File, related_name='albumartfor', null=True)
     files = models.ManyToManyField(File, through='FileInFeed')
         
     def __unicode__(self):
         return self.title or ''
-        
-    @property
-    def license_data(self):
-        return licenses.get(self.license)
 
     class Meta:
         verbose_name = 'Podcast feed'
