@@ -19,6 +19,8 @@ logger = logging.getLogger(__name__)
 def oxpoints_lookup(unit_code):
     if unit_code == 'smith':
         unit_code = 'smth'
+    if unit_code == 'alumni':
+        return 23233512
     result = simplejson.load(urllib.urlopen('http://oxpoints.oucs.ox.ac.uk/oucs:%s.json' % unit_code))
     return result[0]['uri'].split('/')[-1]
 
