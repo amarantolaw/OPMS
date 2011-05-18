@@ -1,4 +1,5 @@
 from django.conf.urls.defaults import *
+from django.views.generic.simple import direct_to_template
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -21,5 +22,5 @@ urlpatterns = patterns('',
     (r'^ffm/', include('opms.ffm.urls')),
     
     # Root homepage
-    (r'^/', django.views.generic.simple.direct_to_template', {'template': 'base.html'}),
+    (r'^/', direct_to_template, {'template': 'base.html'}),
 )
