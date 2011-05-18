@@ -14,7 +14,6 @@ div#mainnav, div#mainnav2
     border-width: 0px;
     background-color: #00274F;
     letter-spacing: 0.15em;
-    padding-left: 1em;
 }
 div#mainnav2 
 {
@@ -32,6 +31,7 @@ div#mainnav h2, div#mainnav2 h3
 {
     width: 50em;
     padding:0;
+    padding-left: 1em;
     display:block;
     margin:0;  
 }
