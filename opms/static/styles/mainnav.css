@@ -57,7 +57,7 @@ div#mainnav h2, div#mainnav2 h3
     font-size:0.95em;
     line-height: 1.9em;
     padding: 0px;
-    /* padding-bottom: 1px; */
+    padding-bottom: 0.1em;
     padding-left: 1em;
     padding-right: 1em;
     text-decoration:none;
