@@ -72,6 +72,7 @@ div#mainnav h2, div#mainnav2 h3
 div#mainnav ul li a:hover, div#mainnav ul li a:focus,
 div#mainnav2 ul li a:hover, div#mainnav2 ul li a:focus
 {
+    color:#fff;
     background-color: #666;
 }
 
