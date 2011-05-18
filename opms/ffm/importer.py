@@ -8,12 +8,21 @@ from datetime import datetime
 import dateutil.parser
 import logging
 import traceback
+import simplejson
 
 from django.template.defaultfilters import slugify
 
-from .models import Podcast, PodcastItem, PodcastEnclosure, PodcastCategory
+from .models import Feed, Item, File
 
 logger = logging.getLogger(__name__)
+
+def oxpoints_lookup(unit_code):
+    if unit_code == 'smith':
+        unit_code = 'smth'
+    if unit_code == 'alumni':
+        return 23233512
+    result = simplejson.load(urllib.urlopen('http://oxpoints.oucs.ox.ac.uk/oucs:%s.json' % unit_code))
+    return result[0]['uri'].split('/')[-1]
 
 class Namespace(object):
     def __init__(self, ns):
@@ -21,22 +30,20 @@ class Namespace(object):
     def __call__(self, local):
         return '{%s}%s' % (self.ns, local)
 
-class RSSPodcastsProvider(object):
+class RSSImporter(object):
     @property
     def PODCAST_ATTRS(self):
         atom = self.atom
         return (
             ('guid', ('guid', atom('id'),)),
             ('title', ('title', atom('title'),)),
-            ('author', ('{itunes:}author',)),
-            ('duration', ('{itunes:}duration',)),
-            ('published_date', ('pubDate', atom('published'),)),
+            ('publish_date', ('pubDate', atom('published'),)),
             ('description', ('description', atom('summary'),)),
-    #       ('itunesu_code', '{itunesu:}code'),
         )
 
-    def __init__(self, podcasts, medium=None):
+    def __init__(self, podcasts, service, medium=None):
         self.podcasts = podcasts
+        self._service = service
         self.medium = medium
     
     @property
@@ -46,7 +53,7 @@ class RSSPodcastsProvider(object):
     def import_data(self, metadata, output):
         for slug, url in self.podcasts:
             podcast, url = Podcast.objects.get_or_create(
-                provider=__name__,
+                provider=self._service,
                 rss_url=url,
                 defaults={'slug': slug})
             if self.medium: 
@@ -79,7 +86,7 @@ class RSSPodcastsProvider(object):
                 return value
             return None
 
-        xml = etree.parse(urllib.urlopen(podcast.rss_url)).getroot()
+        xml = etree.parse(urllib.urlopen(podcast.source_url)).getroot()
 
         try:
             podcast.title = xml.find('.//channel/title').text
@@ -93,27 +100,39 @@ class RSSPodcastsProvider(object):
             podcast.medium = medium
 
         logo = xml.find('.//channel/image/url')
-        podcast.logo = logo.text if logo is not None else None
-
+        logo_url = logo.text
+        if logo_url is not None:
+            item, created = Item.objects.get_or_create(guid=logo_url,
+                                                       defaults={
+                                                        'owning_unit': podcast.owning_unit,
+                                                       })
+            if created:
+                item.save()
+            logo, created = File.objects.get_or_create(url=logo_url,
+                                                       item = item,
+                                                       function='FeedArt')
+            if created:
+                logo.save()
+            podcast.feedart = logo
+        else:
+            podcast.feedart = None
+        
         ids = []
         for item in xml.findall('.//channel/item') or xml.findall(atom('entry')):
+            files = []
             id = gct(item, ('guid', atom('id'),))
             if not id:
                 continue
             
             try:
-                podcast_item, created = PodcastItem.objects.get_or_create(podcast=podcast, guid=id)
-            except PodcastItem.MultipleObjectsReturned:
-                PodcastItem.objects.filter(podcast=podcast, guid=id).delete()
-                podcast_item, created = PodcastItem.objects.get_or_create(podcast=podcast, guid=id)
-
-            old_order = podcast_item.order
-            try:
-                podcast_item.order = int(item.find('{http://ns.ox.ac.uk/namespaces/oxitems/TopDownloads}position').text)
-            except (AttributeError, TypeError):
-                pass
-
-            require_save = old_order != podcast_item.order
+                podcast_item, created = Item.objects.get_or_create(guid=id,
+                                                                   owning_unit=podcast.owning_unit)
+            except Item.MultipleObjectsReturned:
+                Item.objects.filter(guid=id).delete()
+                podcast_item, created = Item.objects.get_or_create(guid=id,
+                                                                   owning_unit=podcast.owning_unit)
+            
+            require_save = False
             for attr, x_attrs in self.PODCAST_ATTRS:
                 if getattr(podcast_item, attr) != gct(item, x_attrs):
                     setattr(podcast_item, attr, gct(item, x_attrs))
@@ -122,12 +141,12 @@ class RSSPodcastsProvider(object):
             if require_save or podcast_item.license != license:
                 podcast_item.license = license
                 podcast_item.save()
-
+            
             enc_urls = []
             for enc in item.findall('enclosure') or item.findall(atom('link')):
                 attrib = enc.attrib
                 url = attrib.get('url', attrib.get('href'))
-                podcast_enc, updated = PodcastEnclosure.objects.get_or_create(podcast_item=podcast_item, url=url)
+                podcast_enc, updated = File.objects.get_or_create(item=podcast_item, url=url)
                 try:
                     podcast_enc.size = int(attrib['length']) 
                 except ValueError:
@@ -135,30 +154,26 @@ class RSSPodcastsProvider(object):
                 podcast_enc.mimetype = attrib['type']
                 podcast_enc.save()
                 enc_urls.append(url)
-
-            encs = PodcastEnclosure.objects.filter(podcast_item = podcast_item)
-            for enc in encs:
-                if not enc.url in enc_urls:
-                    enc.delete()
-
+            
+            if len(enc_urls) == 0:
+                enc = File().save()
+                enc_link = FileInFeed(feed=podcast, file=enc).save()
+            
             ids.append( id )
-
-        for podcast_item in PodcastItem.objects.filter(podcast=podcast):
-            if not podcast_item.guid in ids:
-                podcast_item.podcastenclosure_set.all().delete()
-                podcast_item.delete()
 
         #podcast.most_recent_item_date = max(i.published_date for i in PodcastItem.objects.filter(podcast=podcast))
         podcast.save()
 
-class OPMLPodcastsProvider(RSSPodcastsProvider):
+class OPMLImporter(RSSImporter):
     def __init__(self, 
                  url = 'http://rss.oucs.ox.ac.uk/metafeeds/podcastingnewsfeeds.opml',
-                 rss_re = r'http://rss.oucs.ox.ac.uk/(.+-(.+?))/rss20.xml'):
+                 rss_re = r'http://rss.oucs.ox.ac.uk/(.+-(.+?))/rss20.xml',
+                 service='oxpoints'):
         self.url = url
         self.medium = None
         self.rss_re = re.compile(rss_re)
         self._category = None
+        self._service = service
 
     CATEGORY_ORDERS = {}
 
@@ -200,17 +215,18 @@ class OPMLPodcastsProvider(RSSPodcastsProvider):
 
     def parse_outline(self, outline):
         attrib = outline.attrib
-        podcast, created = Podcast.objects.get_or_create(
-            provider=__name__,
-            rss_url=attrib['xmlUrl'])
+        slug = self.extract_slug(attrib['xmlUrl'])
+        podcast, created = Feed.objects.get_or_create(
+            source_service=self._service,
+            source_url=attrib['xmlUrl'],
+            owning_unit = oxpoints_lookup(slug.split('/')[0]))
         
-        podcast.medium = self.extract_medium(attrib['xmlUrl'])
-        podcast.category = self.decode_category(attrib)
-        podcast.slug = self.extract_slug(attrib['xmlUrl'])
+        podcast.slug = slug
+        podcast.save()
         
         self.update_podcast(podcast)
 
-    def import_data(self, metadata, output):
+    def import_data(self):
         
         self._category = None
 
@@ -228,8 +244,8 @@ class OPMLPodcastsProvider(RSSPodcastsProvider):
                     self.parse_outline(outline)
                     rss_urls.append(outline.attrib['xmlUrl'])
                 except Exception, e:
-                    output.write("Update of podcast %r failed." % outline.attrib['xmlUrl'])
-                    traceback.print_exc(file=output)
+                    print "Update of podcast %r failed." % outline.attrib['xmlUrl']
+                    traceback.print_exc()
                     if not failure_logged:
                         logger.exception("Update of podcast %r failed.", outline.attrib['xmlUrl'])
                         failure_logged = True
@@ -242,15 +258,13 @@ class OPMLPodcastsProvider(RSSPodcastsProvider):
                             self.parse_outline(outline)
                             rss_urls.append(outline.attrib['xmlUrl'])
                         except Exception, e:
-                            output.write("Update of podcast %r failed." % outline.attrib['xmlUrl'])
-                            traceback.print_exc(file=output)
+                            print "Update of podcast %r failed." % outline.attrib['xmlUrl']
+                            traceback.print_exc()
                             if not failure_logged:
                                 logger.exception("Update of podcast %r failed.", outline.attrib['xmlUrl'])
                                 failure_logged = True
                 self._category = None
 
-        for podcast in Podcast.objects.filter(provider=__name__):
-            if not podcast.rss_url in rss_urls:
+        for podcast in Feed.objects.filter(source_service=self._service):
+            if not podcast.source_url in rss_urls:
                 podcast.delete()
-        
-        return metadata
