@@ -22,5 +22,5 @@ urlpatterns = patterns('',
     (r'^ffm/', include('opms.ffm.urls')),
     
     # Root homepage
-    (r'^/', direct_to_template, {'template': 'base.html'}),
+    (r'^', direct_to_template, {'template': 'base.html'}),
 )
