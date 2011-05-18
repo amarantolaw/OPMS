@@ -19,4 +19,7 @@ urlpatterns = patterns('',
     
     # FFM module urls
     (r'^ffm/', include('opms.ffm.urls')),
+    
+    # Root homepage
+    (r'^/', django.views.generic.simple.direct_to_template', {'template': 'base.html'}),
 )
