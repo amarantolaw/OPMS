@@ -6,21 +6,21 @@ This stylesheet provides styling for the main navigation elements in your site
 
 div#mainnav, div#mainnav2
 {
-    height: 1.9em;
+    height: 2em;
     position: absolute;
     top:8.5em;
     left:0px;
     width: 100%;
     border-width: 0px;
-    border-top: 1px solid #fff;
+    /* border-top: 1px solid #fff; */
     padding-bottom: 1px;
-    background-color: #ccc;
+    background-color: #00274F;
     letter-spacing: 0.15em;
 }
 div#mainnav2 
 {
     top:10.5em;
-    background-color: #00274F;
+    background-color: #ccc;
 }
 
 div#mainnav h2, div#mainnav2 h3
@@ -78,10 +78,10 @@ div#mainnav h2, div#mainnav2 h3
 
 
 
-div#mainnav ul li a:hover, div#mainnav ul li a:focus
-{
+div#mainnav ul li a:hover, div#mainnav ul li a:focus,
+/* {
     background-color: #00274f;
-}
+} */
 div#mainnav2 ul li a:hover, div#mainnav2 ul li a:focus
 {
     background-color: #666;
@@ -90,12 +90,12 @@ div#mainnav2 ul li a:hover, div#mainnav2 ul li a:focus
 div#mainnav ul li span.youarehere, div#mainnav ul li a.currentsection, div#mainnav ul li a.selected
 {
     color: #333;
-    background-color: #fff;
+    background-color: #ccc;
 }
 div#mainnav2 ul li span.youarehere, div#mainnav2 ul li a.currentsection, div#mainnav2 ul li a.selected
 {
     color: #333;
-    background-color: #ccc;
+    background-color: #fff;
 }
 
 
