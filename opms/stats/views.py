@@ -35,8 +35,8 @@ def graph_apple_summary_totals(request):
     
     x = matplotlib.numpy.arange(1,len(s))
     
-    tracks = [int(s.total_track_downloads) for item in s]
-    dates = [s.week_ending for item in s]
+    tracks = [int(item.total_track_downloads) for item in s]
+    dates = [item.week_ending for item in s]
     
     
     numTests = len(s)
