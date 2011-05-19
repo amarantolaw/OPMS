@@ -30,8 +30,20 @@
 
 
 {% block content %}
+<script>
+$(document).ready(function() 
+    { 
+        $("#summaryTable").tablesorter( {sortList: [[0,1], [1,1]]} ); 
+    } 
+);
+$("a.codeShowA").click(function(){$("div.sectionA").toggle("slide",{}, 1000); return false;});
+$("a.codeShowB").click(function(){$("div.sectionB").toggle("slide",{}, 1000); return false;});
+</script>
+
+
 <h1>Apple supplied Summary Data</h1>
-{% if latest_summary_data %}
+<p><a href="#" class=codeShowB>Show/hide About Apple Statistics</a></p>
+<div id="sectionA">
 <h2>About Apple Statistics</h2>
 <p>Apple provides a weekly report covering a four-week period and contains multiple worksheets, 
 each including information about a different week of site usage. The main worksheet, Summary, 
@@ -43,9 +55,12 @@ For example, if our site was created on Monday, 2010-09-20, our first weekly rep
 the start date of Sunday and display 2010-09-19 in the individual worksheet tabs and Summary 
 worksheet column. Apple emails our detailed Excel spreadsheet report each Wednesday evening (GMT).</p>
 <p>More information can be found at <a href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/UnderstandingiTunesUreports/chapter_13_section_2.html#//apple_ref/doc/uid/iTUPSM-CH16-SW3">iTunes U Public Site Manager Guide</a>.</p>
+</div>
 
 <h2>User Actions</h2>
 
+<p><a href="#" class=codeShowB>Show/hide Understanding Summary data</a></p>
+<div id="sectionB">
 <h3>Understanding summary data</h3>
 <p>The Summary worksheet lists aggregate values for the individual worksheet user actions. The 
 following table describes what occurs for the user actions returned in the Summary sheet:</p>
@@ -57,7 +72,7 @@ following table describes what occurs for the user actions returned in the Summa
   </tr>
   <tr>
     <td scope="row"><strong>Browse</strong></td>
-    <td>A user views a page in your <a class="content_text" href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/Glossary/chapter_998_section_1.html#//apple_ref/doc/uid/iTUPSM-CH3-SW9">site</a>.
+    <td>A user views a page in our <a class="content_text" href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/Glossary/chapter_998_section_1.html#//apple_ref/doc/uid/iTUPSM-CH3-SW9">site</a>.
     It’s analogous to browsing a page in a web browser.</td>
   </tr>
   <tr>
@@ -110,10 +125,10 @@ following table describes what occurs for the user actions returned in the Summa
   <tr>
     <td scope="row"><strong>Total Track Downloads</strong></td>
     <td>The Total Track Downloads value is a combination of items downloaded for a 
-  collection subscription (SubscriptionEnclosure/SubscriptionRedirectedEnclosure), items downloaded 
-  from an iPhone, iPad, or iPod (DownloadiOS), and items downloaded when a user clicks Free 
-  (DownloadTrack/DownloadRedirectedTrack) or Get All (DownloadTracks/DownloadRedirectedTracks). 
-  The Total Track Downloads value does not include preview data.</td>
+    collection subscription (SubscriptionEnclosure / SubscriptionRedirectedEnclosure), items downloaded 
+    from an iPhone, iPad, or iPod (DownloadiOS), and items downloaded when a user clicks Free 
+    (DownloadTrack / DownloadRedirectedTrack) or Get All (DownloadTracks / DownloadRedirectedTracks). 
+    The Total Track Downloads value does not include preview data.</td>
   </tr>
 </table>
 <!-- Have not seen any evidence of this attribute...
@@ -124,19 +139,13 @@ following table describes what occurs for the user actions returned in the Summa
   through the content caching system as “Redirected’ actions.</p></li>
 </ul>
 -->
+</div>
 
-
+{% if latest_summary_data %}
 <h3>Data visualisation</h3>
 <p>GRAPH</p>
 
 <h3>Data table</h3>
-<script>
-$(document).ready(function() 
-    { 
-        $("#summaryTable").tablesorter( {sortList: [[0,1], [1,1]]} ); 
-    } 
-);
-</script>
 <table id="summaryTable" class="tablesorter">
   <thead>
   <tr>
