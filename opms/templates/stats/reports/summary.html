@@ -35,7 +35,9 @@ $(document).ready(function()
     { 
         $("#summaryTable").tablesorter( {sortList: [[0,1], [1,1]]} ); 
         $("a.codeShowA").click(function(){$("div.sectionA").toggle("blind",{}, "slow"); return false;});
+        $("div.sectionA").toggle("blind",{}, "fast");
         $("a.codeShowB").click(function(){$("div.sectionB").toggle("blind",{}, "slow"); return false;});
+        $("div.sectionB").toggle("blind",{}, "fast");
     } 
 );
 </script>
