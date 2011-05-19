@@ -57,7 +57,7 @@ class SummaryManager(models.Manager):
                 download_ios=row[6], subscription=row[7], subscription_enclosure=row[8],
                 subscription_feed=row[9], total_track_downloads=row[10])
             try:
-                r.total_track_downloads_change = int(previous_row[10])-int(row[10])
+                r.total_track_downloads_change = int(row[10])-int(previous_row[10])
             except IndexError:
                 r.total_track_downloads_change = 0
             previous_row = row
