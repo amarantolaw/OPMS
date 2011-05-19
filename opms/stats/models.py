@@ -29,7 +29,7 @@ class LogFile(models.Model):
 # Apple Summary Data
 ####
 
-class SummaryManager(model.Manager):
+class SummaryManager(models.Manager):
     def get_query_set(self):
         from django.db import connection
         cursor = connection.cursor()
