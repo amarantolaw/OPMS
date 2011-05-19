@@ -2,7 +2,7 @@
 {% block head %}
     <script src="/static/scripts/jquery-1.5.2.min.js"></script>
     <script src="/static/scripts/jquery.tablesorter.min.js"></script>
-    
+    <script src="/static/scripts/jquery-ui-1.8.13.min.js"></script>
 {% endblock %}
 
 {% block title %}Summary Data from Apple iTU Reporting{% endblock %}
@@ -36,13 +36,13 @@ $(document).ready(function()
         $("#summaryTable").tablesorter( {sortList: [[0,1], [1,1]]} ); 
     } 
 );
-$("a.codeShowA").click(function(){$("div.sectionA").toggle("slide",{}, 1000); return false;});
-$("a.codeShowB").click(function(){$("div.sectionB").toggle("slide",{}, 1000); return false;});
+$("a.codeShowA").click(function(){$("div.sectionA").toggle("slide",{}, "slow"); return false;});
+$("a.codeShowB").click(function(){$("div.sectionB").toggle("slide",{}, "slow"); return false;});
 </script>
 
 
 <h1>Apple supplied Summary Data</h1>
-<p><a href="#" class=codeShowB>Show/hide About Apple Statistics</a></p>
+<p><a href="#" class=codeShowA>Show/hide About Apple Statistics</a></p>
 <div id="sectionA">
 <h2>About Apple Statistics</h2>
 <p>Apple provides a weekly report covering a four-week period and contains multiple worksheets, 
