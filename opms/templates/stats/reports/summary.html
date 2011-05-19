@@ -150,6 +150,7 @@ $(document).ready(function()
 <table id="summaryTable" class="tablesorter">
     <thead>
         <tr>
+            <th>Week#</th>
             <th>Week Beginning</th>
             <!--
             <th colspan="6">Downloads</th>
@@ -173,9 +174,10 @@ $(document).ready(function()
     <tbody>
     {% for row in summary_data %}
         <tr>
+            <td>{{ row.week_number }}</td>
             <td>{{ row.week_ending|date:"Y-m-d" }}</td>
             <td>{{ row.total_track_downloads }}</td>
-            <td>{{ row.total_track_downloads_change }}</td>
+            <td class="{% if row.total_track_downloads_change >= 0 %}positive{% else %}negative{% endif %}">{{ row.total_track_downloads_change }}</td>
             <td>{{ row.download_preview }}</td> 
             <td>{{ row.download_preview_ios }}</td> 
             <td>{{ row.download_track }}</td> 
