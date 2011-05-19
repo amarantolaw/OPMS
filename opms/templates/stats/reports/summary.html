@@ -33,7 +33,7 @@
 <script>
 $(document).ready(function() 
     { 
-        $("#summaryTable").tablesorter( {sortList: [[0,1], [1,1]]} ); 
+        $("#summaryTable").tablesorter( {sortList: [[1,1]]} ); 
         $("a.codeShowA").click(function(){$("div.sectionA").toggle("blind",{}, "slow"); return false;});
         $("div.sectionA").toggle("blind",{}, "fast");
         $("a.codeShowB").click(function(){$("div.sectionB").toggle("blind",{}, "slow"); return false;});
@@ -150,14 +150,10 @@ $(document).ready(function()
 <table id="summaryTable" class="tablesorter">
     <thead>
         <tr>
-            <th>Week#</th>
+            <th>Week #</th>
             <th>Week Beginning</th>
-            <!--
-            <th colspan="6">Downloads</th>
-            <th colspan="3">Subscriptions</th>
-            -->
             <th>TOTAL</th>
-            <th>Total Change</th>
+            <th>Total +/-</th>
             <th>Preview</th>
             <th>Preview iOS</th>
             <th>Track</th>
@@ -167,7 +163,6 @@ $(document).ready(function()
             <th>Subs</th>
             <th>Enclosure</th>
             <th>Feed</th>
-            
             <th>Browse</th>
         </tr>
     </thead>
