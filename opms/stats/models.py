@@ -57,11 +57,13 @@ class SummaryManager(models.Manager):
                 download_preview_ios=row[3], download_track=row[4], download_tracks=row[5],
                 download_ios=row[6], subscription=row[7], subscription_enclosure=row[8],
                 subscription_feed=row[9], total_track_downloads=row[10])
+                
             r.week_number = week_number
             try:
                 r.total_track_downloads_change = int(row[10])-int(previous_row[10])
             except IndexError:
                 r.total_track_downloads_change = 0
+            
             result_list.append(r)
                 
             week_number += 1
