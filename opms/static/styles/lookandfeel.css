@@ -46,10 +46,10 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
     color: #000;
 }
 
-td.positive {
+table.tablesorter tbody td.positive {
     color: #0f0;
 }
 
-td.negative {
+table.tablesorter tbody td.negative {
     color: #f00;
 }
