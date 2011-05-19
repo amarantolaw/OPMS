@@ -29,6 +29,39 @@ class LogFile(models.Model):
 # Apple Summary Data
 ####
 
+class SummaryManager(model.Manager):
+    def get_query_set(self):
+        from django.db import connection
+        cursor = connection.cursor()
+        cursor.execute("""
+            SELECT week_ending AS week_beginning, 
+                   sum(browse) AS browse,
+                   sum(download_preview) AS download_preview,
+                   sum(download_preview_ios) AS download_preview_ios,
+                   sum(download_track) AS download_track,
+                   sum(download_tracks) AS download_tracks,
+                   sum(download_ios) AS download_ios,
+                   sum(subscription) AS subscription,
+                   sum(subscription_enclosure) AS subscription_enclosure,
+                   sum(subscription_feed) AS subscription_feed,
+                   sum(total_track_downloads) AS total_track_downloads
+            FROM stats_summary
+            GROUP BY week_ending
+            ORDER BY week_ending ASC
+        """)
+        result_list = []
+        previous_row = []
+        for row in cursor.fetchall():
+            r = self.model(week_beginning=row[0], browse=row[1], download_preview=row[2], 
+                download_preview_ios=row[3], download_track=row[4], download_tracks=row[5],
+                download_ios=row[6], subscription=row[7], subscription_enclosure=row[8],
+                subscription_feed=row[9], total_track_downloads=row[10])
+            r.total_track_downloads_change = int(previous_row[10])-int(row[10])
+            previous_row = row
+            result_list.append(r)
+        return result_list
+
+
 # A Summary record based on a column of data from the Summary tab. Note there can be more than one for a given week (iTU + iTUPSM)
 # aka: "AppleEntry", like LogEntry, but for Apple data.
 class Summary(models.Model):
@@ -37,7 +70,7 @@ class Summary(models.Model):
         (u'itu-psm', u'iTunes U PSM'),
     )    
     # Date from the column - typically from yyyy-mm-dd format
-    week_ending = models.DateField("week ending", db_index=True)
+    week_ending = models.DateField("week ending", db_index=True)  # NB: This needs renaming to week_beginning
     
     # Logfile this data was pulled from
     logfile = models.ForeignKey(LogFile)
@@ -62,6 +95,8 @@ class Summary(models.Model):
     not_listed = models.IntegerField("not listed")
     # The total as calculated by Apple
     total_track_downloads = models.IntegerField("total track downloads")
+    
+    merged = SummaryManager()
     
     def __unicode__(self):
         return str(date.strftime(self.week_ending,"%Y-%m-%d")) + ": Total Downloads=" + str(self.total_track_downloads)
