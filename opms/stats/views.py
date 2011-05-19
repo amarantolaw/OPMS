@@ -29,10 +29,8 @@ def summary_weekof(request):
 def graph_apple_summary_totals(request):
     plt.plot([1,2,3,4])
     plt.ylabel('some numbers')
-    plt.show()
-    f = plt.figure()
 
-    canvas = FigureCanvasAgg(f)    
+    canvas = FigureCanvasAgg(plt.show())    
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response)
     plt.close()
