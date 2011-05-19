@@ -33,8 +33,22 @@
 <h1>Apple supplied Summary Data</h1>
 {% if latest_summary_data %}
 <h2>User Actions</h2>
+<h3>About Apple Statistics</h3>
+<p>Apple provides a weekly report covering a four-week period and contains multiple worksheets, 
+each including information about a different week of site usage. The main worksheet, Summary, 
+contains a week-by-week overview of our site activity.</p>
+<p>iTunes U Public Site Manager captures weekly report data using a Sunday through Saturday 
+schedule, Pacific Time. Sunday is the start of the report week. iTunes U Public Site Manager 
+displays Sunday’s date in the individual worksheet tabs and the Summary worksheet columns. 
+For example, if our site was created on Monday, 2010-09-20, our first weekly report would use 
+the start date of Sunday and display 2010-09-19 in the individual worksheet tabs and Summary 
+worksheet column. Apple emails our detailed Excel spreadsheet report each Wednesday evening (GMT).<p>
+<p>More information can be found at <a href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/UnderstandingiTunesUreports/chapter_13_section_2.html#//apple_ref/doc/uid/iTUPSM-CH16-SW3">http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/UnderstandingiTunesUreports/chapter_13_section_2.html#//apple_ref/doc/uid/iTUPSM-CH16-SW3</a>.</p>
+
+<h3>Data visualisation</h3>
 <p>GRAPH</p>
 
+<h3>Data table</h3>
 <script>
 $(document).ready(function() 
     { 
@@ -45,7 +59,7 @@ $(document).ready(function()
 <table id="summaryTable" class="tablesorter">
   <thead>
   <tr>
-    <th>Week Ending</th>
+    <th>Week Beginning</th>
     <th>Service</th>
     <!--
     <th colspan="6">Downloads</th>
