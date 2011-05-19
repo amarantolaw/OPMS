@@ -33,13 +33,13 @@ def graph_apple_summary_totals(request):
     ax=fig.add_subplot(1,1,1)
     s = Summary.merged.all()
     
-    x = matplotlib.numpy.arange(1,s.count())
+    x = matplotlib.numpy.arange(1,len(s))
     
     tracks = [int(s.total_track_downloads) for item in s]
     dates = [s.week_ending for item in s]
     
     
-    numTests = s.count()
+    numTests = len(s)
     ind = matplotlib.numpy.arange(numTests) # the x locations for the groups
     
     cols = ['red','orange','yellow','green','blue','purple','indigo']*10
