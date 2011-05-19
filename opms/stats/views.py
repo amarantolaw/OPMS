@@ -64,8 +64,8 @@ def graph_apple_summary_totals(request):
     
     autolabel(rects1)
     autolabel(rects2)
+    plt.draw()
     f = plt.figure()
-    plt.show()
 
     canvas = FigureCanvasAgg(f)    
     response = HttpResponse(content_type='image/png')
