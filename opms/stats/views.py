@@ -71,5 +71,5 @@ def graph_apple_summary_totals(request):
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response)
     
-    plt.close(f)
+    plt.close()
     return response
