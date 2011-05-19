@@ -32,8 +32,7 @@
 {% block content %}
 <h1>Apple supplied Summary Data</h1>
 {% if latest_summary_data %}
-<h2>User Actions</h2>
-<h3>About Apple Statistics</h3>
+<h2>About Apple Statistics</h2>
 <p>Apple provides a weekly report covering a four-week period and contains multiple worksheets, 
 each including information about a different week of site usage. The main worksheet, Summary, 
 contains a week-by-week overview of our site activity.</p>
@@ -42,8 +41,90 @@ schedule, Pacific Time. Sunday is the start of the report week. iTunes U Public 
 displays Sunday’s date in the individual worksheet tabs and the Summary worksheet columns. 
 For example, if our site was created on Monday, 2010-09-20, our first weekly report would use 
 the start date of Sunday and display 2010-09-19 in the individual worksheet tabs and Summary 
-worksheet column. Apple emails our detailed Excel spreadsheet report each Wednesday evening (GMT).<p>
-<p>More information can be found at <a href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/UnderstandingiTunesUreports/chapter_13_section_2.html#//apple_ref/doc/uid/iTUPSM-CH16-SW3">http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/UnderstandingiTunesUreports/chapter_13_section_2.html#//apple_ref/doc/uid/iTUPSM-CH16-SW3</a>.</p>
+worksheet column. Apple emails our detailed Excel spreadsheet report each Wednesday evening (GMT).</p>
+<p>More information can be found at <a href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/UnderstandingiTunesUreports/chapter_13_section_2.html#//apple_ref/doc/uid/iTUPSM-CH16-SW3">iTunes U Public Site Manager Guide</a>.</p>
+
+<h2>User Actions</h2>
+
+<h3>Understanding summary data</h3>
+<p>The Summary worksheet lists aggregate values for the individual worksheet user actions. The 
+following table describes what occurs for the user actions returned in the Summary sheet:</p>
+
+<table border = "0" cellspacing="0" cellpadding="5">
+  <tr>
+    <th scope="col"><p>This user action</p></th>
+    <th scope="col"><p>Occurs when this action occurs</p></th>
+  </tr>
+  <tr>
+    <td scope="row"><p><strong>Browse</strong></p></td>
+    <td><p>A user views a page in your <a class="content_text" href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/Glossary/chapter_998_section_1.html#//apple_ref/doc/uid/iTUPSM-CH3-SW9">site</a>.
+    It’s analogous to browsing a page in a web browser.</p></td>
+  </tr>
+  <tr>
+    <td scope="row"><p><strong>DownloadPreview/DownloadRedirectedPreview</strong></p></td>
+    <td><p>A user clicks the Play button or double-clicks an <a class="content_text" href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/Glossary/chapter_998_section_1.html#//apple_ref/doc/uid/iTUPSM-CH3-SW12">item</a>
+    in the iTunes desktop.</p></td>
+  </tr>
+  <tr>
+    <td scope="row"><p><strong>DownloadPreviewiOS</strong></p></td>
+    <td><p>A user taps to play an item on an iPad, iPhone, or iPod.</p></td>
+  </tr>
+  <tr>
+    <td scope="row"><p><strong>DownloadTrack/DownloadRedirectedTrack</strong></p></td>
+    <td><p>A user clicks the Free button to download an item in the iTunes desktop.</p></td>
+  </tr>
+  <tr>
+    <td scope="row"><p><strong>DownloadTracks/DownloadRedirectedTracks</strong></p></td>
+    <td><p>A user clicks the Get All button to download all items in a <a class="content_text" href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/Glossary/chapter_998_section_1.html#//apple_ref/doc/uid/iTUPSM-CH3-SW10">collection page</a>
+    in the iTunes desktop. This action appears multiple times in the report; once for each item 
+    the user downloads.</p></td>
+  </tr>
+  <tr>
+    <td scope="row"><p><strong>DownloadiOS</strong></p></td>
+    <td><p>A user clicks the Free button to download an item on an iPad, iPhone, or iPod.</p></td>
+  </tr>
+  <tr>
+    <td scope="row"><p><strong>Subscription</strong></p></td>
+    <td><p>A user clicks the Subscribe Free button to subscribe to the <a class="content_text" href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/Glossary/chapter_998_section_1.html#//apple_ref/doc/uid/iTUPSM-CH3-SW7">collection</a>.</p></td>
+  </tr>
+  <tr>
+    <td scope="row"><p><strong>SubscriptionEnclosure/SubscriptionRedirectedEnclosure</strong></p></td>
+    <td><p>The podcast reader downloads a new item in the collection. If the podcast reader detects 
+    new content in the collection, it downloads the content.</p></td>
+  </tr>
+  <tr>
+    <td scope="row"><p><strong>SubscriptionFeed</strong></p></td>
+    <td><p>The podcast reader automatically checks for new content in the collection. Podcast 
+    readers automatically check for new content at regular intervals.</p></td>
+  </tr>
+  <tr>
+    <td scope="row"><p><strong>Upload</strong></p></td>
+    <td><p>A user clicks the Upload New Items link in the <a class="content_text" href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/Glossary/chapter_998_section_1.html#//apple_ref/doc/uid/iTUPSM-CH3-SW26">feed editor</a>
+    to upload a file.</p></td>
+  </tr>
+  <tr>
+    <td scope="row"><p><strong>Not Listed</strong></p></td>
+    <td><p>Includes all actions not explicitly listed. In the Summary sheet, Not Listed indicates 
+    all unlisted versions of iTunes.</p></td>
+  </tr>
+  <tr>
+    <td scope="row"><p><strong>Total Track Downloads</strong></p></td>
+    <td><p>The Total Track Downloads value is a combination of items downloaded for a 
+  collection subscription (SubscriptionEnclosure/SubscriptionRedirectedEnclosure), items downloaded 
+  from an iPhone, iPad, or iPod (DownloadiOS), and items downloaded when a user clicks Free 
+  (DownloadTrack/DownloadRedirectedTrack) or Get All (DownloadTracks/DownloadRedirectedTracks). 
+  The Total Track Downloads value does not include preview data.</p></td>
+  </tr>
+</table>
+<!-- Have not seen any evidence of this attribute...
+<p><strong>Notes:</strong></p>
+<ul class="ul">
+  <li class="li"><p>iTunes U Public Site Manager uses a content caching system for some content 
+  available in the iTunes Store. iTunes U Public Site Manager reports some user actions routed 
+  through the content caching system as “Redirected’ actions.</p></li>
+</ul>
+-->
+
 
 <h3>Data visualisation</h3>
 <p>GRAPH</p>
