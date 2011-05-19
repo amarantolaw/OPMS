@@ -51,17 +51,21 @@ class SummaryManager(models.Manager):
         """)
         result_list = []
         previous_row = []
+        week_number = -3
         for row in cursor.fetchall():
             r = self.model(week_ending=row[0], browse=row[1], download_preview=row[2], 
                 download_preview_ios=row[3], download_track=row[4], download_tracks=row[5],
                 download_ios=row[6], subscription=row[7], subscription_enclosure=row[8],
                 subscription_feed=row[9], total_track_downloads=row[10])
+            r.week_number = week_number
             try:
                 r.total_track_downloads_change = int(row[10])-int(previous_row[10])
             except IndexError:
                 r.total_track_downloads_change = 0
-            previous_row = row
             result_list.append(r)
+                
+            week_number += 1
+            previous_row = row
         return result_list
 
 
