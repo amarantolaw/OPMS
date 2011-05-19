@@ -148,48 +148,46 @@ $(document).ready(function()
 
 <h3>Data table</h3>
 <table id="summaryTable" class="tablesorter">
-  <thead>
-  <tr>
-    <th>Week Beginning</th>
-    <th>Service</th>
-    <!--
-    <th colspan="6">Downloads</th>
-    <th colspan="3">Subscriptions</th>
-    -->
-    <th>TOTAL</th>
-    <th>Preview</th>
-    <th>Preview iOS</th>
-    <th>Track</th>
-    <th>Tracks</th>
-    <th>iOS</th>
-    <!-- subscriptions -->
-    <th>Subs</th>
-    <th>Enclosure</th>
-    <th>Feed</th>
-    
-    <th>Browse</th>
-    <th>Search Results</th>
-  </tr>
-  </thead>
-  <tbody>
+    <thead>
+        <tr>
+            <th>Week Beginning</th>
+            <!--
+            <th colspan="6">Downloads</th>
+            <th colspan="3">Subscriptions</th>
+            -->
+            <th>TOTAL</th>
+            <th>Total Change</th>
+            <th>Preview</th>
+            <th>Preview iOS</th>
+            <th>Track</th>
+            <th>Tracks</th>
+            <th>iOS</th>
+            <!-- subscriptions -->
+            <th>Subs</th>
+            <th>Enclosure</th>
+            <th>Feed</th>
+            
+            <th>Browse</th>
+        </tr>
+    </thead>
+    <tbody>
     {% for row in latest_summary_data %}
-  <tr>
-    <td>{{ row.week_ending|date:"Y-m-d" }}</td>
-    <td>{{ row.service_name }}</td>
-    <td>{{ row.total_track_downloads }}</td>
-    <td>{{ row.download_preview }}</td> 
-    <td>{{ row.download_preview_ios }}</td> 
-    <td>{{ row.download_track }}</td> 
-    <td>{{ row.download_tracks }}</td> 
-    <td>{{ row.download_ios }}</td> 
-    <td>{{ row.subscription }}</td> 
-    <td>{{ row.subscription_enclosure }}</td> 
-    <td>{{ row.subscription_feed }}</td>        
-    <td>{{ row.browse }}</td>
-    <td>{{ row.search_results_page }}</td> 
-  </tr>
+        <tr>
+            <td>{{ row.week_beginning|date:"Y-m-d" }}</td>
+            <td>{{ row.total_track_downloads }}</td>
+            <td>{{ row.total_track_downloads_change }}</td>
+            <td>{{ row.download_preview }}</td> 
+            <td>{{ row.download_preview_ios }}</td> 
+            <td>{{ row.download_track }}</td> 
+            <td>{{ row.download_tracks }}</td> 
+            <td>{{ row.download_ios }}</td> 
+            <td>{{ row.subscription }}</td> 
+            <td>{{ row.subscription_enclosure }}</td> 
+            <td>{{ row.subscription_feed }}</td>        
+            <td>{{ row.browse }}</td>
+        </tr>
     {% endfor %}
-  </tbody>
+    </tbody>
 </table>
 
 {% else %}
