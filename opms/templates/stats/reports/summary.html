@@ -34,8 +34,8 @@
 $(document).ready(function() 
     { 
         $("#summaryTable").tablesorter( {sortList: [[0,1], [1,1]]} ); 
-        $("a.codeShowA").click(function(){$("div.sectionA").toggle("slide",{}, "slow"); return false;});
-        $("a.codeShowB").click(function(){$("div.sectionB").toggle("slide",{}, "slow"); return false;});
+        $("a.codeShowA").click(function(){$("div.sectionA").toggle("blind",{}, "slow"); return false;});
+        $("a.codeShowB").click(function(){$("div.sectionB").toggle("blind",{}, "slow"); return false;});
     } 
 );
 </script>
