@@ -13,7 +13,7 @@ def summary_index(request):
     "Show the Apple 'Summary' User Action results"
     # return HttpResponse("Summary Report")
     summary_data = Summary.merged.all()
-    return render_to_response('stats/reports/summary.html', {'latest_summary_data': latest_summary_data,})
+    return render_to_response('stats/reports/summary.html', {'summary_data': latest_summary_data,})
 
 
 def summary_weekof(request):
