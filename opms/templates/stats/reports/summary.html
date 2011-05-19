@@ -142,7 +142,7 @@ $(document).ready(function()
     -->
 </div>
 
-{% if latest_summary_data %}
+{% if summary_data %}
 <h3>Data visualisation</h3>
 <p>GRAPH</p>
 
@@ -171,7 +171,7 @@ $(document).ready(function()
         </tr>
     </thead>
     <tbody>
-    {% for row in latest_summary_data %}
+    {% for row in summary_data %}
         <tr>
             <td>{{ row.week_ending|date:"Y-m-d" }}</td>
             <td>{{ row.total_track_downloads }}</td>
