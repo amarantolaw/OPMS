@@ -29,39 +29,33 @@ def summary_weekof(request):
 
 def graph_apple_summary_totals(request):
     fig = Figure()
+    ax = fig.add_subplot(1,1,1)
     
-    ax=fig.add_subplot(1,1,1)
     s = Summary.merged.all()
-    
     x = matplotlib.numpy.arange(1,len(s))
     
     tracks = [int(item.total_track_downloads) for item in s]
-    dates = [item.week_ending for item in s]
-    
+    dates = [item.week_number for item in s]
     
     numTests = len(s)
     ind = matplotlib.numpy.arange(numTests) # the x locations for the groups
     
-    cols = ['red','orange','yellow','green','blue','purple','indigo']*10
+    cols = ['blue','blue','blue']*100
     
     cols = cols[0:len(ind)]
     ax.bar(ind, tracks,color=cols)
     
-    
     ax.set_xticks(ind + 0.5)
     ax.set_xticklabels(dates)
-    
     
     ax.set_xlabel("Week")
     ax.set_ylabel("Downloads")
     
-    #ax.set_xticklabels(names)
-    
-    title = u"Dynamically Generated Results Plot for Summary"
+    title = u"Apple Weekly Downloads and Cumulative Total"
     ax.set_title(title)
     
+    ax.grid(True)
     
-    #ax.grid(True)
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
     
