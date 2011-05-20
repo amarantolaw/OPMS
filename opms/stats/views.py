@@ -55,12 +55,11 @@ def graph_apple_summary_totals(request):
     ax.set_title(title)
     
     # ax.grid(True)
-    ax.annotate('china launch', xy=(105,400000), xytext=(70,450000), arrowprops=dict(facecolor='black', shrink=0.05),)
-    ax.annotate('iTunes 9.0 released', xy=(55,80000), xytext=(40,150000), arrowprops=dict(facecolor='black', shrink=0.05),)
-    ax.annotate('Oxford on iTunes U launch', xy=(5,80000), xytext=(20,250000), arrowprops=dict(facecolor='black', shrink=0.05),)
+    ax.annotate('iTU PSM launch', xy=(105,400000), xytext=(70,450000), arrowprops=dict(facecolor='black', shrink=0.05),)
+    ax.annotate('iTunes 9.0 released', xy=(53,80000), xytext=(40,150000), arrowprops=dict(facecolor='black', shrink=0.05),)
+    ax.annotate('Oxford on iTunes U launch', xy=(4,80000), xytext=(20,250000), arrowprops=dict(facecolor='black', shrink=0.05),)
     
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
-    
     canvas.print_png(response)
     return response
