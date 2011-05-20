@@ -54,7 +54,8 @@ def graph_apple_summary_totals(request):
     title = u"Apple Weekly Downloads and Cumulative Total"
     ax.set_title(title)
     
-    ax.grid(True)
+    # ax.grid(True)
+    ax.annotate('china launch', xy=(105,400000), xytext=(90,300000), arrowprops=dict(facecolor='black', shrink=0.05),)
     
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
