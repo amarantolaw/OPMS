@@ -28,7 +28,7 @@ def summary_weekof(request):
 
 
 def graph_apple_summary_totals(request):
-    fig = Figure(figsize=(10,7.5), dpi=100)
+    fig = Figure(figsize=(10,7.5), dpi=100, facecolor='white', edgecolor='white')
     ax = fig.add_subplot(1,1,1)
     
     s = Summary.merged.all()
@@ -46,7 +46,7 @@ def graph_apple_summary_totals(request):
     ax.bar(ind, tracks,color=cols)
     
     ax.set_xticks(ind + 0.5)
-    ax.set_xticklabels(dates)
+    ax.set_xticklabels(dates, rotation=90, size='small')
     
     ax.set_xlabel("Week")
     ax.set_ylabel("Downloads")
