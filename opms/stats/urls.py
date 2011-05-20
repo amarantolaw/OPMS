@@ -6,6 +6,6 @@ urlpatterns = patterns('stats.views',
     #(r'^report/pr/partial-guid/(?P<partial_guid>.+)', 'pr_report2'),
     #(r'^report/pr/(?P<sort_by>.*)', 'pr_report1'),
     (r'^report/summary/$', 'summary_index'),
-    (r'^graph/apple/summary-total$', 'graph_apple_summary_totals'),
+    (r'^graph/apple/summary-total.png', 'graph_apple_summary_totals'),
     (r'^$', 'index'),
 )
