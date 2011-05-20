@@ -46,7 +46,7 @@ def graph_apple_summary_totals(request):
     ax.bar(ind, tracks,color=cols)
     
     ax.set_xticks(ind + 0.5)
-    ax.set_xticklabels(dates, rotation=90, size='small')
+    ax.set_xticklabels(dates, rotation=90, size='xx-small')
     
     ax.set_xlabel("Week")
     ax.set_ylabel("Downloads")
