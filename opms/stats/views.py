@@ -28,7 +28,7 @@ def summary_weekof(request):
 
 
 def graph_apple_summary_totals(request):
-    fig = Figure(figsize=(4,3), dpi=300)
+    fig = Figure(figsize=(10,7.5), dpi=100)
     ax = fig.add_subplot(1,1,1)
     
     s = Summary.merged.all()
