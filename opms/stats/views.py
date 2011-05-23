@@ -36,7 +36,7 @@ def graph_apple_summary_totals(request):
     x = matplotlib.numpy.arange(1,len(s))
     
     tracks = [int(item.total_track_downloads) for item in s]
-    dates = [item.week_ending for item in s]
+    dates = [str(item.week_ending) for item in s]
     
     numTests = len(s)
     ind = matplotlib.numpy.arange(numTests) # the x locations for the groups
@@ -48,7 +48,7 @@ def graph_apple_summary_totals(request):
     
     xlabels = []
     previous_month = '00'
-    for str(d) in dates:
+    for d in dates:
         current_month = str(d[5:7])
         if current_month != previous_month:
             xlabels.append = d
