@@ -36,29 +36,38 @@ def graph_apple_summary_totals(request):
     s = Summary.merged.all()
     x = matplotlib.numpy.arange(1,len(s))
     
-    tracks = [int(item.total_track_downloads) for item in s]
-    dates = [str(item.week_ending) for item in s]
+    tracks = []
+    dates = []
+    xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
+    count = 0
+    for item in s:
+        tracks.append(int(item.total_track_downloads))
+        if count == 0 or (count % 4) == 0:
+            dates.append(str(item.week_ending))
+        count += 1
+
     
     ind = matplotlib.numpy.arange(len(s)) # the x locations for the groups
     
     cols = ['blue']*len(ind)
-    ax.bar(ind, tracks, color=cols)
+    ax1.bar(ind, tracks, color=cols)
     
     
-    xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
-    ax.set_xticks(xticks)
-    ax.set_xticklabels(dates, rotation=270, size='xx-small')
+    ax1.set_xticks(xticks)
+    ax1.set_xticklabels(dates, rotation=270, size='xx-small')
     
-    ax.set_xlabel("Week Number")
-    ax.set_ylabel("Downloads")
+    ax1.set_xlabel("Week Number")
+    ax1.set_ylabel("Downloads")
     
     title = u"Apple Weekly Downloads and Cumulative Total"
-    ax.set_title(title)
+    ax1.set_title(title)
     
     # ax.grid(True)
-    ax.annotate('iTU PSM launch', xy=(105,400000), xytext=(70,450000), arrowprops=dict(facecolor='black', shrink=0.05),)
-    ax.annotate('iTunes 9.0 released', xy=(53,80000), xytext=(40,150000), arrowprops=dict(facecolor='black', shrink=0.05),)
-    ax.annotate('Oxford on iTunes U launch', xy=(4,80000), xytext=(20,250000), arrowprops=dict(facecolor='black', shrink=0.05),)
+    ax1.annotate('iTU PSM launch', xy=(105,400000), xytext=(70,450000), arrowprops=dict(facecolor='black', shrink=0.05),)
+    ax1.annotate('iTunes 9.0 released', xy=(53,80000), xytext=(40,150000), arrowprops=dict(facecolor='black', shrink=0.05),)
+    ax1.annotate('Oxford on iTunes U launch', xy=(4,80000), xytext=(20,250000), arrowprops=dict(facecolor='black', shrink=0.05),)
+    
+    
     
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
