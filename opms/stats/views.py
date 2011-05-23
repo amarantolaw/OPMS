@@ -48,7 +48,7 @@ def graph_apple_summary_totals(request):
     
     xlabels = []
     previous_month = '00'
-    for d in dates:
+    for str(d) in dates:
         current_month = str(d[5:7])
         if current_month != previous_month:
             xlabels.append = d
