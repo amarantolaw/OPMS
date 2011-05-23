@@ -57,10 +57,6 @@ def graph_apple_summary_totals(request):
     
     cols = ['blue']*len(ind)
     ax1.bar(ind, tracks, color=cols)
-    
-    ax1.set_xticks(xticks)
-    ax1.set_xticklabels(dates, rotation=270, size='xx-small')
-    ax1.set_xlabel("Week Commencing")
     ax1.set_ylabel("Weekly Downloads", color='blue')
     
     ax1.annotate('iTU PSM launch', xy=(105,400000), xytext=(70,450000), arrowprops=dict(facecolor='black', shrink=0.05),)
@@ -72,6 +68,10 @@ def graph_apple_summary_totals(request):
     ax2.plot(ind, cumulative, 'r-')
     ax2.set_ylabel("Cumulative Downloads", color='red')
     
+    
+    ax2.set_xticks(xticks)
+    ax2.set_xticklabels(dates, rotation=270, size='xx-small')
+    ax2.set_xlabel("Week Commencing")
     
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
