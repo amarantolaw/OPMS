@@ -40,10 +40,14 @@ def graph_apple_summary_totals(request):
     x = matplotlib.numpy.arange(1,len(s))
     
     tracks = []
+    cumulative = []
     dates = []
     xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
+    running_total = 0
     count = 0
     for item in s:
+        running_total += int(item.total_track_downloads)
+        cumulative.append(running_total)
         tracks.append(int(item.total_track_downloads))
         if count == 0 or (count % 4) == 0:
             dates.append(str(item.week_ending))
@@ -56,13 +60,17 @@ def graph_apple_summary_totals(request):
     
     ax1.set_xticks(xticks)
     ax1.set_xticklabels(dates, rotation=270, size='xx-small')
-    ax1.set_xlabel("Week Number")
-    ax1.set_ylabel("Downloads")
+    ax1.set_xlabel("Week Commencing")
+    ax1.set_ylabel("Weekly Downloads", color='blue')
     
     ax1.annotate('iTU PSM launch', xy=(105,400000), xytext=(70,450000), arrowprops=dict(facecolor='black', shrink=0.05),)
     ax1.annotate('iTunes 9.0 released', xy=(53,80000), xytext=(40,150000), arrowprops=dict(facecolor='black', shrink=0.05),)
     ax1.annotate('Oxford on iTunes U launch', xy=(4,80000), xytext=(20,250000), arrowprops=dict(facecolor='black', shrink=0.05),)
     
+    
+    ax2 = ax1.twinx()
+    ax2.plot(ind, cumulative, 'red-')
+    ax2.set_ylabel("Cumulative Downloads", color='red')
     
     
     canvas = FigureCanvas(fig)
