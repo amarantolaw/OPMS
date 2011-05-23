@@ -2,10 +2,11 @@ from django.shortcuts import render_to_response
 from django.http import Http404, HttpResponse
 from stats.models import Summary
 
+import pylab
 import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
-from matplotlib.dates import DateFormatter
+from matplotlib.dates import DateFormatter, WeekdayLocator
 
 
 # Default Stats module homepage
@@ -35,7 +36,7 @@ def graph_apple_summary_totals(request):
     x = matplotlib.numpy.arange(1,len(s))
     
     tracks = [int(item.total_track_downloads) for item in s]
-    dates = [item.week_number for item in s]
+    dates = [item.week_ending for item in s]
     
     numTests = len(s)
     ind = matplotlib.numpy.arange(numTests) # the x locations for the groups
@@ -45,8 +46,10 @@ def graph_apple_summary_totals(request):
     cols = cols[0:len(ind)]
     ax.bar(ind, tracks,color=cols)
     
-    ax.set_xticks(ind + 0.5)
-    ax.set_xticklabels(dates, rotation=270, size='x-small', lod=True)
+    # ax.set_xticks(ind + 0.5)
+    # ax.set_xticklabels(dates, rotation=270, size='x-small', lod=True)
+    ax.xaxis.set_major_locator(WeekdayLocator(byweekday=maplotlib.dates.SU))
+    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%a %d\n%b %Y'))
     
     ax.set_xlabel("Week Number")
     ax.set_ylabel("Downloads")
