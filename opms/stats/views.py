@@ -55,9 +55,10 @@ def graph_apple_summary_totals(request):
     
     ax1.set_xticks(xticks)
     ax1.set_xticklabels(dates, rotation=270, size='xx-small')
-    
     ax1.set_xlabel("Week Number")
+    
     ax1.set_ylabel("Downloads")
+    ax1.set_yticklabels(size='xx-small')
     
     title = u"Apple Weekly Downloads and Cumulative Total"
     ax1.set_title(title)
