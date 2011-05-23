@@ -69,9 +69,9 @@ def graph_apple_summary_totals(request):
     ax2.set_ylabel("Cumulative Downloads", color='red')
     
     
-    ax2.set_xticks(xticks)
-    ax2.set_xticklabels(dates, rotation=270, size='xx-small')
-    ax2.set_xlabel("Week Commencing")
+    ax1.set_xticks(xticks)
+    ax1.set_xticklabels(dates, rotation=270, size='xx-small')
+    ax1.set_xlabel("Week Commencing")
     
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
