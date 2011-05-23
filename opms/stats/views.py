@@ -4,9 +4,9 @@ from stats.models import Summary
 
 import pylab
 import matplotlib
+import matplotlib.dates
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
-from matplotlib.dates import DateFormatter, WeekdayLocator
 
 
 # Default Stats module homepage
@@ -48,7 +48,7 @@ def graph_apple_summary_totals(request):
     
     # ax.set_xticks(ind + 0.5)
     # ax.set_xticklabels(dates, rotation=270, size='x-small', lod=True)
-    ax.xaxis.set_major_locator(WeekdayLocator(byweekday=maplotlib.dates.SU))
+    ax.xaxis.set_major_locator(matplotlib.dates.WeekdayLocator(byweekday=matplotlib.dates.SU))
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%a %d\n%b %Y'))
     
     ax.set_xlabel("Week Number")
