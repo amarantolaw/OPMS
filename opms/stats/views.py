@@ -31,7 +31,7 @@ def summary_weekof(request):
 
 def graph_apple_summary_totals(request):
     fig = Figure(figsize=(9,6), dpi=100, facecolor='white', edgecolor='white')
-    ax = fig.add_subplot(1,1,1)
+    ax1 = fig.add_subplot(1,1,1)
     
     s = Summary.merged.all()
     x = matplotlib.numpy.arange(1,len(s))
