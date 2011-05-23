@@ -30,7 +30,7 @@ def summary_weekof(request):
 
 
 def graph_apple_summary_totals(request):
-    fig = Figure(figsize=(10,7.5), dpi=100, facecolor='white', edgecolor='white')
+    fig = Figure(figsize=(9,6), dpi=100, facecolor='white', edgecolor='white')
     ax = fig.add_subplot(1,1,1)
     
     s = Summary.merged.all()
@@ -39,16 +39,15 @@ def graph_apple_summary_totals(request):
     tracks = [int(item.total_track_downloads) for item in s]
     dates = [str(item.week_ending) for item in s]
     
-    numTests = len(s)
-    ind = matplotlib.numpy.arange(numTests) # the x locations for the groups
+    ind = matplotlib.numpy.arange(len(s)) # the x locations for the groups
     
     cols = ['blue']*len(ind)
     ax.bar(ind, tracks, color=cols)
     
     
-    xticks = matplotlib.numpy.arange(1,len(s),4)
+    xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
     ax.set_xticks(xticks)
-    # ax.set_xticks(ind + 0.5)
+    ax.set_ticks_position('bottom')
     ax.set_xticklabels(dates, rotation=270, size='x-small')
     
     ax.set_xlabel("Week Number")
