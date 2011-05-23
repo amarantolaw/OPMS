@@ -46,7 +46,16 @@ def graph_apple_summary_totals(request):
     cols = cols[0:len(ind)]
     ax.bar(ind, tracks, color=cols)
     
-    ax.set_xticks(ind + 0.5)
+    xlabels = []
+    previous_month = '00'
+    for d in dates:
+        current_month = str(d[5:7])
+        if current_month != previous_month:
+            xlabels.append = d
+            previous_month = current_month
+            
+    ax.set_xticks(xlabels + 0.5)
+    # ax.set_xticks(ind + 0.5)
     ax.set_xticklabels(dates, rotation=270, size='x-small', lod=True)
     #ax.xaxis.set_major_locator(matplotlib.dates.WeekdayLocator(byweekday=matplotlib.dates.SU))
     #ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%a %d\n%b %Y'))
