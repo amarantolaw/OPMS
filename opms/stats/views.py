@@ -47,8 +47,7 @@ def graph_apple_summary_totals(request):
     
     xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
     ax.set_xticks(xticks)
-    ax.xaxis.set_ticks_position('bottom')
-    ax.set_xticklabels(dates, rotation=270, size='x-small')
+    ax.set_xticklabels(dates, rotation=270, size='xx-small')
     
     ax.set_xlabel("Week Number")
     ax.set_ylabel("Downloads")
