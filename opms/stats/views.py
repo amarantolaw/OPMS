@@ -32,6 +32,7 @@ def summary_weekof(request):
 def graph_apple_summary_totals(request):
     fig = Figure(figsize=(9,6), dpi=100, facecolor='white', edgecolor='white')
     ax1 = fig.add_subplot(1,1,1)
+    ax2 = ax1.twinx()
     
     title = u"Apple Weekly Downloads and Cumulative Total"
     ax1.set_title(title)
@@ -64,7 +65,6 @@ def graph_apple_summary_totals(request):
     ax1.annotate('Oxford on iTunes U launch', xy=(4,80000), xytext=(20,250000), arrowprops=dict(facecolor='black', shrink=0.05),)
     
     
-    ax2 = ax1.twinx()
     ax2.plot(ind, cumulative, 'r-')
     ax2.set_ylabel("Cumulative Downloads", color='red')
     
