@@ -69,7 +69,7 @@ def graph_apple_summary_totals(request):
     
     
     ax2 = ax1.twinx()
-    ax2.plot(ind, cumulative, 'red-')
+    ax2.plot(ind, cumulative, 'r-')
     ax2.set_ylabel("Cumulative Downloads", color='red')
     
     
