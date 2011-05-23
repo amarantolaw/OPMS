@@ -44,12 +44,12 @@ def graph_apple_summary_totals(request):
     cols = ['blue','blue','blue']*100
     
     cols = cols[0:len(ind)]
-    ax.bar(ind, tracks,color=cols)
+    ax.bar(ind, tracks, color=cols)
     
-    # ax.set_xticks(ind + 0.5)
-    # ax.set_xticklabels(dates, rotation=270, size='x-small', lod=True)
-    ax.xaxis.set_major_locator(matplotlib.dates.WeekdayLocator(byweekday=matplotlib.dates.SU))
-    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%a %d\n%b %Y'))
+    ax.set_xticks(ind + 0.5)
+    ax.set_xticklabels(dates, rotation=270, size='x-small', lod=True)
+    #ax.xaxis.set_major_locator(matplotlib.dates.WeekdayLocator(byweekday=matplotlib.dates.SU))
+    #ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%a %d\n%b %Y'))
     
     ax.set_xlabel("Week Number")
     ax.set_ylabel("Downloads")
