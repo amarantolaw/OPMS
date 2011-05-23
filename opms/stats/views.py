@@ -38,7 +38,7 @@ def graph_apple_summary_totals(request):
     dates = [item.week_number for item in s]
     
     numTests = len(s)
-    ind = matplotlib.numpy.arange(numTests/2) # the x locations for the groups
+    ind = matplotlib.numpy.arange(numTests) # the x locations for the groups
     
     cols = ['blue','blue','blue']*100
     
