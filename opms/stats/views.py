@@ -86,10 +86,10 @@ def graph_apple_summary_totals(request):
     ax2.yaxis.major.formatter.set_powerlimits((-100,100))
     
     ax2.annotate('Cumulative Downloads for\n' + latest_date + ': ' + str(running_total), 
-                 color = 'r', ha = 'right', size = 'small',
+                 color = 'black', ha = 'right', size = 'small',
                  xy = (len(s),running_total), 
                  xytext = (len(s),(running_total-3000000)), 
-                 arrowprops = dict(facecolor = 'red', shrink = 0.05),)
+                 arrowprops = dict(facecolor = 'red', linewidth=0, shrink = 0.05),)
     
     ax1.set_xticks(xticks)
     ax1.set_xticklabels(dates, rotation=270, size='xx-small')
