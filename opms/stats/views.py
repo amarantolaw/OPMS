@@ -73,6 +73,7 @@ def graph_apple_summary_totals(request):
     ax1.set_ylabel("Weekly Downloads", color='blue', size='small')
     for tl in ax1.get_yticklabels():
         tl.set_color('b')
+    ax1.yaxis.major.formatter.set_powerlimits((-3,3))
     
     ax1.annotate('iTU PSM launch', xy=(107,400000), xytext=(70,450000), arrowprops=dict(facecolor='black', shrink=0.05),)
     ax1.annotate('iTunes 9.0 released', xy=(53,80000), xytext=(40,150000), arrowprops=dict(facecolor='black', shrink=0.05),)
