@@ -40,7 +40,7 @@ def graph_apple_summary_totals(request):
     elif resolution < 100:
         resolution = 100
     
-    fig = Figure(figsize=(9,6), dpi=resolution, facecolor='white', edgecolor='white')
+    fig = Figure(figsize=(9,5), dpi=resolution, facecolor='white', edgecolor='white')
     ax1 = fig.add_subplot(1,1,1)
     ax2 = ax1.twinx()
     
@@ -70,7 +70,7 @@ def graph_apple_summary_totals(request):
     
     cols = ['blue']*len(ind)
     ax1.bar(ind, tracks, color=cols, linewidth=0, edgecolor='w')
-    ax1.set_ylabel("Weekly Downloads", color='blue')
+    ax1.set_ylabel("Weekly Downloads", color='blue', size='small')
     for tl in ax1.get_yticklabels():
         tl.set_color('b')
     
@@ -80,9 +80,10 @@ def graph_apple_summary_totals(request):
     
     
     ax2.plot(ind, cumulative, 'r-')
-    ax2.set_ylabel("Cumulative Downloads", color='red')
+    ax2.set_ylabel("Cumulative Downloads", color='red', size='small')
     for tl in ax2.get_yticklabels():
         tl.set_color('r')
+    ax2.yaxis.major.formatter.set_powerlimits((-100,100))
     
     ax2.annotate('Cumulative Downloads for\n' + latest_date + ': ' + str(running_total), 
                  color = 'r', ha = 'right', size = 'small',
