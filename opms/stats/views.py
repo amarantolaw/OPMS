@@ -30,7 +30,17 @@ def summary_weekof(request):
 
 
 def graph_apple_summary_totals(request):
-    fig = Figure(figsize=(9,6), dpi=270, facecolor='white', edgecolor='white')
+    "Generate the Apple summary chart. Allow for a high resolution version to be produced"
+    try:
+        resolution = int(request.GET.get('dpi', 100))
+    except ValueError:
+        resolution = 100
+    if resolution > 600:
+        resolution = 600
+    elif resolution < 100:
+        resolution = 100
+    
+    fig = Figure(figsize=(9,6), dpi=resolution, facecolor='white', edgecolor='white')
     ax1 = fig.add_subplot(1,1,1)
     ax2 = ax1.twinx()
     
