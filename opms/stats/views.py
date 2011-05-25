@@ -30,7 +30,7 @@ def summary_weekof(request):
 
 
 def graph_apple_summary_totals(request):
-    fig = Figure(figsize=(9,6), dpi=100, facecolor='white', edgecolor='white')
+    fig = Figure(figsize=(9,6), dpi=300, facecolor='white', edgecolor='white')
     ax1 = fig.add_subplot(1,1,1)
     ax2 = ax1.twinx()
     
