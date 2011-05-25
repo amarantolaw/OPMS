@@ -30,7 +30,7 @@ def summary_weekof(request):
 
 
 def graph_apple_summary_totals(request):
-    fig = Figure(figsize=(9,6), dpi=300, facecolor='white', edgecolor='white')
+    fig = Figure(figsize=(9,6), dpi=270, facecolor='white', edgecolor='white')
     ax1 = fig.add_subplot(1,1,1)
     ax2 = ax1.twinx()
     
@@ -71,7 +71,7 @@ def graph_apple_summary_totals(request):
     
     ax2.plot(ind, cumulative, 'r-')
     ax2.set_ylabel("Cumulative Downloads", color='red')
-    for tl in ax1.get_yticklabels():
+    for tl in ax2.get_yticklabels():
         tl.set_color('r')
     
     ax2.annotate('Cumulative Downloads for\n' + latest_date + ': ' + str(running_total), 
