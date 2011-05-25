@@ -73,7 +73,7 @@ def graph_apple_summary_totals(request):
     ax1.set_ylabel("Weekly Downloads", color='blue', size='small')
     for tl in ax1.get_yticklabels():
         tl.set_color('b')
-    ax1.yaxis.major.formatter.set_powerlimits((-3,3))
+    # ax1.yaxis.major.formatter.set_powerlimits((-3,3))
     
     ax1.annotate('iTU PSM launch', xy=(107,400000), xytext=(70,450000), arrowprops=dict(facecolor='black', shrink=0.05),)
     ax1.annotate('iTunes 9.0 released', xy=(53,80000), xytext=(40,150000), arrowprops=dict(facecolor='black', shrink=0.05),)
@@ -84,7 +84,7 @@ def graph_apple_summary_totals(request):
     ax2.set_ylabel("Cumulative Downloads", color='red', size='small')
     for tl in ax2.get_yticklabels():
         tl.set_color('r')
-    ax2.yaxis.major.formatter.set_powerlimits((-3,6))
+    # ax2.yaxis.major.formatter.set_powerlimits((-3,6))
     
     ax2.annotate('Cumulative Downloads for\n' + latest_date + ': ' + str(running_total), 
                  color = 'black', ha = 'right', size = 'small',
@@ -93,7 +93,7 @@ def graph_apple_summary_totals(request):
                  arrowprops = dict(facecolor = 'red', linewidth=0, shrink = 0.05),)
     
     ax1.set_xticks(xticks)
-    ax1.set_xticklabels(dates, rotation=270, size='xx-small')
+    ax1.set_xticklabels(dates, rotation=45, size='xx-small')
     ax1.set_xlabel("Week Commencing")
     
     canvas = FigureCanvas(fig)
