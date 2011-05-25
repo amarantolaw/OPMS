@@ -73,7 +73,7 @@ def graph_apple_summary_totals(request):
         tl.set_color('r')
     
     ax2.annotate('Total Downloads:\n' + str(running_total), 
-                 color = 'r',
+                 color = 'r', ha = 'right',
                  xy = (len(s),running_total), 
                  xytext = ((len(s)-30),(running_total-3000000)), 
                  arrowprops = dict(facecolor = 'red', shrink = 0.05),)
