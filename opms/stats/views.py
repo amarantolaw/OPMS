@@ -69,7 +69,7 @@ def graph_apple_summary_totals(request):
     ind = matplotlib.numpy.arange(len(s)) # the x locations for the groups
     
     cols = ['blue']*len(ind)
-    ax1.bar(ind, tracks, color=cols)
+    ax1.bar(ind, tracks, color=cols, linewidth=1, edgecolor='w')
     ax1.set_ylabel("Weekly Downloads", color='blue')
     for tl in ax1.get_yticklabels():
         tl.set_color('b')
