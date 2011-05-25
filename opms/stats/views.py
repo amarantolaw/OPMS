@@ -74,7 +74,7 @@ def graph_apple_summary_totals(request):
     for tl in ax1.get_yticklabels():
         tl.set_color('r')
     
-    ax2.annotate('Total Downloads\n' + latest_date + ':' + str(running_total), 
+    ax2.annotate('Cumulative Downloads for\n' + latest_date + ': ' + str(running_total), 
                  color = 'r', ha = 'right', size = 'small',
                  xy = (len(s),running_total), 
                  xytext = (len(s),(running_total-3000000)), 
