@@ -59,15 +59,23 @@ def graph_apple_summary_totals(request):
     cols = ['blue']*len(ind)
     ax1.bar(ind, tracks, color=cols)
     ax1.set_ylabel("Weekly Downloads", color='blue')
+    for tl in ax1.get_yticklabels():
+        tl.set_color('b')
     
-    ax1.annotate('iTU PSM launch', xy=(105,400000), xytext=(70,450000), arrowprops=dict(facecolor='black', shrink=0.05),)
+    ax1.annotate('iTU PSM launch', xy=(107,400000), xytext=(70,450000), arrowprops=dict(facecolor='black', shrink=0.05),)
     ax1.annotate('iTunes 9.0 released', xy=(53,80000), xytext=(40,150000), arrowprops=dict(facecolor='black', shrink=0.05),)
     ax1.annotate('Oxford on iTunes U launch', xy=(4,80000), xytext=(20,250000), arrowprops=dict(facecolor='black', shrink=0.05),)
     
     
     ax2.plot(ind, cumulative, 'r-')
     ax2.set_ylabel("Cumulative Downloads", color='red')
+    for tl in ax1.get_yticklabels():
+        tl.set_color('r')
     
+    ax2.annotate('Total Downloads:' + str(running_total), 
+                 xy=(len(s),running_total), 
+                 xytext=((len(s)-50),(running_total+100)), 
+                 arrowprops=dict(facecolor='black', shrink=0.05),)
     
     ax1.set_xticks(xticks)
     ax1.set_xticklabels(dates, rotation=270, size='xx-small')
