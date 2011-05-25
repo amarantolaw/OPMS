@@ -72,10 +72,10 @@ def graph_apple_summary_totals(request):
     for tl in ax1.get_yticklabels():
         tl.set_color('r')
     
-    ax2.annotate('Total Downloads:' + str(running_total), 
+    ax2.annotate('Total Downloads:\n' + str(running_total), 
                  color = 'r',
                  xy = (len(s),running_total), 
-                 xytext = ((len(s)-50),(running_total+100000)), 
+                 xytext = ((len(s)-50),(running_total+1000000)), 
                  arrowprops = dict(facecolor = 'red', shrink = 0.05),)
     
     ax1.set_xticks(xticks)
