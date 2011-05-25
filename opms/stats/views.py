@@ -42,6 +42,7 @@ def graph_apple_summary_totals(request):
     
     fig = Figure(figsize=(9,5), dpi=resolution, facecolor='white', edgecolor='white')
     ax1 = fig.add_subplot(1,1,1)
+    ax1.set_xmargin(0.4)
     ax2 = ax1.twinx()
     
     title = u"Apple Weekly Downloads and Cumulative Total"
@@ -94,7 +95,6 @@ def graph_apple_summary_totals(request):
     
     ax1.set_xticks(xticks)
     ax1.set_xticklabels(dates, rotation='vertical', size='xx-small', ha='right', va='baseline')
-    ax1.set_xmargin(0.4)
     ax1.set_xlabel("Week Commencing")
     
     canvas = FigureCanvas(fig)
