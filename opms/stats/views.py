@@ -46,6 +46,7 @@ def graph_apple_summary_totals(request):
     xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
     running_total = 0
     count = 0
+    latest_date = ''
     for item in s:
         running_total += int(item.total_track_downloads)
         cumulative.append(running_total)
@@ -53,6 +54,7 @@ def graph_apple_summary_totals(request):
         if count == 0 or (count % 4) == 0:
             dates.append(str(item.week_ending))
         count += 1
+        latest_date = str(item.week_ending)
         
     ind = matplotlib.numpy.arange(len(s)) # the x locations for the groups
     
@@ -72,8 +74,8 @@ def graph_apple_summary_totals(request):
     for tl in ax1.get_yticklabels():
         tl.set_color('r')
     
-    ax2.annotate('Total Downloads:\n' + str(running_total), 
-                 color = 'r', ha = 'right',
+    ax2.annotate('Total Downloads\n' + latest_date + ':' + str(running_total), 
+                 color = 'r', ha = 'right', size = 'small',
                  xy = (len(s),running_total), 
                  xytext = (len(s),(running_total-3000000)), 
                  arrowprops = dict(facecolor = 'red', shrink = 0.05),)
