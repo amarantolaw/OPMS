@@ -106,7 +106,7 @@ class Summary(models.Model):
     total_track_downloads = models.IntegerField("total track downloads")
     
     merged = SummaryManager() # Manager for merged data
-    objects = model.Manager() # Default manager
+    objects = models.Manager() # Default manager
     
     def __unicode__(self):
         return str(date.strftime(self.week_ending,"%Y-%m-%d")) + ": Total Downloads=" + str(self.total_track_downloads)
