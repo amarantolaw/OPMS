@@ -76,9 +76,9 @@ def graph_apple_summary_totals(request):
         tl.set_color('b')
     # ax1.yaxis.major.formatter.set_powerlimits((-3,3))
     
-    ax1.annotate('iTU PSM launch', xy=(107,400000), xytext=(70,450000), arrowprops=dict(facecolor='black', shrink=0.05),)
-    ax1.annotate('iTunes 9.0 released', xy=(53,80000), xytext=(40,150000), arrowprops=dict(facecolor='black', shrink=0.05),)
-    ax1.annotate('Oxford on iTunes U launch', xy=(4,80000), xytext=(20,250000), arrowprops=dict(facecolor='black', shrink=0.05),)
+    ax1.annotate('iTU PSM launch', xy=(107,370000), xytext=(70,450000), arrowprops=dict(facecolor='black', linewidth=0, shrink=0.05),)
+    ax1.annotate('iTunes 9.0 released', xy=(53,80000), xytext=(40,150000), arrowprops=dict(facecolor='black', linewidth=0, shrink=0.05),)
+    ax1.annotate('Oxford on iTunes U launch', xy=(4,80000), xytext=(10,200000), arrowprops=dict(facecolor='black', linewidth=0, shrink=0.05),)
     
     
     ax2.plot(ind, cumulative, 'r-')
