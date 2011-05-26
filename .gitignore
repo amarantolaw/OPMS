@@ -10,6 +10,7 @@
 ###############
 logs/
 data/
+apache2/
 
 # Specific files #
 ##################
