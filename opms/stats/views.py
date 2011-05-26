@@ -83,7 +83,7 @@ def graph_apple_summary_totals(request):
     if len(s) > 53:
         ax1.annotate('iTunes 9.0 released', xy=(53,80000), xytext=(40,150000), 
                      arrowprops=dict(facecolor='black', linewidth=0, shrink=0.05),)
-    if len(s) > 4:
+    if len(s) > 11:
         ax1.annotate('Oxford on iTunes U launch', xy=(4,80000), xytext=(10,200000), 
                      arrowprops=dict(facecolor='black', linewidth=0, shrink=0.05),)
     
