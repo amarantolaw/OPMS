@@ -58,7 +58,13 @@ $(document).ready(function()
     <p>More information can be found at <a href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/UnderstandingiTunesUreports/chapter_13_section_2.html#//apple_ref/doc/uid/iTUPSM-CH16-SW3">iTunes U Public Site Manager Guide</a>.</p>
 </div>
 
-<h2>User Actions <a href="#" class="codeShowB">[?]</a></h2>
+<h2>User Actions</h2>
+
+{% if summary_data %}
+<h3>Data visualisation</h3>
+<p><img src="/stats/graph/apple/summary-total.png" /><br />
+    <a href="/stats/graph/apple/summary-total.png?dpi=300">[Print Version]</a> <a href="/stats/graph/apple/summary-total.png?dpi=600">[High Resolution]</a></p>
+
 <div class="sectionB">
     <h3>Understanding summary data</h3>
     <p>The Summary worksheet lists aggregate values for the individual worksheet user actions. The 
@@ -142,12 +148,7 @@ $(document).ready(function()
     -->
 </div>
 
-{% if summary_data %}
-<h3>Data visualisation</h3>
-<p><img src="/stats/graph/apple/summary-total.png" /><br />
-    <a href="/stats/graph/apple/summary-total.png?dpi=300">[Print Version]</a> <a href="/stats/graph/apple/summary-total.png?dpi=600">[High Resolution]</a></p>
-
-<h3>Data table</h3>
+<h3>Data table <a href="#" class="codeShowB">[?]</a></h3>
 <table id="summaryTable" class="tablesorter">
     <thead>
         <tr>
