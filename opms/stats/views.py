@@ -93,8 +93,8 @@ def graph_apple_summary_totals(request):
                  xytext = (len(s),(running_total-3000000)), 
                  arrowprops = dict(facecolor = 'red', linewidth=0, shrink = 0.05),)
     
-    ax1.set_xticks(xticks + 0.5)
-    ax1.set_xticklabels(dates, rotation=270, size=5, ha='right', va='top')
+    ax1.set_xticks(xticks - 0.5)
+    ax1.set_xticklabels(dates, rotation=270, size=5, ha='center', va='top')
     ax1.set_xlabel("Week Commencing")
     
     canvas = FigureCanvas(fig)
