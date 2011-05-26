@@ -4,14 +4,17 @@
 *.swo
 *.swp
 *.swn
+*.log
 
 # Directories #
 ###############
 logs/
+data/
 
 # Specific files #
 ##################
 opms/settings.py
+opms/stats/ua_data/cache
 
 # OS generated files #
 ######################
