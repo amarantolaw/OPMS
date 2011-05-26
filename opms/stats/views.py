@@ -76,12 +76,16 @@ def graph_apple_summary_totals(request):
         tl.set_color('b')
     # ax1.yaxis.major.formatter.set_powerlimits((-3,3))
     
-    ax1.annotate('iTU PSM launch', xy=(107,370000), xytext=(70,450000), 
-                 arrowprops=dict(facecolor='black', linewidth=0, shrink=0.05),)
-    ax1.annotate('iTunes 9.0 released', xy=(53,80000), xytext=(40,150000), 
-                 arrowprops=dict(facecolor='black', linewidth=0, shrink=0.05),)
-    ax1.annotate('Oxford on iTunes U launch', xy=(4,80000), xytext=(10,200000), 
-                 arrowprops=dict(facecolor='black', linewidth=0, shrink=0.05),)
+    # Add some manual annotations, but check that there is data there already for them!
+    if len(s) > 107:
+        ax1.annotate('iTU PSM launch', xy=(107,370000), xytext=(70,450000), 
+                     arrowprops=dict(facecolor='black', linewidth=0, shrink=0.05),)
+    if len(s) > 53:
+        ax1.annotate('iTunes 9.0 released', xy=(53,80000), xytext=(40,150000), 
+                     arrowprops=dict(facecolor='black', linewidth=0, shrink=0.05),)
+    if len(s) > 11:
+        ax1.annotate('Oxford on iTunes U launch', xy=(4,80000), xytext=(10,200000), 
+                     arrowprops=dict(facecolor='black', linewidth=0, shrink=0.05),)
     
     
     ax2.plot(ind, cumulative, 'r-')
@@ -93,7 +97,7 @@ def graph_apple_summary_totals(request):
     ax2.annotate('Cumulative Downloads for\n' + latest_date + ': ' + str(running_total), 
                  color = 'black', ha = 'right', size = 'small',
                  xy = (len(s),running_total), 
-                 xytext = (len(s),(running_total-3000000)), 
+                 xytext = (len(s),int(running_total*0.7)), 
                  arrowprops = dict(facecolor = 'red', linewidth=0, shrink = 0.05),)
     
     ax1.set_xticks(xticks - 0.6)
