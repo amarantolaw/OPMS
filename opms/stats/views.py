@@ -97,7 +97,7 @@ def graph_apple_summary_totals(request):
     ax2.annotate('Cumulative Downloads for\n' + latest_date + ': ' + str(running_total), 
                  color = 'black', ha = 'right', size = 'small',
                  xy = (len(s),running_total), 
-                 xytext = (len(s),int(running_total*0.7), 
+                 xytext = (len(s),int(running_total*0.7)), 
                  arrowprops = dict(facecolor = 'red', linewidth=0, shrink = 0.05),)
     
     ax1.set_xticks(xticks - 0.6)
