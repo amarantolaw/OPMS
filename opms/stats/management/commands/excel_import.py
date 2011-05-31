@@ -213,7 +213,7 @@ class Command(LabelCommand):
             summary_object.save()
             
             if summary_created:
-                self._parse_summary_cs(summaryCS)
+                self._parse_summary_cs(summaryCS[i])
                 
                 # Now work through the related week's worth of Tracks, Browses and Previews. These sheets might be missing in early files.
                 self._parse_related_sheets(summary_object, wb, week)
@@ -245,7 +245,7 @@ class Command(LabelCommand):
                             defaults=week)
                         summary_object.save()
                         
-                        self._parse_summary_cs(summaryCS)
+                        self._parse_summary_cs(summaryCS[i])
                         
                         self._parse_related_sheets(summary_object, wb, week)
                         
@@ -262,7 +262,7 @@ class Command(LabelCommand):
 
 
     def _parse_summary_cs(self, summaryCS):
-        for k,v in summaryCS[i].items():
+        for k,v in summaryCS.items():
             # Parse each key to create a related ClientSoftware object
             cs_object = ClientSoftware()
             cs_object.logfile = logfile_obj
@@ -294,7 +294,7 @@ class Command(LabelCommand):
         return None
 
 
-    def _parse_related_sheets(summary_object, wb, week):
+    def _parse_related_sheets(self, summary_object, wb, week):
         try:
             self._parse_tracks(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Tracks'))
         except biffh.XLRDError:
