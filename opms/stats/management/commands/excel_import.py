@@ -274,16 +274,16 @@ class Command(LabelCommand):
                 if int(summary_object.total_track_downloads) != int(week.total_track_downloads):
                     if summary_object.logfile.file_name[-14:-4] < logfile_obj.file_name[-14:-4]:
                         # I.e. if the record in the database is less recent than this excel file, report and overwrite...
-                        err_msg = "WARNING: More recent data does not match previously imported data.\nOverwriting...\n" +
-                                  "Total was:" + str(summary_object.total_track_downloads) + ".\n" +
+                        err_msg = "WARNING: More recent data does not match previously imported data.\nOverwriting...\n" +\
+                                  "Total was:" + str(summary_object.total_track_downloads) + ".\n" +\
                                   "New value:" + str(week.total_track_downloads) + ".\n"
                         self._errorlog(err_msg)
                         print err_msg
                     
                     elif summary_object.logfile.file_name[-14:-4] >= logfile_obj.file_name[-14:-4]:
                         # Newer data exists already, so warn, but do nothing to change the data
-                        err_msg = "WARNING: Existing more recent data does not match data attempting to be imported.\n" +
-                                  "Total is:" + str(summary_object.total_track_downloads) + ".\n" +
+                        err_msg = "WARNING: Existing more recent data does not match data attempting to be imported.\n" +\
+                                  "Total is:" + str(summary_object.total_track_downloads) + ".\n" +\
                                   "Ignoring:" + str(week.total_track_downloads) + " from the import.\n"
                         self._errorlog(err_msg)
                         print err_msg
