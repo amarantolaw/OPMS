@@ -216,7 +216,7 @@ class Command(LabelCommand):
                 self._parse_summary_cs(summaryCS)
                 
                 # Now work through the related week's worth of Tracks, Browses and Previews. These sheets might be missing in early files.
-                self._parse_related_sheets(summary_object, wb)
+                self._parse_related_sheets(summary_object, wb, week)
                 
             else:
                 print "NOTE: Data has previously been imported for " + str(logfile_obj.service_name) + "@" + str(week.get('week_ending'))
@@ -247,7 +247,7 @@ class Command(LabelCommand):
                         
                         self._parse_summary_cs(summaryCS)
                         
-                        self._parse_related_sheets(summary_object, wb)
+                        self._parse_related_sheets(summary_object, wb, week)
                         
                     else:
                         # Newer data exists already, so warn, but do nothing to change the data
@@ -294,7 +294,7 @@ class Command(LabelCommand):
         return None
 
 
-    def _parse_related_sheets(summary_object, wb)
+    def _parse_related_sheets(summary_object, wb, week):
         try:
             self._parse_tracks(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Tracks'))
         except biffh.XLRDError:
