@@ -280,7 +280,7 @@ class Command(LabelCommand):
                         self._errorlog(err_msg)
                         print err_msg
                     
-                    elif summary_object.logfile.file_name[-14:-4] >= logfile_obj.file_name[-14:-4]:
+                    else:
                         # Newer data exists already, so warn, but do nothing to change the data
                         err_msg = "WARNING: Existing more recent data does not match data attempting to be imported.\n" +\
                                   "Total is:" + str(summary_object.total_track_downloads) + ".\n" +\
