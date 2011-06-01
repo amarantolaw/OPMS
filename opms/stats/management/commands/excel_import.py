@@ -341,6 +341,7 @@ class Command(LabelCommand):
                 tc.guid = self._trackguid(summary_object.logfile, sheet.cell(row_id,3).value[:255], tc)
             except IndexError:
                 tc.guid = self._trackguid(summary_object.logfile, '', tc)
+                self._errorlog('No GUID found for ' + str(tc.path) + '. Generated: ' + str(tc.guid))
             
             tc.save()
             count += 1
