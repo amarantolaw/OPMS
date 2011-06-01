@@ -214,6 +214,7 @@ class Command(LabelCommand):
             
             if summary_created:
                 self._parse_summary_cs(summaryCS[i], logfile_obj, summary_object)
+                print "Imported SUMMARY data for " + str(week.get('week_ending'))
                 
                 # Now work through the related week's worth of Tracks, Browses and Previews. These sheets might be missing in early files.
                 self._parse_related_sheets(summary_object, wb, week)
@@ -246,6 +247,7 @@ class Command(LabelCommand):
                         summary_object.save()
                         
                         self._parse_summary_cs(summaryCS[i], logfile_obj, summary_object)
+                        print "Re-imported SUMMARY data for " + str(week.get('week_ending'))
                         
                         self._parse_related_sheets(summary_object, wb, week)
                         
@@ -290,7 +292,6 @@ class Command(LabelCommand):
                 cs_object.platform = 'Unknown'
             
             cs_object.save()
-        print "Imported SUMMARY data for " + str(week.get('week_ending'))
         return None
 
 
