@@ -51,7 +51,7 @@ class SummaryManager(models.Manager):
         """)
         result_list = []
         previous_row = []
-        week_number = -3
+        week_number = -5  # Want to be able to calculate this from a preset start date...
         for row in cursor.fetchall():
             r = self.model(week_ending=row[0], browse=row[1], download_preview=row[2], 
                 download_preview_ios=row[3], download_track=row[4], download_tracks=row[5],

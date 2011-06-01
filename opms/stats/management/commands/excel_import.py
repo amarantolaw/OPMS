@@ -213,66 +213,110 @@ class Command(LabelCommand):
             summary_object.save()
             
             if summary_created:
-                for k,v in summaryCS[i].items():
-                    # Parse each key to create a related ClientSoftware object
-                    cs_object = ClientSoftware()
-                    cs_object.logfile = logfile_obj
-                    cs_object.summary = summary_object
-                    cs_object.version_major = 0
-                    cs_object.version_minor = 0
-                    cs_object.count = int(v)
-                                 
-                    strings = k.split('/')
-                    if len(strings) > 1:
-                        version = strings[1].split('.')
-                        if len(version) > 1:
-                            # Most items will fall into this pattern Application/M.m/Platform
-                            if strings[2] == '?':
-                                cs_object.platform = str(strings[0])[:20] #iTunes-iPod, etc
-                            else:
-                                cs_object.platform = str(strings[2])[:20] #Macintosh, Windows
-                            cs_object.version_major = int(version[0])
-                            cs_object.version_minor = int(version[1])
-                        else:
-                            # This is likely to be the ?/?/Platform
-                            cs_object.platform = str(strings[2])[:20] #Macintosh, Windows
-                    else:
-                        # Likely to be 'Not Listed'
-                        cs_object.platform = 'Unknown'
-                    
-                    cs_object.save()
+                self._parse_summary_cs(summaryCS[i], logfile_obj, summary_object)
                 print "Imported SUMMARY data for " + str(week.get('week_ending'))
                 
                 # Now work through the related week's worth of Tracks, Browses and Previews. These sheets might be missing in early files.
-                try:
-                    self._parse_tracks(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Tracks'))
-                    self._debug('Summary week ' + str(i) + ' Tracks parsed')
-                except biffh.XLRDError:
-                    err_msg = "Sheet does not exist for " + str(week.get('week_ending')) + " Tracks"
-                    self._errorlog(err_msg)
-                    print err_msg
-                try:
-                    self._parse_browses(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Browse'))
-                    self._debug('Summary week ' + str(i) + ' Browses parsed')
-                except biffh.XLRDError:
-                    err_msg = "Sheet does not exist for " + str(week.get('week_ending')) + " Browse"
-                    self._errorlog(err_msg)
-                    print err_msg
-                try:
-                    self._parse_previews(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Previews'))
-                    self._debug('Summary week ' + str(i) + ' Previews parsed')
-                except biffh.XLRDError:
-                    err_msg = "Sheet does not exist for " + str(week.get('week_ending')) + " Previews"
-                    self._errorlog(err_msg)
-                    print err_msg
+                self._parse_related_sheets(summary_object, wb, week)
                 
-                self._error_log_save()
             else:
-                # Lazy duplication skipping. If the summary data has been imported, we assume the rest of it has too.
                 print "NOTE: Data has previously been imported for " + str(logfile_obj.service_name) + "@" + str(week.get('week_ending'))
-        
+                # Check the date of the excel file, and whether the total downloads match. 
+                # Apple change their results from time to time and this is to detect it
+                if int(summary_object.total_track_downloads) != int(week.get('total_track_downloads')):
+                    if summary_object.logfile.file_name[-14:-4] < logfile_obj.file_name[-14:-4]:
+                        # I.e. if the record in the database is less recent than this excel file, report and overwrite...
+                        err_msg = "WARNING: More recent data does not match previously imported data.\nOverwriting...\n" +\
+                                  "Total was:" + str(summary_object.total_track_downloads) + ".\n" +\
+                                  "New value:" + str(week.get('total_track_downloads')) + ".\n"
+                        self._errorlog(err_msg)
+                        print err_msg
+                        
+                        # Overwrite the week's worth of data... delete first, then insert newer data
+                        ClientSoftware.objects.filter(summary=summary_object).delete()
+                        TrackCount.objects.filter(summary=summary_object).delete()
+                        BrowseCount.objects.filter(summary=summary_object).delete()
+                        PreviewCount.objects.filter(summary=summary_object).delete()
+                        summary_object.delete()
+                        
+                        # Create afresh... perhaps a little superfluous
+                        summary_object, summary_created = Summary.objects.get_or_create(
+                            week_ending=week.get('week_ending'), 
+                            service_name=logfile_obj.service_name,
+                            defaults=week)
+                        summary_object.save()
+                        
+                        self._parse_summary_cs(summaryCS[i], logfile_obj, summary_object)
+                        print "Re-imported SUMMARY data for " + str(week.get('week_ending'))
+                        
+                        self._parse_related_sheets(summary_object, wb, week)
+                        
+                    else:
+                        # Newer data exists already, so warn, but do nothing to change the data
+                        err_msg = "WARNING: Existing more recent data does not match data attempting to be imported.\n" +\
+                                  "Total is:" + str(summary_object.total_track_downloads) + ".\n" +\
+                                  "Ignoring:" + str(week.get('total_track_downloads')) + " from the import.\n"
+                        self._errorlog(err_msg)
+                        print err_msg
+                    
+                    self._error_log_save()
         return None
 
+
+    def _parse_summary_cs(self, summaryCS, logfile_obj, summary_object):
+        for k,v in summaryCS.items():
+            # Parse each key to create a related ClientSoftware object
+            cs_object = ClientSoftware()
+            cs_object.logfile = logfile_obj
+            cs_object.summary = summary_object
+            cs_object.version_major = 0
+            cs_object.version_minor = 0
+            cs_object.count = int(v)
+                         
+            strings = k.split('/')
+            if len(strings) > 1:
+                version = strings[1].split('.')
+                if len(version) > 1:
+                    # Most items will fall into this pattern Application/M.m/Platform
+                    if strings[2] == '?':
+                        cs_object.platform = str(strings[0])[:20] #iTunes-iPod, etc
+                    else:
+                        cs_object.platform = str(strings[2])[:20] #Macintosh, Windows
+                    cs_object.version_major = int(version[0])
+                    cs_object.version_minor = int(version[1])
+                else:
+                    # This is likely to be the ?/?/Platform
+                    cs_object.platform = str(strings[2])[:20] #Macintosh, Windows
+            else:
+                # Likely to be 'Not Listed'
+                cs_object.platform = 'Unknown'
+            
+            cs_object.save()
+        return None
+
+
+    def _parse_related_sheets(self, summary_object, wb, week):
+        try:
+            self._parse_tracks(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Tracks'))
+        except biffh.XLRDError:
+            err_msg = "Sheet does not exist for " + str(week.get('week_ending')) + " Tracks"
+            self._errorlog(err_msg)
+            print err_msg
+        try:
+            self._parse_browses(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Browse'))
+        except biffh.XLRDError:
+            err_msg = "Sheet does not exist for " + str(week.get('week_ending')) + " Browse"
+            self._errorlog(err_msg)
+            print err_msg
+        try:
+            self._parse_previews(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Previews'))
+        except biffh.XLRDError:
+            err_msg = "Sheet does not exist for " + str(week.get('week_ending')) + " Previews"
+            self._errorlog(err_msg)
+            print err_msg
+       
+            self._error_log_save()
+        return None
 
     # ===================================================== TRACKS =================================
     
