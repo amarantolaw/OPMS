@@ -3,6 +3,9 @@ from django.utils.encoding import smart_str, smart_unicode
 from datetime import date
 from opms.ffm import models as ffm_models
 
+# Remember: this application is managed by Django South so when you change this file, do the following:
+# python manage.py schemamigration appname --auto
+# python manage.py migrate appname
 
 
 # Quite possible to have multiple log file sources, use this as a lookup table

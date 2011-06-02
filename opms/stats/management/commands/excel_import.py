@@ -9,7 +9,7 @@ from opms.stats.models import *
 from xlrd import open_workbook, biffh
 from datetime import time, datetime
 import sys, uuid
-        
+
 class Command(LabelCommand):
     args = '<spreadsheet.xls>'
     help = 'Imports the contents of the specified spreadsheet into the database'
@@ -17,7 +17,7 @@ class Command(LabelCommand):
     #    make_option('--merge', action='store', dest='merge',
     #        default=False, help='Use this option to add this data to exisiting data, thus summing counts for records.'),
     #)
-    
+
     def __init__(self):
         # Toggle debug statements on/off
         self.debug = False
@@ -58,25 +58,25 @@ class Command(LabelCommand):
         self.preview_path_cache = list(PreviewPath.objects.all())
         self.preview_handle_cache = list(PreviewHandle.objects.all())
         self.preview_guid_cache = list(PreviewGUID.objects.all())
-        
+
         return None
 
 
     def handle_label(self, filename, **options):
         print "Import started at " + str(datetime.utcnow()) + "\n"
-        
+
         # Create an error log per import file
         self._errorlog_start(filename + '_import-error.log')
-        
+
         # This only needs setting/getting the once per call of this function
         logfile_obj = self._logfile(filename)
-        
+
         # Read the Worksheet
         wb = open_workbook(filename)
-        
+
         # Start the parsing with the summary sheet
         self._parse_summary(logfile_obj, wb)
-            
+
         print "\nImport finished at " + str(datetime.utcnow())
         self._errorlog_stop()
         return None
@@ -90,7 +90,7 @@ class Command(LabelCommand):
         # Some basic checking
         if filename.endswith('.xls') == False:
            raise CommandError("This is not a valid Excel 1998-2002 file. Must end in .xls\n\n")
-        
+
         # Test the log_service option is valid. Use the same list as LogFile.SERVICE_NAME_CHOICES
         # Guess the service based on the filename
         try:
@@ -105,7 +105,7 @@ class Command(LabelCommand):
             logfile['service_name'] = 'itu'
         else:
             raise CommandError("The service can not be determined from the filename.")
-            
+
         try:
             logfile['file_name'] = filename[filename.rindex('/')+1:]
             logfile['file_path'] = filename[:filename.rindex('/')+1]
@@ -113,23 +113,23 @@ class Command(LabelCommand):
             # Likely path doesn't feature any directories... so improvise
             logfile['file_name'] = filename
             logfile['file_path'] = "./"
-            
+
         logfile['last_updated'] = datetime.utcnow()
-        
+
         obj, created = LogFile.objects.get_or_create(
             service_name = logfile.get('service_name'),
             file_name = logfile.get('file_name'),
             file_path = logfile.get('file_path'),
             defaults = logfile)
-        
+
         # If this isn't the first time, and the datetime is significantly different from last access, update the time
         if not created and (logfile.get('last_updated') - obj.last_updated).days > 0:
             obj.last_updated = logfile.get('last_updated')
-        
+
         obj.save()
 
         return obj
-        
+
 
     # ===================================================== SUMMARY ================================
 
@@ -137,7 +137,7 @@ class Command(LabelCommand):
         # Scan down the sheet, looking for the four columns of data and matching to header data
         # Work between modes, saving the results to the db at the end.
         summary = wb.sheet_by_name('Summary')
-        
+
         # Some reference constants
         headings1 = 1 # Most headings are in Col B, hence this is headings1
         headings2 = 0
@@ -155,28 +155,28 @@ class Command(LabelCommand):
         summaryCS = [{},{},{},{}] # Four columns of data on each sheet, we'll scan in parallel
         # Mode switch
         section = ''
-        
+
         def _summaryUA_set(header_key, row_id):
             summaryUA[0][header_key] = summary.cell(row_id,week1).value
             summaryUA[1][header_key] = summary.cell(row_id,week2).value
             summaryUA[2][header_key] = summary.cell(row_id,week3).value
             summaryUA[3][header_key] = summary.cell(row_id,week4).value
             return None
-        
+
         def _summaryCS_set(header_key, row_id):
             summaryCS[0][header_key] = summary.cell(row_id,week1).value
             summaryCS[1][header_key] = summary.cell(row_id,week2).value
             summaryCS[2][header_key] = summary.cell(row_id,week3).value
             summaryCS[3][header_key] = summary.cell(row_id,week4).value
             return None
-        
+
         for row_id in range(summary.nrows):
             if section == 'User Actions':
                 if summary.cell(row_id,headings1).value == 'Total Track Downloads' or \
                   summary.cell(row_id,headings2).value == 'Total Track Downloads':
                     _summaryUA_set('total_track_downloads',row_id)
                     section = 'Client Software'
-                    
+
                 elif summary.cell(row_id,week1).value != '':
                     if summary.cell(row_id,headings1).value in self.modelmapping:
                         header = self.modelmapping.get(summary.cell(row_id,headings1).value)
@@ -189,7 +189,7 @@ class Command(LabelCommand):
             elif section == 'Client Software':
                 if summary.cell(row_id,week1).value != '':
                     _summaryCS_set(summary.cell(row_id,headings1).value,row_id)
-                    
+
             else:
                 # Should only happen at the start, and we're looking for week_ending dates, and then User Actions
                 if summary.cell(row_id,week1).value == '':
@@ -200,28 +200,28 @@ class Command(LabelCommand):
             # Write the error cache to disk
             self._error_log_save()
         self._debug('Summary data parsed')
-        
+
         # Should now have 8 lists of dictionaries - 4 for Client Software, 4 for UserActions/Summarys
         for i in range(0,4):
             week = summaryUA[i]
-            
+
             # This needs to account for different types of import file (public vs public_dz)
             summary_object, summary_created = Summary.objects.get_or_create(
-                week_ending=week.get('week_ending'), 
+                week_ending=week.get('week_ending'),
                 service_name=logfile_obj.service_name,
                 defaults=week)
             summary_object.save()
-            
+
             if summary_created:
                 self._parse_summary_cs(summaryCS[i], logfile_obj, summary_object)
                 print "Imported SUMMARY data for " + str(week.get('week_ending'))
-                
+
                 # Now work through the related week's worth of Tracks, Browses and Previews. These sheets might be missing in early files.
                 self._parse_related_sheets(summary_object, wb, week)
-                
+
             else:
                 print "NOTE: Data has previously been imported for " + str(logfile_obj.service_name) + "@" + str(week.get('week_ending'))
-                # Check the date of the excel file, and whether the total downloads match. 
+                # Check the date of the excel file, and whether the total downloads match.
                 # Apple change their results from time to time and this is to detect it
                 if int(summary_object.total_track_downloads) != int(week.get('total_track_downloads')):
                     if summary_object.logfile.file_name[-14:-4] < logfile_obj.file_name[-14:-4]:
@@ -231,26 +231,26 @@ class Command(LabelCommand):
                                   "New value:" + str(week.get('total_track_downloads')) + ".\n"
                         self._errorlog(err_msg)
                         print err_msg
-                        
+
                         # Overwrite the week's worth of data... delete first, then insert newer data
                         ClientSoftware.objects.filter(summary=summary_object).delete()
                         TrackCount.objects.filter(summary=summary_object).delete()
                         BrowseCount.objects.filter(summary=summary_object).delete()
                         PreviewCount.objects.filter(summary=summary_object).delete()
                         summary_object.delete()
-                        
+
                         # Create afresh... perhaps a little superfluous
                         summary_object, summary_created = Summary.objects.get_or_create(
-                            week_ending=week.get('week_ending'), 
+                            week_ending=week.get('week_ending'),
                             service_name=logfile_obj.service_name,
                             defaults=week)
                         summary_object.save()
-                        
+
                         self._parse_summary_cs(summaryCS[i], logfile_obj, summary_object)
                         print "Re-imported SUMMARY data for " + str(week.get('week_ending'))
-                        
+
                         self._parse_related_sheets(summary_object, wb, week)
-                        
+
                     else:
                         # Newer data exists already, so warn, but do nothing to change the data
                         err_msg = "WARNING: Existing more recent data does not match data attempting to be imported.\n" +\
@@ -258,7 +258,7 @@ class Command(LabelCommand):
                                   "Ignoring:" + str(week.get('total_track_downloads')) + " from the import.\n"
                         self._errorlog(err_msg)
                         print err_msg
-                    
+
                     self._error_log_save()
         return None
 
@@ -272,7 +272,7 @@ class Command(LabelCommand):
             cs_object.version_major = 0
             cs_object.version_minor = 0
             cs_object.count = int(v)
-                         
+
             strings = k.split('/')
             if len(strings) > 1:
                 version = strings[1].split('.')
@@ -290,7 +290,7 @@ class Command(LabelCommand):
             else:
                 # Likely to be 'Not Listed'
                 cs_object.platform = 'Unknown'
-            
+
             cs_object.save()
         return None
 
@@ -314,38 +314,38 @@ class Command(LabelCommand):
             err_msg = "Sheet does not exist for " + str(week.get('week_ending')) + " Previews"
             self._errorlog(err_msg)
             print err_msg
-       
+
             self._error_log_save()
         return None
 
     # ===================================================== TRACKS =================================
-    
+
     def _parse_tracks(self, summary_object, sheet):
         "Parse a Tracks sheet for counts."
         # Can assume data duplication has already been accounted for in the parse_summary() process, so if we're here, import...
         count = 0
-        
+
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
             # Setup the basic count record
             tc = TrackCount()
             tc.summary = summary_object
             tc.count = int(sheet.cell(row_id,1).value)
-            
+
             # Now link to path and handle
             tc.path = self._trackpath(summary_object.logfile, sheet.cell(row_id,0).value)
             tc.handle = self._trackhandle(summary_object.logfile, sheet.cell(row_id,2).value)
-            
+
             # Guids don't appear until 24-05-2009. Prior to that there was no guid column, so this call will fail initially.
-            try: 
+            try:
                 tc.guid = self._trackguid(summary_object.logfile, sheet.cell(row_id,3).value[:255], tc)
             except IndexError:
                 tc.guid = self._trackguid(summary_object.logfile, '', tc)
                 self._errorlog('No GUID found for ' + str(tc.path) + '. Generated: ' + str(tc.guid))
-            
+
             tc.save()
             count += 1
-            
+
         print "Imported TRACK data for " + str(summary_object.week_ending) + " with " + str(count) + " rows added."
         return None
 
@@ -363,16 +363,16 @@ class Command(LabelCommand):
                 if item.logfile.last_updated > logfile_object.last_updated:
                     # Update the database
                     tp = TrackPath.objects.get(id=item.id)
-                    tp.logfile = logfile_object   
+                    tp.logfile = logfile_object
                     tp.save()
                     # Update the cache
-                    item.logfile = logfile_object 
+                    item.logfile = logfile_object
                 return item
-        
+
         # Nothing found, so save and update the cache
         tp.save()
         self.track_path_cache.append(tp)
-        
+
         return tp
 
 
@@ -389,60 +389,72 @@ class Command(LabelCommand):
                 if item.logfile.last_updated > logfile_object.last_updated:
                     # Update the database
                     th = TrackHandle.objects.get(id=item.id)
-                    th.logfile = logfile_object   
+                    th.logfile = logfile_object
                     th.save()
                     # Update the cache
-                    item.logfile = logfile_object 
+                    item.logfile = logfile_object
                 return item
-        
+
         # Nothing found, so save and update the cache
         th.save()
         self.track_handle_cache.append(th)
-        
+
         return th
-        
+
 
     def _trackguid(self, logfile_object, guid, trackcount_object):
         "Get or Create the TrackGUID information"
         tg = TrackGUID()
         tg.logfile = logfile_object
-        
-        # If guid provided, use. If not, find one. If none available, make one.
+
+        # If guid provided, search for and use.
+        # If first time this guid has been seen, see if it applies to any previously unGUID'd tracks.
+        # If no guid, find one (works fine for importing backwards). If still none available, make one.
         if guid != '':
             tg.guid = guid
-            # Attempt to locate in memory cache
+            # Attempt to locate in memory cache, if found, then link to trackcount and stop
             for item in self.track_guid_cache:
                 if item.guid == tg.guid:
                     # Check if the import path appears earlier than the stored path and update if needed
                     if item.logfile.last_updated > logfile_object.last_updated:
                         # Update the database
                         tg = TrackGUID.objects.get(id=item.id)
-                        tg.logfile = logfile_object   
+                        tg.logfile = logfile_object
                         tg.save()
                         # Update the cache
-                        item.logfile = logfile_object 
+                        item.logfile = logfile_object
                     return item
-        else:
-            # Match on handle (trust Apple to make these unique), or then path
+
+        # Match on handle (trust Apple to make these unique), or then path
+        try:
+            # Any existing TrackCount object should have a guid associated with it, thus, find one that has this handle, you've got it's guid
+            tc = TrackCount.objects.filter(handle=trackcount_object.handle.id)
+            if guid == '': # No guid, so use one found by a handle match
+                tg.guid = tc[0].guid.guid
+            else: # Update the prior trackcount objects to use the newly found GUID
+                for item in tc:
+                    item.guid = tg
+                    item.save()
+        except IndexError:
+            # First time this handle has been seen, so look for a path match
             try:
-                # Any existing TrackCount object should have a guid associated with it, thus, find one that has this handle, you've got it's guid
-                tc = TrackCount.objects.filter(handle=trackcount_object.handle.id)[0]
-                tg.guid = tc.guid.guid
+                tc = TrackCount.objects.filter(path=trackcount_object.path.id)
+                if guid == '': # No guid, so use one found by a handle match
+                    tg.guid = tc[0].guid.guid
+                else: # Update the prior trackcount objects to use the newly found GUID
+                    for item in tc:
+                        item.guid = tg
+                        item.save()
             except IndexError:
-                # First time this handle has been seen, so look for a path match
-                try:
-                    tc = TrackCount.objects.filter(path=trackcount_object.path.id)[0]
-                    tg.guid = tc.guid.guid
-                except IndexError:
-                    # No path match found, really must be new, so generate a GUID (UUID)
-                    tg.guid = str(uuid.uuid4())
-                    self._errorlog("No TrackGUID found for " +str(trackcount_object.path)+ "(" + str(trackcount_object.handle) + "). " +\
-                      "Created: " + str(tg.guid))
+                # No path match found, really must be new, so generate a GUID (UUID)
+                tg.guid = str('OPMS:' + uuid.uuid4())
+                self._errorlog("No TrackGUID found for " +str(trackcount_object.path)+ "(" + str(trackcount_object.handle) + "). " +\
+                  "Created: " + str(tg.guid))
 
         # Nothing found, so save and update the cache
         tg.save()
         self.track_guid_cache.append(tg)
-        
+
         return tg
 
 
@@ -453,27 +465,27 @@ class Command(LabelCommand):
         "Parse a Browse sheet for counts."
         # Can assume data duplication has already been accounted for in the parse_summary() process, so if we're here, import...
         count = 0
-        
+
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
             # Setup the basic count record
             bc = BrowseCount()
             bc.summary = summary_object
             bc.count = int(sheet.cell(row_id,1).value)
-            
+
             # Now link to path and handle
             bc.path = self._browsepath(summary_object.logfile, sheet.cell(row_id,0).value)
             bc.handle = self._browsehandle(summary_object.logfile, sheet.cell(row_id,2).value)
-            
+
             # Guids don't appear until 24-05-2009. Prior to that there was no guid column, so this call will fail initially.
-            try: 
+            try:
                 bc.guid = self._browseguid(summary_object.logfile, sheet.cell(row_id,3).value[:255], bc)
             except IndexError:
                 bc.guid = self._browseguid(summary_object.logfile, '', bc)
-            
+
             bc.save()
             count += 1
-            
+
         print "Imported BROWSE data for " + str(summary_object.week_ending) + " with " + str(count) + " rows added."
         return None
 
@@ -491,16 +503,16 @@ class Command(LabelCommand):
                 if item.logfile.last_updated > logfile_object.last_updated:
                     # Update the database
                     bp = BrowsePath.objects.get(id=item.id)
-                    bp.logfile = logfile_object   
+                    bp.logfile = logfile_object
                     bp.save()
                     # Update the cache
-                    item.logfile = logfile_object 
+                    item.logfile = logfile_object
                 return item
-        
+
         # Nothing found, so save and update the cache
         bp.save()
         self.browse_path_cache.append(bp)
-        
+
         return bp
 
 
@@ -517,24 +529,24 @@ class Command(LabelCommand):
                 if item.logfile.last_updated > logfile_object.last_updated:
                     # Update the database
                     bh = BrowseHandle.objects.get(id=item.id)
-                    bh.logfile = logfile_object   
+                    bh.logfile = logfile_object
                     bh.save()
                     # Update the cache
-                    item.logfile = logfile_object 
+                    item.logfile = logfile_object
                 return item
-        
+
         # Nothing found, so save and update the cache
         bh.save()
         self.browse_handle_cache.append(bh)
-        
+
         return bh
-        
+
 
     def _browseguid(self, logfile_object, guid, browsecount_object):
         "Get or Create the BrowseGUID information"
         bg = BrowseGUID()
         bg.logfile = logfile_object
-        
+
         # If guid provided, use. If not, find one. If none available, make one.
         if guid != '':
             bg.guid = guid
@@ -545,10 +557,10 @@ class Command(LabelCommand):
                     if item.logfile.last_updated > logfile_object.last_updated:
                         # Update the database
                         bg = BrowseGUID.objects.get(id=item.id)
-                        bg.logfile = logfile_object   
+                        bg.logfile = logfile_object
                         bg.save()
                         # Update the cache
-                        item.logfile = logfile_object 
+                        item.logfile = logfile_object
                     return item
         else:
             # Match on handle (trust Apple to make these unique), or then path
@@ -570,39 +582,39 @@ class Command(LabelCommand):
         # Nothing found, so save and update the cache
         bg.save()
         self.browse_guid_cache.append(bg)
-        
+
         return bg
 
 
 
 
     # ===================================================== PREVIEWS ===============================
-    
+
     def _parse_previews(self, summary_object, sheet):
         "Parse a Previews sheet for counts."
         # Can assume data duplication has already been accounted for in the parse_summary() process, so if we're here, import...
         count = 0
-        
+
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
             # Setup the basic count record
             pc = PreviewCount()
             pc.summary = summary_object
             pc.count = int(sheet.cell(row_id,1).value)
-            
+
             # Now link to path and handle
             pc.path = self._previewpath(summary_object.logfile, sheet.cell(row_id,0).value)
             pc.handle = self._previewhandle(summary_object.logfile, sheet.cell(row_id,2).value)
-            
+
             # Guids don't appear until 24-05-2009. Prior to that there was no guid column, so this call will fail initially.
-            try: 
+            try:
                 pc.guid = self._previewguid(summary_object.logfile, sheet.cell(row_id,3).value[:255], pc)
             except IndexError:
                 pc.guid = self._previewguid(summary_object.logfile, '', pc)
-            
+
             pc.save()
             count += 1
-            
+
         print "Imported PREVIEW data for " + str(summary_object.week_ending) + " with " + str(count) + " rows added."
         return None
 
@@ -620,16 +632,16 @@ class Command(LabelCommand):
                 if item.logfile.last_updated > logfile_object.last_updated:
                     # Update the database
                     pp = PreviewPath.objects.get(id=item.id)
-                    pp.logfile = logfile_object   
+                    pp.logfile = logfile_object
                     pp.save()
                     # Update the cache
-                    item.logfile = logfile_object 
+                    item.logfile = logfile_object
                 return item
-        
+
         # Nothing found, so save and update the cache
         pp.save()
         self.preview_path_cache.append(pp)
-        
+
         return pp
 
 
@@ -646,24 +658,24 @@ class Command(LabelCommand):
                 if item.logfile.last_updated > logfile_object.last_updated:
                     # Update the database
                     ph = PreviewHandle.objects.get(id=item.id)
-                    ph.logfile = logfile_object   
+                    ph.logfile = logfile_object
                     ph.save()
                     # Update the cache
-                    item.logfile = logfile_object 
+                    item.logfile = logfile_object
                 return item
-        
+
         # Nothing found, so save and update the cache
         ph.save()
         self.preview_handle_cache.append(ph)
-        
+
         return ph
-        
+
 
     def _previewguid(self, logfile_object, guid, previewcount_object):
         "Get or Create the PreviewGUID information"
         pg = PreviewGUID()
         pg.logfile = logfile_object
-        
+
         # If guid provided, use. If not, find one. If none available, make one.
         if guid != '':
             pg.guid = guid
@@ -674,10 +686,10 @@ class Command(LabelCommand):
                     if item.logfile.last_updated > logfile_object.last_updated:
                         # Update the database
                         pg = PreviewGUID.objects.get(id=item.id)
-                        pg.logfile = logfile_object   
+                        pg.logfile = logfile_object
                         pg.save()
                         # Update the cache
-                        item.logfile = logfile_object 
+                        item.logfile = logfile_object
                     return item
         else:
             # Match on handle (trust Apple to make these unique), or then path
@@ -699,7 +711,7 @@ class Command(LabelCommand):
         # Nothing found, so save and update the cache
         pg.save()
         self.preview_guid_cache.append(pg)
-        
+
         return pg
 
 
@@ -712,7 +724,7 @@ class Command(LabelCommand):
         if self.debug:
             print 'DEBUG:' + str(error_str) + '\n'
         return None
-            
+
 
     def _errorlog(self,error_str):
         "Write errors to a log file"
@@ -722,11 +734,11 @@ class Command(LabelCommand):
 
     def _errorlog_start(self, path_to_file):
         try:
-            self.error_log = open(path_to_file,'a') 
+            self.error_log = open(path_to_file,'a')
         except IOError:
             sys.stderr.write("WARNING: Could not open existing error file. New file being created")
             self.error_log = open(path_to_file,'w')
-        
+
         self.error_log.write("Log started at " + str(datetime.utcnow()) + "\n")
         print "Writing errors to: " + path_to_file
         return None
