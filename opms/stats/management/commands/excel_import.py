@@ -447,13 +447,15 @@ class Command(LabelCommand):
                         item.save()
             except IndexError:
                 # No path match found, really must be new, so generate a GUID (UUID)
-                tg.guid = str('OPMS:' + uuid.uuid4())
+                tg.guid = 'OPMS:' + str(uuid.uuid4())
                 self._errorlog("No TrackGUID found for " +str(trackcount_object.path)+ "(" + str(trackcount_object.handle) + "). " +\
                   "Created: " + str(tg.guid))
 
         # Nothing found, so save and update the cache
         tg.save()
         self.track_guid_cache.append(tg)
+
+        # Note: Will likely need to do a manual clean out of defunct custom GUIDs as this process doesn't delete redundant records, just unlinks them
 
         return tg
 
