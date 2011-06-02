@@ -430,7 +430,7 @@ class Command(LabelCommand):
             # Any existing TrackCount object should have a guid associated with it, thus, find one that has this handle, you've got it's guid
             tc = TrackCount.objects.filter(handle=trackcount_object.handle.id)
             if guid == '': # No guid, so use one found by a handle match
-                tg.guid = tc[0].guid.guid
+                tg = tc[0].guid
             else: # Update the prior trackcount objects to use the newly found GUID
                 for item in tc:
                     item.guid = tg
@@ -440,7 +440,7 @@ class Command(LabelCommand):
             try:
                 tc = TrackCount.objects.filter(path=trackcount_object.path.id)
                 if guid == '': # No guid, so use one found by a handle match
-                    tg.guid = tc[0].guid.guid
+                    tg = tc[0].guid
                 else: # Update the prior trackcount objects to use the newly found GUID
                     for item in tc:
                         item.guid = tg
@@ -450,13 +450,10 @@ class Command(LabelCommand):
                 tg.guid = 'OPMS:' + str(uuid.uuid4())
                 self._errorlog("No TrackGUID found for " +str(trackcount_object.path)+ "(" + str(trackcount_object.handle) + "). " +\
                   "Created: " + str(tg.guid))
-
-        # Nothing found, so save and update the cache
-        tg.save()
-        self.track_guid_cache.append(tg)
+                tg.save()
+                self.track_guid_cache.append(tg)
 
         # Note: Will likely need to do a manual clean out of defunct custom GUIDs as this process doesn't delete redundant records, just unlinks them
-
         return tg
 
 
