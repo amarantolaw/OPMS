@@ -3,6 +3,9 @@ from django.utils.encoding import smart_str, smart_unicode
 from datetime import date
 from opms.ffm import models as ffm_models
 
+# Remember: this application is managed by Django South so when you change this file, do the following:
+# python manage.py schemamigration appname --auto
+# python manage.py migrate appname
 
 
 # Quite possible to have multiple log file sources, use this as a lookup table
@@ -129,7 +132,7 @@ class ClientSoftware(models.Model):
 ####
 # Track Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific track
 class TrackPath(models.Model):
-    path = models.TextField("path")
+    path = models.TextField("path", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this path first found?
     
     def __unicode__(self):
@@ -138,7 +141,7 @@ class TrackPath(models.Model):
 
 # Track Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific track
 class TrackHandle(models.Model):
-    handle = models.BigIntegerField("handle")
+    handle = models.BigIntegerField("handle", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this handle first found?
     
     def __unicode__(self):
@@ -148,7 +151,7 @@ class TrackHandle(models.Model):
 # Track GUIDs change from time to time due to OxItems changes, but we want to keep them related to a specific track
 # NB: This data should eventually be migrated to the FFM app, as it comes from the rss source, and is copied into the stats data by Apple
 class TrackGUID(models.Model):
-    guid = models.CharField("GUID", max_length=255,db_index=True)
+    guid = models.CharField("GUID", max_length=255, db_index=True, unique=True)
     # Eventually there will be a link here to a File record from the FFM module
     file = models.ForeignKey(ffm_models.File, null=True)
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
@@ -175,7 +178,7 @@ class TrackCount(models.Model):
 ####
 # Browse Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific browse
 class BrowsePath(models.Model):
-    path = models.TextField("path")
+    path = models.TextField("path", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this path first found?
     
     def __unicode__(self):
@@ -184,7 +187,7 @@ class BrowsePath(models.Model):
 
 # Browse Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific browse
 class BrowseHandle(models.Model):
-    handle = models.BigIntegerField("handle")
+    handle = models.BigIntegerField("handle", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this handle first found?
     
     def __unicode__(self):
@@ -192,7 +195,7 @@ class BrowseHandle(models.Model):
 
 # GUIDs for Browses are optional
 class BrowseGUID(models.Model):
-    guid = models.CharField("GUID", max_length=255)
+    guid = models.CharField("GUID", max_length=255, unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
     
     def __unicode__(self):
@@ -219,7 +222,7 @@ class BrowseCount(models.Model):
 ####
 # Preview Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific preview
 class PreviewPath(models.Model):
-    path = models.TextField("path")
+    path = models.TextField("path", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this path first found?
     
     def __unicode__(self):
@@ -228,7 +231,7 @@ class PreviewPath(models.Model):
 
 # Preview Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific preview
 class PreviewHandle(models.Model):
-    handle = models.BigIntegerField("handle")
+    handle = models.BigIntegerField("handle", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this handle first found?
     
     def __unicode__(self):
@@ -238,7 +241,7 @@ class PreviewHandle(models.Model):
 # Preview GUIDs change from time to time due to OxItems changes, but we want to keep them related to a specific preview
 # NB: This data should eventually be migrated to the FFM app, as it comes from the rss source, and is copied into the stats data by Apple
 class PreviewGUID(models.Model):
-    guid = models.CharField("GUID", max_length=255,db_index=True)
+    guid = models.CharField("GUID", max_length=255, db_index=True, unique=True)
     # Eventually there will be a link here to a File record from the FFM module
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
     
