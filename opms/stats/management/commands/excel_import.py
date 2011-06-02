@@ -430,8 +430,10 @@ class Command(LabelCommand):
             # Any existing TrackCount object should have a guid associated with it, thus, find one that has this handle, you've got it's guid
             tc = TrackCount.objects.filter(handle=trackcount_object.handle.id)
             if guid == '': # No guid, so use one found by a handle match
-                tg = tc[0].guid
+                return tc[0].guid
+
             else: # Update the prior trackcount objects to use the newly found GUID
+                tg.save()
                 for item in tc:
                     item.guid = tg
                     item.save()
@@ -440,19 +442,21 @@ class Command(LabelCommand):
             try:
                 tc = TrackCount.objects.filter(path=trackcount_object.path.id)
                 if guid == '': # No guid, so use one found by a handle match
-                    tg = tc[0].guid
+                    return tc[0].guid
+
                 else: # Update the prior trackcount objects to use the newly found GUID
+                    tg.save()
                     for item in tc:
                         item.guid = tg
                         item.save()
             except IndexError:
                 # No path match found, really must be new, so generate a GUID (UUID)
                 tg.guid = 'OPMS:' + str(uuid.uuid4())
+                tg.save()
                 self._errorlog("No TrackGUID found for " +str(trackcount_object.path)+ "(" + str(trackcount_object.handle) + "). " +\
                   "Created: " + str(tg.guid))
-                tg.save()
-                self.track_guid_cache.append(tg)
 
+        self.track_guid_cache.append(tg)
         # Note: Will likely need to do a manual clean out of defunct custom GUIDs as this process doesn't delete redundant records, just unlinks them
         return tg
 
@@ -561,27 +565,41 @@ class Command(LabelCommand):
                         # Update the cache
                         item.logfile = logfile_object
                     return item
-        else:
+
             # Match on handle (trust Apple to make these unique), or then path
             try:
                 # Any existing BrowseCount object should have a guid associated with it, thus, find one that has this handle, you've got it's guid
-                bc = BrowseCount.objects.filter(handle=browsecount_object.handle.id)[0]
-                bg.guid = bc.guid.guid
+                bc = BrowseCount.objects.filter(handle=browsecount_object.handle.id)
+                if guid == '':
+                    return bc[0].guid
+
+                else:
+                    bg.save()
+                    for item in bc:
+                        item.guid = bg
+                        item.save()
             except IndexError:
                 # First time this handle has been seen, so look for a path match
                 try:
-                    bc = BrowseCount.objects.filter(path=browsecount_object.path.id)[0]
-                    bg.guid = bc.guid.guid
+                    bc = BrowseCount.objects.filter(path=browsecount_object.path.id)
+                    if guid == '':
+                        return bc[0].guid
+
+                    else:
+                        bg.save()
+                        for item in bc:
+                            item.guid = bg
+                            item.save()
                 except IndexError:
                     # No path match found, really must be new, so generate a GUID (UUID)
-                    bg.guid = str(uuid.uuid4())
+                    bg.guid = 'OPMS:' + str(uuid.uuid4())
+                    bg.save()
                     self._errorlog("No BrowseGUID found for " +str(browsecount_object.path)+ "(" + str(browsecount_object.handle) + "). " +\
                       "Created: " + str(bg.guid))
 
         # Nothing found, so save and update the cache
-        bg.save()
         self.browse_guid_cache.append(bg)
-
+        # Note: Will likely need to do a manual clean out of defunct custom GUIDs as this process doesn't delete redundant records, just unlinks them
         return bg
 
 
@@ -690,25 +708,39 @@ class Command(LabelCommand):
                         # Update the cache
                         item.logfile = logfile_object
                     return item
-        else:
-            # Match on handle (trust Apple to make these unique), or then path
+
+        # Match on handle (trust Apple to make these unique), or then path
+        try:
+            # Any existing PreviewCount object should have a guid associated with it, thus, find one that has this handle, you've got it's guid
+            pc = PreviewCount.objects.filter(handle=previewcount_object.handle.id)
+            if guid == '':
+                return pc[0].guid
+
+            else:
+                pg.save()
+                for item in pc:
+                    item.guid = pg
+                    item.save()
+        except IndexError:
+            # First time this handle has been seen, so look for a path match
             try:
-                # Any existing PreviewCount object should have a guid associated with it, thus, find one that has this handle, you've got it's guid
-                pc = PreviewCount.objects.filter(handle=previewcount_object.handle.id)[0]
-                pg.guid = pc.guid.guid
+                pc = PreviewCount.objects.filter(path=previewcount_object.path.id)
+                if guid == '':
+                    return pc[0].guid
+
+                else:
+                    pg.save()
+                    for item in pc:
+                        item.guid = pg
+                        item.save()
             except IndexError:
-                # First time this handle has been seen, so look for a path match
-                try:
-                    pc = PreviewCount.objects.filter(path=previewcount_object.path.id)[0]
-                    pg.guid = pc.guid.guid
-                except IndexError:
-                    # No path match found, really must be new, so generate a GUID (UUID)
-                    pg.guid = str(uuid.uuid4())
-                    self._errorlog("No PreviewGUID found for " +str(previewcount_object.path)+ "(" + str(previewcount_object.handle) + "). " +\
-                      "Created: " + str(pg.guid))
+                # No path match found, really must be new, so generate a GUID (UUID)
+                pg.guid = 'OPMS:' + str(uuid.uuid4())
+                pg.save()
+                self._errorlog("No PreviewGUID found for " +str(previewcount_object.path)+ "(" + str(previewcount_object.handle) + "). " +\
+                  "Created: " + str(pg.guid))
 
         # Nothing found, so save and update the cache
-        pg.save()
         self.preview_guid_cache.append(pg)
 
         return pg
