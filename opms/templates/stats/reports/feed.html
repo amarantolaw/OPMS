@@ -1,0 +1,78 @@
+{% extends "stats/base.html" %}
+{% block head %}
+    <script src="/static/scripts/jquery-1.5.2.min.js"></script>
+    <script src="/static/scripts/jquery.tablesorter.min.js"></script>
+{% endblock %}
+
+{% block title %}Summary Feed Data ({{ref}}) from Apple iTU Reporting{% endblock %}
+
+{% block navbar %}
+<div id="mainnav">
+    <h2>Main sections</h2>
+    <ul class="level-1">
+        <li><a href="/">Home</a></li>
+        <li><a href="/admin/">Admin</a></li>
+        <li><a href="/ffm/">Files &amp; Feeds</a></li>
+        <li><a href="/stats/" class="currentsection">Statistics</a></li>
+    </ul>
+</div>
+<div id="mainnav2">
+    <h3>Sub sections for Statistics</h3>
+    <ul class="level-2">
+        <li><a href="../">Summary</a></li>
+        <li><span class="youarehere">Feeds</span></li>
+        <li><a href="#">Platforms</a></li>
+        <li><a href="#">Geography</a></li>
+    </ul>
+</div>
+{% endblock %}
+
+
+{% block content %}
+<h1>Summary of downloads for all time for {{ref}} (psudeo feed)</h1>
+
+{% if listing %}
+
+{% if summary %}
+<h3>Summary</h3>
+<p>Total downloads is {{ summary.total }} for {{ summary.count }} items.
+Most popular item has been downloaded {{ summary.max }} times whilst the average for the feed is {{ summary.avg }} times.</p>
+{% endif %}
+
+<h3>Data visualisation</h3>
+<!--
+<p><img src="/stats/graph/apple/summary-total.png" /><br />
+    <a href="/stats/graph/apple/summary-total.png?dpi=300">[Print Version]</a> <a href="/stats/graph/apple/summary-total.png?dpi=600">[High Resolution]</a></p>
+-->
+
+<script>
+$(document).ready(function()
+    {
+        $("#summaryTable").tablesorter( {sortList: [[0,1]]} );
+    }
+);
+</script>
+
+<h3>Data table</h3>
+<table id="summaryTable" class="tablesorter">
+    <thead>
+        <tr>
+            <th>Cumulative Count</th>
+            <th>Approximate Feed</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in listing %}
+        <tr>
+            <td>{{ row.count }}</td>
+            <td>{{ row.feed }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Data is missing</p>
+{% endif %}
+
+
+{% endblock %}

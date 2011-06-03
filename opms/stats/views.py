@@ -40,7 +40,7 @@ def feed_detail(request, partial_guid):
     c = TrackCount.merged.feed_counts(partial_guid)
 
 
-    listing = Track.objects.items_by_feed(partial_guid)
+    listing = []
     summary = {}
     summary['count'] = len(listing)
     summary['total'] = 0
