@@ -49,7 +49,10 @@ def feed_detail(request, partial_guid):
         summary['total'] += row.count
         if row.count > summary.get('max'):
             summary['max'] = row.count
-    summary['avg'] = summary.get('total') // summary.get('count')
+    try:
+        summary['avg'] = summary.get('total') // summary.get('count')
+    except ZeroDivisionError:
+        summary['avg'] = summary.get('total')
 
     return render_to_response('stats/reports/feed.html',{'listing':listing, 'ref':partial_guid, 'summary':summary})
 
