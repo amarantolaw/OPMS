@@ -148,8 +148,7 @@ class TrackManager(models.Manager):
 
         result_list = []
         for row in cursor.fetchall():
-            t = self.model(count=row[0], guid=row[2])
-            t.psudeo_feed = row[1]
+            t = {'count':row[0], 'feed':row[1], 'guid':row[2]}
             result_list.append(t)
         return result_list
 
