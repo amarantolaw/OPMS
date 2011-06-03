@@ -214,7 +214,7 @@ class TrackManager(models.Manager):
 
         result_list = []
         for row in cursor.fetchall():
-            t = self.model(week_ending=row[0], path=row[1], guid=row[2], count=row[4])
+            t = {'week_ending':row[0], 'path':row[1], 'guid':row[2], 'count':row[4]}
             result_list.append(t)
 
         return result_list
