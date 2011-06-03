@@ -137,7 +137,7 @@ class TrackManager(models.Manager):
         cursor = connection.cursor()
 
         cursor.execute('''
-            SELECT sum(tc.count) AS count, substring(tg.guid,52) AS psuedo_feed, max(tg.guid) AS guid
+            SELECT sum(tc.count) AS count, substring(tg.guid,52) AS psuedo_feed
             FROM stats_trackcount AS tc,
                  stats_trackguid AS tg
             WHERE tc.guid_id = tg.id
@@ -148,7 +148,7 @@ class TrackManager(models.Manager):
 
         result_list = []
         for row in cursor.fetchall():
-            t = {'count':row[0], 'feed':row[1], 'guid':row[2]}
+            t = {'count':row[0], 'feed':row[1]}
             result_list.append(t)
         return result_list
 
