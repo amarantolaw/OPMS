@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response
 from django.http import Http404, HttpResponse
-from stats.models import Summary
+from stats.models import *
 
 import array
 import pylab
