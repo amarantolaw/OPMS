@@ -23,10 +23,10 @@ class LogFile(models.Model):
     file_name = models.TextField("file name")
     file_path = models.TextField("path to file")
     last_updated = models.DateTimeField("last updated") # Acts as date of import
-    
+
     def __unicode__(self):
         return self.file_name
-        
+
 
 ####
 # Apple Summary Data
@@ -37,7 +37,7 @@ class SummaryManager(models.Manager):
         from django.db import connection
         cursor = connection.cursor()
         cursor.execute("""
-            SELECT week_ending AS week_beginning, 
+            SELECT week_ending AS week_beginning,
                    sum(browse) AS browse,
                    sum(download_preview) AS download_preview,
                    sum(download_preview_ios) AS download_preview_ios,
@@ -56,19 +56,19 @@ class SummaryManager(models.Manager):
         previous_row = []
         week_number = -5  # Want to be able to calculate this from a preset start date...
         for row in cursor.fetchall():
-            r = self.model(week_ending=row[0], browse=row[1], download_preview=row[2], 
+            r = self.model(week_ending=row[0], browse=row[1], download_preview=row[2],
                 download_preview_ios=row[3], download_track=row[4], download_tracks=row[5],
                 download_ios=row[6], subscription=row[7], subscription_enclosure=row[8],
                 subscription_feed=row[9], total_track_downloads=row[10])
-                
+
             r.week_number = week_number
             try:
                 r.total_track_downloads_change = int(row[10])-int(previous_row[10])
             except IndexError:
                 r.total_track_downloads_change = 0
-            
+
             result_list.append(r)
-                
+
             week_number += 1
             previous_row = row
         return result_list
@@ -80,15 +80,15 @@ class Summary(models.Model):
     SERVICE_NAME_CHOICES = (
         (u'itu', u'iTunes U v1'),
         (u'itu-psm', u'iTunes U PSM'),
-    )    
+    )
     # Date from the column - typically from yyyy-mm-dd format
     week_ending = models.DateField("week ending", db_index=True)  # NB: This needs renaming to week_beginning
-    
+
     # Logfile this data was pulled from
     logfile = models.ForeignKey(LogFile)
     # Repeating this field as a necessary evil for the sake of duplication checking on import
     service_name = models.CharField("service name associate with this log", max_length=20, choices=SERVICE_NAME_CHOICES)
-    
+
     # User Actions section
     browse = models.IntegerField("browse")
     download_preview  = models.IntegerField("download preview")
@@ -107,10 +107,10 @@ class Summary(models.Model):
     not_listed = models.IntegerField("not listed")
     # The total as calculated by Apple
     total_track_downloads = models.IntegerField("total track downloads")
-    
+
     merged = SummaryManager() # Manager for merged data
     objects = models.Manager() # Default manager
-    
+
     def __unicode__(self):
         return str(date.strftime(self.week_ending,"%Y-%m-%d")) + ": Total Downloads=" + str(self.total_track_downloads)
 
@@ -130,11 +130,102 @@ class ClientSoftware(models.Model):
 ####
 # Apple Track Records
 ####
+class TrackManager(models.Manager):
+
+    def psuedo_feeds(self):
+        from django.db import connection, transaction
+        cursor = connection.cursor()
+
+        cursor.execute('''
+            SELECT sum(tc.count) AS count, substring(tg.guid,52) AS psuedo_feed, max(tg.guid) AS guid
+            FROM stats_trackcount AS tc,
+                 stats_trackguid AS tg
+            WHERE tc.guid_id = tg.id
+              AND substring(tg.guid,52) <> ''
+            GROUP BY substring(tg.guid,52)
+            ORDER BY 1 DESC
+            ''')
+
+        result_list = []
+        for row in cursor.fetchall():
+            t = self.model(count=row[0], guid=row[2])
+            t.psudeo_feed = row[1]
+            result_list.append(t)
+        return result_list
+
+
+    def feed_weeks(self, partial_guid = ''):
+        from django.db import connection, transaction
+        cursor = connection.cursor()
+
+        # get the weeks that data exists for a given feed
+        cursor.execute('''
+            SELECT DISTINCT s.week_ending
+              FROM stats_trackcount AS tc,
+                   stats_trackguid AS tg,
+                   stats_summary AS s
+            WHERE tc.guid_id = tg.id
+              AND tc.summary_id = s.id
+              AND substring(tg.guid,52) = %s
+            ORDER BY 1 ASC;
+            ''', [partial_guid] )
+
+        result_list = []
+        for row in cursor.fetchall():
+            result_list.append(str(row[0]))
+        return result_list
+
+
+    def feed_items(self, partial_guid = ''):
+        from django.db import connection, transaction
+        cursor = connection.cursor()
+
+        # get the items that data exists for a given feed - if a guid exists, it is because we have data for it
+        cursor.execute('''
+            SELECT DISTINCT tg.guid
+              FROM stats_trackguid AS tg
+            WHERE substring(tg.guid,52) = 'conted/critical_reasoning-aud'
+            ORDER BY 1 ASC;
+            ''', [partial_guid] )
+
+        result_list = []
+        for row in cursor.fetchall():
+            result_list.append(str(row[0]))
+        return result_list
+
+
+    def feed_counts(self, partial_guid = ''):
+        from django.db import connection, transaction
+        cursor = connection.cursor()
+
+        # get the count data for a given feed, such that it can be arranged against the above queries
+        cursor.execute('''
+            SELECT s.week_ending, max(tp.path), tg.guid, sum(tc.count)
+              FROM stats_trackcount AS tc,
+                   stats_trackpath AS tp,
+                   stats_trackguid AS tg,
+                   stats_summary AS s
+            WHERE tc.path_id = tp.id
+              AND tc.guid_id = tg.id
+              AND tc.summary_id = s.id
+              AND substring(tg.guid,52) = %s
+            GROUP BY s.week_ending, tg.guid
+            ORDER BY 1 ASC, 3 ASC;
+            ''', [partial_guid])
+
+        result_list = []
+        for row in cursor.fetchall():
+            t = self.model(week_ending=row[0], path=row[1], guid=row[2], count=row[4])
+            result_list.append(t)
+
+        return result_list
+
+
 # Track Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific track
 class TrackPath(models.Model):
     path = models.TextField("path", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this path first found?
-    
+
     def __unicode__(self):
         return smart_unicode(self.path)
 
@@ -143,7 +234,7 @@ class TrackPath(models.Model):
 class TrackHandle(models.Model):
     handle = models.BigIntegerField("handle", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this handle first found?
-    
+
     def __unicode__(self):
         return str(self.handle)
 
@@ -155,7 +246,7 @@ class TrackGUID(models.Model):
     # Eventually there will be a link here to a File record from the FFM module
     file = models.ForeignKey(ffm_models.File, null=True)
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
-    
+
     def __unicode__(self):
         return smart_unicode(self.guid)
 
@@ -168,7 +259,10 @@ class TrackCount(models.Model):
     path = models.ForeignKey(TrackPath)
     handle = models.ForeignKey(TrackHandle)
     guid = models.ForeignKey(TrackGUID)
-    
+
+    merged = TrackManager() # Manager for merged data
+    objects = models.Manager() # Default manager
+
     def __unicode__(self):
         return '%s:%s' % (self.summary.week_ending,self.count)
 
@@ -180,7 +274,7 @@ class TrackCount(models.Model):
 class BrowsePath(models.Model):
     path = models.TextField("path", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this path first found?
-    
+
     def __unicode__(self):
         return smart_unicode(self.path)
 
@@ -189,7 +283,7 @@ class BrowsePath(models.Model):
 class BrowseHandle(models.Model):
     handle = models.BigIntegerField("handle", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this handle first found?
-    
+
     def __unicode__(self):
         return str(self.handle)
 
@@ -197,10 +291,10 @@ class BrowseHandle(models.Model):
 class BrowseGUID(models.Model):
     guid = models.CharField("GUID", max_length=255, unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
-    
+
     def __unicode__(self):
         return smart_unicode(self.guid)
-        
+
 
 # This is a browse count record, which will have multiple handles, paths and guids/files associated with it
 class BrowseCount(models.Model):
@@ -210,7 +304,7 @@ class BrowseCount(models.Model):
     path = models.ForeignKey(BrowsePath)
     handle = models.ForeignKey(BrowseHandle)
     guid = models.ForeignKey(BrowseGUID, null=True)
-    
+
     def __unicode__(self):
         return '%s:%s' % (self.summary.week_ending,self.count)
 
@@ -224,7 +318,7 @@ class BrowseCount(models.Model):
 class PreviewPath(models.Model):
     path = models.TextField("path", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this path first found?
-    
+
     def __unicode__(self):
         return smart_unicode(self.path)
 
@@ -233,7 +327,7 @@ class PreviewPath(models.Model):
 class PreviewHandle(models.Model):
     handle = models.BigIntegerField("handle", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this handle first found?
-    
+
     def __unicode__(self):
         return str(self.handle)
 
@@ -244,10 +338,10 @@ class PreviewGUID(models.Model):
     guid = models.CharField("GUID", max_length=255, db_index=True, unique=True)
     # Eventually there will be a link here to a File record from the FFM module
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
-    
+
     def __unicode__(self):
         return smart_unicode(self.guid)
-        
+
 
 # This is a preview count record, which will have multiple handles, paths and guids/files associated with it
 class PreviewCount(models.Model):
@@ -257,7 +351,7 @@ class PreviewCount(models.Model):
     path = models.ForeignKey(PreviewPath)
     handle = models.ForeignKey(PreviewHandle)
     guid = models.ForeignKey(PreviewGUID)
-    
+
     def __unicode__(self):
         return '%s:%s' % (self.summary.week_ending,self.count)
 
@@ -275,7 +369,7 @@ class Rdns(models.Model):
     country_code = models.CharField("country code", max_length=2)
     country_name = models.CharField("country name", max_length=200)
     last_updated = models.DateTimeField("last updated")
-    
+
     def __unicode__(self):
         return self.resolved_name
 
@@ -285,7 +379,7 @@ class OS(models.Model):
     company = models.CharField("operating system company", max_length=200)
     family = models.CharField("operating system family", max_length=100)
     name = models.CharField("operating system identity", max_length=200)
-    
+
     def __unicode__(self):
         return self.name
 
@@ -295,7 +389,7 @@ class UA(models.Model):
     company = models.CharField("user agent company", max_length=200)
     family = models.CharField("user agent family", max_length=100)
     name = models.CharField("user agent identity", max_length=200)
-    
+
     def __unicode__(self):
         return self.name
 
@@ -375,7 +469,7 @@ class Tracking(models.Model):
     def __unicode__(self):
         return '%s=%s' % (self.key_string,self.value_string)
 
-    
+
 # Replace three repetative fields with one id
 class Server(models.Model):
     name = models.CharField("server dns name", max_length=200)
@@ -384,7 +478,7 @@ class Server(models.Model):
 
     def __unicode__(self):
         return '%s=%s' % (self.name,self.ip_address)
-        
+
 
 # Log file request table. Each row is a request from a log file
 class LogEntry(models.Model):
@@ -445,6 +539,6 @@ class LogEntry(models.Model):
     user_agent = models.ForeignKey(UserAgent, verbose_name="user agent string")
     # This needs to be optional, as there may 0-n tracking tags on this entry
     tracking = models.ManyToManyField(Tracking, verbose_name="tracking on this entry")
-    
+
     def __unicode__(self):
         return '%s:%s' % (self.time_of_request,self.file_request)
