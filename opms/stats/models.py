@@ -214,7 +214,7 @@ class TrackManager(models.Manager):
 
         result_list = []
         for row in cursor.fetchall():
-            t = {'week_ending':row[0], 'path':row[1], 'guid':row[2], 'count':row[3]}
+            t = {'week_ending':str(date.strftime(row[0],"%Y-%m-%d")), 'path':row[1], 'guid':row[2], 'count':row[3]}
             result_list.append(t)
 
         return result_list
