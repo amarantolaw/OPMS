@@ -183,7 +183,7 @@ class TrackManager(models.Manager):
         cursor.execute('''
             SELECT DISTINCT tg.guid
               FROM stats_trackguid AS tg
-            WHERE substring(tg.guid,52) = 'conted/critical_reasoning-aud'
+            WHERE substring(tg.guid,52) = %s
             ORDER BY 1 ASC;
             ''', [partial_guid] )
 
