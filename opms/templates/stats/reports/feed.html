@@ -62,7 +62,7 @@ $(document).ready(function()
             <th>Week Commencing</th>
             <th>Week Total</th>
             {% for item in items %}
-            <th>{{ item[25:52] }}</th>
+            <th>{{ item|slice:"25:52" }}</th>
             {% endfor %}
         </tr>
     </thead>
