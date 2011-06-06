@@ -65,6 +65,13 @@ $(document).ready(function()
         </tr>
     </thead>
     <tbody>
+        <tr>
+            <td>Item Total</td>
+            <td>&nbsp;</td>
+            {% for item, value in items %}
+            <th>{{ value }}</th>
+            {% endfor %}
+        </tr>
         {% for row in listing %}
         <tr>
             <td>{{ row.week_ending }}</td>
