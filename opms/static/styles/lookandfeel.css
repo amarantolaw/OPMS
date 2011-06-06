@@ -60,3 +60,7 @@ table.tablesorter tbody td.positive {
 table.tablesorter tbody td.negative {
     color: #f00;
 }
+
+table.tablesorter tbody td.highlight-total {
+    background-color: #ddd;
+}

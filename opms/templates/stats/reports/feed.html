@@ -27,7 +27,7 @@
 </div>
 {% endblock %}
 
-{% block breadcrumb %}&gt; <a href="#">Apple Feeds</a> &gt; Feed Detail{% endblock %}
+{% block breadcrumb %}&gt; <a href="/stats/report/summary/feeds/">Apple Feeds</a> &gt; Feed Detail{% endblock %}
 
 
 {% block content %}
@@ -62,7 +62,7 @@ $(document).ready(function()
             <th>Week Commencing</th>
             <th>Week Total</th>
             {% for item in items %}
-            <th>{{ item }}</th>
+            <th>{{ item[25:52] }}</th>
             {% endfor %}
         </tr>
     </thead>
@@ -71,13 +71,13 @@ $(document).ready(function()
             <td>Item Total</td>
             <td>&nbsp;</td>
             {% for item, value in items.items %}
-            <td>{{ value }}</td>
+            <td class="highlight-total">{{ value }}</td>
             {% endfor %}
         </tr>
         {% for row in listing %}
         <tr>
             <td>{{ row.week_ending }}</td>
-            <td>{{ row.total }}</td>
+            <td class="highlight-total">{{ row.total }}</td>
             {% for item in row.data %}
             <td>{{ item }}</td>
             {% endfor %}
