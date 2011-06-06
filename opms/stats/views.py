@@ -61,6 +61,13 @@ def feed_detail(request, partial_guid):
                 row_data.append(None)
         listing.append({'week_ending':week, 'data':row_data, 'total':row_total})
 
+    # Put column headers and totals into listing array
+    row_data = []
+    for item in i:
+        row_data.append(item_totals.get(item))
+    listing.insert(0,{'week_ending':'Item Total', 'data':row_data, 'total':''})
+    listing.insert(0,{'week_ending':'Week Commencing', 'data':i, 'total':'Week Total'})
+
     summary = {}
     summary['count'] = len(i)
     summary['total'] = 0
@@ -76,7 +83,7 @@ def feed_detail(request, partial_guid):
         summary['avg'] = summary.get('total')
 
     return render_to_response('stats/reports/feed.html',{
-        'listing':listing, 'ref':partial_guid, 'summary':summary, 'items':item_totals
+        'listing':listing, 'ref':partial_guid, 'summary':summary
         })
 
 

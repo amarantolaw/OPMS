@@ -38,7 +38,7 @@
 {% if summary %}
 <h3>Summary</h3>
 <p>This feed has {{ summary.count }} items and in total they have been downloaded {{ summary.total }} times.<br />
-Most popular item has been downloaded {{ summary.max }} times whilst the average per item is {{ summary.avg }} times.</p>
+Most popular item ({{ summary.max_guid|slice:"29:50" }}) has been downloaded {{ summary.max }} times whilst the average per item is {{ summary.avg }} times.</p>
 {% endif %}
 
 <h3>Data visualisation</h3>
@@ -58,23 +58,28 @@ $(document).ready(function()
 <h3>Data table</h3>
 <table id="summaryTable" class="tablesorter">
     <thead>
+        {% for row in listing %}
+        {% if forloop.counter0 == 0 %}
         <tr>
             <th>Week Commencing</th>
             <th>Week Total</th>
-            {% for item, value in items.items %}
-            <th>{{ item|slice:"29:50" }}</th>
+            {% for item in row.data %}
+            <td>{{ item|slice:"29:50" }}</td>
             {% endfor %}
         </tr>
     </thead>
     <tbody>
+        {% endif %}
+        {% if forloop.counter0 == 1 %}
         <tr>
-            <td>Item Total</td>
-            <td>&nbsp;</td>
-            {% for item, value in items.items %}
-            <td class="highlight-total">{{ value }}</td>
+            <td>{{ row.week_ending }}</td>
+            <td>{{ row.total }}</td>
+            {% for item in row.data %}
+            <td class="highlight-total">{{ item }}</td>
             {% endfor %}
         </tr>
-        {% for row in listing %}
+        {% endif %}
+        {% if forloop.counter0 > 1 %}
         <tr>
             <td>{{ row.week_ending }}</td>
             <td class="highlight-total">{{ row.total }}</td>
@@ -82,6 +87,7 @@ $(document).ready(function()
             <td>{{ item }}</td>
             {% endfor %}
         </tr>
+        {% endif %}
         {% endfor %}
     </tbody>
 </table>
