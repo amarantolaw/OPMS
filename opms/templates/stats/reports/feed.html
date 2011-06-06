@@ -57,15 +57,21 @@ $(document).ready(function()
 <table id="summaryTable" class="tablesorter">
     <thead>
         <tr>
-            <th>Cumulative Count</th>
-            <th>Approximate Feed</th>
+            <th>Week Commencing</th>
+            <th>Week Total</th>
+            {% for item in items.keys() %}
+            <th>{{ item }}</th>
+            {% endfor %}
         </tr>
     </thead>
     <tbody>
         {% for row in listing %}
         <tr>
-            <td>{{ row.count }}</td>
-            <td>{{ row.feed }}</td>
+            <td>{{ row.week_ending }}</td>
+            <td>{{ row.total }}</td>
+            {% for item in row.data %}
+            <td>{{ item }}</td>
+            {% endfor %}
         </tr>
         {% endfor %}
     </tbody>

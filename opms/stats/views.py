@@ -46,11 +46,11 @@ def feed_detail(request, partial_guid):
     listing = []
     count = c.pop(0)
     for week in w:
-        rowdata = []
-        row_total
+        row_data = []
+        row_total = 0
         for item in i:
             if count != None and count.get("week_ending") == week and count.get("guid") == item:
-                rowdata.append(int(count.get("count")))
+                row_data.append(int(count.get("count")))
                 row_total += int(count.get("count"))
                 item_totals[item] += int(count.get("count"))
                 try:
@@ -58,24 +58,26 @@ def feed_detail(request, partial_guid):
                 except IndexError:
                     count = None
             else:
-                rowdata.append(None)
-
-        listing.append({'week_ending':week, 'rowdata':rowdata})
+                row_data.append(None)
+        listing.append({'week_ending':week, 'data':row_data, 'total':row_total})
 
     summary = {}
     summary['count'] = len(i)
     summary['total'] = 0
     summary['max']   = 0
-    for row in listing:
-        summary['total'] += row.count
-        if row.count > summary.get('max'):
-            summary['max'] = row.count
+    for k, v in item_totals.items():
+        summary['total'] += v
+        if v > summary.get('max'):
+            summary['max'] = v
+            summary['max_guid'] = k
     try:
         summary['avg'] = summary.get('total') // summary.get('count')
     except ZeroDivisionError:
         summary['avg'] = summary.get('total')
 
-    return render_to_response('stats/reports/feed.html',{'listing':listing, 'ref':partial_guid, 'summary':summary})
+    return render_to_response('stats/reports/feed.html',{
+        'listing':listing, 'ref':partial_guid, 'summary':summary, 'items':item_totals
+        })
 
 
 def item_detail(request, guid):
