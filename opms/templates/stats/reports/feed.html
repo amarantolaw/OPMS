@@ -64,7 +64,7 @@ $(document).ready(function()
             <th>Week Commencing</th>
             <th>Week Total</th>
             {% for item in row.data %}
-            <td>{{ item|slice:"29:50" }}</td>
+            <th>{{ item|slice:"29:50" }}</th>
             {% endfor %}
         </tr>
     </thead>
