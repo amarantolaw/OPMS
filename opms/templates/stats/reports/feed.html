@@ -37,8 +37,8 @@
 
 {% if summary %}
 <h3>Summary</h3>
-<p>This feed has {{ summary.count }} items and in total they have been downloaded {{ summary.total }} times.
-Most popular item has been downloaded {{ summary.max }} times whilst the average for the feed is {{ summary.avg }} times.</p>
+<p>This feed has {{ summary.count }} items and in total they have been downloaded {{ summary.total }} times.<br />
+Most popular item has been downloaded {{ summary.max }} times whilst the average per item is {{ summary.avg }} times.</p>
 {% endif %}
 
 <h3>Data visualisation</h3>
@@ -61,7 +61,7 @@ $(document).ready(function()
         <tr>
             <th>Week Commencing</th>
             <th>Week Total</th>
-            {% for item in items %}
+            {% for item, value in items.items %}
             <th>{{ item|slice:"29:50" }}</th>
             {% endfor %}
         </tr>
