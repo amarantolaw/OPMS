@@ -146,6 +146,7 @@ class TrackManager(models.Manager):
                  stats_trackguid AS tg,
                  stats_summary AS s
             WHERE tc.guid_id = tg.id
+              AND tc.summary_id = s.id
               AND substring(tg.guid,52) <> ''
             GROUP BY substring(tg.guid,52)
             ORDER BY 1 DESC
