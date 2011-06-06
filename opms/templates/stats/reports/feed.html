@@ -68,8 +68,8 @@ $(document).ready(function()
         <tr>
             <td>Item Total</td>
             <td>&nbsp;</td>
-            {% for item, value in items %}
-            <th>{{ value }}</th>
+            {% for item, value in items.items() %}
+            <td>{{ value }}</td>
             {% endfor %}
         </tr>
         {% for row in listing %}
