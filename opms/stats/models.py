@@ -137,9 +137,14 @@ class TrackManager(models.Manager):
         cursor = connection.cursor()
 
         cursor.execute('''
-            SELECT sum(tc.count) AS count, substring(tg.guid,52) AS psuedo_feed
+            SELECT sum(tc.count) AS count,
+                   substring(tg.guid,52) AS psuedo_feed,
+                   min(s.week_ending) AS first_result,
+                   max(s.week_ending) AS last_result,
+                   count(tc.id) AS item_count
             FROM stats_trackcount AS tc,
-                 stats_trackguid AS tg
+                 stats_trackguid AS tg,
+                 stats_summary AS s
             WHERE tc.guid_id = tg.id
               AND substring(tg.guid,52) <> ''
             GROUP BY substring(tg.guid,52)
@@ -148,7 +153,7 @@ class TrackManager(models.Manager):
 
         result_list = []
         for row in cursor.fetchall():
-            t = {'count':row[0], 'feed':row[1]}
+            t = {'count':row[0], 'feed':row[1], 'min_date':row[2], 'max_date':row[3], 'item_count':row[4], }
             result_list.append(t)
         return result_list
 
