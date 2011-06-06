@@ -39,20 +39,31 @@ def feed_detail(request, partial_guid):
     w = TrackCount.merged.feed_weeks(partial_guid)
     c = TrackCount.merged.feed_counts(partial_guid)
 
+    item_totals = {}
+    for item in i:
+        item_totals[item] = 0
+
     listing = []
     count = c.pop(0)
     for week in w:
         rowdata = []
+        row_total
         for item in i:
-            if count.get("week_ending") == week and count.get("guid") == item:
-                rowdata.append(count.count)
-                count = c.pop(0)
+            if count != None and count.get("week_ending") == week and count.get("guid") == item:
+                rowdata.append(int(count.get("count")))
+                row_total += int(count.get("count"))
+                item_totals[item] += int(count.get("count"))
+                try:
+                    count = c.pop(0)
+                except IndexError:
+                    count = None
             else:
                 rowdata.append(None)
+
         listing.append({'week_ending':week, 'rowdata':rowdata})
 
     summary = {}
-    summary['count'] = len(listing)
+    summary['count'] = len(i)
     summary['total'] = 0
     summary['max']   = 0
     for row in listing:
