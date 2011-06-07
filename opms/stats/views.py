@@ -118,8 +118,8 @@ def feed_detail(request, partial_guid):
         summary['max_term'] = "week"
     for k, v in column_totals.items():
         summary['total'] += v
-        if v > summary.get('max'):
-            summary['max_value'] = v
+        if v > summary.get('max_value'):
+            summary['max_value'] = int(v)
             summary['max_name'] = k
     try:
         summary['avg'] = summary.get('total') // summary.get('count')
