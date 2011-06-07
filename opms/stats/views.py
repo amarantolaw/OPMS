@@ -251,19 +251,19 @@ def graph_apple_summary_feeds(request):
         if int(row.get("count")) > 10000000:
             cols.append('#ff0000')
         elif int(row.get("count")) > 1000000:
-            cols.append('#ee0000')
-        elif int(row.get("count")) > 100000:
-            cols.append('#dd0000')
-        elif int(row.get("count")) > 10000:
             cols.append('#cc0000')
-        elif int(row.get("count")) > 1000:
-            cols.append('#bb0000')
-        elif int(row.get("count")) > 100:
-            cols.append('#aa0000')
-        elif int(row.get("count")) > 10:
+        elif int(row.get("count")) > 100000:
             cols.append('#990000')
+        elif int(row.get("count")) > 10000:
+            cols.append('#660000')
+        elif int(row.get("count")) > 1000:
+            cols.append('#330033')
+        elif int(row.get("count")) > 100:
+            cols.append('#000066')
+        elif int(row.get("count")) > 10:
+            cols.append('#000099')
         else:
-            cols.append('#880000')
+            cols.append('#0000cc')
 
     ind = matplotlib.numpy.arange(len(bars)) # the x locations for the groups
 
