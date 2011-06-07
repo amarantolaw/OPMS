@@ -61,10 +61,10 @@ $(document).ready(function()
         {% for row in listing %}
         {% if forloop.counter0 == 0 %}
         <tr>
-            <th>Week Commencing</th>
-            <th>Week Total</th>
+            <th>{{ row.week_ending|default:"Week Commencing" }}</th>
+            <th>{{ row.total|default:"Week Total" }}</th>
             {% for item in row.data %}
-            <th>{{ item|slice:"29:50" }}</th>
+            <th>{{ item }}</th>
             {% endfor %}
         </tr>
     </thead>

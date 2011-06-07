@@ -61,12 +61,15 @@ def feed_detail(request, partial_guid):
                 row_data.append(None)
         listing.append({'week_ending':week, 'data':row_data, 'total':row_total})
 
-    # Put column headers and totals into listing array
+    # Put column headers and totals into listing array - values, then headings
     row_data = []
     for item in i:
         row_data.append(item_totals.get(item))
     listing.insert(0,{'week_ending':'Item Total', 'data':row_data, 'total':''})
-    listing.insert(0,{'week_ending':'Week Commencing', 'data':i, 'total':'Week Total'})
+    row_data = []
+    for item in i:
+        row_data.append(str(item)[29:50])
+    listing.insert(0,{'week_ending':'Week Commencing', 'data':row_data, 'total':'Week Total'})
 
     summary = {}
     summary['count'] = len(i)
