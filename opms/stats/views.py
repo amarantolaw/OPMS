@@ -255,6 +255,7 @@ def graph_apple_summary_feeds(request):
     ax1.set_yscale('linear')
     for tl in ax1.get_yticklabels():
         tl.set_color('b')
+    ax1.ylim(0.01,100000)
 
     # ax1.set_xticks(xticks - 0.6)
     ax1.set_xticklabels(xvalues, rotation=270, size=5, ha='center', va='top')
