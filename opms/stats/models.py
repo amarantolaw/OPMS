@@ -199,7 +199,7 @@ class TrackManager(models.Manager):
         return result_list
 
 
-    def feed_counts(self, partial_guid = ''):
+    def feed_counts(self, partial_guid = '', order_by=0):
         from django.db import connection, transaction
         cursor = connection.cursor()
 
@@ -215,8 +215,11 @@ class TrackManager(models.Manager):
               AND tc.summary_id = s.id
               AND substring(tg.guid,52) = %s
             GROUP BY s.week_ending, tg.guid
-            ORDER BY 1 ASC, 3 ASC;
             '''
+        if order_by > 0:
+            sql += "ORDER BY 3 ASC, 1 ASC;"
+        else:
+            sql += "ORDER BY 1 ASC, 3 ASC;"
         cursor.execute(sql, [partial_guid])
 
         result_list = []
