@@ -241,14 +241,33 @@ def graph_apple_summary_feeds(request):
 
     bars = []
     xvalues = []
+    cols = []
     # xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
     for row in s:
         bars.append(int(row.get("count")))
         xvalues.append(str(row.get("feed")))
 
+        #Create a colour scale
+        if int(row.get("count")) > 10000000:
+            cols.append('#ff0000')
+        elif int(row.get("count")) > 1000000:
+            cols.append('#ee0000')
+        elif int(row.get("count")) > 100000:
+            cols.append('#dd0000')
+        elif int(row.get("count")) > 10000:
+            cols.append('#cc0000')
+        elif int(row.get("count")) > 1000:
+            cols.append('#bb0000')
+        elif int(row.get("count")) > 100:
+            cols.append('#aa0000')
+        elif int(row.get("count")) > 10:
+            cols.append('#990000')
+        else:
+            cols.append('#880000')
+
     ind = matplotlib.numpy.arange(len(bars)) # the x locations for the groups
 
-    cols = ['blue']*len(ind)
+    # cols = ['blue']*len(ind)
     ax1.bar(ind, bars, color=cols, linewidth=0, edgecolor='w', log=True)
 
     ax1.set_ylabel("Downloads", color='blue', size='small')
