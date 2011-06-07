@@ -304,7 +304,7 @@ def graph_apple_feed_weeks(request, feed=''):
     title = u"Downloads per week for '" + str(feed) + "'"
     ax1.set_title(title)
 
-    s = TrackCount.merged.feed_week_counts(partial_guid)
+    s = TrackCount.merged.feed_week_counts(feed)
     x = matplotlib.numpy.arange(1,len(s))
 
     bars = []
