@@ -252,7 +252,7 @@ def graph_apple_summary_feeds(request):
     ax1.bar(ind, bars, color=cols, linewidth=0, edgecolor='w')
 
     ax1.set_ylabel("Downloads", color='blue', size='small')
-    ax1.set_yscale('linear')
+    ax1.set_yscale('log')
     for tl in ax1.get_yticklabels():
         tl.set_color('b')
     ax1.set_ylim(0.01,100000)
