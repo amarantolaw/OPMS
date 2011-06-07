@@ -45,13 +45,14 @@ def feed_detail(request, partial_guid):
     w = TrackCount.merged.feed_weeks(partial_guid)
     c = TrackCount.merged.feed_counts(partial_guid, orientation)
 
-    column_totals = {}
-    for item in i:
-        column_totals[item] = 0
 
     listing = []
+    column_totals = {}
     count = c.pop(0)
     if orientation == 0:
+        for item in i:
+            column_totals[item] = 0
+
         for week in w:
             row_data = []
             row_total = 0
@@ -78,6 +79,9 @@ def feed_detail(request, partial_guid):
             row_data.append(str(item)[29:50])
         listing.insert(0,{'column_a':'Week Commencing', 'data':row_data, 'total':'Week Total'})
     else:
+        for week in w:
+            column_totals[week] = 0
+
         for item in i:
             row_data = []
             row_total = 0
