@@ -111,12 +111,16 @@ def feed_detail(request, partial_guid):
     summary = {}
     summary['count'] = len(i)
     summary['total'] = 0
-    summary['max']   = 0
+    summary['max_value']   = 0
+    if orientation == 0:
+        summary['max_term'] = "item"
+    else:
+        summary['max_term'] = "week"
     for k, v in column_totals.items():
         summary['total'] += v
         if v > summary.get('max'):
-            summary['max'] = v
-            summary['max_guid'] = k
+            summary['max_value'] = v
+            summary['max_name'] = k
     try:
         summary['avg'] = summary.get('total') // summary.get('count')
     except ZeroDivisionError:
