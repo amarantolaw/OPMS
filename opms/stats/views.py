@@ -242,7 +242,6 @@ def graph_apple_summary_feeds(request):
     bars = []
     xvalues = []
     cols = []
-    # xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
     for row in s:
         bars.append(int(row.get("count")))
         xvalues.append(str(row.get("feed")))
@@ -275,6 +274,7 @@ def graph_apple_summary_feeds(request):
     for tl in ax1.get_yticklabels():
         tl.set_color('b')
 
+    xticks = matplotlib.numpy.arange(1,len(bars))
     ax1.set_xticks(xticks - 0.6)
     ax1.set_xticklabels(xvalues, rotation=270, size=5, ha='center', va='top')
     ax1.set_xlabel("Psudeo Feed")
