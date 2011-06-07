@@ -85,7 +85,7 @@ def feed_detail(request, partial_guid):
                 if count != None and count.get("week_ending") == week and count.get("guid") == item:
                     row_data.append(int(count.get("count")))
                     row_total += int(count.get("count"))
-                    column_totals[item] += int(count.get("count"))
+                    column_totals[week] += int(count.get("count"))
                     try:
                         count = c.pop(0)
                     except IndexError:
