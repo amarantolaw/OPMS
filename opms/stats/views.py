@@ -243,8 +243,8 @@ def graph_apple_summary_feeds(request):
     xvalues = []
     # xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
     for row in s:
-        bars.append(int(row.count))
-        xvalues.append(str(row.feed))
+        bars.append(int(row.get("count")))
+        xvalues.append(str(row.get("feed")))
 
     ind = matplotlib.numpy.arange(len(bars)) # the x locations for the groups
 
