@@ -249,7 +249,7 @@ def graph_apple_summary_feeds(request):
     ind = matplotlib.numpy.arange(len(bars)) # the x locations for the groups
 
     cols = ['blue']*len(ind)
-    ax1.bar(ind, bars, color=cols, linewidth=0, edgecolor='w')
+    ax1.bar(ind, bars, color=cols, linewidth=0, edgecolor='w', log=True)
 
     ax1.set_ylabel("Downloads", color='blue', size='small')
     ax1.set_yscale('log')
