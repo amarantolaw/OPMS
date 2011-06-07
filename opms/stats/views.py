@@ -23,11 +23,6 @@ def summary_index(request):
     return render_to_response('stats/reports/summary.html', {'summary_data': summary_data,})
 
 
-def summary_weekof(request):
-    "Show the results for a given week"
-    return HttpResponse("Hello World. You're at the  Week of Results page.")
-
-
 def summary_feeds(request):
     listing = TrackCount.merged.psuedo_feeds()
     return render_to_response('stats/reports/feeds.html',{'listing':listing})
@@ -131,10 +126,26 @@ def feed_detail(request, partial_guid):
         })
 
 
-def item_detail(request, guid):
-    pass
+
+def summary_items(request):
+    #listing = TrackCount.merged.psuedo_feeds()
+    #return render_to_response('stats/reports/items.html',{'listing':listing})
+    "Show the results for all items"
+    return HttpResponse("Hello World. You're at the ITEMS LISTING page.")
 
 
+def item_detail(request, item_id):
+    "Show the results for a given item"
+    return HttpResponse("Hello World. You're at the ITEM DETAIL page.")
+
+
+
+
+######
+# =================================================================================
+# =============================  GRAPHS AND IMAGES  ===============================
+# =================================================================================
+######
 
 def graph_apple_summary_totals(request):
     "Generate the Apple summary chart. Allow for a high resolution version to be produced"
