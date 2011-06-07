@@ -8,6 +8,8 @@
 # into your database.
 
 from django.db import models
+from django.utils.encoding import smart_str, smart_unicode
+from datetime import date
 
 class Rg07Channels(models.Model):
     id = models.IntegerField(primary_key=True)
