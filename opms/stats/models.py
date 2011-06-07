@@ -204,7 +204,7 @@ class TrackManager(models.Manager):
         cursor = connection.cursor()
 
         # get the count data for a given feed, such that it can be arranged against the above queries
-        cursor.execute('''
+        sql = '''
             SELECT s.week_ending, max(tp.path), tg.guid, sum(tc.count)
               FROM stats_trackcount AS tc,
                    stats_trackpath AS tp,
@@ -215,8 +215,9 @@ class TrackManager(models.Manager):
               AND tc.summary_id = s.id
               AND substring(tg.guid,52) = %s
             GROUP BY s.week_ending, tg.guid
-            ORDER BY %s;
-            ''', [partial_guid, "1 ASC, 3 ASC"])
+            ORDER BY 1 ASC, 3 ASC;
+            '''
+        cursor.execute(sql, [partial_guid])
 
         result_list = []
         for row in cursor.fetchall():
