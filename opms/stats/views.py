@@ -242,9 +242,10 @@ def graph_apple_summary_feeds(request):
     bars = []
     xvalues = []
     cols = []
-    for row in s:
+    for counter, row in enumerate(s):
         bars.append(int(row.get("count")))
-        xvalues.append(str(row.get("feed")))
+        if counter == 0 or (counter % 10) == 0:
+            xvalues.append(str(row.get("feed")))
 
         #Create a colour scale
         if int(row.get("count")) > 10000000:
@@ -274,7 +275,7 @@ def graph_apple_summary_feeds(request):
     for tl in ax1.get_yticklabels():
         tl.set_color('b')
 
-    xticks = matplotlib.numpy.arange(1,len(bars))
+    xticks = matplotlib.numpy.arange(1,len(bars),10)
     ax1.set_xticks(xticks - 0.6)
     ax1.set_xticklabels(xvalues, rotation=270, size=5, ha='center', va='top')
     ax1.set_xlabel("Psudeo Feed")
