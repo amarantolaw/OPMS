@@ -323,7 +323,7 @@ def graph_apple_feed_weeks(request, feed=''):
         tl.set_color('b')
 
     xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
-    ax1.set_xticks(xticks)
+    ax1.set_xticks(xticks - 0.6)
     ax1.set_xticklabels(xvalues, rotation=270, size=5, ha='center', va='top')
     ax1.set_xlabel("Week Commencing")
 
