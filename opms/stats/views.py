@@ -43,7 +43,7 @@ def feed_detail(request, partial_guid):
 
     i = TrackCount.merged.feed_items(partial_guid)
     w = TrackCount.merged.feed_weeks(partial_guid)
-    c = TrackCount.merged.feed_counts(partial_guid)
+    c = TrackCount.merged.feed_counts(partial_guid, orientation)
 
     column_totals = {}
     for item in i:
@@ -67,6 +67,16 @@ def feed_detail(request, partial_guid):
                 else:
                     row_data.append(None)
             listing.append({'week_ending':week, 'data':row_data, 'total':row_total})
+
+        # Put column headers and totals into listing array - values, then headings
+        row_data = []
+        for item in i:
+            row_data.append(column_totals.get(item))
+        listing.insert(0,{'week_ending':'Item Total', 'data':row_data, 'total':''})
+        row_data = []
+        for item in i:
+            row_data.append(str(item)[29:50])
+        listing.insert(0,{'week_ending':'Week Commencing', 'data':row_data, 'total':'Week Total'})
     else:
         for item in i:
             row_data = []
@@ -84,15 +94,15 @@ def feed_detail(request, partial_guid):
                     row_data.append(None)
             listing.append({'week_ending':week, 'data':row_data, 'total':row_total})
 
-    # Put column headers and totals into listing array - values, then headings
-    row_data = []
-    for item in i:
-        row_data.append(column_totals.get(item))
-    listing.insert(0,{'week_ending':'Item Total', 'data':row_data, 'total':''})
-    row_data = []
-    for item in i:
-        row_data.append(str(item)[29:50])
-    listing.insert(0,{'week_ending':'Week Commencing', 'data':row_data, 'total':'Week Total'})
+        # Put column headers and totals into listing array - values, then headings
+        row_data = []
+        for week in w:
+            row_data.append(column_totals.get(week))
+        listing.insert(0,{'week_ending':'Week Total', 'data':row_data, 'total':''})
+        row_data = []
+        for week in w:
+            row_data.append(str(week))
+        listing.insert(0,{'week_ending':'Item', 'data':row_data, 'total':'Item Total'})
 
     summary = {}
     summary['count'] = len(i)
