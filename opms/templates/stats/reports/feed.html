@@ -61,7 +61,7 @@ $(document).ready(function()
         {% for row in listing %}
         {% if forloop.counter0 == 0 %}
         <tr>
-            <th>{{ row.week_ending|default:"Week Commencing" }}</th>
+            <th>{{ row.column_a|default:"Week Commencing" }}</th>
             <th>{{ row.total|default:"Week Total" }}</th>
             {% for item in row.data %}
             <th>{{ item }}</th>
@@ -72,7 +72,7 @@ $(document).ready(function()
         {% endif %}
         {% if forloop.counter0 == 1 %}
         <tr>
-            <td>{{ row.week_ending }}</td>
+            <td>{{ row.column_a }}</td>
             <td>{{ row.total }}</td>
             {% for item in row.data %}
             <td class="highlight-total">{{ item }}</td>
@@ -81,7 +81,7 @@ $(document).ready(function()
         {% endif %}
         {% if forloop.counter0 > 1 %}
         <tr>
-            <td>{{ row.week_ending }}</td>
+            <td>{{ row.column_a }}</td>
             <td class="highlight-total">{{ row.total }}</td>
             {% for item in row.data %}
             <td>{{ item }}</td>

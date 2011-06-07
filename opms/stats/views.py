@@ -66,17 +66,17 @@ def feed_detail(request, partial_guid):
                         count = None
                 else:
                     row_data.append(None)
-            listing.append({'week_ending':week, 'data':row_data, 'total':row_total})
+            listing.append({'column_a':week, 'data':row_data, 'total':row_total})
 
         # Put column headers and totals into listing array - values, then headings
         row_data = []
         for item in i:
             row_data.append(column_totals.get(item))
-        listing.insert(0,{'week_ending':'Item Total', 'data':row_data, 'total':''})
+        listing.insert(0,{'column_a':'Item Total', 'data':row_data, 'total':''})
         row_data = []
         for item in i:
             row_data.append(str(item)[29:50])
-        listing.insert(0,{'week_ending':'Week Commencing', 'data':row_data, 'total':'Week Total'})
+        listing.insert(0,{'column_a':'Week Commencing', 'data':row_data, 'total':'Week Total'})
     else:
         for item in i:
             row_data = []
@@ -92,17 +92,17 @@ def feed_detail(request, partial_guid):
                         count = None
                 else:
                     row_data.append(None)
-            listing.append({'week_ending':week, 'data':row_data, 'total':row_total})
+            listing.append({'column_a':item, 'data':row_data, 'total':row_total})
 
         # Put column headers and totals into listing array - values, then headings
         row_data = []
         for week in w:
             row_data.append(column_totals.get(week))
-        listing.insert(0,{'week_ending':'Week Total', 'data':row_data, 'total':''})
+        listing.insert(0,{'column_a':'Week Total', 'data':row_data, 'total':''})
         row_data = []
         for week in w:
             row_data.append(str(week))
-        listing.insert(0,{'week_ending':'Item', 'data':row_data, 'total':'Item Total'})
+        listing.insert(0,{'column_a':'Item', 'data':row_data, 'total':'Item Total'})
 
     summary = {}
     summary['count'] = len(i)
