@@ -9,6 +9,37 @@
 
 from django.db import models
 
+class Rg07Channels(models.Model):
+    id = models.IntegerField(primary_key=True)
+    modified = models.DateTimeField()
+    modifier = models.CharField(max_length=11)
+    deleted = models.BooleanField()
+    channel_guid = models.CharField(max_length=80)
+    channel_updated = models.CharField(max_length=32)
+    name = models.CharField(max_length=128)
+    title = models.CharField(max_length=128)
+    link = models.CharField(max_length=256)
+    description = models.TextField()
+    channel_image = models.CharField(max_length=256)
+    deleter = models.CharField(max_length=11)
+    channel_emailaddress = models.CharField(max_length=256)
+    channel_taxonomies = models.TextField()
+    channel_categories = models.TextField()
+    channel_template = models.TextField()
+    channel_not_used_1 = models.TextField()
+    channel_not_used_2 = models.TextField()
+    oxpoints_units = models.TextField()
+    channel_short_name = models.TextField()
+    channel_cc = models.IntegerField()
+    channel_tpi = models.IntegerField()
+    channel_sort_values = models.TextField()
+    channel_licence = models.IntegerField()
+    channel_number_of_items = models.IntegerField()
+    channel_number_of_byncsa = models.IntegerField()
+    channel_jorumopen_collection = models.TextField()
+    class Meta:
+        db_table = u'rg0_7_channels'
+
 class Rg07AuthorsBlacklist(models.Model):
     id = models.IntegerField(primary_key=True)
     modified = models.DateTimeField()
@@ -75,36 +106,6 @@ class Rg07AuthorsGroups(models.Model):
     class Meta:
         db_table = u'rg0_7_authors_groups'
 
-class Rg07Channels(models.Model):
-    id = models.IntegerField(primary_key=True)
-    modified = models.DateTimeField()
-    modifier = models.CharField(max_length=11)
-    deleted = models.BooleanField()
-    channel_guid = models.CharField(max_length=80)
-    channel_updated = models.CharField(max_length=32)
-    name = models.CharField(max_length=128)
-    title = models.CharField(max_length=128)
-    link = models.CharField(max_length=256)
-    description = models.TextField()
-    channel_image = models.CharField(max_length=256)
-    deleter = models.CharField(max_length=11)
-    channel_emailaddress = models.CharField(max_length=256)
-    channel_taxonomies = models.TextField()
-    channel_categories = models.TextField()
-    channel_template = models.TextField()
-    channel_not_used_1 = models.TextField()
-    channel_not_used_2 = models.TextField()
-    oxpoints_units = models.TextField()
-    channel_short_name = models.TextField()
-    channel_cc = models.IntegerField()
-    channel_tpi = models.IntegerField()
-    channel_sort_values = models.TextField()
-    channel_licence = models.IntegerField()
-    channel_number_of_items = models.IntegerField()
-    channel_number_of_byncsa = models.IntegerField()
-    channel_jorumopen_collection = models.TextField()
-    class Meta:
-        db_table = u'rg0_7_channels'
 
 class Rg07Events(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -204,4 +205,3 @@ class Rg07Managers(models.Model):
     deleter = models.CharField(max_length=11)
     class Meta:
         db_table = u'rg0_7_managers'
-
