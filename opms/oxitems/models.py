@@ -40,6 +40,10 @@ class Rg07Channels(models.Model):
     class Meta:
         db_table = u'rg0_7_channels'
 
+    def __unicode__(self):
+        return str(date.strftime(self.modified,"%Y-%m-%d")) + ": Title=" + str(self.title)
+
+
 class Rg07AuthorsBlacklist(models.Model):
     id = models.IntegerField(primary_key=True)
     modified = models.DateTimeField()
