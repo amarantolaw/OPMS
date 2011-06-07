@@ -34,37 +34,60 @@ def summary_feeds(request):
 
 
 def feed_detail(request, partial_guid):
-    # Construct pivot table of data
+    # Construct pivot table of data.
+    # Orientation 0 is items on x, time on y. Anything else is time on x, items on y.
+    try:
+        orientation = int(request.GET.get('orientation', 0))
+    except ValueError:
+        orientation = 0
+
     i = TrackCount.merged.feed_items(partial_guid)
     w = TrackCount.merged.feed_weeks(partial_guid)
     c = TrackCount.merged.feed_counts(partial_guid)
 
-    item_totals = {}
+    column_totals = {}
     for item in i:
-        item_totals[item] = 0
+        column_totals[item] = 0
 
     listing = []
     count = c.pop(0)
-    for week in w:
-        row_data = []
-        row_total = 0
+    if orientation == 0:
+        for week in w:
+            row_data = []
+            row_total = 0
+            for item in i:
+                if count != None and count.get("week_ending") == week and count.get("guid") == item:
+                    row_data.append(int(count.get("count")))
+                    row_total += int(count.get("count"))
+                    column_totals[item] += int(count.get("count"))
+                    try:
+                        count = c.pop(0)
+                    except IndexError:
+                        count = None
+                else:
+                    row_data.append(None)
+            listing.append({'week_ending':week, 'data':row_data, 'total':row_total})
+    else:
         for item in i:
-            if count != None and count.get("week_ending") == week and count.get("guid") == item:
-                row_data.append(int(count.get("count")))
-                row_total += int(count.get("count"))
-                item_totals[item] += int(count.get("count"))
-                try:
-                    count = c.pop(0)
-                except IndexError:
-                    count = None
-            else:
-                row_data.append(None)
-        listing.append({'week_ending':week, 'data':row_data, 'total':row_total})
+            row_data = []
+            row_total = 0
+            for week in w:
+                if count != None and count.get("week_ending") == week and count.get("guid") == item:
+                    row_data.append(int(count.get("count")))
+                    row_total += int(count.get("count"))
+                    column_totals[item] += int(count.get("count"))
+                    try:
+                        count = c.pop(0)
+                    except IndexError:
+                        count = None
+                else:
+                    row_data.append(None)
+            listing.append({'week_ending':week, 'data':row_data, 'total':row_total})
 
     # Put column headers and totals into listing array - values, then headings
     row_data = []
     for item in i:
-        row_data.append(item_totals.get(item))
+        row_data.append(column_totals.get(item))
     listing.insert(0,{'week_ending':'Item Total', 'data':row_data, 'total':''})
     row_data = []
     for item in i:
@@ -75,7 +98,7 @@ def feed_detail(request, partial_guid):
     summary['count'] = len(i)
     summary['total'] = 0
     summary['max']   = 0
-    for k, v in item_totals.items():
+    for k, v in column_totals.items():
         summary['total'] += v
         if v > summary.get('max'):
             summary['max'] = v

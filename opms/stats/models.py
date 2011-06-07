@@ -215,8 +215,8 @@ class TrackManager(models.Manager):
               AND tc.summary_id = s.id
               AND substring(tg.guid,52) = %s
             GROUP BY s.week_ending, tg.guid
-            ORDER BY 1 ASC, 3 ASC;
-            ''', [partial_guid])
+            ORDER BY %s;
+            ''', [partial_guid, "1 ASC, 3 ASC"])
 
         result_list = []
         for row in cursor.fetchall():
