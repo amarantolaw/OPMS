@@ -230,6 +230,32 @@ class TrackManager(models.Manager):
         return result_list
 
 
+    def feed_week_counts(self, partial_guid = ''):
+        from django.db import connection, transaction
+        cursor = connection.cursor()
+
+        # get the count data per week for a given feed
+        sql = '''
+            SELECT s.week_ending, sum(tc.count)
+              FROM stats_trackcount AS tc,
+                   stats_trackguid AS tg,
+                   stats_summary AS s
+            WHERE tc.summary_id = s.id
+              AND tc.guid_id = tg.id
+              AND substring(tg.guid,52) = %s
+            GROUP BY s.week_ending
+            ORDER BY 1 ASC;
+            '''
+        cursor.execute(sql, [partial_guid])
+
+        result_list = []
+        for row in cursor.fetchall():
+            t = {'week_ending':str(date.strftime(row[0],"%Y-%m-%d")), 'count':row[1]}
+            result_list.append(t)
+
+        return result_list
+
+
 # Track Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific track
 class TrackPath(models.Model):
     path = models.TextField("path", unique=True)

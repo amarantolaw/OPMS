@@ -284,3 +284,50 @@ def graph_apple_summary_feeds(request):
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response)
     return response
+
+
+
+def graph_apple_feed_weeks(request, feed=''):
+    "Generate a chart plotting weeks vs downloads for a given feed. Allow for a high resolution version to be produced"
+    try:
+        resolution = int(request.GET.get('dpi', 100))
+    except ValueError:
+        resolution = 100
+    if resolution > 600:
+        resolution = 600
+    elif resolution < 100:
+        resolution = 100
+
+    fig = Figure(figsize=(9,5), dpi=resolution, facecolor='white', edgecolor='white')
+    ax1 = fig.add_subplot(1,1,1)
+
+    title = u"Downloads per week for '" + str(feed) + "'"
+    ax1.set_title(title)
+
+    s = TrackCount.merged.feed_week_counts(partial_guid)
+    x = matplotlib.numpy.arange(1,len(s))
+
+    bars = []
+    xvalues = []
+    for counter, row in enumerate(s):
+        bars.append(int(row.get("count")))
+        if counter == 0 or (counter % 4) == 0:
+            xvalues.append(str(row.get("week_ending")))
+
+    ind = matplotlib.numpy.arange(len(bars)) # the x locations for the groups
+
+    cols = ['blue']*len(ind)
+    ax1.bar(ind, bars, color=cols, linewidth=0, edgecolor='w')
+    ax1.set_ylabel("Weekly Downloads", color='blue', size='small')
+    for tl in ax1.get_yticklabels():
+        tl.set_color('b')
+
+    xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
+    ax1.set_xticks(xticks)
+    ax1.set_xticklabels(xvalues, rotation=270, size=5, ha='center', va='top')
+    ax1.set_xlabel("Week Commencing")
+
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response)
+    return response
