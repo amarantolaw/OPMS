@@ -159,7 +159,9 @@ class TrackManager(models.Manager):
 
         result_list = []
         for row in cursor.fetchall():
-            t = {'count':row[0], 'feed':row[1], 'min_date':row[2], 'max_date':row[3], 'item_count':row[4], }
+            avg = int(row[0])/int(row[4])
+            t = {'count':row[0], 'feed':row[1], 'min_date':row[2],
+                 'max_date':row[3], 'item_count':row[4], 'item_avg':avg}
             result_list.append(t)
         return result_list
 

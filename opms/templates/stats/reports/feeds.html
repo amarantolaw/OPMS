@@ -54,6 +54,7 @@ $(document).ready(function()
             <th>First Data</th>
             <th>Last Data</th>
             <th>Items in Feed</th>
+            <th>Avg. Dl/Item</th>
         </tr>
     </thead>
     <tbody>
@@ -64,6 +65,7 @@ $(document).ready(function()
             <td>{{ row.min_date|date:"Y-m-d" }}</td>
             <td>{{ row.max_date|date:"Y-m-d" }}</td>
             <td>{{ row.item_count }}</td>
+            <td>{{ row.item_avg }}</td>
         </tr>
         {% endfor %}
     </tbody>
