@@ -241,21 +241,28 @@ class TrackManager(models.Manager):
 
         # get the count data per week for a given feed
         sql = '''
-            SELECT s.week_ending, sum(tc.count)
-              FROM stats_trackcount AS tc,
-                   stats_trackguid AS tg,
-                   stats_summary AS s
-            WHERE tc.summary_id = s.id
-              AND tc.guid_id = tg.id
-              AND substring(tg.guid,52) = %s
-            GROUP BY s.week_ending
+            SELECT ss.week, sum(ss.count), max(ss.guid), count(ss.id)
+            FROM (
+                SELECT s.week_ending || tg.guid AS id,
+                       sum(tc.count) AS count,
+                       max(s.week_ending) AS week,
+                       max(tg.guid) AS guid
+                FROM stats_trackcount AS tc,
+                     stats_trackguid AS tg,
+                     stats_summary AS s
+                WHERE tc.summary_id = s.id
+                  AND tc.guid_id = tg.id
+                  AND substring(tg.guid,52) = %s
+                GROUP BY 1
+                ) AS ss
+            GROUP BY ss.week
             ORDER BY 1 ASC;
             '''
         cursor.execute(sql, [partial_guid])
 
         result_list = []
         for row in cursor.fetchall():
-            t = {'week_ending':str(date.strftime(row[0],"%Y-%m-%d")), 'count':row[1]}
+            t = {'week_ending':str(date.strftime(row[0],"%Y-%m-%d")), 'count':row[1], 'guid':row[2], 'item_count':row[3]}
             result_list.append(t)
 
         return result_list

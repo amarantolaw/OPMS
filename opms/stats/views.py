@@ -334,10 +334,17 @@ def graph_apple_feed_weeks(request, feed=''):
     for tl in ax1.get_yticklabels():
         tl.set_color('b')
 
+    ax2.plot(ind, lines, 'r-')
+    ax2.set_ylabel("Number of Items", color='red', size='small')
+    for tl in ax2.get_yticklabels():
+        tl.set_color('r')
+
     xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
     ax1.set_xticks(xticks - 0.6)
     ax1.set_xticklabels(xvalues, rotation=270, size=5, ha='center', va='top')
     ax1.set_xlabel("Week Commencing")
+
+
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
