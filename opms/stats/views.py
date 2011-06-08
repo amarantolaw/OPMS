@@ -160,7 +160,6 @@ def graph_apple_summary_totals(request):
 
     fig = Figure(figsize=(9,5), dpi=resolution, facecolor='white', edgecolor='white')
     ax1 = fig.add_subplot(1,1,1)
-    ax1.set_xmargin(0.4)
     ax2 = ax1.twinx()
 
     title = u"Apple Weekly Downloads and Cumulative Total"
@@ -311,6 +310,7 @@ def graph_apple_feed_weeks(request, feed=''):
 
     fig = Figure(figsize=(9,5), dpi=resolution, facecolor='white', edgecolor='white')
     ax1 = fig.add_subplot(1,1,1)
+    ax2 = ax1.twinx()
 
     title = u"Downloads per week for '" + str(feed) + "'"
     ax1.set_title(title)
@@ -319,14 +319,15 @@ def graph_apple_feed_weeks(request, feed=''):
     x = matplotlib.numpy.arange(1,len(s))
 
     bars = []
+    lines = []
     xvalues = []
     for counter, row in enumerate(s):
         bars.append(int(row.get("count")))
         if counter == 0 or (counter % 4) == 0:
             xvalues.append(str(row.get("week_ending")))
+        lines.append(int(row.get("item_count")))
 
     ind = matplotlib.numpy.arange(len(bars)) # the x locations for the groups
-
     cols = ['blue']*len(ind)
     ax1.bar(ind, bars, color=cols, linewidth=0, edgecolor='w')
     ax1.set_ylabel("Weekly Downloads", color='blue', size='small')

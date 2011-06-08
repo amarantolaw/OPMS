@@ -141,12 +141,17 @@ class TrackManager(models.Manager):
                    substring(tg.guid,52) AS psuedo_feed,
                    min(s.week_ending) AS first_result,
                    max(s.week_ending) AS last_result,
-                   count(tc.id) AS item_count
+                   max(ic.item_count) AS item_count
             FROM stats_trackcount AS tc,
                  stats_trackguid AS tg,
-                 stats_summary AS s
+                 stats_summary AS s,
+                (SELECT substring(tg.guid,52) AS psuedo_feed, count(tg.guid) AS item_count
+                 FROM stats_trackguid AS tg
+                 WHERE substring(tg.guid,52) <> ''
+                 GROUP BY substring(tg.guid,52)) AS ic
             WHERE tc.guid_id = tg.id
               AND tc.summary_id = s.id
+              AND ic.psuedo_feed = substring(tg.guid,52)
               AND substring(tg.guid,52) <> ''
             GROUP BY substring(tg.guid,52)
             ORDER BY 1 DESC
