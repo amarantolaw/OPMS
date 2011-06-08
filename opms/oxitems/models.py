@@ -43,7 +43,7 @@ class Rg07Channels(models.Model):
         db_table = u'rg0_7_channels'
 
     def __unicode__(self):
-        return str(date.strftime(self.modified,"%Y-%m-%d")) + ": Title=" + str(self.title)
+        return str(date.strftime(self.modified,"%Y-%m-%d")) + ": Title=" + smart_unicode(self.title)
 
 
 class Rg07AuthorsBlacklist(models.Model):
