@@ -191,12 +191,12 @@ class TrackManager(models.Manager):
         transaction.commit_unless_managed()
 
         for item in cc_guids:
-            cursor.execute("INSERT INTO temp_cc_guids (guid) VALUES (%s)", [item])
+            cursor.execute("INSERT INTO temp_cc_guids (guid, title) VALUES (%s,%s)", [item.get('guid'), item.get('title')])
             transaction.commit_unless_managed()
 
         sql = '''
             SELECT sum(tc.count) AS count,
-                   substring(tg.guid,52) AS psuedo_feed,
+                   max(tcc.title) AS psuedo_feed,
                    min(s.week_ending) AS first_result,
                    max(s.week_ending) AS last_result,
                    max(ic.item_count) AS item_count
