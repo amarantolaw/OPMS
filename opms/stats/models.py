@@ -178,10 +178,18 @@ class TrackManager(models.Manager):
         for row in cursor.fetchall():
             cc_guids.append(row[0])
 
-        cc_guid_string = ', '.join(map(str, cc_guids)) # str(cc_guids).strip('[]')
+        # cc_guid_string = '"' + '", "'.join(map(str, cc_guids)) + '"'
 
         cursor = connections['default'].cursor()
-        cursor.execute('''
+        sql = '''CREATE TEMPORARY TABLE temp_cc_guids (guid varchar(80) PRIMARY KEY)'''
+        cursor.execute(sql)
+        transaction.commit_unless_managed()
+
+        for item in cc_guids:
+            cursor.execute("INSERT INTO temp_cc_guids (guid) VALUES (%s)", [item])
+            transaction.commit_unless_managed()
+
+        sql = '''
             SELECT sum(tc.count) AS count,
                    substring(tg.guid,52) AS psuedo_feed,
                    min(s.week_ending) AS first_result,
@@ -193,15 +201,17 @@ class TrackManager(models.Manager):
                 (SELECT substring(tg.guid,52) AS psuedo_feed, count(tg.guid) AS item_count
                  FROM stats_trackguid AS tg
                  WHERE substring(tg.guid,52) <> ''
-                 GROUP BY substring(tg.guid,52)) AS ic
+                 GROUP BY substring(tg.guid,52)) AS ic,
+                 temp_cc_guids AS tcc
             WHERE tc.guid_id = tg.id
               AND tc.summary_id = s.id
               AND ic.psuedo_feed = substring(tg.guid,52)
               AND substring(tg.guid,52) <> ''
-              AND tg.guid IN (%s)
+              AND tg.guid = tcc.guid
             GROUP BY substring(tg.guid,52)
             ORDER BY 1 DESC
-            ''', [cc_guid_string])
+            '''
+        cursor.execute(sql)
 
         result_list = []
         for row in cursor.fetchall():
