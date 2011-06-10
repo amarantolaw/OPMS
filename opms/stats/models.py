@@ -228,7 +228,7 @@ class TrackManager(models.Manager):
             avg = int(row[0])/int(row[4])
             t = {'count':row[0], 'feed':row[1], 'min_date':row[2],
                  'max_date':row[3], 'item_count':row[4], 'item_avg':avg,
-                 'feed_name':row[5], 'feed-description':row[6]}
+                 'feed_name':row[5], 'feed_description':row[6]}
             result_list.append(t)
         return result_list
 
