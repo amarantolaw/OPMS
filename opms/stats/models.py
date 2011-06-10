@@ -176,7 +176,7 @@ class TrackManager(models.Manager):
                        ''')
         cc_guids = []
         for row in cursor.fetchall():
-            cc_guid.append(row[0])
+            cc_guids.append(row[0])
 
         cc_guid_string = str(cc_guids).strip('[]')
 
