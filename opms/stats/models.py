@@ -199,8 +199,10 @@ class TrackManager(models.Manager):
                  stats_trackguid AS tg,
                  stats_summary AS s,
                 (SELECT substring(tg.guid,52) AS psuedo_feed, count(tg.guid) AS item_count
-                 FROM stats_trackguid AS tg
+                 FROM stats_trackguid AS tg,
+                      temp_cc_guids AS tcc
                  WHERE substring(tg.guid,52) <> ''
+                   AND tg.guid = tcc.guid
                  GROUP BY substring(tg.guid,52)) AS ic,
                  temp_cc_guids AS tcc
             WHERE tc.guid_id = tg.id
