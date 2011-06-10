@@ -191,7 +191,7 @@ class TrackManager(models.Manager):
         transaction.commit_unless_managed()
 
         for item in cc_guids:
-            cursor.execute("INSERT INTO temp_cc_guids (guid, title) VALUES (%s,%s,%s)",
+            cursor.execute("INSERT INTO temp_cc_guids (guid, title, description) VALUES (%s,%s,%s)",
                            [item.get('guid'), item.get('title'), item.get('description')])
             transaction.commit_unless_managed()
 
