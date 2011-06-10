@@ -172,16 +172,21 @@ class TrackManager(models.Manager):
 
         cursor = connections['oxitems'].cursor()
         cursor.execute('''
-                       SELECT DISTINCT item_guid FROM rg0_7_items WHERE item_licence > 0 AND deleted='f'
-                       ''')
+            SELECT DISTINCT i.item_guid, c.title
+            FROM rg0_7_items AS i,
+                 rg0_7_channels AS c
+            WHERE i.item_licence > 0
+              AND i.item_channel_id = c.id
+              AND i.deleted='f'
+            ''')
         cc_guids = []
         for row in cursor.fetchall():
-            cc_guids.append(row[0])
+            cc_guids.append({'guid':row[0], 'title':row[1]})
 
         # cc_guid_string = '"' + '", "'.join(map(str, cc_guids)) + '"'
 
         cursor = connections['default'].cursor()
-        sql = '''CREATE TEMPORARY TABLE temp_cc_guids (guid varchar(80) PRIMARY KEY)'''
+        sql = '''CREATE TEMPORARY TABLE temp_cc_guids (guid varchar(80) PRIMARY KEY, title varchar(128))'''
         cursor.execute(sql)
         transaction.commit_unless_managed()
 
