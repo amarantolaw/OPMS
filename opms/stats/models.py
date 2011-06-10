@@ -178,7 +178,7 @@ class TrackManager(models.Manager):
         for row in cursor.fetchall():
             cc_guids.append(row[0])
 
-        cc_guid_string = str(cc_guids).strip('[]')
+        cc_guid_string = ', '.join(map(str, cc_guids)) # str(cc_guids).strip('[]')
 
         cursor = connections['default'].cursor()
         cursor.execute('''
