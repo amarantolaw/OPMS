@@ -196,7 +196,7 @@ class TrackManager(models.Manager):
 
         sql = '''
             SELECT sum(tc.count) AS count,
-                   max(tcc.title) || '(' || substring(tg.guid,52) || ')' AS psuedo_feed,
+                   max(tcc.title) || ' (' || substring(tg.guid,52) || ')' AS psuedo_feed,
                    min(s.week_ending) AS first_result,
                    max(s.week_ending) AS last_result,
                    max(ic.item_count) AS item_count
