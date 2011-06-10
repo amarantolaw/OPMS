@@ -133,7 +133,7 @@ def feed_detail(request, partial_guid):
 # TEMP FUNCTIONS
 def summary_feeds_cc(request):
     listing = TrackCount.merged.psuedo_feeds_cc()
-    return render_to_response('stats/reports/feeds.html',{'listing':listing})
+    return render_to_response('stats/reports/feeds-cc.html',{'listing':listing})
 
 
 def feed_detail(request, partial_guid):

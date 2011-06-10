@@ -196,10 +196,11 @@ class TrackManager(models.Manager):
 
         sql = '''
             SELECT sum(tc.count) AS count,
-                   max(tcc.title) AS psuedo_feed,
+                   max(tcc.title) AS title,
                    min(s.week_ending) AS first_result,
-                   substring(tg.guid,52) AS last_result,
-                   max(ic.item_count) AS item_count
+                   max(s.week_ending) AS last_result,
+                   max(ic.item_count) AS item_count,
+                   substring(tg.guid,52) AS psuedo_feed
             FROM stats_trackcount AS tc,
                  stats_trackguid AS tg,
                  stats_summary AS s,
@@ -224,7 +225,8 @@ class TrackManager(models.Manager):
         for row in cursor.fetchall():
             avg = int(row[0])/int(row[4])
             t = {'count':row[0], 'feed':row[1], 'min_date':row[2],
-                 'max_date':row[3], 'item_count':row[4], 'item_avg':avg}
+                 'max_date':row[3], 'item_count':row[4], 'item_avg':avg,
+                 'feed_name':row[5]}
             result_list.append(t)
         return result_list
 
