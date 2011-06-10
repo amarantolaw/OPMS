@@ -166,6 +166,56 @@ class TrackManager(models.Manager):
         return result_list
 
 
+
+    def psuedo_feeds_cc(self):
+        from django.db import connections, transaction
+
+        cursor = connections['oxitems'].cursor()
+        cursor.execute('''
+                       SELECT DISTINCT item_guid FROM rg0_7_items WHERE item_licence > 0 AND deleted='f'
+                       ''')
+        cc_guids = []
+        for row in cursor.fetchall():
+            cc_guid.append(row[0])
+
+        cc_guid_string = str(cc_guids).strip('[]')
+
+        cursor = connections['default'].cursor()
+        cursor.execute('''
+            SELECT sum(tc.count) AS count,
+                   substring(tg.guid,52) AS psuedo_feed,
+                   min(s.week_ending) AS first_result,
+                   max(s.week_ending) AS last_result,
+                   max(ic.item_count) AS item_count
+            FROM stats_trackcount AS tc,
+                 stats_trackguid AS tg,
+                 stats_summary AS s,
+                (SELECT substring(tg.guid,52) AS psuedo_feed, count(tg.guid) AS item_count
+                 FROM stats_trackguid AS tg
+                 WHERE substring(tg.guid,52) <> ''
+                 GROUP BY substring(tg.guid,52)) AS ic
+            WHERE tc.guid_id = tg.id
+              AND tc.summary_id = s.id
+              AND ic.psuedo_feed = substring(tg.guid,52)
+              AND substring(tg.guid,52) <> ''
+              AND tg.guid IN %s
+            GROUP BY substring(tg.guid,52)
+            ORDER BY 1 DESC
+            ''', [cc_guid_string])
+
+        result_list = []
+        for row in cursor.fetchall():
+            avg = int(row[0])/int(row[4])
+            t = {'count':row[0], 'feed':row[1], 'min_date':row[2],
+                 'max_date':row[3], 'item_count':row[4], 'item_avg':avg}
+            result_list.append(t)
+        return result_list
+
+
+
+
+
+
     def feed_weeks(self, partial_guid = ''):
         from django.db import connection, transaction
         cursor = connection.cursor()

@@ -127,6 +127,124 @@ def feed_detail(request, partial_guid):
 
 
 
+
+
+
+# TEMP FUNCTIONS
+def summary_feeds_cc(request):
+    listing = TrackCount.merged.psuedo_feeds_cc()
+    return render_to_response('stats/reports/feeds.html',{'listing':listing})
+
+
+def feed_detail(request, partial_guid):
+    # Construct pivot table of data.
+    # Orientation 0 is items on x, time on y. Anything else is time on x, items on y.
+    try:
+        orientation = int(request.GET.get('orientation', 0))
+    except ValueError:
+        orientation = 0
+
+    i = TrackCount.merged.feed_items(partial_guid)
+    w = TrackCount.merged.feed_weeks(partial_guid)
+    c = TrackCount.merged.feed_counts(partial_guid, orientation)
+
+
+    listing = []
+    column_totals = {}
+    count = c.pop(0)
+    if orientation == 0:
+        for item in i:
+            column_totals[item] = 0
+
+        for week in w:
+            row_data = []
+            row_total = 0
+            for item in i:
+                if count != None and count.get("week_ending") == week and count.get("guid") == item:
+                    row_data.append(int(count.get("count")))
+                    row_total += int(count.get("count"))
+                    column_totals[item] += int(count.get("count"))
+                    try:
+                        count = c.pop(0)
+                    except IndexError:
+                        count = None
+                else:
+                    row_data.append(None)
+            listing.append({'column_a':week, 'data':row_data, 'total':row_total})
+
+        # Put column headers and totals into listing array - values, then headings
+        row_data = []
+        for item in i:
+            row_data.append(column_totals.get(item))
+        listing.insert(0,{'column_a':'Item Total', 'data':row_data, 'total':''})
+        row_data = []
+        for item in i:
+            row_data.append(str(item)[29:50])
+        listing.insert(0,{'column_a':'Week Commencing', 'data':row_data, 'total':'Week Total'})
+    else:
+        for week in w:
+            column_totals[week] = 0
+
+        for item in i:
+            row_data = []
+            row_total = 0
+            for week in w:
+                if count != None and count.get("week_ending") == week and count.get("guid") == item:
+                    row_data.append(int(count.get("count")))
+                    row_total += int(count.get("count"))
+                    column_totals[week] += int(count.get("count"))
+                    try:
+                        count = c.pop(0)
+                    except IndexError:
+                        count = None
+                else:
+                    row_data.append(None)
+            listing.append({'column_a':item, 'data':row_data, 'total':row_total})
+
+        # Put column headers and totals into listing array - values, then headings
+        row_data = []
+        for week in w:
+            row_data.append(column_totals.get(week))
+        listing.insert(0,{'column_a':'Week Total', 'data':row_data, 'total':''})
+        row_data = []
+        for week in w:
+            row_data.append(str(week))
+        listing.insert(0,{'column_a':'Item', 'data':row_data, 'total':'Item Total'})
+
+    summary = {}
+    summary['count'] = len(i)
+    summary['total'] = 0
+    summary['max_value']   = 0
+    if orientation == 0:
+        summary['max_term'] = "item"
+    else:
+        summary['max_term'] = "week"
+    for k, v in column_totals.items():
+        summary['total'] += v
+        if v > summary.get('max_value'):
+            summary['max_value'] = int(v)
+            summary['max_name'] = k
+    try:
+        summary['avg'] = summary.get('total') // summary.get('count')
+    except ZeroDivisionError:
+        summary['avg'] = summary.get('total')
+
+    return render_to_response('stats/reports/feed.html',{
+        'listing':listing, 'ref':partial_guid, 'summary':summary
+        })
+
+
+
+
+
+
+
+
+
+
+
+
+
 def summary_items(request):
     #listing = TrackCount.merged.psuedo_feeds()
     #return render_to_response('stats/reports/items.html',{'listing':listing})
