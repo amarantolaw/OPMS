@@ -198,7 +198,7 @@ class TrackManager(models.Manager):
               AND tc.summary_id = s.id
               AND ic.psuedo_feed = substring(tg.guid,52)
               AND substring(tg.guid,52) <> ''
-              AND tg.guid IN %s
+              AND tg.guid IN (%s)
             GROUP BY substring(tg.guid,52)
             ORDER BY 1 DESC
             ''', [cc_guid_string])
