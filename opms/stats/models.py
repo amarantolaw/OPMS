@@ -172,7 +172,7 @@ class TrackManager(models.Manager):
 
         cursor = connections['oxitems'].cursor()
         cursor.execute('''
-            SELECT DISTINCT i.item_guid, c.title
+            SELECT DISTINCT i.item_guid, c.title, c.description
             FROM rg0_7_items AS i,
                  rg0_7_channels AS c
             WHERE i.item_licence > 0
@@ -181,17 +181,18 @@ class TrackManager(models.Manager):
             ''')
         cc_guids = []
         for row in cursor.fetchall():
-            cc_guids.append({'guid':row[0], 'title':row[1]})
+            cc_guids.append({'guid':row[0], 'title':row[1], 'description':row[2]})
 
         # cc_guid_string = '"' + '", "'.join(map(str, cc_guids)) + '"'
 
         cursor = connections['default'].cursor()
-        sql = '''CREATE TEMPORARY TABLE temp_cc_guids (guid varchar(80) PRIMARY KEY, title varchar(128))'''
+        sql = '''CREATE TEMPORARY TABLE temp_cc_guids (guid varchar(80) PRIMARY KEY, title varchar(128), description text)'''
         cursor.execute(sql)
         transaction.commit_unless_managed()
 
         for item in cc_guids:
-            cursor.execute("INSERT INTO temp_cc_guids (guid, title) VALUES (%s,%s)", [item.get('guid'), item.get('title')])
+            cursor.execute("INSERT INTO temp_cc_guids (guid, title) VALUES (%s,%s,%s)",
+                           [item.get('guid'), item.get('title'), item.get('description')])
             transaction.commit_unless_managed()
 
         sql = '''
@@ -200,7 +201,8 @@ class TrackManager(models.Manager):
                    min(s.week_ending) AS first_result,
                    max(s.week_ending) AS last_result,
                    max(ic.item_count) AS item_count,
-                   substring(tg.guid,52) AS psuedo_feed
+                   substring(tg.guid,52) AS psuedo_feed,
+                   max(tcc.description) AS description
             FROM stats_trackcount AS tc,
                  stats_trackguid AS tg,
                  stats_summary AS s,
@@ -226,7 +228,7 @@ class TrackManager(models.Manager):
             avg = int(row[0])/int(row[4])
             t = {'count':row[0], 'feed':row[1], 'min_date':row[2],
                  'max_date':row[3], 'item_count':row[4], 'item_avg':avg,
-                 'feed_name':row[5]}
+                 'feed_name':row[5], 'feed-description':row[6]}
             result_list.append(t)
         return result_list
 
