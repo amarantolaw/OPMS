@@ -19,10 +19,10 @@ class Person(models.Model): # This should be in the CRM or OxDB App
         string = self.titles
         if string != '':
             string += ' ' + self.first_name
-        if self.middle_names != ''
+        if self.middle_names != '':
             string += ' ' + self.middle_names
         string += ' ' + self.last_name
-        if self.additional_information != ''
+        if self.additional_information != '':
             string += ' (' + self.additional_information + ')'
         return smart_unicode(string)
 
