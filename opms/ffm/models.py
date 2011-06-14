@@ -169,7 +169,7 @@ class File(models.Model):
     ]
     #v2.0 file = models.FileField(upload_to='')
     function = models.ForeignKey(FileFunction, verbose_name="file function", default='unknown')
-    guid = models.CharField("file GUID", max_length=100, default=File.create_guid)
+    guid = models.CharField("file GUID", max_length=100, default=create_guid)
     item = models.ForeignKey(Item, verbose_name="Owning Item")
     mimetype = models.TextField("mime type", choices=MIMETYPES, default='unknown')
     url = models.URLField("file url", verify_exists=True) # Everything in this system should be hosted on a URL
@@ -392,7 +392,7 @@ class FileInFeed(models.Model):
 class FeedDestination(models.Model):
     feed = models.ForeignKey(Feed, verbose_name="feed")
     destination = models.ForeignKey(Destination, verbose_name="destination")
-    guid = models.CharField("guid", max_length=100, default=FeedDestination.create_guid)
+    guid = models.CharField("guid", max_length=100, default=create_guid)
     withhold = models.IntegerField("publishing status", default=100) # Default to being withheld
     url = models.URLField("url of this feed")
 
