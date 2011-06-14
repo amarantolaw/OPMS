@@ -4,8 +4,8 @@ from datetime import date
 from opms.ffm import models as ffm_models
 
 # Remember: this application is managed by Django South so when you change this file, do the following:
-# python manage.py schemamigration appname --auto
-# python manage.py migrate appname
+# python manage.py schemamigration stats --auto
+# python manage.py migrate stats
 
 
 # Quite possible to have multiple log file sources, use this as a lookup table
@@ -541,32 +541,12 @@ class FileRequest(models.Model):
         (u'POST', u'POST'),
         (u'HEAD', u'HEAD'),
     )
-    FILE_TYPE_CHOICES = (
-        (u'mp3', u'Audio MP3'),
-        (u'mp4', u'Video MP4'),
-        (u'm4a', u'Audio M4A'),
-        (u'm4b', u'Audiobook M4B'),
-        (u'm4p', u'Audio Protected M4P'),
-        (u'm4v', u'Video M4V'),
-        (u'txt', u'Text TXT'),
-        (u'gif', u'Image GIF'),
-        (u'png', u'Image PNG'),
-        (u'jpg', u'Image JPG'),
-        (u'pdf', u'Portable Document Format'),
-        (u'pub', u'Electronic Book'),
-        (u'htm', u'Webpage'),
-        (u'tml', u'Webpage'),
-        (u'php', u'php Webpage'),
-        (u'', u'Unknown'),
-    )
     method = models.CharField("request method", max_length=5, choices=METHOD_CHOICES)
     uri_string = models.TextField("uri path in request string")
     argument_string = models.TextField("arguments in request string")
     protocol = models.CharField("request protocol", max_length=20)
     # Eventually there will be a link here to a File record from the FFM module
     file = models.ForeignKey(ffm_models.File, null=True)
-    # No longer need file type as this comes from FFM.File
-    # file_type = models.CharField("file type", max_length=3, choices=FILE_TYPE_CHOICES)
 
     def __unicode__(self):
         return self.uri_string

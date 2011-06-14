@@ -28,9 +28,7 @@
 <http://creativecommons.org/publicdomain/zero/1.0/>
       a       dctype:LicenseDocument ;
       dct:title "CC0 1.0 Universal" ;
-      dct:description """The person who associated a work with this document has dedicated the work to the Commons by waiving all of his or her rights to the work worldwide under copyright law and all related or neighboring legal rights he or she had in the work, to the extent allowable by law.
-
-Works under CC0 do not require attribution. When citing the work, you should not imply endorsement by the author.""" ;
+      dct:description """The person who associated a work with this document has dedicated the work to the Commons by waiving all of his or her rights to the work worldwide under copyright law and all related or neighboring legal rights he or she had in the work, to the extent allowable by law. Works under CC0 do not require attribution. When citing the work, you should not imply endorsement by the author.""" ;
       foaf:logo <http://i.creativecommons.org/l/publicdomain/80x15.png> .
 
 <http://creativecommons.org/licenses/by/1.0/>
@@ -136,4 +134,3 @@ Works under CC0 do not require attribution. When citing the work, you should not
 <http://www.opensource.org/licenses/afl-3.0.php>
       a       dctype:LicenseDocument ;
       dct:title "Academic Free License 3.0" .
-
