@@ -1,14 +1,14 @@
-- model: ffm.tag_group
+- model: ffm.taggroup
   pk: 1
   fields:
     name: Unsorted Tags
     description: Old and assorted tags often imported from OxItems and need migrating
-- model: ffm.tag_group
+- model: ffm.taggroup
   pk: 2
   fields:
     name: JACS Codes
     description: Codes used for OER markup of items
-- model: ffm.tag_group
+- model: ffm.taggroup
   pk: 3
   fields:
     name: JorumOPEN Collection
@@ -44,25 +44,25 @@
     image: null
         http://i.creativecommons.org/l/by-nc-nd/3.0/80x15.png  ==========================
 
-- model: ffm.file_function
+- model: ffm.filefunction
   pk: 1
   fields:
     name: Unknown
     description: Unknown file type and function
     category: unknown
-- model: ffm.file_function
+- model: ffm.filefunction
   pk: 2
   fields:
     name: ItemArt
     description: Album artwork for a specific item
     category: image
-- model: ffm.file_function
+- model: ffm.filefunction
   pk: 3
   fields:
     name: FeedArt
     description: Album artwork for a specific feed
     category: image
-- model: ffm.file_function
+- model: ffm.filefunction
   pk: 4
   fields:
     name: RelatedLink
