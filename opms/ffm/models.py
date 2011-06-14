@@ -94,18 +94,18 @@ class Item(models.Model):
 
 
 class Role(models.Model):
-    ROLES = {
+    ROLES = [
         # From http://www.steeple.org.uk/wiki/Feeds/credit
         # NB: We could always use this extensive list... http://www.ebu.ch/metadata/cs/web/ebu_RoleCodeCS_p.xml.htm
-        u'presenter': u'Presenter',
-        u'lecturer': u'Lecturer',
-        u'moderator': u'Moderator',
-        u'mc': u'Master of Ceremonies',
-        u'interviewer': u'Interviewer',
-        u'interviewee': u'Interviewee',
-        u'creator': u'Creator',
-        u'publisher': u'Publisher',
-    }
+        (u'presenter': u'Presenter'),
+        (u'lecturer': u'Lecturer'),
+        (u'moderator': u'Moderator'),
+        (u'mc': u'Master of Ceremonies'),
+        (u'interviewer': u'Interviewer'),
+        (u'interviewee': u'Interviewee'),
+        (u'creator': u'Creator'),
+        (u'publisher': u'Publisher'),
+    ]
     person = models.ForeignKey(Person, verbose_name="associated Person")
     item = models.ForeignKey(Item, verbose_name="associated Item")
     role = models.CharField("role of Person", max_length=20, choices=ROLES, db_index=True)
