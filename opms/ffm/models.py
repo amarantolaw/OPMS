@@ -171,7 +171,7 @@ class File(models.Model):
     def get_mimetype_display(self):
         return MIMETYPES.get(self.mimetype, 'unknown')
 
-    def create_guid(self):
+    def create_guid():
         return 'OPMS-file:' + str(uuid.uuid4())
 
     #v2.0 file = models.FileField(upload_to='')
@@ -391,7 +391,7 @@ class FileInFeed(models.Model):
 
 
 class FeedDestination(models.Model):
-    def create_guid(self):
+    def create_guid():
         return 'OPMS-feed:' + str(uuid.uuid4())
 
     feed = models.ForeignKey(Feed, verbose_name="feed")
