@@ -7,6 +7,7 @@ import uuid
 # Remember: this application is managed by Django South so when you change this file, do the following:
 # python manage.py schemamigration ffm --auto
 # python manage.py migrate ffm
+# NB: Can't convert existing fields to foreignkeys in one step. Need to do two migrations. http://south.aeracode.org/ticket/498
 
 class Person(models.Model): # This should be in the CRM or OxDB App
     titles = models.CharField("Honorifics and Titles", max_length=100, default='')
@@ -83,7 +84,7 @@ class Item(models.Model):
     guid = models.CharField("GUID String", max_length=200)
     internal_comments = models.TextField("Private comments on this item", default='')
     last_updated = models.DateTimeField("Datetime for last update", auto_now=True, default=datetime.now)
-    # license = models.ForeignKey(Licence, verbose_name="Licence", default=1) - Hide from South as it can't convert Field to ForeignKey with same name
+    license = models.ForeignKey(Licence, verbose_name="Licence", default=1)
     owning_unit = models.ForeignKey(Unit, verbose_name="Unit owning this item", default=1)
     people = models.ManyToManyField(Person, through='Role', verbose_name="Associated People")
     publish_start = models.DateTimeField("Publishing start date", default=datetime.now)
@@ -175,7 +176,7 @@ class File(models.Model):
         return 'OPMS-file:' + str(uuid.uuid4())
 
     #v2.0 file = models.FileField(upload_to='')
-    # function = models.ForeignKey(FileFunction, verbose_name="file function", default='unknown') - Hide from South for one migration step
+    function = models.ForeignKey(FileFunction, verbose_name="file function", default='unknown')
     guid = models.CharField("file GUID", max_length=100, default=create_guid)
     item = models.ForeignKey(Item, verbose_name="Owning Item")
     mimetype = models.TextField("mime type", choices=MIMETYPES, default='unknown')
