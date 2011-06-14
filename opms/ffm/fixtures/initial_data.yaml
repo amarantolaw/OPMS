@@ -34,7 +34,6 @@
     description: Creative Commons licence (BY-NC-SA E and W)
     url: http://creativecommons.org/licenses/by-nc-sa/2.0/uk/
     image: null
-        http://i.creativecommons.org/l/by-nc-sa/2.0/80x15.png  ==========================
 - model: ffm.licence
   pk: 3
   fields:
@@ -42,7 +41,6 @@
     description: Creative Commons licence (BY-NC-SA E and W)
     url: http://creativecommons.org/licenses/by-nc-nd/3.0/
     image: null
-        http://i.creativecommons.org/l/by-nc-nd/3.0/80x15.png  ==========================
 
 - model: ffm.filefunction
   pk: 1
