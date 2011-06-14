@@ -78,12 +78,12 @@ class Item(models.Model):
 
     @property
     def links(self):
-        return file_set.filter('function__file_category__contains':'link')
+        return file_set.filter('function__file_category__contains'='link')
 
     @property
     def artwork(self):
         # use models.ImageField() in the future
-        return file_set.filter('iexact':'itemart')
+        return file_set.filter('iexact'='itemart')
 
     def __unicode__(self):
         return smart_unicode(self.title) or ''
@@ -228,16 +228,16 @@ class Feed(models.Model):
 
     @property
     def podcasts(self):
-        return files.filter('function__file_category__in':('audio', 'video'))
+        return files.filter('function__file_category__in'=('audio', 'video'))
 
     @property
     def links(self):
-        return files.filter('function__file_category__contains':'link')
+        return files.filter('function__file_category__contains'='link')
 
     @property
     def artwork(self):
         # use models.ImageField() in the future
-        return files.filter('iexact':'feedart')
+        return files.filter('iexact'='feedart')
 
     def __unicode__(self):
         return smart_unicode(self.title) or ''
