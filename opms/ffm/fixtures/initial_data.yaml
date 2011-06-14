@@ -1,0 +1,81 @@
+- model: ffm.tag_group
+  pk: 1
+  fields:
+    name: Unsorted Tags
+    description: Old and assorted tags often imported from OxItems and need migrating
+- model: ffm.tag_group
+  pk: 2
+  fields:
+    name: JACS Codes
+    description: Codes used for OER markup of items
+- model: ffm.tag_group
+  pk: 3
+  fields:
+    name: JorumOPEN Collection
+    description: Codes used for JorumOPEN markup of feeds
+
+- model: ffm.unit
+  pk: 1
+  fields:
+    name: Unknown Unit
+    oxpoints_id: null
+
+- model: ffm.licence
+  pk: 1
+  fields:
+    name: University of Oxford Personal Use
+    description: Licence only for personal use. Default licence for University of Oxford Podcasts
+    url: null
+    image: null
+- model: ffm.licence
+  pk: 2
+  fields:
+    name: Creative Commons licence (BY-NC-SA E and W)
+    description: Creative Commons licence (BY-NC-SA E and W)
+    url: http://creativecommons.org/licenses/by-nc-sa/2.0/uk/
+    image: null
+        http://i.creativecommons.org/l/by-nc-sa/2.0/80x15.png  ==========================
+- model: ffm.licence
+  pk: 3
+  fields:
+    name: Creative Commons licence (BY-NC-ND E and W)
+    description: Creative Commons licence (BY-NC-SA E and W)
+    url: http://creativecommons.org/licenses/by-nc-nd/3.0/
+    image: null
+        http://i.creativecommons.org/l/by-nc-nd/3.0/80x15.png  ==========================
+
+- model: ffm.file_function
+  pk: 1
+  fields:
+    name: Unknown
+    description: Unknown file type and function
+    category: unknown
+- model: ffm.file_function
+  pk: 2
+  fields:
+    name: ItemArt
+    description: Album artwork for a specific item
+    category: image
+- model: ffm.file_function
+  pk: 3
+  fields:
+    name: FeedArt
+    description: Album artwork for a specific feed
+    category: image
+- model: ffm.file_function
+  pk: 4
+  fields:
+    name: RelatedLink
+    description: Webpage link related to this resource
+    category: link
+
+- model: ffm.file
+  pk: 1
+  fields:
+    duration: null
+    function: 3
+    guid: OPMS:
+    item: models.ForeignKey(Item, verbose_name="Owning Item")
+    mimetype: models.TextField("mime type", default='unknown', choices=MIMETYPES)
+    size = models.IntegerField("file size in bytes", null=True)
+    url = models.URLField("file url", verify_exists=True) # Everything in this system should be hosted on a URL

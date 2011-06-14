@@ -176,7 +176,7 @@ class File(models.Model):
         return 'OPMS-file:' + str(uuid.uuid4())
 
     #v2.0 file = models.FileField(upload_to='')
-    function = models.ForeignKey(FileFunction, verbose_name="file function", default='unknown')
+    function = models.ForeignKey(FileFunction, verbose_name="file function", default=1)
     guid = models.CharField("file GUID", max_length=100, default=create_guid)
     item = models.ForeignKey(Item, verbose_name="Owning Item")
     mimetype = models.TextField("mime type", choices=MIMETYPES, default='unknown')
