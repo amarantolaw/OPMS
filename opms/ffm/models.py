@@ -65,7 +65,7 @@ class Licence(models.Model):
 class Item(models.Model):
     description = models.TextField("Description", null=True)
     guid = models.CharField("GUID String", max_length=200)
-    internal_comments = models.TextField("Private comments on this item")
+    internal_comments = models.TextField("Private comments on this item", default='')
     last_updated = models.DateTimeField("Datetime for last update", auto_now=True)
     license = models.ForeignKey(Licence, verbose_name="Licence")
     owning_unit = models.ForeignKey(Unit, verbose_name="Unit owning this item")
@@ -218,6 +218,7 @@ class Feed(models.Model):
     destinations = models.ManyToManyField(Destination, through='FeedDestination', verbose_name="destinations for this feed")
     files = models.ManyToManyField(File, through='FileInFeed', verbose_name="files related to this feed")
     guid = models.CharField("guid", max_length=100)
+    internal_comments = models.TextField("Private comments on this feed", default='')
     last_updated = models.DateTimeField("last updated", auto_now=True)
     owning_unit = models.ForeignKey(Unit, verbose_name="unit owning this feed")
     publish_start = models.DateField("start publishing from date", default=datetime.now)
