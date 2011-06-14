@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.encoding import smart_str, smart_unicode
 from datetime import date, datetime
-from opms.ffm.models import File
+from opms.ffm.models import *
 import uuid
 
 # Remember: this application is managed by Django South so when you change this file, do the following:
