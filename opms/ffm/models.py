@@ -15,7 +15,7 @@ class Person(models.Model): # This should be in the CRM or OxDB App
     email = models.EmailField(null=True)
 
     def full_name(self):
-        return smart_unicode(self.titles + ' ' + self.first_name + ' ' + self.middle_names + ' ' self.last_name)
+        return smart_unicode(self.titles + ' ' + self.first_name + ' ' + self.middle_names + ' ' + self.last_name)
 
     def short_name(self):
         return smart_unicode(self.first_name + ' ' + self.last_name)
