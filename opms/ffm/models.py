@@ -90,7 +90,7 @@ class Item(models.Model):
     publish_stop = models.DateTimeField("Publishing end date", null=True)
     recording_date = models.DateField("Date of recording", null=True)
     tags = models.ManyToManyField(Tag, verbose_name="Associated Tags", null=True)
-    title = models.CharField("Item Title", max_length=256)
+    title = models.CharField("Item Title", max_length=256, default='Untitled Item')
     links = models.ManyToManyField(Link, verbose_name="Associated Links", null=True)
 
     @property
