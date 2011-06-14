@@ -68,14 +68,3 @@
     name: RelatedLink
     description: Webpage link related to this resource
     category: link
-
-- model: ffm.file
-  pk: 1
-  fields:
-    duration: null
-    function: 3
-    guid: OPMS:
-    item: models.ForeignKey(Item, verbose_name="Owning Item")
-    mimetype: models.TextField("mime type", default='unknown', choices=MIMETYPES)
-    size = models.IntegerField("file size in bytes", null=True)
-    url = models.URLField("file url", verify_exists=True) # Everything in this system should be hosted on a URL
