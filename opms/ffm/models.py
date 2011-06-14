@@ -55,7 +55,7 @@ class Licence(models.Model):
     description = models.TextField("Description of Licence")
     name = models.CharField("Name", max_length=100)
     url = models.URLField("URL for full licence", null=True)
-    image = models.ForeignKey(File, limit_choices_to = {'function__file_category__contains':'image'},
+    image = models.ForeignKey('File', limit_choices_to = {'function__file_category__contains':'image'},
                               null=True, verbose_name="image for licence")
 
     def __unicode__(self):
