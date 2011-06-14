@@ -83,7 +83,7 @@ class Item(models.Model):
     guid = models.CharField("GUID String", max_length=200)
     internal_comments = models.TextField("Private comments on this item", default='')
     last_updated = models.DateTimeField("Datetime for last update", auto_now=True, default=datetime.now)
-    license = models.ForeignKey(Licence, verbose_name="Licence", default=1)
+    # license = models.ForeignKey(Licence, verbose_name="Licence", default=1) - Hide from South as it can't convert Field to ForeignKey with same name
     owning_unit = models.ForeignKey(Unit, verbose_name="Unit owning this item", default=1)
     people = models.ManyToManyField(Person, through='Role', verbose_name="Associated People")
     publish_start = models.DateTimeField("Publishing start date", default=datetime.now)
