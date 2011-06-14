@@ -167,6 +167,13 @@ class File(models.Model):
         (u'audio/x-m4a', u'MP4 audio'),
         (u'application/epub+zip', u'ePub eBook'),
     ]
+
+    def get_mimetype_display(self):
+        return MIMETYPES.get(self.mimetype, 'unknown')
+
+    def create_guid(self):
+        return 'OPMS-file:' + str(uuid.uuid4())
+
     #v2.0 file = models.FileField(upload_to='')
     function = models.ForeignKey(FileFunction, verbose_name="file function", default='unknown')
     guid = models.CharField("file GUID", max_length=100, default=create_guid)
@@ -181,12 +188,6 @@ class File(models.Model):
     def title(self):
         # return the title of this file via Item
         return self.item.title
-
-    def create_guid(self):
-        return 'OPMS-file:' + str(uuid.uuid4())
-
-    def get_mimetype_display(self):
-        return MIMETYPES.get(self.mimetype, 'unknown')
 
     class Meta:
         verbose_name = 'Podcast enclosed data'
@@ -390,14 +391,14 @@ class FileInFeed(models.Model):
 
 
 class FeedDestination(models.Model):
+    def create_guid(self):
+        return 'OPMS-feed:' + str(uuid.uuid4())
+
     feed = models.ForeignKey(Feed, verbose_name="feed")
     destination = models.ForeignKey(Destination, verbose_name="destination")
     guid = models.CharField("guid", max_length=100, default=create_guid)
     withhold = models.IntegerField("publishing status", default=100) # Default to being withheld
     url = models.URLField("url of this feed")
-
-    def create_guid(self):
-        return 'OPMS-feed:' + str(uuid.uuid4())
 
     def __unicode__(self):
         return smart_unicode(self.feed.title + ' for ' + self.destination.name + ' at:' + self.url)
