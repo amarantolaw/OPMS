@@ -1,40 +1,49 @@
 from django.db import models
 from django.utils.encoding import smart_str, smart_unicode
 from datetime import date, datetime
+import uuid
 
 # Remember: this application is managed by Django South so when you change this file, do the following:
 # python manage.py schemamigration ffm --auto
 # python manage.py migrate ffm
 
 class Person(models.Model): # This should be in the CRM or OxDB App
-    titles = models.CharField("Honorifics and Titles", max_length=100)
-    first_name = models.CharField("First Name", max_length=50)
-    middle_names = models.CharField("Middle Names", max_length=200)
-    last_name = models.CharField("Last Name", max_length=50)
-    additional_information = models.TextField("Additional Information (e.g. University of Oxford)")
+    titles = models.CharField("Honorifics and Titles", max_length=100, default='')
+    first_name = models.CharField("First Name", max_length=50, default='Unknown')
+    middle_names = models.CharField("Middle Names", max_length=200, default='')
+    last_name = models.CharField("Last Name", max_length=50, default='Person')
+    additional_information = models.TextField("Additional Information (e.g. University of Oxford)", default='')
     email = models.EmailField(null=True)
 
     def full_name(self):
-        return smart_unicode(self.titles + ' ' + self.first_name + ' ' + self.middle_names + ' ' + self.last_name)
+        string = self.titles
+        if string != '':
+            string += ' ' + self.first_name
+        if self.middle_names != ''
+            string += ' ' + self.middle_names
+        string += ' ' + self.last_name
+        if self.additional_information != ''
+            string += ' (' + self.additional_information + ')'
+        return smart_unicode(string)
 
     def short_name(self):
         return smart_unicode(self.first_name + ' ' + self.last_name)
 
     def __unicode__(self):
-        return self._full_name()
+        return self.full_name()
 
 
 class Unit(models.Model):
     name = models.CharField("unit name", max_length=250)
-    oxpoint_id = models.IntegerField("OxItems ID")
+    oxpoints_id = models.IntegerField("OxItems ID", null=True)
 
     def __unicode__(self):
-        return self._full_name()
+        return smart_unicode(self.name)
 
 
 class TagGroup(models.Model):
     # Groups of Tags. How to create collection types
-    description = models.TextField("Description")
+    description = models.TextField("Description", default='')
     name = models.CharField("Name", max_length=50)
 
     def __unicode__(self):
@@ -43,8 +52,8 @@ class TagGroup(models.Model):
 
 class Tag(models.Model):
     # Text value used to group Items and Feeds
-    group = models.ForeignKey(TagGroup, verbose_name="Group tag belongs to")
-    name = models.TextField("Name of tag")
+    group = models.ForeignKey(TagGroup, verbose_name="Group tag belongs to", default=1)
+    name = models.TextField("Name of tag", default='Unnamed Tag')
 
     def __unicode__(self):
         return smart_unicode(self.name + ' (' + self.group.name + ')')
@@ -52,7 +61,7 @@ class Tag(models.Model):
 
 class Licence(models.Model):
     # Expandable data table of licences we can publish with or recognise
-    description = models.TextField("Description of Licence")
+    description = models.TextField("Description of Licence", default='')
     name = models.CharField("Name", max_length=100)
     url = models.URLField("URL for full licence", null=True)
     image = models.ForeignKey('File', limit_choices_to = {'function__file_category__contains':'image'},
@@ -62,23 +71,26 @@ class Licence(models.Model):
         return smart_unicode(self.name)
 
 
+class Link(models.Model):
+    description = models.TextField("description", default='')
+    name = models.TextField("name for link", default='Unnamed Link')
+    url = models.URLField("link url including http: etc", default='http://www.ox.ac.uk/')
+
+
 class Item(models.Model):
-    description = models.TextField("Description", null=True)
+    description = models.TextField("Description", default='')
     guid = models.CharField("GUID String", max_length=200)
     internal_comments = models.TextField("Private comments on this item", default='')
     last_updated = models.DateTimeField("Datetime for last update", auto_now=True, default=datetime.now)
-    license = models.ForeignKey(Licence, verbose_name="Licence")
-    owning_unit = models.ForeignKey(Unit, verbose_name="Unit owning this item")
+    license = models.ForeignKey(Licence, verbose_name="Licence", default=1)
+    owning_unit = models.ForeignKey(Unit, verbose_name="Unit owning this item", default=1)
     people = models.ManyToManyField(Person, through='Role', verbose_name="Associated People")
     publish_start = models.DateTimeField("Publishing start date", default=datetime.now)
     publish_stop = models.DateTimeField("Publishing end date", null=True)
     recording_date = models.DateField("Date of recording", null=True)
-    tags = models.ManyToManyField(Tag, verbose_name="Associated Tags")
+    tags = models.ManyToManyField(Tag, verbose_name="Associated Tags", null=True)
     title = models.CharField("Item Title", max_length=256)
-
-    @property
-    def links(self):
-        return file_set.filter(function__file_category__contains='link')
+    links = models.ManyToManyField(Link, verbose_name="Associated Links", null=True)
 
     @property
     def artwork(self):
@@ -118,43 +130,20 @@ class Role(models.Model):
 
 
 class FileFunction(models.Model):
-    FILE_CATEGORY_CHOICES = [
-        (u'audio', u'Audio'),
-        (u'video', u'Video'),
+    CATEGORY_CHOICES = [
+        (u'audio', u'Audio Podcast'),
+        (u'video', u'Video Podcast'),
         (u'image', u'Image'),
-        (u'text', u'Text'),
-        (u'link', u'Link'),
-        (u'transcript', u'Transcript'),
+        (u'document', u'Related Document'),
+        (u'transcript', u'Transcript of Podcast'),
         (u'unknown', u'Unknown'),
     ]
-    FILE_TYPE_CHOICES = [
-        (u'mp3', u'Audio MP3'),
-        (u'mp4', u'Video MP4'),
-        (u'm4a', u'Audio M4A'),
-        (u'm4b', u'Audiobook M4B'),
-        (u'm4p', u'Audio Protected M4P'),
-        (u'm4v', u'Video M4V'),
-        (u'txt', u'Text TXT'),
-        (u'gif', u'Image GIF'),
-        (u'png', u'Image PNG'),
-        (u'jpg', u'Image JPG'),
-        (u'pdf', u'Portable Document Format'),
-        (u'pub', u'Electronic Book'),
-        (u'htm', u'Webpage'),
-        (u'html', u'Webpage'),
-        (u'php', u'php Webpage'),
-        (u'', u'Unknown'),
-    ]
-    description = models.TextField("description")
+    description = models.TextField("description", default='')
     name = models.CharField("name", max_length=50)
-    file_category = models.CharField("file category", max_length=20, choices=FILE_CATEGORY_CHOICES)
-    file_type = models.CharField("file type", max_length=5, choices=FILE_TYPE_CHOICES)
+    category = models.CharField("file category", max_length=20, choices=CATEGORY_CHOICES, default='unknown')
 
-    def get_filetype_display(self):
-        return FILE_TYPE_CHOICES.get(self.file_type, 'unknown')
-
-    def get_filecategory_display(self):
-        return FILE_CATEGORY_CHOICES.get(self.file_category, 'unknown')
+    def get_category_display(self):
+        return CATEGORY_CHOICES.get(self.category, 'unknown')
 
     def __unicode__(self):
         return smart_unicode(self.name + ' (' + self.file_category + ')')
@@ -177,19 +166,23 @@ class File(models.Model):
         (u'audio/x-m4a', u'MP4 audio'),
         (u'application/epub+zip', u'ePub eBook'),
     ]
-    duration = models.IntegerField("duration in seconds", null=True)
     #v2.0 file = models.FileField(upload_to='')
-    function = models.ForeignKey(FileFunction, verbose_name="file function")
-    guid = models.CharField("file GUID", max_length=100)
+    function = models.ForeignKey(FileFunction, verbose_name="file function", default='unknown')
+    guid = models.CharField("file GUID", max_length=100, default=self.create_guid)
     item = models.ForeignKey(Item, verbose_name="Owning Item")
-    mimetype = models.TextField("mime type", default='unknown', choices=MIMETYPES)
-    size = models.IntegerField("file size in bytes", null=True)
+    mimetype = models.TextField("mime type", choices=MIMETYPES, default='unknown')
     url = models.URLField("file url", verify_exists=True) # Everything in this system should be hosted on a URL
+    # Optional extras
+    duration = models.IntegerField("duration in seconds", null=True)
+    size = models.IntegerField("file size in bytes", null=True)
 
     @property
     def title(self):
         # return the title of this file via Item
         return self.item.title
+
+    def create_guid(self):
+        return 'OPMS-file:' + str(uuid.uuid4())
 
     def get_mimetype_display(self):
         return MIMETYPES.get(self.mimetype, 'unknown')
@@ -199,14 +192,14 @@ class File(models.Model):
         verbose_name_plural = 'Podcast enclosed data'
 
     def __unicode__(self):
-        return smart_unicode(self.url + ' (' + self.item.title +')')
+        return smart_unicode(self.url + ' (' + self.title +')')
 
 
 class Destination(models.Model):
     # This is a publishing destination, used when it comes to generating specific feeds for output
+    description = models.TextField("description", default='')
     name = models.CharField("name", max_length=100)
-    description = models.TextField("description")
-    url = models.URLField("base url of destination")
+    url = models.URLField("base url of destination", verify_exists=True)
 
     def __unicode__(self):
         return smart_unicode(self.name + ' (' + str(self.url) + ')')
@@ -215,25 +208,21 @@ class Destination(models.Model):
 
 class Feed(models.Model):
     description = models.TextField("description", default='')
-    destinations = models.ManyToManyField(Destination, through='FeedDestination', verbose_name="destinations for this feed")
-    files = models.ManyToManyField(File, through='FileInFeed', verbose_name="files related to this feed")
-    guid = models.CharField("guid", max_length=100)
+    destinations = models.ManyToManyField(Destination, through='FeedDestination', verbose_name="destinations for this feed", null=True)
+    files = models.ManyToManyField(File, through='FileInFeed', verbose_name="files related to this feed", null=True)
     internal_comments = models.TextField("Private comments on this feed", default='')
     last_updated = models.DateTimeField("Datetime for last update", auto_now=True, default=datetime.now)
-    owning_unit = models.ForeignKey(Unit, verbose_name="unit owning this feed")
+    links = models.ManyToManyField(Link, verbose_name="Associated Links", null=True)
+    owning_unit = models.ForeignKey(Unit, verbose_name="unit owning this feed", default=1)
     publish_start = models.DateField("start publishing from date", default=datetime.now)
     publish_stop = models.DateField("stop publishing by date", null=True)
     slug = models.SlugField("seo feedname", unique=True) # aka, Feed name in OxItems parlance
-    tags = models.ManyToManyField(Tag, verbose_name="tags categorising this feed")
+    tags = models.ManyToManyField(Tag, verbose_name="tags categorising this feed", null=True)
     title = models.CharField("title", max_length=150)
 
     @property
     def podcasts(self):
-        return files.filter(function__file_category__in=('audio', 'video'))
-
-    @property
-    def links(self):
-        return files.filter(function__file_category__contains='link')
+        return files.filter(function__file_category__in=('audio', 'video', 'document'))
 
     @property
     def artwork(self):
@@ -402,8 +391,12 @@ class FileInFeed(models.Model):
 class FeedDestination(models.Model):
     feed = models.ForeignKey(Feed, verbose_name="feed")
     destination = models.ForeignKey(Destination, verbose_name="destination")
+    guid = models.CharField("guid", max_length=100, default=self.create_guid)
     withhold = models.IntegerField("publishing status", default=100) # Default to being withheld
     url = models.URLField("url of this feed")
+
+    def create_guid(self):
+        return 'OPMS-feed:' + str(uuid.uuid4())
 
     def __unicode__(self):
         return smart_unicode(self.feed.title + ' for ' + self.destination.name + ' at:' + self.url)
