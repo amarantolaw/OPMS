@@ -5,3 +5,7 @@ A web application and scripts to do all the things that other parts of our servi
 = Statistics =
 First module deals with trying to collect impact data and present it in a format suitable for management review.
 Initial work is on the Apple Excel Weekly report sheets. Next up is Apache log records for media server.
+
+= File and Feed Manager =
+System for holding metadata about Items, Files and Feeds known to the system. Initiall this data is imported
+and synced from an existing legacy database.
