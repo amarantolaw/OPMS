@@ -72,7 +72,11 @@ MIDDLEWARE_CLASSES = (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
-INTERNAL_IPS = ('127.0.0.1','0.0.0.0',)
+INTERNAL_IPS = (
+    '127.0.0.1',
+    '0.0.0.0',
+    '163.1.13.36',
+)
 
 ROOT_URLCONF = 'opms.urls'
 
