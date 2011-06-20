@@ -39,7 +39,7 @@ MEDIA_URL = ''
 # Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = '/media/'
 
-# Many projects will also have static assets that aren't tied to a particular app; you can give 
+# Many projects will also have static assets that aren't tied to a particular app; you can give
 # staticfiles additional directories to search via the STATICFILES_DIRS setting .
 STATICFILES_DIRS = (
     os.path.join(PROJECT_ROOT, 'static'),
@@ -69,7 +69,10 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
+
+INTERNAL_IPS = ('127.0.0.1','0.0.0.0',)
 
 ROOT_URLCONF = 'opms.urls'
 
@@ -87,10 +90,9 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
     'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    'django.contrib.admindocs',
+    'debug_toolbar',
     'south',
     'stats',
     'ffm',
