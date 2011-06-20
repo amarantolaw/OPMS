@@ -73,9 +73,8 @@ MIDDLEWARE_CLASSES = (
 )
 
 INTERNAL_IPS = (
-    '127.0.0.1',
-    '0.0.0.0',
     '163.1.13.36',
+    '127.0.0.1',
 )
 
 ROOT_URLCONF = 'opms.urls'
