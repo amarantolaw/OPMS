@@ -7,6 +7,8 @@
 # Also note: You'll have to insert the output of 'django-admin.py sqlcustom [appname]'
 # into your database.
 
+# These tables can be manually dropped when the app and model is deleted. In the meantime, syncdb works as normal.
+
 from django.db import models
 from django.utils.encoding import smart_str, smart_unicode
 from datetime import date
