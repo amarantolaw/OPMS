@@ -80,8 +80,11 @@ class Link(models.Model):
 
 
 class Item(models.Model):
+    def create_guid():
+        return 'OPMS-item:' + str(uuid.uuid4())
+
     description = models.TextField("Description", default='')
-    guid = models.CharField("GUID String", max_length=200)
+    guid = models.CharField("GUID String", max_length=100, default=create_guid)
     internal_comments = models.TextField("Private comments on this item", default='')
     last_updated = models.DateTimeField("Datetime for last update", auto_now=True, default=datetime.now)
     license = models.ForeignKey(Licence, verbose_name="Licence", default=1)
