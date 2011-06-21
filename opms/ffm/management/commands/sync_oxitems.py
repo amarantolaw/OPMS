@@ -24,7 +24,7 @@ class Command(NoArgsCommand):
         self.error_log = ""
         self.error_cache = ""
 
-        self.import_stats = []
+        self.import_stats = {}
 
         # Cache objects to hold ffm subtables in memory
         self.cache_links = list(Link.objects.all())
