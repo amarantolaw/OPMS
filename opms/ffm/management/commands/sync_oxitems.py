@@ -19,7 +19,7 @@ class Command(NoArgsCommand):
         Setup variables used by the command
         """
         # Toggle debug statements on/off
-        self.debug = False
+        self.debug = True
         # Error logging file and string cache
         self.error_log = ""
         self.error_cache = ""
@@ -61,16 +61,25 @@ class Command(NoArgsCommand):
 
         # Copy Oxitems remote to Oxitems local, overwrite existing
         remote_channels = Rg07Channels.objects.using('oxitems').filter(channel_categories__icontains='simple-podcasting')
-        for row in remote_channels:
+        total_count = len(remote_channels)
+        for counter, row in enumerate(remote_channels):
             row.save(using='default')
+            if counter == 0 or (counter % 100) == 0:
+                self._debug("Copied %s of %s" (counter,total_count))
+        self._debug("Channels copy finished")
+
         remote_items = Rg07Items.objects.using('oxitems').filter(item_channel__channel_categories__icontains='simple-podcasting')
-        for row in remote_items:
+        total_count = len(remote_items)
+        for counter, row in enumerate(remote_items):
             row.save(using='default')
+            if counter == 0 or (counter % 100) == 0:
+                self._debug("Copied %s of %s" (counter,total_count))
+        self._debug("Items copy finished")
 
 
         # Import OxItems.Channels
         oxitems_channels = Rg07Channels.objects.all()
-        for row in oxitems_channels:
+        for counter, row in enumerate(oxitems_channels):
             # initialise objects
             f = Feed()
 
@@ -91,6 +100,9 @@ class Command(NoArgsCommand):
             self._parse_items(f, row.id, row.channel_sort_values)
             self._set_jorum_tags(f, row.channel_jorumopen_collection)
             self._get_or_create_artwork(f, row.channel_image)
+
+            if counter == 0 or (counter % 50) == 0:
+                self._debug("Parsed %s of %s Channels" (counter,total_count))
             
 
         # Final stats output at end of file
@@ -113,7 +125,7 @@ class Command(NoArgsCommand):
 
 
     def _get_or_create_owning_unit(self, oxpoints_unit):
-        return 1
+        return Unit.objects.get(pk=1)
 
     def _set_jorum_tags(self, feed_obj, collection_string):
         return None
