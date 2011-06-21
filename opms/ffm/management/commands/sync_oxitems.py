@@ -59,22 +59,23 @@ class Command(NoArgsCommand):
 
         self.stopcount = int(options.get('stopcount', 0))
 
-        # Copy Oxitems remote to Oxitems local, overwrite existing
-        remote_channels = Rg07Channels.objects.using('oxitems').filter(channel_categories__icontains='simple-podcasting')
-        total_count = len(remote_channels)
-        for counter, row in enumerate(remote_channels):
-            row.save(using='default')
-            if counter == 0 or (counter % 100) == 0:
-                self._debug("Copied %s of %s channels" % (counter,total_count))
-        self._debug("Channels copy finished")
+        if not self.debug:
+            # Copy Oxitems remote to Oxitems local, overwrite existing
+            remote_channels = Rg07Channels.objects.using('oxitems').filter(channel_categories__icontains='simple-podcasting')
+            total_count = len(remote_channels)
+            for counter, row in enumerate(remote_channels):
+                row.save(using='default')
+                if counter == 0 or (counter % 100) == 0:
+                    self._debug("Copied %s of %s channels" % (counter,total_count))
+            self._debug("Channels copy finished")
 
-        remote_items = Rg07Items.objects.using('oxitems').filter(item_channel__channel_categories__icontains='simple-podcasting')
-        total_count = len(remote_items)
-        for counter, row in enumerate(remote_items):
-            row.save(using='default')
-            if counter == 0 or (counter % 100) == 0:
-                self._debug("Copied %s of %s items" % (counter,total_count))
-        self._debug("Items copy finished")
+            remote_items = Rg07Items.objects.using('oxitems').filter(item_channel__channel_categories__icontains='simple-podcasting')
+            total_count = len(remote_items)
+            for counter, row in enumerate(remote_items):
+                row.save(using='default')
+                if counter == 0 or (counter % 100) == 0:
+                    self._debug("Copied %s of %s items" % (counter,total_count))
+            self._debug("Items copy finished")
 
 
         # Import OxItems.Channels
@@ -97,6 +98,7 @@ class Command(NoArgsCommand):
 
             f.title = row.title
             f.description = row.description
+            self._debug("slug=" + row.name)
             f.slug = row.name
             f.internal_comments = row.channel_emailaddress
             f.last_updated = row.channel_updated
