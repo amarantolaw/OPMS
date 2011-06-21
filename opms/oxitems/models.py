@@ -10,6 +10,44 @@
 from django.db import models
 from django.utils.encoding import smart_str, smart_unicode
 from datetime import date
+from opms.ffm.models import *
+
+
+# These are local temporary linking tables designed to make syncing easier
+class ImportFeedChannel(models.Model):
+    """
+    If a feed has been linked to this channel, then attempt to update that feed
+    """
+    feed = models.ForeignKey(Feed)
+    channel = models.ForeignKey("Rg07Channels")
+
+class ImportFeeddestinationChannel(models.Model):
+    """
+    If a feeddestination has been linked to this channel, then attempt to update that feeddestination
+    """
+    feeddestination = models.ForeignKey(FeedDestination)
+    channel = models.ForeignKey("Rg07Channels")
+
+class ImportFileItem(models.Model):
+    """
+    If a file has been linked to this item, then attempt to update that file
+    """
+    file = models.ForeignKey(File)
+    item = models.ForeignKey("Rg07Items")
+
+class ImportFileinfeedItem(models.Model):
+    """
+    If a fileinfeed has been linked to this item, then attempt to update that fileinfeed
+    """
+    fileinfeed = models.ForeignKey(FileInFeed)
+    item = models.ForeignKey("Rg07Items")
+
+class ImportItemItem(models.Model):
+    """
+    If an item has been linked to this item, then attempt to update that item
+    """
+    ffm_item = models.ForeignKey(Item)
+    item = models.ForeignKey("Rg07Items")
 
 
 
