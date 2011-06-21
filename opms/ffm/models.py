@@ -55,7 +55,7 @@ class TagGroup(models.Model):
 class Tag(models.Model):
     # Text value used to group Items and Feeds
     group = models.ForeignKey(TagGroup, verbose_name="Group tag belongs to", default=1)
-    name = models.TextField("Name of tag", default='Unnamed Tag')
+    name = models.CharField("Name of tag", max_length=200, default='Unnamed Tag')
 
     def __unicode__(self):
         return smart_unicode(self.name + ' (' + self.group.name + ')')
@@ -75,7 +75,7 @@ class Licence(models.Model):
 
 class Link(models.Model):
     description = models.TextField("description", default='')
-    name = models.TextField("name for link", default='Unnamed Link')
+    name = models.CharField("name for link", max_length=100, default='Unnamed Link')
     url = models.URLField("link url including http: etc", default='http://www.ox.ac.uk/')
 
 
@@ -182,7 +182,7 @@ class File(models.Model):
     function = models.ForeignKey(FileFunction, verbose_name="file function", default=1)
     guid = models.CharField("file GUID", max_length=100, default=create_guid)
     item = models.ForeignKey(Item, verbose_name="Owning Item")
-    mimetype = models.TextField("mime type", choices=MIMETYPES, default='unknown')
+    mimetype = models.CharField("mime type", max_length=50, choices=MIMETYPES, default='unknown')
     url = models.URLField("file url", verify_exists=True) # Everything in this system should be hosted on a URL
     # Optional extras
     duration = models.IntegerField("duration in seconds", null=True)
