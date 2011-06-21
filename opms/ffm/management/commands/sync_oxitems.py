@@ -99,7 +99,7 @@ class Command(NoArgsCommand):
             f.title = row.title
             f.description = row.description
             self._debug("slug=" + row.name)
-            f.slug = row.name
+            f.slug = row.name # NB: THESE ARE NOT UNIQUE IN OXITEMS
             f.internal_comments = row.channel_emailaddress
             f.last_updated = row.channel_updated
             f.owning_unit = self._get_or_create_owning_unit(row.oxpoints_units)
