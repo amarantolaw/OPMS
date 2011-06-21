@@ -65,7 +65,7 @@ class Command(NoArgsCommand):
         for counter, row in enumerate(remote_channels):
             row.save(using='default')
             if counter == 0 or (counter % 100) == 0:
-                self._debug("Copied %s of %s" (counter,total_count))
+                self._debug("Copied %s of %s channels" % (counter,total_count))
         self._debug("Channels copy finished")
 
         remote_items = Rg07Items.objects.using('oxitems').filter(item_channel__channel_categories__icontains='simple-podcasting')
@@ -73,7 +73,7 @@ class Command(NoArgsCommand):
         for counter, row in enumerate(remote_items):
             row.save(using='default')
             if counter == 0 or (counter % 100) == 0:
-                self._debug("Copied %s of %s" (counter,total_count))
+                self._debug("Copied %s of %s items" % (counter,total_count))
         self._debug("Items copy finished")
 
 
@@ -102,7 +102,7 @@ class Command(NoArgsCommand):
             self._get_or_create_artwork(f, row.channel_image)
 
             if counter == 0 or (counter % 50) == 0:
-                self._debug("Parsed %s of %s Channels" (counter,total_count))
+                self._debug("Parsed %s of %s Channels" % (counter,total_count))
             
 
         # Final stats output at end of file
