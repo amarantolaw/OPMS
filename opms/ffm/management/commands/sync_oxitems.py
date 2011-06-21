@@ -43,7 +43,6 @@ class Command(NoArgsCommand):
         self.cache_importfileinfeeditem = ''
         self.cache_importitemitem = ''
 
-
         super(Command, self).__init__()
 
 
