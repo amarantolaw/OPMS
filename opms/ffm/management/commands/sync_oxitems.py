@@ -27,21 +27,21 @@ class Command(NoArgsCommand):
         self.import_stats = {}
 
         # Cache objects to hold ffm subtables in memory
-        self.cache_links = list(Link.objects.all())
-        self.cache_people = list(Person.objects.all())
-        self.cache_licences = list(Licence.objects.all())
-        self.cache_taggroups = list(TagGroup.objects.all())
-        self.cache_tags = list(Tag.objects.all()) # Probably need to rethink this!
-        self.cache_file_functions = list(FileFunction.objects.all())
-        self.cache_destinations = list(Destination.objects.all())
-        self.cache_units = list(Unit.objects.all())
+        #self.cache_links = list(Link.objects.all())
+        #self.cache_people = list(Person.objects.all())
+        #self.cache_licences = list(Licence.objects.all())
+        #self.cache_taggroups = list(TagGroup.objects.all())
+        #self.cache_tags = list(Tag.objects.all()) # Probably need to rethink this!
+        #self.cache_file_functions = list(FileFunction.objects.all())
+        #self.cache_destinations = list(Destination.objects.all())
+        #self.cache_units = list(Unit.objects.all())
 
         # Cache objects to hold oxitems-local subtables in memory
-        self.cache_importfeedchannel = ''
-        self.cache_importfeeddestinationchannel = ''
-        self.cache_importfileitem = ''
-        self.cache_importfileinfeeditem = ''
-        self.cache_importitemitem = ''
+        #self.cache_importfeedchannel = ''
+        #self.cache_importfeeddestinationchannel = ''
+        #self.cache_importfileitem = ''
+        #self.cache_importfileinfeeditem = ''
+        #self.cache_importitemitem = ''
 
         super(Command, self).__init__()
 
@@ -79,23 +79,32 @@ class Command(NoArgsCommand):
 
         # Import OxItems.Channels
         oxitems_channels = Rg07Channels.objects.all()
+        total_count = len(oxitems_channels)
         for counter, row in enumerate(oxitems_channels):
-            # initialise objects
-            f = Feed()
+            # Update or create?
+            if len(row.importfeedchannel_set.all()) == 0:
+                # Create a new feed
+                f = Feed()
+                f.save()
+
+                # Make link to import
+                ifc = ImportFeedChannel()
+                ifc.feed = f
+                ifc.channel = row
+                ifc.save()
+            else:
+                f = row.importfeedchannel_set.get(channel=row) #NB: Channels N -> 1 Feed relationship, even though it looks M2M
 
             f.title = row.title
             f.description = row.description
             f.slug = row.name
-
+            f.internal_comments = row.channel_emailaddress
             f.last_updated = row.channel_updated
-            if row.deleted == True:
-                f.withhold = 1000 # TODO: Need to determine some workflow values and descriptions for withhold
-
-
             f.owning_unit = self._get_or_create_owning_unit(row.oxpoints_units)
+            f.save()
 
             # Things to do after the Feed is created
-            self._set_feed_destinations(f, row.channel_guid, row.channel_tpi)
+            self._set_feed_destinations(f, row.channel_guid, row.channel_tpi, row.deleted)
             self._get_or_create_link(f, row.link)
             self._parse_items(f, row.id, row.channel_sort_values)
             self._set_jorum_tags(f, row.channel_jorumopen_collection)
@@ -141,8 +150,11 @@ class Command(NoArgsCommand):
         artwork = File()
         return None
 
-    def _set_feed_destinations(self, feed_obj, itunesu_guid, oxitems_publish):
+    def _set_feed_destinations(self, feed_obj, itunesu_guid, oxitems_destination, oxitems_deleted):
+
         fd = FeedDestination()
+        if oxitems_deleted == True:
+            fd.withhold = 1000 # TODO: Need to determine some workflow values and descriptions for withhold
         return None
 
     """
