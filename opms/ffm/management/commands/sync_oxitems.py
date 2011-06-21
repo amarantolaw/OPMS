@@ -113,7 +113,7 @@ class Command(NoArgsCommand):
 
 
     def _get_or_create_owning_unit(self, oxpoints_unit):
-        return None
+        return 1
 
     def _set_jorum_tags(self, feed_obj, collection_string):
         return None
