@@ -95,7 +95,7 @@ class Command(NoArgsCommand):
 
                 # Make link to import
                 ifgc = ImportFeedGroupChannel()
-                ifgc.feed = fg
+                ifgc.feedgroup = fg
                 ifgc.channel = row
                 ifgc.save()
             else:
