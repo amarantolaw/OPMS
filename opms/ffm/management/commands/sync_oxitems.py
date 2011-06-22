@@ -166,6 +166,7 @@ class Command(NoArgsCommand):
         destinations = []
         if oxitems_destination == 0:
             # This isn't appearing anywhere, so exit now
+            self._debug("set_feed_destination() found no destinations for feed:" + feed_obj.slug)
             return None
         elif oxitems_destination == 1:
             destinations.append(Destination.objects.get(pk=1)) # POAU
@@ -186,7 +187,7 @@ class Command(NoArgsCommand):
 
         self._debug("set_feed_destination about to link feed to " + str(len(destinations)) + " destinations")
         # For this sync we just wipe and recreate, no need to try to sync
-        FeedDestination.objects.filter(feed_id__iexact=feed_obj.id).delete()
+        FeedDestination.objects.filter(feed__iexact=feed_obj).delete()
         for dest in destinations:
             feed_destination = FeedDestination()
             feed_destination.feed = feed_obj
