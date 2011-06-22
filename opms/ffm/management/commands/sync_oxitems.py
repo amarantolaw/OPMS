@@ -133,7 +133,7 @@ class Command(NoArgsCommand):
 
             # Things to do after the Feed is created
             self._set_feed_destinations(f, row.channel_guid, row.channel_tpi, row.deleted)
-            #self._get_or_create_link(f, row.link)
+            self._get_or_create_link(f, row.link)
             #self._parse_items(f, row.id, row.channel_sort_values)
             #self._set_jorum_tags(f, row.channel_jorumopen_collection)
             #self._get_or_create_artwork(f, row.channel_image)
@@ -200,13 +200,21 @@ class Command(NoArgsCommand):
             self._debug(feed_obj.slug + " linked to " + dest.name)
         return None
 
+
+    def _get_or_create_link(self, feed_obj, url):
+        # Handle the M2M relationship between Feed and Link
+        link, created = Link.objects.get_or_create(url=url, defaults={'url':url})
+        if created:
+            link.save()
+
+        feed_obj.links.add(link)
+        return None
+
+
     def _get_or_create_owning_unit(self, oxpoints_unit):
         return Unit.objects.get(pk=1)
 
     def _set_jorum_tags(self, feed_obj, collection_string):
-        return None
-
-    def _get_or_create_link(self, feed_obj, url):
         return None
 
     # Import OxItems.Items, but done on a channel by channel basis
