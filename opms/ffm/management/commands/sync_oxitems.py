@@ -187,7 +187,7 @@ class Command(NoArgsCommand):
 
         self._debug("set_feed_destination about to link feed to " + str(len(destinations)) + " destinations")
         # For this sync we just wipe and recreate, no need to try to sync
-        FeedDestination.objects.filter(feed__iexact=feed_obj).delete()
+        FeedDestination.objects.filter(feed=feed_obj).delete()
         for dest in destinations:
             feed_destination = FeedDestination()
             feed_destination.feed = feed_obj
