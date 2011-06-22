@@ -136,8 +136,8 @@ class Command(NoArgsCommand):
 
             # Things to do after the Feed is created
             self._set_feed_destinations(f, row.channel_guid, row.channel_tpi, row.deleted)
+            self._get_or_create_artwork(f, row.channel_image)
             #self._parse_items(f, row.id, row.channel_sort_values)
-            #self._get_or_create_artwork(f, row.channel_image)
 
             if counter == 0 or (counter % 50) == 0:
                 self._debug("Parsed %s of %s Channels" % (counter,total_count))
@@ -230,18 +230,29 @@ class Command(NoArgsCommand):
             if created:
                 tag.save()
                 self._debug("Tag created for: " + str(tag.name))
+                # TODO: Raise an error here because we should have all the jorumopen collection codes already in a fixture and loaded
             else:
                 self._debug("Tag found @" + str(tag.id) + " for:" + str(tag.name))
 
         feedgroup_obj.tags.add(tag)
         return None
 
-    # Import OxItems.Items, but done on a channel by channel basis
-    def _parse_items(self, feed_obj, channel_id, sort_order):
+    def _get_or_create_artwork(self, feed_obj, url):
+        # TODO: Test the url is valid and do the full file analysis eventually
+        # Trust the URL for the timebeing...
+        function = FileFunction.objects.get(pk=3) # Hardcoded for fixture loaded FileFunction FeedArt
+        artwork, created = File.objects.get_or_create(url=url, function=function, defaults={'url':url, 'function':function})
+        if created:
+            artwork.save()
+            self._debug("Artwork item created")
+        else:
+            self._debug("Artwork item found")
+
+        feed_obj.files.add(artwork)
         return None
 
-    def _get_or_create_artwork(self, feed_obj, url):
-        artwork = File()
+    # Import OxItems.Items, but done on a channel by channel basis
+    def _parse_items(self, feed_obj, channel_id, sort_order):
         return None
 
     """
