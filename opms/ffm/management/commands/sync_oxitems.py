@@ -79,7 +79,7 @@ class Command(NoArgsCommand):
 
 
         # Import OxItems.Channels
-        oxitems_channels = Rg07Channels.objects.all()
+        oxitems_channels = Rg07Channels.objects.filter(deleted=False)
         total_count = len(oxitems_channels)
         for counter, row in enumerate(oxitems_channels):
             # Update or create?
@@ -99,7 +99,7 @@ class Command(NoArgsCommand):
             f.title = row.title
             f.description = row.description
             self._debug("slug=" + row.name)
-            f.slug = row.name # NB: THESE ARE NOT UNIQUE IN OXITEMS
+            f.slug = row.name # NB: THESE ARE NOT UNIQUE IN OXITEMS. For the moment, cheat. Don't imported deleted, hence no duplicates.
             f.internal_comments = row.channel_emailaddress
             f.last_updated = row.channel_updated
             f.owning_unit = self._get_or_create_owning_unit(row.oxpoints_units)
