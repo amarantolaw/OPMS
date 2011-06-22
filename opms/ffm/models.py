@@ -214,10 +214,16 @@ class Destination(models.Model):
 class FeedGroup(models.Model):
     description = models.TextField("description", default='')
     internal_comments = models.TextField("Private comments on this feed", default='')
+    links = models.ManyToManyField(Link, verbose_name="Associated Links", null=True)
     owning_unit = models.ForeignKey(Unit, verbose_name="unit owning this feed", default=1)
     publish_start = models.DateField("start publishing from date", default=datetime.now)
     publish_stop = models.DateField("stop publishing by date", null=True)
     title = models.CharField("title", max_length=150, default='Untitled Feed')
+    tags = models.ManyToManyField(Tag, verbose_name="tags categorising this feed", null=True)
+
+    @property
+    def jorumopen_collections(self):
+        return tags.filter(group__name__iexact='JorumOPEN Collection')
 
     def __unicode__(self):
         return smart_unicode(self.title) or ''
@@ -228,9 +234,7 @@ class Feed(models.Model):
     feed_group = models.ForeignKey(FeedGroup, verbose_name="feed group", default=1)
     files = models.ManyToManyField(File, through='FileInFeed', verbose_name="files related to this feed", null=True)
     last_updated = models.DateTimeField("Datetime for last update", auto_now=True, default=datetime.now)
-    links = models.ManyToManyField(Link, verbose_name="Associated Links", null=True)
     slug = models.SlugField("seo feedname", unique=True) # aka, Feed name in OxItems parlance
-    tags = models.ManyToManyField(Tag, verbose_name="tags categorising this feed", null=True)
 
     @property
     def podcasts(self):
