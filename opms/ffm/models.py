@@ -211,20 +211,26 @@ class Destination(models.Model):
         return smart_unicode(self.name + ' (' + str(self.url) + ')')
 
 
-
-class Feed(models.Model):
+class FeedGroup(models.Model):
     description = models.TextField("description", default='')
-    destinations = models.ManyToManyField(Destination, through='FeedDestination', verbose_name="destinations for this feed", null=True)
-    files = models.ManyToManyField(File, through='FileInFeed', verbose_name="files related to this feed", null=True)
     internal_comments = models.TextField("Private comments on this feed", default='')
-    last_updated = models.DateTimeField("Datetime for last update", auto_now=True, default=datetime.now)
-    links = models.ManyToManyField(Link, verbose_name="Associated Links", null=True)
     owning_unit = models.ForeignKey(Unit, verbose_name="unit owning this feed", default=1)
     publish_start = models.DateField("start publishing from date", default=datetime.now)
     publish_stop = models.DateField("stop publishing by date", null=True)
+    title = models.CharField("title", max_length=150)
+
+    def __unicode__(self):
+        return smart_unicode(self.title) or ''
+
+
+class Feed(models.Model):
+    destinations = models.ManyToManyField(Destination, through='FeedDestination', verbose_name="destinations for this feed", null=True)
+    feed_group = models.ForeignKey(FeedGroup, verbose_name="feed group")
+    files = models.ManyToManyField(File, through='FileInFeed', verbose_name="files related to this feed", null=True)
+    last_updated = models.DateTimeField("Datetime for last update", auto_now=True, default=datetime.now)
+    links = models.ManyToManyField(Link, verbose_name="Associated Links", null=True)
     slug = models.SlugField("seo feedname", unique=True) # aka, Feed name in OxItems parlance
     tags = models.ManyToManyField(Tag, verbose_name="tags categorising this feed", null=True)
-    title = models.CharField("title", max_length=150)
 
     @property
     def podcasts(self):
@@ -236,7 +242,7 @@ class Feed(models.Model):
         return files.filter(iexact='feedart')
 
     def __unicode__(self):
-        return smart_unicode(self.title) or ''
+        return smart_unicode(self.slug) or ''
 
     class Meta:
         verbose_name = 'Podcast feed'
