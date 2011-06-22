@@ -115,11 +115,11 @@ class Command(NoArgsCommand):
             #f.save()
 
             # Things to do after the Feed is created
-            self._set_feed_destinations(f, row.channel_guid, row.channel_tpi, row.deleted)
-            self._get_or_create_link(f, row.link)
-            self._parse_items(f, row.id, row.channel_sort_values)
-            self._set_jorum_tags(f, row.channel_jorumopen_collection)
-            self._get_or_create_artwork(f, row.channel_image)
+            #self._set_feed_destinations(f, row.channel_guid, row.channel_tpi, row.deleted)
+            #self._get_or_create_link(f, row.link)
+            #self._parse_items(f, row.id, row.channel_sort_values)
+            #self._set_jorum_tags(f, row.channel_jorumopen_collection)
+            #self._get_or_create_artwork(f, row.channel_image)
 
             if counter == 0 or (counter % 50) == 0:
                 self._debug("Parsed %s of %s Channels" % (counter,total_count))
