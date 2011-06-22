@@ -23,6 +23,13 @@ class ImportFeedChannel(models.Model):
     feed = models.ForeignKey(Feed)
     channel = models.ForeignKey("Rg07Channels")
 
+class ImportFeedGroupChannel(models.Model):
+    """
+    If a feedgroup has been linked to this channel, then attempt to update that feed
+    """
+    feedgroup = models.ForeignKey(FeedGroup)
+    channel = models.ForeignKey("Rg07Channels")
+
 class ImportFeeddestinationChannel(models.Model):
     """
     If a feeddestination has been linked to this channel, then attempt to update that feeddestination
