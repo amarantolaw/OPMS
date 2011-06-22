@@ -121,11 +121,11 @@ class Command(NoArgsCommand):
                 ifc.feed = f
                 ifc.channel = row
                 ifc.save()
+                self._debug("Feed created, id:" + str(f.id) + ". slug=" + row.name)
             else:
                 f = row.importfeedchannel_set.get(channel=row).feed #NB: Channels N -> 1 Feed relationship, even though it looks M2M
+                self._debug("Feed found, id:" + str(f.id) + ". slug=" + row.name)
 
-
-            self._debug("slug=" + row.name)
             # NB: THESE ARE NOT UNIQUE IN OXITEMS. For the moment, cheat. Don't imported deleted, hence no duplicates.
             f.slug = row.name
             f.last_updated = row.channel_updated
