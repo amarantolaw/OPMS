@@ -99,7 +99,7 @@ class Command(NoArgsCommand):
                 ifgc.channel = row
                 ifgc.save()
             else:
-                fg = row.importfeedgroupchannel_set.get(channel=row) #NB: Channels N -> 1 FeedGroup relationship, even though it looks M2M
+                fg = row.importfeedgroupchannel_set.get(channel=row).feedgroup #NB: Channels N -> 1 FeedGroup relationship, even though it looks M2M
                 self._debug("FeedGroup found, id: " + str(fg.id) + ". Title=" + fg.title)
 
             fg.title = row.title
