@@ -132,7 +132,7 @@ class Command(NoArgsCommand):
             f.save()
 
             # Things to do after the Feed is created
-            #self._set_feed_destinations(f, row.channel_guid, row.channel_tpi, row.deleted)
+            self._set_feed_destinations(f, row.channel_guid, row.channel_tpi, row.deleted)
             #self._get_or_create_link(f, row.link)
             #self._parse_items(f, row.id, row.channel_sort_values)
             #self._set_jorum_tags(f, row.channel_jorumopen_collection)
@@ -161,6 +161,44 @@ class Command(NoArgsCommand):
         return None
 
 
+    def _set_feed_destinations(self, feed_obj, itunesu_guid, oxitems_destination, oxitems_deleted):
+        # determine how many destinations are needed
+        destinations = []
+        if oxitems_destination == 0:
+            # This isn't appearing anywhere, so exit now
+            return None
+        elif oxitems_destination == 1:
+            destinations.append(Destination.objects.get(pk=1)) # POAU
+            destinations.append(Destination.objects.get(pk=2)) # POAU-Beta
+            destinations.append(Destination.objects.get(pk=4)) # m.ox
+        elif oxitems_destination == 2:
+            destinations.append(Destination.objects.get(pk=3)) # iTunesU
+            destinations.append(Destination.objects.get(pk=4)) # m.ox
+        elif oxitems_destination == 3:
+            destinations.append(Destination.objects.get(pk=1)) # POAU
+            destinations.append(Destination.objects.get(pk=2)) # POAU-Beta
+            destinations.append(Destination.objects.get(pk=3)) # iTunesU
+            destinations.append(Destination.objects.get(pk=4)) # m.ox
+        else:
+            # Something strange happened here...
+            self._errorlog("set_feed_destination() could not identify destination for feed:" + feed_obj.slug)
+            return None
+
+        self._debug("set_feed_destination about to link feed to " + str(len(destinations)) + " destinations")
+        # For this sync we just wipe and recreate, no need to try to sync
+        FeedDestination.objects.filter(feed_id__iexact=feed_obj.id).delete()
+        for dest in destinations:
+            feed_destination = FeedDestination()
+            feed_destination.feed = feed_obj
+            feed_destination.destination = dest
+            if dest.id == 3: # iTunes U from fixtures/db
+                feed_destination.guid = itunesu_guid # This is largely ignored and unused...
+            if oxitems_deleted == True: # NB: whilst hacking out the slug duplicates by ignoring deleted items, this is untested...
+                feed_destination.withhold = 1000 # TODO: Need to determine some workflow values and descriptions for withhold
+            feed_destination.save()
+            self._debug(feed_obj.slug + " linked to " + destination.name)
+        return None
+
     def _get_or_create_owning_unit(self, oxpoints_unit):
         return Unit.objects.get(pk=1)
 
@@ -176,13 +214,6 @@ class Command(NoArgsCommand):
 
     def _get_or_create_artwork(self, feed_obj, url):
         artwork = File()
-        return None
-
-    def _set_feed_destinations(self, feed_obj, itunesu_guid, oxitems_destination, oxitems_deleted):
-
-        fd = FeedDestination()
-        if oxitems_deleted == True:
-            fd.withhold = 1000 # TODO: Need to determine some workflow values and descriptions for withhold
         return None
 
     """
