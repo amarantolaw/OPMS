@@ -109,6 +109,9 @@ class Command(NoArgsCommand):
             fg.internal_comments = row.channel_emailaddress
             fg.owning_unit = self._get_or_create_owning_unit(row.oxpoints_units)
             fg.save()
+            # Things to do after the FeedGroup is created/found
+            self._get_or_create_link(fg, row.link)
+            self._set_jorum_tags(fg, row.channel_jorumopen_collection)
 
             # Update or create Feed?
             if len(row.importfeedchannel_set.all()) == 0: # Create Feed
@@ -133,8 +136,6 @@ class Command(NoArgsCommand):
 
             # Things to do after the Feed is created
             self._set_feed_destinations(f, row.channel_guid, row.channel_tpi, row.deleted)
-            self._get_or_create_link(f, row.link)
-            # self._set_jorum_tags(f, row.channel_jorumopen_collection)
             #self._parse_items(f, row.id, row.channel_sort_values)
             #self._get_or_create_artwork(f, row.channel_image)
 
@@ -206,7 +207,7 @@ class Command(NoArgsCommand):
         return None
 
 
-    def _get_or_create_link(self, feed_obj, url):
+    def _get_or_create_link(self, feedgroup_obj, url):
         # Handle the M2M relationship between Feed and Link
         link, created = Link.objects.get_or_create(url=url, defaults={'url':url})
         if created:
@@ -215,10 +216,24 @@ class Command(NoArgsCommand):
         else:
             self._debug("Link found @" + str(link.id) + " for: " + str(url))
 
-        feed_obj.links.add(link)
+        feedgroup_obj.links.add(link)
         return None
 
-    def _set_jorum_tags(self, feed_obj, collection_string):
+    def _set_jorum_tags(self, feedgroup_obj, collection_string):
+        if len(collection_string) < 10:
+            return None
+
+        g = TagGroup.objects.get(pk=3) # Hardcoded for fixture loaded Jorumopen collection group
+        tags = collection_string.split('|')
+        for t in tags:
+            tag, created = Tag.objects.get_or_create(name=t,group=g, defaults={'name':t, 'group':g})
+            if created:
+                tag.save()
+                self._debug("Tag created for: " + str(tag.name))
+            else:
+                self._debug("Tag found @" + str(tag.id) + " for:" + str(tag.name))
+
+        feedgroup_obj.tags.add(tag)
         return None
 
     # Import OxItems.Items, but done on a channel by channel basis
