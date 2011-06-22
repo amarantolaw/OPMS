@@ -86,7 +86,7 @@ class Command(NoArgsCommand):
             if len(row.importfeedgroupchannel_set.all()) == 0:
                 # Does this need merging with an existing feedgroup? Compare with existing titles. Basic exact match first...
                 feed_group = {'title': row.title}
-                fg, created = FeedGroup.objects.get_or_create(title=row.title, default=feed_group)
+                fg, created = FeedGroup.objects.get_or_create(title=row.title, defaults=feed_group)
                 if created:
                     self._debug("New FeedGroup created, id: " + str(fg.id) + ". Title=" + fg.title)
                     fg.save()
