@@ -92,3 +92,9 @@
     name: Oxford University Homepage
     description: The primary university website
     url: http://www.ox.ac.uk/
+
+- model: ffm.feedgroup
+  pk: 1
+  fields:
+    title: Master Unknown Feed
+    owning_unit: 1
