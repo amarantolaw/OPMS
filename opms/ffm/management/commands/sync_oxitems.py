@@ -83,7 +83,7 @@ class Command(NoArgsCommand):
         oxitems_channels = Rg07Channels.objects.filter(deleted=False)
         total_count = len(oxitems_channels)
         for counter, row in enumerate(oxitems_channels):
-            # Update or create? Work from FeedGroup, through to Feed and beyond.
+            # Update or create FeedGroup?
             if len(row.importfeedgroupchannel_set.all()) == 0:
                 # Does this need merging with an existing feedgroup? Compare with existing titles. Basic exact match first...
                 feed_group = {'title': row.title}
@@ -103,17 +103,33 @@ class Command(NoArgsCommand):
                 fg = row.importfeedgroupchannel_set.get(channel=row).feedgroup #NB: Channels N -> 1 FeedGroup relationship, even though it looks M2M
                 self._debug("FeedGroup found, id: " + str(fg.id) + ". Title=" + fg.title)
 
+            # NB: This will overwrite with the last item found to match, and there is no sort order on the list...
             fg.title = row.title
             fg.description = row.description
             fg.internal_comments = row.channel_emailaddress
             fg.owning_unit = self._get_or_create_owning_unit(row.oxpoints_units)
             fg.save()
 
-            
+            # Update or create Feed?
+            if len(row.importfeedchannel_set.all()) == 0: # Create Feed
+                f = Feed()
+                f.feed_group = fg
+                f.save()
+
+                # Make link to import
+                ifc = ImportFeedChannel()
+                ifc.feed = f
+                ifc.channel = row
+                ifc.save()
+            else:
+                f = row.importfeedchannel_set.get(channel=row).feed #NB: Channels N -> 1 Feed relationship, even though it looks M2M
+
+
             self._debug("slug=" + row.name)
-            #f.slug = row.name # NB: THESE ARE NOT UNIQUE IN OXITEMS. For the moment, cheat. Don't imported deleted, hence no duplicates.
-            #f.last_updated = row.channel_updated
-            #f.save()
+            # NB: THESE ARE NOT UNIQUE IN OXITEMS. For the moment, cheat. Don't imported deleted, hence no duplicates.
+            f.slug = row.name
+            f.last_updated = row.channel_updated
+            f.save()
 
             # Things to do after the Feed is created
             #self._set_feed_destinations(f, row.channel_guid, row.channel_tpi, row.deleted)
