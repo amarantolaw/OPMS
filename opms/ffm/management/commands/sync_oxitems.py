@@ -137,7 +137,7 @@ class Command(NoArgsCommand):
             # Things to do after the Feed is created
             self._set_feed_destinations(f, row.channel_guid, row.channel_tpi, row.deleted)
             self._get_or_create_feedartwork(f, row.channel_image)
-            self._parse_items(f, row.id, row.channel_sort_values)
+            self._parse_items(f, row)
 
             if counter == 0 or (counter % 50) == 0:
                 self._debug("Parsed %s of %s Channels" % (counter,total_count))
@@ -261,8 +261,10 @@ class Command(NoArgsCommand):
 
 
     # Import OxItems.Items, but done on a channel by channel basis
-    def _parse_items(self, feed_obj, channel_id, sort_order):
+    def _parse_items(self, feed_obj, channel_obj):
         # TODO: YOU ARE HERE!!!
+        oxitems = Rg07Items.objects.filter(item_channel=channel_obj)
+        self._debug("Found " + str(len(oxitems)) + " OxItems to process")
         return None
 
     """
