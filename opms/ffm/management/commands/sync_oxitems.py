@@ -197,7 +197,7 @@ class Command(NoArgsCommand):
             if oxitems_deleted == True: # NB: whilst hacking out the slug duplicates by ignoring deleted items, this is untested...
                 feed_destination.withhold = 1000 # TODO: Need to determine some workflow values and descriptions for withhold
             feed_destination.save()
-            self._debug(feed_obj.slug + " linked to " + destination.name)
+            self._debug(feed_obj.slug + " linked to " + dest.name)
         return None
 
     def _get_or_create_owning_unit(self, oxpoints_unit):
