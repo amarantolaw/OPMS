@@ -60,6 +60,24 @@
     name: FeedArt
     description: Album artwork for a specific feed
     category: image
+- model: ffm.filefunction
+  pk: 4
+  fields:
+    name: AudioPodcast
+    description: Default Audio Podcast (typically mp3)
+    category: audio
+- model: ffm.filefunction
+  pk: 5
+  fields:
+    name: VideoSoundtrack
+    description: Audio soundtrack of a video podcast
+    category: audio
+- model: ffm.filefunction
+  pk: 6
+  fields:
+    name: VideoPodcast
+    description: Default Video Podcast (typically mp4)
+    category: video
 
 - model: ffm.destination
   pk: 1
