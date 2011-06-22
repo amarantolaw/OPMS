@@ -136,7 +136,7 @@ class Command(NoArgsCommand):
 
             # Things to do after the Feed is created
             self._set_feed_destinations(f, row.channel_guid, row.channel_tpi, row.deleted)
-            self._get_or_create_artwork(f, row.channel_image)
+            self._get_or_create_feedartwork(f, row.channel_image)
             #self._parse_items(f, row.id, row.channel_sort_values)
 
             if counter == 0 or (counter % 50) == 0:
@@ -219,6 +219,7 @@ class Command(NoArgsCommand):
         feedgroup_obj.links.add(link)
         return None
 
+
     def _set_jorum_tags(self, feedgroup_obj, collection_string):
         if len(collection_string) < 10:
             return None
@@ -237,19 +238,27 @@ class Command(NoArgsCommand):
         feedgroup_obj.tags.add(tag)
         return None
 
-    def _get_or_create_artwork(self, feed_obj, url):
+
+    def _get_or_create_feedartwork(self, feed_obj, url):
         # TODO: Test the url is valid and do the full file analysis eventually
+        if url == '':
+            return None
         # Trust the URL for the timebeing...
         function = FileFunction.objects.get(pk=3) # Hardcoded for fixture loaded FileFunction FeedArt
         artwork, created = File.objects.get_or_create(url=url, function=function, defaults={'url':url, 'function':function})
         if created:
             artwork.save()
-            self._debug("Artwork item created")
+            self._debug("Artwork item created: " + str(url))
         else:
-            self._debug("Artwork item found")
+            self._debug("Artwork item found @" + str(artwork.id) + " for: " + str(url))
 
-        feed_obj.files.add(artwork)
+        fif, created = FileInFeed.objects.get_or_create(file=artwork, feed=feed_obj, defaults={
+            'file':artwork, 'feed':feed_obj, 'withhold':0
+        })
+        if created:
+            fif.save()
         return None
+
 
     # Import OxItems.Items, but done on a channel by channel basis
     def _parse_items(self, feed_obj, channel_id, sort_order):
