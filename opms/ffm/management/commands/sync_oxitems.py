@@ -93,13 +93,18 @@ class Command(NoArgsCommand):
                 ifc.feed = f
                 ifc.channel = row
                 ifc.save()
+
+                self._debug("New Feed created: " + row.title)
             else:
                 f = row.importfeedchannel_set.get(channel=row) #NB: Channels N -> 1 Feed relationship, even though it looks M2M
+                self._debug("Feed found, id: " + f.id)
 
             f.title = row.title
             f.description = row.description
+            
             self._debug("slug=" + row.name)
             f.slug = row.name # NB: THESE ARE NOT UNIQUE IN OXITEMS. For the moment, cheat. Don't imported deleted, hence no duplicates.
+
             f.internal_comments = row.channel_emailaddress
             f.last_updated = row.channel_updated
             f.owning_unit = self._get_or_create_owning_unit(row.oxpoints_units)
