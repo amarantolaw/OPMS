@@ -206,6 +206,9 @@ class Command(NoArgsCommand):
         link, created = Link.objects.get_or_create(url=url, defaults={'url':url})
         if created:
             link.save()
+            self._debug("Link created for: " + str(url))
+        else:
+            self._debug("Link found @" + str(link.id) + " for: " + str(url))
 
         feed_obj.links.add(link)
         return None
