@@ -217,7 +217,7 @@ class FeedGroup(models.Model):
     owning_unit = models.ForeignKey(Unit, verbose_name="unit owning this feed", default=1)
     publish_start = models.DateField("start publishing from date", default=datetime.now)
     publish_stop = models.DateField("stop publishing by date", null=True)
-    title = models.CharField("title", max_length=150)
+    title = models.CharField("title", max_length=150, default='Untitled Feed')
 
     def __unicode__(self):
         return smart_unicode(self.title) or ''

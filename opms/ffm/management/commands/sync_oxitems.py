@@ -82,33 +82,37 @@ class Command(NoArgsCommand):
         oxitems_channels = Rg07Channels.objects.filter(deleted=False)
         total_count = len(oxitems_channels)
         for counter, row in enumerate(oxitems_channels):
-            # Update or create?
-            if len(row.importfeedchannel_set.all()) == 0:
-                # Create a new feed
-                f = Feed()
-                f.save()
+            # Update or create? Work from FeedGroup, through to Feed and beyond.
+            if len(row.importfeedgroupchannel_set.all()) == 0:
+                # Does this need merging with an existing feedgroup? Compare with existing titles. Basic exact match first...
+                feed_group = {'title': row.title}
+                fg, created = FeedGroup.objects.get_or_create(title=row.title, default=feed_group)
+                if created:
+                    self._debug("New FeedGroup created, id: " + str(fg.id) + ". Title=" + fg.title)
+                    fg.save()
+                else:
+                    self._debug("FeedGroup found for merger, id: " + str(fg.id) + ". Title=" + fg.title)
 
                 # Make link to import
-                ifc = ImportFeedChannel()
-                ifc.feed = f
-                ifc.channel = row
-                ifc.save()
-
-                self._debug("New Feed created: " + row.title)
+                ifgc = ImportFeedGroupChannel()
+                ifgc.feed = fg
+                ifgc.channel = row
+                ifgc.save()
             else:
-                f = row.importfeedchannel_set.get(channel=row) #NB: Channels N -> 1 Feed relationship, even though it looks M2M
-                self._debug("Feed found, id: " + str(f.id))
+                fg = row.importfeedgroupchannel_set.get(channel=row) #NB: Channels N -> 1 FeedGroup relationship, even though it looks M2M
+                self._debug("FeedGroup found, id: " + str(fg.id) + ". Title=" + fg.title)
 
-            f.title = row.title
-            f.description = row.description
+            fg.title = row.title
+            fg.description = row.description
+            fg.internal_comments = row.channel_emailaddress
+            fg.owning_unit = self._get_or_create_owning_unit(row.oxpoints_units)
+            fg.save()
+
             
             self._debug("slug=" + row.name)
-            f.slug = row.name # NB: THESE ARE NOT UNIQUE IN OXITEMS. For the moment, cheat. Don't imported deleted, hence no duplicates.
-
-            f.internal_comments = row.channel_emailaddress
-            f.last_updated = row.channel_updated
-            f.owning_unit = self._get_or_create_owning_unit(row.oxpoints_units)
-            f.save()
+            #f.slug = row.name # NB: THESE ARE NOT UNIQUE IN OXITEMS. For the moment, cheat. Don't imported deleted, hence no duplicates.
+            #f.last_updated = row.channel_updated
+            #f.save()
 
             # Things to do after the Feed is created
             self._set_feed_destinations(f, row.channel_guid, row.channel_tpi, row.deleted)
