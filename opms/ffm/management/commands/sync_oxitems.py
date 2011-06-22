@@ -97,7 +97,7 @@ class Command(NoArgsCommand):
                 self._debug("New Feed created: " + row.title)
             else:
                 f = row.importfeedchannel_set.get(channel=row) #NB: Channels N -> 1 Feed relationship, even though it looks M2M
-                self._debug("Feed found, id: " + f.id)
+                self._debug("Feed found, id: " + str(f.id))
 
             f.title = row.title
             f.description = row.description
