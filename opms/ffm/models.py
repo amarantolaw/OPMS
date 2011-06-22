@@ -225,7 +225,7 @@ class FeedGroup(models.Model):
 
 class Feed(models.Model):
     destinations = models.ManyToManyField(Destination, through='FeedDestination', verbose_name="destinations for this feed", null=True)
-    feed_group = models.ForeignKey(FeedGroup, verbose_name="feed group")
+    # feed_group = models.ForeignKey(FeedGroup, verbose_name="feed group", default=1) two stage migration again...
     files = models.ManyToManyField(File, through='FileInFeed', verbose_name="files related to this feed", null=True)
     last_updated = models.DateTimeField("Datetime for last update", auto_now=True, default=datetime.now)
     links = models.ManyToManyField(Link, verbose_name="Associated Links", null=True)
