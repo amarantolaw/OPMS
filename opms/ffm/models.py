@@ -181,7 +181,7 @@ class File(models.Model):
     #v2.0 file = models.FileField(upload_to='')
     function = models.ForeignKey(FileFunction, verbose_name="file function", default=1)
     guid = models.CharField("file GUID", max_length=100, default=create_guid)
-    item = models.ForeignKey(Item, verbose_name="Owning Item", null=True) # Some files belong to feeds, or licences, not just items
+    item = models.ForeignKey(Item, verbose_name="Owning Item", default=None, null=True) # Some files belong to feeds, or licences, not just items
     mimetype = models.CharField("mime type", max_length=50, choices=MIMETYPES, default='unknown')
     url = models.URLField("file url", verify_exists=True) # Everything in this system should be hosted on a URL
     # Optional extras
