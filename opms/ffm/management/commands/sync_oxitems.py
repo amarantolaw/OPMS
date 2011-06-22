@@ -6,6 +6,7 @@ from django.core.management.base import NoArgsCommand, CommandError
 from opms.ffm.models import *
 from opms.oxitems.models import *
 import datetime, sys
+from django.utils.encoding import smart_str, smart_unicode
 
 class Command(NoArgsCommand):
     help = 'Scan through OxItems database and import into OPMS:FFM'
@@ -214,15 +215,12 @@ class Command(NoArgsCommand):
     def _debug(self,error_str):
         "Basic optional debug function. Print the string if enabled"
         if self.debug:
-            print 'DEBUG:' + str(error_str) + '\n'
+            print 'DEBUG:' + smart_unicode(error_str) + '\n'
         return None
-
 
     def _errorlog(self,error_str):
         "Write errors to a log file"
-        # sys.stderr.write('ERROR:' + str(error_str) + '\n')
-        #self.error_log.write('ERROR:' + str(error_str) + '\n')
-        self.error_cache += 'ERROR:' + str(error_str) + '\n'
+        self.error_cache += 'ERROR:' + smart_unicode(error_str) + '\n'
         return None
 
 
