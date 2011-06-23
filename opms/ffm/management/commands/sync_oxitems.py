@@ -274,14 +274,7 @@ class Command(NoArgsCommand):
                 item = {'title':row.item_title} # NB: May fail without a person record to store...
                 i, created = Item.objects.get_or_create(title=row.item_title, defaults=item)
                 if created:
-                    i.last_updated = row.last_updated
-                    i.description = row.item_summary + " :: " + row.item_content
-                    i.publish_start = row.item_startdate
-                    i.recording_date = row.item_recording_date
-                    i.internal_comments = row.item_other_comments + " :: " + row.item_legal_comments
-                    i.publish_stop = row.item_expires
-                    i.license = self._get_licence(row.item_licence) # TODO: Correct and standardise all spellings of licence/license
-                    i.owning_unit = self._get_or_create_owning_unit('')
+                    i = self._update_item(i, row)
                     i.save()
                     self._debug("New Item created, id, id: " + str(i.id) + ". Title=" + i.title)
                 else:
@@ -297,14 +290,7 @@ class Command(NoArgsCommand):
                 self._debug("Item found, id: " + str(i.id) + ". Title=" + i.title)
 
             if not row.deleted: #Only overwrite the item information if this is not a deleted item
-                i.last_updated = row.item_updated
-                i.description = row.item_summary + " :: " + row.item_content
-                i.publish_start = row.item_startdate
-                i.recording_date = row.item_recording_date
-                i.internal_comments = row.item_other_comments + " :: " + row.item_legal_comments
-                i.publish_stop = row.item_expires
-                i.license = self._get_licence(row.item_licence)
-                i.owning_unit = self._get_or_create_owning_unit('')
+                i = self._update_item(i, row)
                 i.save()
                 self._debug("Item details updated from oxitems row:" + str(row.id))
 
@@ -320,6 +306,30 @@ class Command(NoArgsCommand):
 
         return None
 
+    def _update_item(self, item_obj, oxitem_obj):
+        if oxitem_obj.item_updated != '':
+            item_obj.last_updated = oxitem_obj.item_updated
+        item_obj.description = oxitem_obj.item_summary
+        if item_obj.description != '':
+            item_obj.description += (" :: " + oxitem_obj.item_content)
+        else:
+            item_obj.description = oxitem_obj.item_content
+        if oxitem_obj.item_startdate != '':
+            item_obj.publish_start = oxitem_obj.item_startdate
+        if oxitem_obj.item_recording_date != '':
+            item_obj.recording_date = oxitem_obj.item_recording_date
+        item_obj.internal_comments = oxitem_obj.item_other_comments
+        if item_obj.internal_comments != '':
+            item_obj.internal_comments += (" :: " + oxitem_obj.item_legal_comments)
+        else:
+            item_obj.internal_comments = oxitem_obj.item_legal_comments
+        if oxitem_obj.item_expires != '':
+            item_obj.publish_stop = oxitem_obj.item_expires
+        item_obj.license = self._get_licence(oxitem_obj.item_licence) # TODO: Correct and standardise all spellings of licence/license
+        item_obj.owning_unit = self._get_or_create_owning_unit('')
+        return item_obj
+
+
     def _get_licence(self, oxitems_licence):
         if  oxitems_licence == 5:
             return Licence.objects.get(pk=2) # CC BY-NC-SA Licence hardcoded from Fixtures
@@ -328,7 +338,6 @@ class Command(NoArgsCommand):
         else:
             return Licence.objects.get(pk=1) # Personal Licence hardcoded from Fixtures
 
-    
 
     def _parse_people(self, oxitem_obj, item_obj):
         return None
