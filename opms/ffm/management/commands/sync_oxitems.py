@@ -368,6 +368,9 @@ class Command(NoArgsCommand):
         if len(oxitem_obj.item_enclosure_length)>0:
             file_obj.size = int(oxitem_obj.item_enclosure_length)
         file_obj.duration = int(oxitem_obj.item_duration)
+        # TODO: determine file function
+        # TODO: determine file mimetype
+        # TODO: determine proper duration and size from the file...
         return file_obj
 
 
@@ -381,10 +384,12 @@ class Command(NoArgsCommand):
 
 
     def _parse_people(self, oxitem_obj, item_obj):
+        # TODO: parse the people associated with this item
         return None
 
 
     def _parse_keywords(self, oxitem_obj, item_obj):
+        # TODO: parse the keywords associated with this item
         return None
 
 
