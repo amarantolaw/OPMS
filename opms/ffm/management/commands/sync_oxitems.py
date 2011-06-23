@@ -297,7 +297,7 @@ class Command(NoArgsCommand):
                 self._debug("Item found, id: " + str(i.id) + ". Title=" + i.title)
 
             if not row.deleted: #Only overwrite the item information if this is not a deleted item
-                i.last_updated = row.last_updated
+                i.last_updated = row.item_updated
                 i.description = row.item_summary + " :: " + row.item_content
                 i.publish_start = row.item_startdate
                 i.recording_date = row.item_recording_date
