@@ -365,7 +365,7 @@ class Command(NoArgsCommand):
 
 
     def _update_item(self, item_obj, oxitem_obj):
-        self._debug("item_updated=" + oxitem_obj.item_updated)
+        self._debug("item_updated='" + oxitem_obj.item_updated + "'")
         if oxitem_obj.item_updated != '':
             item_obj.last_updated = oxitem_obj.item_updated
         item_obj.description = oxitem_obj.item_summary
@@ -373,10 +373,10 @@ class Command(NoArgsCommand):
             item_obj.description += (" :: " + oxitem_obj.item_content)
         else:
             item_obj.description = oxitem_obj.item_content
-        self._debug("item_startdate=" + oxitem_obj.item_startdate)
+        self._debug("item_startdate='" + oxitem_obj.item_startdate + "'")
         if oxitem_obj.item_startdate != '':
             item_obj.publish_start = oxitem_obj.item_startdate
-        self._debug("item_recording_date=" + oxitem_obj.item_recording_date)
+        self._debug("item_recording_date='" + oxitem_obj.item_recording_date + "'")
         if oxitem_obj.item_recording_date != '':
             item_obj.recording_date = oxitem_obj.item_recording_date
         item_obj.internal_comments = oxitem_obj.item_other_comments
@@ -384,7 +384,7 @@ class Command(NoArgsCommand):
             item_obj.internal_comments += (" :: " + oxitem_obj.item_legal_comments)
         else:
             item_obj.internal_comments = oxitem_obj.item_legal_comments
-        self._debug("item_expires=" + oxitem_obj.item_expires)
+        self._debug("item_expires='" + oxitem_obj.item_expires + "'")
         if oxitem_obj.item_expires != '':
             item_obj.publish_stop = oxitem_obj.item_expires
         item_obj.license = self._get_licence(oxitem_obj.item_licence) # TODO: Correct and standardise all spellings of licence/license
