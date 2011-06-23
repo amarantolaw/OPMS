@@ -311,7 +311,7 @@ class Command(NoArgsCommand):
     def _update_item(self, item_obj, oxitem_obj):
         self._debug("item_updated='" + oxitem_obj.item_updated + "'")
         if len(oxitem_obj.item_updated) > 6:
-            item_obj.last_updated = datetime.strptime(oxitem_obj.item_updated,'%Y-%m-%dT%H:%M:%s%z')
+            item_obj.last_updated = datetime.strptime(oxitem_obj.item_updated,'%Y-%m-%dT%H:%M:%S%z')
 
         item_obj.description = oxitem_obj.item_summary
         if item_obj.description != '':
@@ -321,11 +321,11 @@ class Command(NoArgsCommand):
 
         self._debug("item_startdate='" + oxitem_obj.item_startdate + "'")
         if len(oxitem_obj.item_startdate) > 6:
-            item_obj.publish_start = datetime.strptime(oxitem_obj.item_startdate,'%Y-%m-%dT%H:%M:%s%z')
+            item_obj.publish_start = datetime.strptime(oxitem_obj.item_startdate,'%Y-%m-%dT%H:%M:%S%z')
 
         self._debug("item_recording_date='" + oxitem_obj.item_recording_date + "'")
         if len(oxitem_obj.item_recording_date) > 6:
-            item_obj.recording_date = datetime.strptime(oxitem_obj.item_recording_date,'%Y-%m-%dT%H:%M:%s%z')
+            item_obj.recording_date = datetime.strptime(oxitem_obj.item_recording_date,'%Y-%m-%dT%H:%M:%S%z')
 
         item_obj.internal_comments = oxitem_obj.item_other_comments
         if item_obj.internal_comments != '':
@@ -335,7 +335,7 @@ class Command(NoArgsCommand):
 
         self._debug("item_expires='" + oxitem_obj.item_expires + "'")
         if len(oxitem_obj.item_expires) > 6:
-            item_obj.publish_stop = datetime.strptime(oxitem_obj.item_expires,'%Y-%m-%dT%H:%M:%s%z')
+            item_obj.publish_stop = datetime.strptime(oxitem_obj.item_expires,'%Y-%m-%dT%H:%M:%S%z')
 
         item_obj.license = self._get_licence(oxitem_obj.item_licence) # TODO: Correct and standardise all spellings of licence/license
         item_obj.owning_unit = self._get_or_create_owning_unit('')
