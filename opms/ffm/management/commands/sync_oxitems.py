@@ -308,8 +308,8 @@ class Command(NoArgsCommand):
                 f, created = File.objects.get_or_create(url=row.item_enclosure_href, defaults=file)
                 if created:
                     f.guid = row.item_guid
-                    f.size = row.item_enclosure_length
-                    f.duration = row.item_duration
+                    f.size = int(row.item_enclosure_length)
+                    f.duration = int(row.item_duration)
                     f.save()
                     self._debug("New File created, id: " + str(f.id) + ". Url=" + f.url)
                 else:
@@ -325,8 +325,8 @@ class Command(NoArgsCommand):
 
             if not row.deleted:
                 f.guid = row.item_guid
-                f.size = row.item_enclosure_length
-                f.duration = row.item_duration
+                f.size = int(row.item_enclosure_length)
+                f.duration = int(row.item_duration)
                 f.save()
 
 
