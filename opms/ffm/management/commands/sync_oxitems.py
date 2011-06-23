@@ -262,9 +262,31 @@ class Command(NoArgsCommand):
 
     # Import OxItems.Items, but done on a channel by channel basis
     def _parse_items(self, feed_obj, channel_obj):
-        # TODO: YOU ARE HERE!!!
         oxitems = Rg07Items.objects.filter(item_channel=channel_obj)
         self._debug("Found " + str(len(oxitems)) + " OxItems to process")
+
+        for counter, row in enumerate(oxitems):
+            # Update or create an item
+            if len(row.importitemitem_set.all()) == 0:
+                # Does this need merging with an existing Item? Compare with existing titles...
+                item = {'title':row.item_title} # NB: May fail without a person record to store...
+                i, created = Item.objects.get_or_create(title=row.item_title, defaults=item)
+                if created:
+                    i.save()
+                    self._debug("New Item created, id, id: " + str(i.id) + ". Title=" + i.title)
+                else:
+                    self._debug("Item found for merger, id: " + str(i.id) + ". Title=" + i.title)
+
+                # Make import link
+                iii = ImportItemItem()
+                iii.ffm_item = i
+                iii.item = row
+                iii.save()
+            else:
+                i = row.importitemitem_set.get(item=row).item
+                self._debug("Item found, id: " + str(i.id) + ". Title=" + i.title)
+
+
         return None
 
     """
