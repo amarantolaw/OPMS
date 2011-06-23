@@ -363,12 +363,12 @@ class Command(NoArgsCommand):
         return item_obj
 
 
-    def _update_file(self, file_obj, oxitem_obj):
-        f.guid = row.item_guid
-        if len(row.item_enclosure_length)>0:
-            f.size = int(row.item_enclosure_length)
-        if len(row.item_duration)>0:
-            f.duration = int(row.item_duration)
+    def _update_file(self, file_obj, file_obj):
+        file_obj.guid = file_obj.item_guid
+        if len(file_obj.item_enclosure_length)>0:
+            file_obj.size = int(file_obj.item_enclosure_length)
+        if len(file_obj.item_duration)>0:
+            file_obj.duration = int(file_obj.item_duration)
         return file_obj
 
 
