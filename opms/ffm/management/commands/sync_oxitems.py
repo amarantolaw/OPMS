@@ -306,7 +306,7 @@ class Command(NoArgsCommand):
 
         return None
 
-    def _parseDateTime(self, s):
+    def _parseDateTime(s):
         """Create datetime object representing date/time
            expressed in a string. Handle partial strings with filler
  
@@ -346,7 +346,7 @@ class Command(NoArgsCommand):
             tzhour, tzmin = int(tzhour), int(tzmin)
             if tzhour == tzmin == 0:
                 tzname = 'UTC'
-            tz = FixedOffset(timedelta(hours=tzhour,minutes=tzmin), tzname)
+            tz = FixedOffset(datetime.timedelta(hours=tzhour,minutes=tzmin), tzname)
 
         # Convert the date/time field into a python datetime
         # object.
@@ -366,27 +366,33 @@ class Command(NoArgsCommand):
 
     def _update_item(self, item_obj, oxitem_obj):
         self._debug("item_updated='" + oxitem_obj.item_updated + "'")
-        if oxitem_obj.item_updated != '':
-            item_obj.last_updated = oxitem_obj.item_updated
+        if len(oxitem_obj.item_updated) > 6:
+            item_obj.last_updated = _parseDateTime(oxitem_obj.item_updated)
+
         item_obj.description = oxitem_obj.item_summary
         if item_obj.description != '':
             item_obj.description += (" :: " + oxitem_obj.item_content)
         else:
             item_obj.description = oxitem_obj.item_content
+
         self._debug("item_startdate='" + oxitem_obj.item_startdate + "'")
-        if oxitem_obj.item_startdate != '':
-            item_obj.publish_start = oxitem_obj.item_startdate
+        if len(oxitem_obj.item_startdate) > 6:
+            item_obj.publish_start = _parseDateTime(oxitem_obj.item_startdate)
+
         self._debug("item_recording_date='" + oxitem_obj.item_recording_date + "'")
-        if oxitem_obj.item_recording_date != '':
-            item_obj.recording_date = oxitem_obj.item_recording_date
+        if len(oxitem_obj.item_recording_date) > 6:
+            item_obj.recording_date = _parseDateTime(oxitem_obj.item_recording_date)
+
         item_obj.internal_comments = oxitem_obj.item_other_comments
         if item_obj.internal_comments != '':
             item_obj.internal_comments += (" :: " + oxitem_obj.item_legal_comments)
         else:
             item_obj.internal_comments = oxitem_obj.item_legal_comments
+
         self._debug("item_expires='" + oxitem_obj.item_expires + "'")
-        if oxitem_obj.item_expires != '':
-            item_obj.publish_stop = oxitem_obj.item_expires
+        if len(oxitem_obj.item_expires) > 6:
+            item_obj.publish_stop = _parseDateTime(oxitem_obj.item_expires)
+
         item_obj.license = self._get_licence(oxitem_obj.item_licence) # TODO: Correct and standardise all spellings of licence/license
         item_obj.owning_unit = self._get_or_create_owning_unit('')
         return item_obj
