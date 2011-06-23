@@ -367,8 +367,7 @@ class Command(NoArgsCommand):
         file_obj.guid = oxitem_obj.item_guid
         if len(oxitem_obj.item_enclosure_length)>0:
             file_obj.size = int(oxitem_obj.item_enclosure_length)
-        if len(oxitem_obj.item_duration)>0:
-            file_obj.duration = int(oxitem_obj.item_duration)
+        file_obj.duration = int(oxitem_obj.item_duration)
         return file_obj
 
 
