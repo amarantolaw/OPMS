@@ -5,7 +5,8 @@ from optparse import make_option
 from django.core.management.base import NoArgsCommand, CommandError
 from opms.ffm.models import *
 from opms.oxitems.models import *
-import datetime, sys, re
+import sys, re
+from datetime import datetime
 from django.utils.encoding import smart_str, smart_unicode
 
 class Command(NoArgsCommand):
@@ -48,7 +49,7 @@ class Command(NoArgsCommand):
 
 
     def handle_noargs(self, **options):
-        print "Import started at " + str(datetime.datetime.utcnow()) + "\n"
+        print "Import started at " + str(datetime.utcnow()) + "\n"
 
         # Create an error log
         self._errorlog_start('sync_oxitems.log')
@@ -56,7 +57,7 @@ class Command(NoArgsCommand):
         # Reset statistics
         self.import_stats['update_count'] = 0
         self.import_stats['update_timeoutskips'] = 0
-        self.import_stats['update_starttime'] = datetime.datetime.utcnow()
+        self.import_stats['update_starttime'] = datetime.utcnow()
 
         self.stopcount = int(options.get('stopcount', 0))
 
@@ -146,11 +147,11 @@ class Command(NoArgsCommand):
         # Final stats output at end of file
         #try:
         #    self.import_stats['update_rate'] = float(self.import_stats.get('update_count')) /\
-        #        float((datetime.datetime.utcnow() - self.import_stats.get('update_starttime')).seconds)
+        #        float((datetime.utcnow() - self.import_stats.get('update_starttime')).seconds)
         #except ZeroDivisionError:
         #    self.import_stats['update_rate'] = 0
 
-        print "\nUpdate finished at " + str(datetime.datetime.utcnow()) +\
+        print "\nUpdate finished at " + str(datetime.utcnow()) +\
         ""
         #    "\nSkipped " + str(self.import_stats.get('update_timeoutskips')) + " IP Addresses. " +\
         #    "\nIP addresses parsed: " + str(self.import_stats.get('update_count')) +\
@@ -346,11 +347,11 @@ class Command(NoArgsCommand):
             tzhour, tzmin = int(tzhour), int(tzmin)
             if tzhour == tzmin == 0:
                 tzname = 'UTC'
-            tz = FixedOffset(datetime.timedelta(hours=tzhour,minutes=tzmin), tzname)
+            tz = FixedOffset(timedelta(hours=tzhour,minutes=tzmin), tzname)
 
         # Convert the date/time field into a python datetime
         # object.
-        x = datetime.datetime.strptime(datestr, "%Y-%m-%d %H:%M:%S")
+        x = datetime.strptime(datestr, "%Y-%m-%d %H:%M:%S")
 
         # Convert the fractional second portion into a count
         # of microseconds.
@@ -414,44 +415,6 @@ class Command(NoArgsCommand):
     def _parse_keywords(self, oxitem_obj, item_obj):
         return None
 
-    """
-        # Loop through stats.rdns entries that show as Unknown, attempt rdns lookup
-        for record in Rdns.objects.filter(resolved_name='Unknown').order_by('last_updated'):
-            record.resolved_name = self._rdns_lookup(record.ip_address)
-            self.import_stats['update_count'] += 1
-            if record.resolved_name == 'Unknown':
-                self.import_stats['update_timeoutskips'] += 1
-
-            # Update the record! - even if it comes back as Unknown, as the timestamp needs updating.
-            record.last_updated = datetime.datetime.utcnow()
-            record.save()
-
-            if (self.import_stats.get('update_count') % 10) == 0:
-                # Output the status
-                try:
-                    self.import_stats['update_rate'] = float(self.import_stats.get('update_count')) /\
-                        float((datetime.datetime.utcnow() - self.import_stats.get('update_starttime')).seconds)
-                except ZeroDivisionError:
-                    self.import_stats['update_rate'] = 0
-
-                print str(datetime.datetime.utcnow()) + ": " +\
-                    "Parsed " + str(self.import_stats.get('update_count')) + " IP Addresses. " +\
-                    "Skipped " + str(self.import_stats.get('update_timeoutskips')) + " IP Addresses. " +\
-                    "Rate: " + str(self.import_stats.get('update_rate'))[0:6] + " IP Addresses/sec. "
-
-                # Write the error cache to disk
-                self._error_log_save()
-
-            if self.stopcount > 0 and self.import_stats.get('update_count') > self.stopcount:
-                print 'Stopping now having reached update limit\n'
-                break
-
-
-
-        return None
-    """
-
-
 
 
 
@@ -476,7 +439,7 @@ class Command(NoArgsCommand):
             sys.stderr.write("WARNING: Could not open existing error file. New file being created")
             self.error_log = open(path_to_file,'w')
 
-        self.error_log.write("Log started at " + str(datetime.datetime.utcnow()) + "\n")
+        self.error_log.write("Log started at " + str(datetime.utcnow()) + "\n")
         print "Writing errors to: " + path_to_file
         return None
 
@@ -488,6 +451,6 @@ class Command(NoArgsCommand):
 
 
     def _errorlog_stop(self):
-        self.error_log.write("Log ended at " + str(datetime.datetime.utcnow()) + "\n")
+        self.error_log.write("Log ended at " + str(datetime.utcnow()) + "\n")
         self.error_log.close()
         return None
