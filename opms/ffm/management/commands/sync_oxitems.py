@@ -307,9 +307,7 @@ class Command(NoArgsCommand):
                 file = {'url':row.item_enclosure_href}
                 f, created = File.objects.get_or_create(url=row.item_enclosure_href, defaults=file)
                 if created:
-                    f.guid = row.item_guid
-                    f.size = int(row.item_enclosure_length)
-                    f.duration = int(row.item_duration)
+                    f = self._update_file(f, row)
                     f.save()
                     self._debug("New File created, id: " + str(f.id) + ". Url=" + f.url)
                 else:
@@ -324,9 +322,7 @@ class Command(NoArgsCommand):
                 f = row.importfileitem_set.get(item=row).file
 
             if not row.deleted:
-                f.guid = row.item_guid
-                f.size = int(row.item_enclosure_length)
-                f.duration = int(row.item_duration)
+                f = self._update_file(f, row)
                 f.save()
 
 
@@ -365,6 +361,15 @@ class Command(NoArgsCommand):
         item_obj.license = self._get_licence(oxitem_obj.item_licence) # TODO: Correct and standardise all spellings of licence/license
         item_obj.owning_unit = self._get_or_create_owning_unit('')
         return item_obj
+
+
+    def _update_file(self, file_obj, oxitem_obj):
+        f.guid = row.item_guid
+        if len(row.item_enclosure_length)>0:
+            f.size = int(row.item_enclosure_length)
+        if len(row.item_duration)>0:
+            f.duration = int(row.item_duration)
+        return file_obj
 
 
     def _get_licence(self, oxitems_licence):
