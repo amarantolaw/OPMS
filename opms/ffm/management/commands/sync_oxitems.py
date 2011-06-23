@@ -29,23 +29,6 @@ class Command(NoArgsCommand):
 
         self.import_stats = {}
 
-        # Cache objects to hold ffm subtables in memory
-        #self.cache_links = list(Link.objects.all())
-        #self.cache_people = list(Person.objects.all())
-        #self.cache_licences = list(Licence.objects.all())
-        #self.cache_taggroups = list(TagGroup.objects.all())
-        #self.cache_tags = list(Tag.objects.all()) # Probably need to rethink this!
-        #self.cache_file_functions = list(FileFunction.objects.all())
-        #self.cache_destinations = list(Destination.objects.all())
-        #self.cache_units = list(Unit.objects.all())
-
-        # Cache objects to hold oxitems-local subtables in memory
-        #self.cache_importfeedchannel = ''
-        #self.cache_importfeeddestinationchannel = ''
-        #self.cache_importfileitem = ''
-        #self.cache_importfileinfeeditem = ''
-        #self.cache_importitemitem = ''
-
         super(Command, self).__init__()
 
 

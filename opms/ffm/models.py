@@ -183,6 +183,7 @@ class File(models.Model):
     guid = models.CharField("file GUID", max_length=100, default=create_guid)
     item = models.ForeignKey(Item, verbose_name="Owning Item", default=None, null=True) # Some files belong to feeds, or licences, not just items
     mimetype = models.CharField("mime type", max_length=50, choices=MIMETYPES, default='unknown')
+    # TODO: Investigate http://docs.python.org/library/urlparse.html for url parsing
     url = models.URLField("file url", verify_exists=True) # Everything in this system should be hosted on a URL
     # Optional extras
     duration = models.IntegerField("duration in seconds", null=True)
