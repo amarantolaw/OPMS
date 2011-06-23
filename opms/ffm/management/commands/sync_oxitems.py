@@ -6,7 +6,7 @@ from django.core.management.base import NoArgsCommand, CommandError
 from opms.ffm.models import *
 from opms.oxitems.models import *
 import sys, re
-from datetime import datetime
+from datetime import datetime, FixedOffset
 from django.utils.encoding import smart_str, smart_unicode
 
 class Command(NoArgsCommand):
