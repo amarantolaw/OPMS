@@ -5,7 +5,7 @@ from optparse import make_option
 from django.core.management.base import NoArgsCommand, CommandError
 from opms.ffm.models import *
 from opms.oxitems.models import *
-import datetime, sys
+import datetime, sys, re
 from django.utils.encoding import smart_str, smart_unicode
 
 class Command(NoArgsCommand):
@@ -306,7 +306,66 @@ class Command(NoArgsCommand):
 
         return None
 
+    def _parseDateTime(self, s):
+        """Create datetime object representing date/time
+           expressed in a string. Handle partial strings with filler
+ 
+        Takes a string in the format produced by calling str()
+        on a python datetime object and returns a datetime
+        instance that would produce that string.
+
+        Acceptable formats are: "YYYY-MM-DD HH:MM:SS.ssssss+HH:MM",
+                                "YYYY-MM-DD HH:MM:SS.ssssss",
+                                "YYYY-MM-DD HH:MM:SS+HH:MM",
+                                "YYYY-MM-DD HH:MM:SS",
+                                "YYYY-MM-DD"
+        Where ssssss represents fractional seconds.	 The timezone
+        is optional and may be either positive or negative
+        hours/minutes east of UTC.
+
+        This function originally comes from http://aralbalkan.com/1512
+        """
+        if s is None:
+            return None
+        # Split string in the form 2007-06-18 19:39:25.3300-07:00
+        # into its constituent date/time, microseconds, and
+        # timezone fields where microseconds and timezone are
+        # optional.
+        m = re.match(r'(.*?)(?:\.(\d+))?(([-+]\d{1,2}):(\d{2}))?$',str(s))
+        datestr, fractional, tzname, tzhour, tzmin = m.groups()
+
+        # Create tzinfo object representing the timezone
+        # expressed in the input string.  The names we give
+        # for the timezones are lame: they are just the offset
+        # from UTC (as it appeared in the input string).  We
+        # handle UTC specially since it is a very common case
+        # and we know its name.
+        if tzname is None:
+            tz = None
+        else:
+            tzhour, tzmin = int(tzhour), int(tzmin)
+            if tzhour == tzmin == 0:
+                tzname = 'UTC'
+            tz = FixedOffset(timedelta(hours=tzhour,minutes=tzmin), tzname)
+
+        # Convert the date/time field into a python datetime
+        # object.
+        x = datetime.datetime.strptime(datestr, "%Y-%m-%d %H:%M:%S")
+
+        # Convert the fractional second portion into a count
+        # of microseconds.
+        if fractional is None:
+            fractional = '0'
+        fracpower = 6 - len(fractional)
+        fractional = float(fractional) * (10 ** fracpower)
+
+        # Return updated datetime object with microseconds and
+        # timezone information.
+        return x.replace(microsecond=int(fractional), tzinfo=tz)
+
+
     def _update_item(self, item_obj, oxitem_obj):
+        self._debug("item_updated=" + oxitem_obj.item_updated)
         if oxitem_obj.item_updated != '':
             item_obj.last_updated = oxitem_obj.item_updated
         item_obj.description = oxitem_obj.item_summary
@@ -314,8 +373,10 @@ class Command(NoArgsCommand):
             item_obj.description += (" :: " + oxitem_obj.item_content)
         else:
             item_obj.description = oxitem_obj.item_content
+        self._debug("item_startdate=" + oxitem_obj.item_startdate)
         if oxitem_obj.item_startdate != '':
             item_obj.publish_start = oxitem_obj.item_startdate
+        self._debug("item_recording_date=" + oxitem_obj.item_recording_date)
         if oxitem_obj.item_recording_date != '':
             item_obj.recording_date = oxitem_obj.item_recording_date
         item_obj.internal_comments = oxitem_obj.item_other_comments
@@ -323,6 +384,7 @@ class Command(NoArgsCommand):
             item_obj.internal_comments += (" :: " + oxitem_obj.item_legal_comments)
         else:
             item_obj.internal_comments = oxitem_obj.item_legal_comments
+        self._debug("item_expires=" + oxitem_obj.item_expires)
         if oxitem_obj.item_expires != '':
             item_obj.publish_stop = oxitem_obj.item_expires
         item_obj.license = self._get_licence(oxitem_obj.item_licence) # TODO: Correct and standardise all spellings of licence/license
