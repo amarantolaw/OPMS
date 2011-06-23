@@ -306,7 +306,7 @@ class Command(NoArgsCommand):
 
         return None
 
-    def _parseDateTime(s):
+    def _parseDateTime(self, s):
         """Create datetime object representing date/time
            expressed in a string. Handle partial strings with filler
  
