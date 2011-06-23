@@ -278,7 +278,7 @@ class Command(NoArgsCommand):
                 if created:
                     i = self._update_item(i, row)
                     i.save()
-                    self._debug("New Item created, id, id: " + str(i.id) + ". Title=" + i.title)
+                    self._debug("New Item created, id: " + str(i.id) + ". Title=" + i.title)
                 else:
                     self._debug("Item found for merger, id: " + str(i.id) + ". Title=" + i.title)
 
@@ -303,14 +303,38 @@ class Command(NoArgsCommand):
 
             # Update or create File for this Item
             if len(row.importfileitem_set.all()) == 0:
-                pass
+                # Does this file already exist?
+                file = {'url':row.item_enclosure_href}
+                f, created = File.objects.get_or_create(url=row.item_enclosure_href, defaults=file)
+                if created:
+                    f.guid = row.item_guid
+                    f.size = row.item_enclosure_length
+                    f.duration = row.item_duration
+                    f.save()
+                    self._debug("New File created, id: " + str(f.id) + ". Url=" + f.url)
+                else:
+                    self._debug("File found, id: " + str(f.id) + ". Url=" + f.url)
+
+                # Make import link
+                ifi = ImportFileItem()
+                ifi.file = f
+                ifi.item = row
+                ifi.save()
+            else:
+                f = row.importfileitem_set.get(item=row).file
+
+            if not row.deleted:
+                f.guid = row.item_guid
+                f.size = row.item_enclosure_length
+                f.duration = row.item_duration
+                f.save()
 
 
         return None
 
 
     def _update_item(self, item_obj, oxitem_obj):
-        self._debug("item_updated='" + oxitem_obj.item_updated + "'")
+        # self._debug("item_updated='" + oxitem_obj.item_updated + "'")
         if len(oxitem_obj.item_updated) > 6:
             item_obj.last_updated = parser.parse(oxitem_obj.item_updated)
 
@@ -320,11 +344,11 @@ class Command(NoArgsCommand):
         else:
             item_obj.description = oxitem_obj.item_content
 
-        self._debug("item_startdate='" + oxitem_obj.item_startdate + "'")
+        # self._debug("item_startdate='" + oxitem_obj.item_startdate + "'")
         if len(oxitem_obj.item_startdate) > 6:
             item_obj.publish_start = parser.parse(oxitem_obj.item_startdate)
 
-        self._debug("item_recording_date='" + oxitem_obj.item_recording_date + "'")
+        # self._debug("item_recording_date='" + oxitem_obj.item_recording_date + "'")
         if len(oxitem_obj.item_recording_date) > 6:
             item_obj.recording_date = parser.parse(oxitem_obj.item_recording_date)
 
@@ -334,7 +358,7 @@ class Command(NoArgsCommand):
         else:
             item_obj.internal_comments = oxitem_obj.item_legal_comments
 
-        self._debug("item_expires='" + oxitem_obj.item_expires + "'")
+        # self._debug("item_expires='" + oxitem_obj.item_expires + "'")
         if len(oxitem_obj.item_expires) > 6:
             item_obj.publish_stop = parser.parse(oxitem_obj.item_expires)
 
