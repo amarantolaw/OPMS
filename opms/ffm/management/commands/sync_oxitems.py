@@ -293,7 +293,7 @@ class Command(NoArgsCommand):
                 iii.item = row
                 iii.save()
             else:
-                i = row.importitemitem_set.get(item=row).item
+                i = row.importitemitem_set.get(item=row).ffm_item
                 self._debug("Item found, id: " + str(i.id) + ". Title=" + i.title)
 
             if not row.deleted: #Only overwrite the item information if this is not a deleted item
