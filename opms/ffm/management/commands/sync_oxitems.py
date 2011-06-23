@@ -162,8 +162,9 @@ class Command(NoArgsCommand):
         return None
 
 
-    def _get_or_create_owning_unit(self, oxpoints_unit):
+    def _get_or_create_owning_unit(self, oxpoints_unit=''):
         # Datafield is blank so we improvise in the meantime
+        # TODO: Work out how to determine owning units for these objects, both Items and FeedGroups
         return Unit.objects.get(pk=1)
 
 
@@ -207,7 +208,7 @@ class Command(NoArgsCommand):
         return None
 
 
-    def _get_or_create_link(self, feedgroup_obj, url):
+    def _get_or_create_link(self, obj, url):
         # Handle the M2M relationship between Feed and Link
         link, created = Link.objects.get_or_create(url=url, defaults={'url':url})
         if created:
@@ -216,7 +217,8 @@ class Command(NoArgsCommand):
         else:
             self._debug("Link found @" + str(link.id) + " for: " + str(url))
 
-        feedgroup_obj.links.add(link)
+        # Same call for both Item and FeedGroup objects, no need to type check
+        obj.links.add(link)
         return None
 
 
@@ -272,6 +274,14 @@ class Command(NoArgsCommand):
                 item = {'title':row.item_title} # NB: May fail without a person record to store...
                 i, created = Item.objects.get_or_create(title=row.item_title, defaults=item)
                 if created:
+                    i.last_updated = row.last_updated
+                    i.description = row.item_summary + " :: " + row.item_content
+                    i.publish_start = row.item_startdate
+                    i.recording_date = row.item_recording_date
+                    i.internal_comments = row.item_other_comments + " :: " + row.item_legal_comments
+                    i.publish_stop = row.item_expires
+                    i.license = self._get_licence(row.item_licence) # TODO: Correct and standardise all spellings of licence/license
+                    i.owning_unit = self._get_or_create_owning_unit('')
                     i.save()
                     self._debug("New Item created, id, id: " + str(i.id) + ". Title=" + i.title)
                 else:
@@ -286,7 +296,45 @@ class Command(NoArgsCommand):
                 i = row.importitemitem_set.get(item=row).item
                 self._debug("Item found, id: " + str(i.id) + ". Title=" + i.title)
 
+            if not row.deleted: #Only overwrite the item information if this is not a deleted item
+                i.last_updated = row.last_updated
+                i.description = row.item_summary + " :: " + row.item_content
+                i.publish_start = row.item_startdate
+                i.recording_date = row.item_recording_date
+                i.internal_comments = row.item_other_comments + " :: " + row.item_legal_comments
+                i.publish_stop = row.item_expires
+                i.license = self._get_licence(row.item_licence)
+                i.owning_unit = self._get_or_create_owning_unit('')
+                i.save()
+                self._debug("Item details updated from oxitems row:" + str(row.id))
 
+            # Things to do once you've got the item...
+            self._parse_people(row, i)
+            # self._get_or_create_link() - There are no links in Oxitems Items :(
+            self._parse_keywords(row, i)
+
+            # Update or create File for this Item
+            if len(row.importfileitem_set.all()) == 0:
+                pass
+
+
+        return None
+
+    def _get_licence(self, oxitems_licence):
+        if  oxitems_licence == 5:
+            return Licence.objects.get(pk=2) # CC BY-NC-SA Licence hardcoded from Fixtures
+        elif  oxitems_licence == 6:
+            return Licence.objects.get(pk=3) # CC BY-NC-ND Licence hardcoded from Fixtures
+        else:
+            return Licence.objects.get(pk=1) # Personal Licence hardcoded from Fixtures
+
+    
+
+    def _parse_people(self, oxitem_obj, item_obj):
+        return None
+
+
+    def _parse_keywords(self, oxitem_obj, item_obj):
         return None
 
     """
