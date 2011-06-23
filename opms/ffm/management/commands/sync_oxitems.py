@@ -325,6 +325,7 @@ class Command(NoArgsCommand):
                 f = self._update_file(f, row)
                 f.save()
 
+            # TODO: Link files to feeds
 
         return None
 
