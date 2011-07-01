@@ -217,12 +217,12 @@ class Command(NoArgsCommand):
             tag, created = Tag.objects.get_or_create(name=t,group=g, defaults={'name':t, 'group':g})
             if created:
                 tag.save()
-                self._debug("Tag created for: " + str(tag.name))
+                self._debug("_set_jorum_tags(): Tag created for: " + str(tag.name))
                 # TODO: Raise an error here because we should have all the jorumopen collection codes already in a fixture and loaded
             else:
-                self._debug("Tag found @" + str(tag.id) + " for:" + str(tag.name))
+                self._debug("_set_jorum_tags(): Tag found @" + str(tag.id) + " for:" + str(tag.name))
 
-        feedgroup_obj.tags.add(tag)
+            feedgroup_obj.tags.add(tag) # Indented this one more level, need to test...
         return None
 
 
@@ -369,11 +369,31 @@ class Command(NoArgsCommand):
 
     def _parse_people(self, oxitem_obj, item_obj):
         # TODO: parse the people associated with this item
+        # In = String of text, probably CSV-like
+        # Out, a link to a person record that can be manually curated later.
+        # TODO: Will need to have a merge records method for manual use
         return None
 
 
     def _parse_keywords(self, oxitem_obj, item_obj):
-        # TODO: parse the keywords associated with this item
+        # TODO: parse the keywords associated with this item - TEST ME
+        # Likely to default to general keywords, supplied as a csv string, with a comma first
+        if len(oxitem_obj.item_simple_categories) < 3:
+            return None
+
+        g = TagGroup.objects.get(pk=1) # Hardcoded for fixture loaded Unsorted Tags collection group
+        tags = oxitem_obj.item_simple_categories.split(',')
+        for t in tags:
+            if len(t) < 1:
+                continue
+            tag, created = Tag.objects.get_or_create(name=t,group=g, defaults={'name':t, 'group':g})
+            if created:
+                tag.save()
+                self._debug("_parse_keywords(): Tag created for: " + str(tag.name))
+            else:
+                self._debug("_parse_keywords(): Tag found @" + str(tag.id) + " for:" + str(tag.name))
+
+            item_obj.tags.add(tag)
         return None
 
 
