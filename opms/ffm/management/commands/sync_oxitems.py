@@ -382,16 +382,16 @@ class Command(NoArgsCommand):
             return None
 
         g = TagGroup.objects.get(pk=1) # Hardcoded for fixture loaded Unsorted Tags collection group
-        tags = oxitem_obj.item_simple_categories.split(',')
+        tags = oxitem_obj.item_simple_categories.lower().split(',')
         for t in tags:
             if len(t) < 1:
                 continue
             tag, created = Tag.objects.get_or_create(name=t,group=g, defaults={'name':t, 'group':g})
             if created:
                 tag.save()
-                self._debug("_parse_keywords(): Tag created for: " + str(tag.name))
+                self._debug("_parse_keywords(): Tag created for: " + tag.name)
             else:
-                self._debug("_parse_keywords(): Tag found @" + str(tag.id) + " for:" + str(tag.name))
+                self._debug("_parse_keywords(): Tag found @" + str(tag.id) + " for:" + tag.name)
 
             item_obj.tags.add(tag)
         return None
