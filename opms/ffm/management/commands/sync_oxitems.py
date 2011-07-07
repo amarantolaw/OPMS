@@ -376,7 +376,8 @@ class Command(NoArgsCommand):
 
 
     def _parse_keywords(self, oxitem_obj, item_obj):
-        # TODO: parse the keywords associated with this item - TEST ME
+        # Clean up any existing tag associations first
+        item_obj.tags.clear()
         # Likely to default to general keywords, supplied as a csv string, with a comma first
         if len(oxitem_obj.item_simple_categories) < 3:
             return None
