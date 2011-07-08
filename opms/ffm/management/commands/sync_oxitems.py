@@ -385,10 +385,31 @@ class Command(NoArgsCommand):
 
 
     def _parse_people(self, oxitem_obj, item_obj):
-        # TODO: parse the people associated with this item
+        # TODO: parse the people associated with this item - YOU ARE WORKING HERE!!!
         # In = String of text, probably CSV-like
         # Out, a link to a person record that can be manually curated later.
         # TODO: Will need to have a merge records method for manual use
+
+        # Clear out any existing role links
+
+        if len(oxitem_obj.item_enclosure_artists) < 3:
+            return None
+
+        people = oxitem_obj.item_enclosure_artists.split(',')
+        for p in people:
+            if len(p) < 1:
+                continue
+            names = p.split(' ')
+            
+            person = {'first_name':'', 'last_name':'', 'middle_names':'', 'additional_information':''}
+            tag, created = Tag.objects.get_or_create(name=t,group=g, defaults={'name':t, 'group':g})
+            if created:
+                tag.save()
+                self._debug("_parse_keywords(): Tag created for: " + tag.name)
+            else:
+                self._debug("_parse_keywords(): Tag found @" + str(tag.id) + " for:" + tag.name)
+
+            item_obj.tags.add(tag)
         return None
 
 

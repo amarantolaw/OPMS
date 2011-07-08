@@ -112,16 +112,30 @@ class Item(models.Model):
 
 class Role(models.Model):
     ROLES = [
-        # From http://www.steeple.org.uk/wiki/Feeds/credit
-        # NB: We could always use this extensive list... http://www.ebu.ch/metadata/cs/web/ebu_RoleCodeCS_p.xml.htm
-        (u'presenter', u'Presenter'),
-        (u'lecturer', u'Lecturer'),
-        (u'moderator', u'Moderator'),
-        (u'mc', u'Master of Ceremonies'),
-        (u'interviewer', u'Interviewer'),
-        (u'interviewee', u'Interviewee'),
-        (u'creator', u'Creator'),
-        (u'publisher', u'Publisher'),
+        # From http://www.steeple.org.uk/wiki/Feeds/credit -> defering to the mRSS preferred list of EBU...
+        # NB: Using section 25 TALENT http://www.ebu.ch/metadata/cs/web/ebu_RoleCodeCS_p.xml.htm
+        (u'25.1', u'Key Character'),
+        (u'25.2', u'Key Talents'),
+        (u'25.3', u'Scenarist'),
+        (u'25.4', u'Essayist'),
+        (u'25.5', u'Sculptor'),
+        (u'25.6', u'Variety Artist'),
+        (u'25.7', u'Voice Over Artist'),
+        (u'25.8', u'Artist / Performer'),
+        (u'25.9', u'Actor'),
+        (u'25.10', u'Anchor / Moderator / Presenter'),
+        (u'25.11', u'Interviewer'),
+        (u'25.12', u'Interviewed Guest'),
+        (u'25.13', u'Guest'),
+        (u'25.14', u'Host'),
+        (u'25.15', u'Narrator / Storyteller / Reader'),
+        (u'25.16', u'Speaker / Lecturer / Causeur'),  # This is the likely default option for podcasts
+        (u'25.17', u'Choreographer'),
+        (u'25.18', u'Dancer'),
+        (u'25.19', u'Participant'),
+        (u'25.20', u'Panelist'),
+        (u'25.21', u'Commentator'),
+        (u'25.22', u'Dubber'),
     ]
     person = models.ForeignKey(Person, verbose_name="associated Person")
     item = models.ForeignKey(Item, verbose_name="associated Item")
