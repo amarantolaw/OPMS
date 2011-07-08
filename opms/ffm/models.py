@@ -394,10 +394,8 @@ class FileInFeed(models.Model):
     # Optional additional categorising information
     itunesu_category = models.IntegerField("iTunesU category", choices=ITUNESU_CATEGORIES, null=True)
     # JACS Codes are complex and numerous - http://en.wikipedia.org/wiki/Joint_Academic_Classification_of_Subjects
-    jacs_codes = models.ForeignKey(Tag,
-                                   limit_choices_to = {'group__name__contains': 'JACS codes'},
-                                   null=True,
-                                   verbose_name="JACS codes")
+    # HIDE WHILST MIGRATING jacs_codes = models.ManyToManyField(Tag, verbose_name="JACS codes", null=True) # limit_choices_to = {'group__name__contains': 'JACS codes'},
+
 
     def get_itunesu_category_display(self):
         return ITUNESU_CATEGORIES.get(self.itunesu_category, '112')
