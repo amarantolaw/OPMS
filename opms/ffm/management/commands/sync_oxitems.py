@@ -414,7 +414,7 @@ class Command(NoArgsCommand):
             item_obj.tags.add(tag)
         return None
 
-    def _parse_jacs_code(fif_obj,code_string):
+    def _parse_jacs_code(self, fif_obj,code_string):
         fif_obj.jacs_codes.clear()
         # Likely to default to short 4 character codes, supplied as a csv string, with a comma first
         if len(code_string) < 3:
