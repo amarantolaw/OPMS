@@ -252,14 +252,14 @@ class Command(NoArgsCommand):
         oxitems = Rg07Items.objects.filter(item_channel=channel_obj)
         self._debug("Found " + str(len(oxitems)) + " OxItems to process")
 
-        for counter, row in enumerate(oxitems):
+        for counter, item_row in enumerate(oxitems):
             # Update or create an item
-            if len(row.importitemitem_set.all()) == 0:
+            if len(item_row.importitemitem_set.all()) == 0:
                 # Does this need merging with an existing Item? Compare with existing titles...
-                item = {'title':row.item_title} # NB: May fail without a person record to store...
-                i, created = Item.objects.get_or_create(title=row.item_title, defaults=item)
+                item = {'title':item_row.item_title} # NB: May fail without a person record to store...
+                i, created = Item.objects.get_or_create(title=item_row.item_title, defaults=item)
                 if created:
-                    i = self._update_item(i, row)
+                    i = self._update_item(i, item_row)
                     i.save()
                     self._debug("New Item created, id: " + str(i.id) + ". Title=" + i.title)
                 else:
@@ -268,29 +268,33 @@ class Command(NoArgsCommand):
                 # Make import link
                 iii = ImportItemItem()
                 iii.ffm_item = i
-                iii.item = row
+                iii.item = item_row
                 iii.save()
             else:
-                i = row.importitemitem_set.get(item=row).ffm_item
+                i = item_row.importitemitem_set.get(item=item_row).ffm_item
                 self._debug("Item found, id: " + str(i.id) + ". Title=" + i.title)
 
-            if not row.deleted: #Only overwrite the item information if this is not a deleted item
-                i = self._update_item(i, row)
+            if not item_row.deleted: #Only overwrite the item information if this is not a deleted item
+                i = self._update_item(i, item_row)
                 i.save()
-                self._debug("Item details updated from oxitems row:" + str(row.id))
+                self._debug("Item details updated from oxitems row:" + str(item_row.id))
+            else:
+                # TODO: Consider what happens if all the items we're grouping here are deleted
+                # Consider whether we really even need to do anything after determining that this item has been deleted
+                pass
 
             # Things to do once you've got the item...
-            self._parse_people(row, i)
+            self._parse_people(item_row, i)
             # self._get_or_create_link() - There are no links in Oxitems Items :(
-            self._parse_keywords(row, i)
+            self._parse_keywords(item_row, i)
 
             # Update or create File for this Item
-            if len(row.importfileitem_set.all()) == 0:
+            if len(item_row.importfileitem_set.all()) == 0:
                 # Does this file already exist?
-                file = {'url':row.item_enclosure_href}
-                f, created = File.objects.get_or_create(url=row.item_enclosure_href, defaults=file)
+                file = {'url':item_row.item_enclosure_href}
+                f, created = File.objects.get_or_create(url=item_row.item_enclosure_href, defaults=file)
                 if created:
-                    f = self._update_file(f, row)
+                    f = self._update_file(f, item_row)
                     f.save()
                     self._debug("New File created, id: " + str(f.id) + ". Url=" + f.url)
                 else:
@@ -299,17 +303,30 @@ class Command(NoArgsCommand):
                 # Make import link
                 ifi = ImportFileItem()
                 ifi.file = f
-                ifi.item = row
+                ifi.item = item_row
                 ifi.save()
             else:
-                f = row.importfileitem_set.get(item=row).file
+                f = item_row.importfileitem_set.get(item=item_row).file
 
-            if not row.deleted:
-                f = self._update_file(f, row)
+            if not item_row.deleted:
+                f = self._update_file(f, item_row)
                 f.save()
 
-            # TODO: Link files to feeds
+            # feed_obj.files.add(f) -- Not a simple M2M link
+            # Update or create a link for this FileInFeed. There is always a link for historical tracking reasons
+            fileinfeed = {'file':f, 'feed':feed_obj, 'withhold':item_row.item_checked, 'itunesu_category':item_row.item_cc}
+            fif, created = FileInFeed.objects.get_or_create(file=f, feed=feed_obj, defaults=fileinfeed)
+            if created:
+                fif.save()
+            else:
+                fif.withhold = item_row.deleted
+                fif.itunesu_category = item_row.item_cc
+            if item_row.deleted:
+                fif.withhold = 1000
+            fif.save()
+            self._parse_jacs_code(fif,item_row.item_jacs_codes)
 
+        # TODO: Determine fif.order values based on channel_sort_values
         return None
 
 
@@ -397,7 +414,27 @@ class Command(NoArgsCommand):
             item_obj.tags.add(tag)
         return None
 
+    def _parse_jacs_code(fif_obj,code_string):
+        fif_obj.jacs_codes.clear()
+        # Likely to default to short 4 character codes, supplied as a csv string, with a comma first
+        if len(code_string) < 3:
+            return None
 
+        # Note: JACS Codes are complex and numerous, so not easy to check - http://en.wikipedia.org/wiki/Joint_Academic_Classification_of_Subjects
+        g = TagGroup.objects.get(pk=2) # Hardcoded for fixture loaded JACS Codes collection group
+        tags = code_string.upper().split(',')
+        for t in tags:
+            if len(t) < 1:
+                continue
+            tag, created = Tag.objects.get_or_create(name=t,group=g, defaults={'name':t, 'group':g})
+            if created:
+                tag.save()
+                self._debug("_parse_jacs_code(): Tag created for: " + tag.name)
+            else:
+                self._debug("_parse_jacs_code(): Tag found @" + str(tag.id) + " for:" + tag.name)
+
+            fif_obj.jacs_codes.add(tag)
+        return None
 
 
     # DEBUG AND INTERNAL HELP METHODS ==============================================================

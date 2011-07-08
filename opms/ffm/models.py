@@ -393,6 +393,7 @@ class FileInFeed(models.Model):
     withhold = models.IntegerField("publishing status", default=100) # Default to being withheld
     # Optional additional categorising information
     itunesu_category = models.IntegerField("iTunesU category", choices=ITUNESU_CATEGORIES, null=True)
+    # JACS Codes are complex and numerous - http://en.wikipedia.org/wiki/Joint_Academic_Classification_of_Subjects
     jacs_codes = models.ForeignKey(Tag,
                                    limit_choices_to = {'group__name__contains': 'JACS codes'},
                                    null=True,

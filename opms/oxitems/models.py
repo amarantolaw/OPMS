@@ -38,13 +38,6 @@ class ImportFileItem(models.Model):
     file = models.ForeignKey(File)
     item = models.ForeignKey("Rg07Items")
 
-class ImportFileinfeedItem(models.Model):
-    """
-    If a fileinfeed has been linked to this item, then attempt to update that fileinfeed
-    """
-    fileinfeed = models.ForeignKey(FileInFeed)
-    item = models.ForeignKey("Rg07Items")
-
 class ImportItemItem(models.Model):
     """
     If an item has been linked to this item, then attempt to update that item
