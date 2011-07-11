@@ -444,8 +444,8 @@ class Command(NoArgsCommand):
         else: # Deal with names separated by comma
             names = in_str.split(",")
             for n in names:
-                if n.count(" and ") > 0:
-                    names2 = n.split(" and ")
+                if br.sub('',n).count(" and ") > 0:
+                    names2 = br.sub('',n).split(" and ")
                     for n2 in names2:
                         person = {}
                         person["additional_information"] = n2.strip()
