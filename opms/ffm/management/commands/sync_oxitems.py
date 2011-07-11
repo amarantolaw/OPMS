@@ -22,7 +22,7 @@ class Command(NoArgsCommand):
         Setup variables used by the command
         """
         # Toggle debug statements on/off
-        self.debug = True
+        self.debug = False
         # Error logging file and string cache
         self.error_log = ""
         self.error_cache = ""
@@ -73,6 +73,7 @@ class Command(NoArgsCommand):
         # Import OxItems.Channels
         oxitems_channels = Rg07Channels.objects.filter(deleted=False)
         total_count = len(oxitems_channels)
+        print "Processing OxItems Channel Data into OPMS (" + str(total_count) + " rows to do)"
         for counter, row in enumerate(oxitems_channels):
             # Update or create FeedGroup?
             if len(row.importfeedgroupchannel_set.all()) == 0:
@@ -145,7 +146,7 @@ class Command(NoArgsCommand):
 
         print "\nUpdate finished at " + str(datetime.utcnow()) +\
             "\nFeedGroups created: " + str(self.import_stats.get('feedgroup_created')) + "." +\
-            "\nFeedGroups created: " + str(self.import_stats.get('feed_created')) + "." +\
+            "\nFeeds created: " + str(self.import_stats.get('feed_created')) + "." +\
         ""
         #    "\nIP addresses parsed: " + str(self.import_stats.get('update_count')) +\
         #    "\nImported at " + str(self.import_stats.get('update_rate'))[0:6] + " IP Addresses/sec\n"
@@ -259,7 +260,7 @@ class Command(NoArgsCommand):
     # Import OxItems.Items, but done on a channel by channel basis
     def _parse_items(self, feed_obj, channel_obj):
         oxitems = Rg07Items.objects.filter(item_channel=channel_obj)
-        self._debug("Found " + str(len(oxitems)) + " OxItems to process")
+        print "Found " + str(len(oxitems)) + " OxItems to process for " + str(feed_obj.slug)
 
         for counter, item_row in enumerate(oxitems):
             # Update or create an item
