@@ -396,6 +396,10 @@ class Command(NoArgsCommand):
             # This should likely throw some sort of error about missing people?
             return None
 
+        # Some manual exceptions for people parsing...
+        if oxitem_obj.id == 15314 or oxitem_obj.id == 15315 or oxitem_obj.id == 24581:
+            return None
+
         def _person(name, person_dict):
             # Check for titles
             title = name[0].lower()
