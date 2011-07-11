@@ -402,7 +402,7 @@ class Command(NoArgsCommand):
             if title.startswith("prof") or title.startswith("dr") or title.startswith("lord")\
                 or title.startswith("mr") or title.startswith("ms") or title.startswith("rt")\
                 or title.startswith("lieutenant") or title.startswith("president") or title.startswith("baron"):
-                person_dict["title"] = name[0][:100]
+                person_dict["titles"] = name[0][:100]
                 person_dict["first_name"] = name[1][:50]
             else:
                 person_dict["first_name"] = name[0][:50]
