@@ -402,8 +402,8 @@ class Command(NoArgsCommand):
                 person = {}
                 person["additional_information"] = n.strip()
                 name = n.split(",")[0].strip().split(" ")
-                person["first_name"] = name[0]
-                person["last_name"] = name[-1]
+                person["first_name"] = name[0][:50]
+                person["last_name"] = name[-1][:50]
 
                 # Get or create a person record for this one
                 person, created = Person.objects.get_or_create(
@@ -427,8 +427,8 @@ class Command(NoArgsCommand):
                 person = {}
                 person["additional_information"] = n.strip()
                 name = n.strip().split(" ")
-                person["first_name"] = name[0]
-                person["last_name"] = name[-1]
+                person["first_name"] = name[0][:50]
+                person["last_name"] = name[-1][:50]
 
                 # Get or create a person record for this one
                 person, created = Person.objects.get_or_create(
