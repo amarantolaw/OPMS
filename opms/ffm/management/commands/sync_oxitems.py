@@ -401,7 +401,7 @@ class Command(NoArgsCommand):
             title = name[0].lower()
             if title.startswith("prof") or title.startswith("dr") or title.startswith("lord")\
                 or title.startswith("mr") or title.startswith("ms") or title.startswith("rt")\
-                or title.startswith("lieutenant") or title.startswith("president"):
+                or title.startswith("lieutenant") or title.startswith("president") or title.startswith("baron"):
                 person_dict["title"] = name[0][:100]
                 person_dict["first_name"] = name[1][:50]
             else:
@@ -431,6 +431,7 @@ class Command(NoArgsCommand):
             for n in names:
                 person = {}
                 person["additional_information"] = n.strip()
+                self._debug("_parse_people(): Examining(;):" + n.strip())
                 name = n.split(",")[0].strip().split(" ")
                 _person(name, person)
         elif in_str.count(",") > 0: # Deal with names separated by comma
@@ -438,6 +439,7 @@ class Command(NoArgsCommand):
             for n in names:
                 person = {}
                 person["additional_information"] = n.strip()
+                self._debug("_parse_people(): Examining(,):" + n.strip())
                 name = n.strip().split(" ")
                 _person(name, person)
         else: # Deal with single people or couples split with an "and"
@@ -445,6 +447,7 @@ class Command(NoArgsCommand):
             for n in names:
                 person = {}
                 person["additional_information"] = n.strip()
+                self._debug("_parse_people(): Examining(and):" + n.strip())
                 name = n.strip().split(" ")
                 _person(name, person)
 
