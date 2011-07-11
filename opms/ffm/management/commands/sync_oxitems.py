@@ -440,7 +440,7 @@ class Command(NoArgsCommand):
         # Split on commas outside of brackets - http://stackoverflow.com/questions/1648537/how-to-split-a-string-by-commas-positioned-outside-of-parenthesis
         cs = re.compile('(?:[^,(]|\([^)]*\))+',re.DOTALL)
         if in_str.count(";") > 0: # Deal with names separated by semi colons
-            names = in_str.split(";")
+            names = in_str.strip().split(";")
             for n in names:
                 person = {}
                 person["additional_information"] = n.strip()
