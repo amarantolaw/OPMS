@@ -308,7 +308,7 @@ class Command(NoArgsCommand):
                 file = {'url':item_row.item_enclosure_href}
                 f, created = File.objects.get_or_create(url=item_row.item_enclosure_href, defaults=file)
                 if created:
-                    f = self._update_file(f, item_row)
+                    f = self._update_file(f, item_row, i)
                     f.save()
                     # self._debug("New File created, id: " + str(f.id) + ". Url=" + f.url)
                 else:
@@ -324,7 +324,7 @@ class Command(NoArgsCommand):
                 f = item_row.importfileitem_set.get(item=item_row).file
 
             if not item_row.deleted:
-                f = self._update_file(f, item_row)
+                f = self._update_file(f, item_row, i)
                 f.save()
 
             # feed_obj.files.add(f) -- Not a simple M2M link
@@ -379,8 +379,9 @@ class Command(NoArgsCommand):
         return item_obj
 
 
-    def _update_file(self, file_obj, oxitem_obj):
+    def _update_file(self, file_obj, oxitem_obj, item_obj):
         file_obj.guid = oxitem_obj.item_guid
+        file_obj.item = item_obj
         if len(oxitem_obj.item_enclosure_length)>0:
             file_obj.size = int(oxitem_obj.item_enclosure_length)
         file_obj.duration = int(oxitem_obj.item_duration)
