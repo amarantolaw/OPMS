@@ -438,7 +438,7 @@ class Command(NoArgsCommand):
             for n in names:
                 person = {}
                 person["additional_information"] = n.strip()
-                self._debug("_parse_people(): Examining(;):" + n.strip())
+                self._debug("_parse_people(): Examining(;):" + br.sub('',n).strip())
                 name = br.sub('',n).split(",")[0].strip().split(" ")
                 _person(name, person)
         else: # Deal with names separated by comma
@@ -449,13 +449,13 @@ class Command(NoArgsCommand):
                     for n2 in names2:
                         person = {}
                         person["additional_information"] = n2.strip()
-                        self._debug("_parse_people(): Examining(and):" + n2.strip())
+                        self._debug("_parse_people(): Examining(and):" + br.sub('',n2).strip())
                         name2 = br.sub('',n2).strip().split(" ")
                         _person(name2, person)
                 else:
                     person = {}
                     person["additional_information"] = n.strip()
-                    self._debug("_parse_people(): Examining(,):" + n.strip())
+                    self._debug("_parse_people(): Examining(,):" + br.sub('',n).strip())
                     name = br.sub('',n).strip().split(" ")
                     _person(name, person)
 
