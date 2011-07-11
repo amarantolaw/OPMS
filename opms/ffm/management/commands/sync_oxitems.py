@@ -442,13 +442,13 @@ class Command(NoArgsCommand):
             names = in_str.split(",")
             for n in names:
                 if n.count(" and ") > 0:
-                    names2 = in_str.split(" and ")
-                    for n in names2:
+                    names2 = n.split(" and ")
+                    for n2 in names2:
                         person = {}
-                        person["additional_information"] = n.strip()
-                        self._debug("_parse_people(): Examining(and):" + n.strip())
-                        name = n.strip().split(" ")
-                        _person(name, person)
+                        person["additional_information"] = n2.strip()
+                        self._debug("_parse_people(): Examining(and):" + n2.strip())
+                        name2 = n2.strip().split(" ")
+                        _person(name2, person)
                 else:
                     person = {}
                     person["additional_information"] = n.strip()
