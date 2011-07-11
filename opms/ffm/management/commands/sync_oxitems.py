@@ -433,30 +433,32 @@ class Command(NoArgsCommand):
 
         # Remove anything in brackets ()
         br = re.compile('\(.*?\)', re.DOTALL)
+        # Split on commas outside of brackets - http://stackoverflow.com/questions/1648537/how-to-split-a-string-by-commas-positioned-outside-of-parenthesis
+        cs = re.compile('(?:[^,(]|\([^)]*\))+',re.DOTALL)
         if in_str.count(";") > 0: # Deal with names separated by semi colons
             names = in_str.split(";")
             for n in names:
                 person = {}
                 person["additional_information"] = n.strip()
-                self._debug("_parse_people(): Examining(;):" + br.sub('',n).strip())
-                name = br.sub('',n).split(",")[0].strip().split(" ")
+                self._debug("_parse_people(): Examining(;):" + n.strip())
+                name = cs.findall(n)[0].strip().split(" ")
                 _person(name, person)
         else: # Deal with names separated by comma
-            names = in_str.split(",")
+            names = cs.findall(in_str)
             for n in names:
                 if br.sub('',n).count(" and ") > 0:
                     names2 = br.sub('',n).split(" and ")
                     for n2 in names2:
                         person = {}
                         person["additional_information"] = n2.strip()
-                        self._debug("_parse_people(): Examining(and):" + br.sub('',n2).strip())
+                        self._debug("_parse_people(): Examining(and):" + n2.strip())
                         name2 = br.sub('',n2).strip().split(" ")
                         _person(name2, person)
                 else:
                     person = {}
                     person["additional_information"] = n.strip()
-                    self._debug("_parse_people(): Examining(,):" + br.sub('',n).strip())
-                    name = br.sub('',n).strip().split(" ")
+                    self._debug("_parse_people(): Examining(,):" + n.strip())
+                    name = br.sub('',n).strip().split(" ") # Presumes names don't exist in brackets - though, yes, there are some
                     _person(name, person)
 
 
