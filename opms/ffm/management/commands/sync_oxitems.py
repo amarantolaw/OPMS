@@ -22,7 +22,7 @@ class Command(NoArgsCommand):
         Setup variables used by the command
         """
         # Toggle debug statements on/off
-        self.debug = True
+        self.debug = False
         # Error logging file and string cache
         self.error_log = ""
         self.error_cache = ""
