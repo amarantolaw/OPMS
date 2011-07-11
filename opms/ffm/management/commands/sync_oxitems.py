@@ -12,10 +12,10 @@ from django.utils.encoding import smart_str, smart_unicode
 
 class Command(NoArgsCommand):
     help = 'Scan through OxItems database and import into OPMS:FFM'
-    #option_list = NoArgsCommand.option_list + (
-    #    make_option('--stop-at', action='store', dest='stopcount',
-    #        default=0, help='Optional limit to the number of IP addresses to parse'),
-    #)
+    option_list = NoArgsCommand.option_list + (
+        make_option('--no-sync', action='store', dest='no_sync',
+            default=False, help='Use this to skip the sync with OxItems live data'),
+    )
 
     def __init__(self):
         """
@@ -48,9 +48,9 @@ class Command(NoArgsCommand):
         self.import_stats['feedgroup_created'] = 0
         self.import_stats['update_starttime'] = datetime.utcnow()
 
-        self.stopcount = int(options.get('stopcount', 0))
+        self.no_sync = bool(options.get('no_sync', False))
 
-        if not self.debug:
+        if not self.debug or self.no_sync:
             print "Synchronising Databases (OxItems -> OPMS)"
             # Copy Oxitems remote to Oxitems local, overwrite existing
             remote_channels = Rg07Channels.objects.using('oxitems').filter(channel_categories__icontains='simple-podcasting')
