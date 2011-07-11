@@ -432,7 +432,7 @@ class Command(NoArgsCommand):
             return None
 
         # Remove anything in brackets ()
-        br = re.compile('\(*.*?\)', re.DOTALL)
+        br = re.compile('\(.*?\)', re.DOTALL)
         if in_str.count(";") > 0: # Deal with names separated by semi colons
             names = in_str.split(";")
             for n in names:
