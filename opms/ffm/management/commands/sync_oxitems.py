@@ -22,7 +22,7 @@ class Command(NoArgsCommand):
         Setup variables used by the command
         """
         # Toggle debug statements on/off
-        self.debug = False
+        self.debug = True
         # Error logging file and string cache
         self.error_log = ""
         self.error_cache = ""
@@ -168,7 +168,7 @@ class Command(NoArgsCommand):
         destinations = []
         if oxitems_destination == 0:
             # This isn't appearing anywhere, so exit now
-            self._debug("set_feed_destination() found no destinations for feed:" + feed_obj.slug)
+            self._errorlog("set_feed_destination() found no destinations for feed:" + feed_obj.slug)
             return None
         elif oxitems_destination == 1:
             destinations.append(Destination.objects.get(pk=1)) # POAU
@@ -187,7 +187,7 @@ class Command(NoArgsCommand):
             self._errorlog("set_feed_destination() could not identify destination for feed:" + feed_obj.slug)
             return None
 
-        self._debug("set_feed_destination about to link feed to " + str(len(destinations)) + " destinations")
+        # self._debug("set_feed_destination about to link feed to " + str(len(destinations)) + " destinations")
         # For this sync we just wipe and recreate, no need to try to sync
         FeedDestination.objects.filter(feed=feed_obj).delete()
         for dest in destinations:
@@ -199,7 +199,7 @@ class Command(NoArgsCommand):
             if oxitems_deleted == True: # NB: whilst hacking out the slug duplicates by ignoring deleted items, this is untested...
                 feed_destination.withhold = 1000 # TODO: Need to determine some workflow values and descriptions for withhold
             feed_destination.save()
-            self._debug(feed_obj.slug + " linked to " + dest.name)
+            # self._debug(feed_obj.slug + " linked to " + dest.name)
         return None
 
 
@@ -208,9 +208,10 @@ class Command(NoArgsCommand):
         link, created = Link.objects.get_or_create(url=url, defaults={'url':url})
         if created:
             link.save()
-            self._debug("Link created for: " + str(url))
+            # self._debug("Link created for: " + str(url))
         else:
-            self._debug("Link found @" + str(link.id) + " for: " + str(url))
+            # self._debug("Link found @" + str(link.id) + " for: " + str(url))
+            pass
 
         # Same call for both Item and FeedGroup objects, no need to type check
         obj.links.add(link)
@@ -227,10 +228,11 @@ class Command(NoArgsCommand):
             tag, created = Tag.objects.get_or_create(name=t,group=g, defaults={'name':t, 'group':g})
             if created:
                 tag.save()
-                self._debug("_set_jorum_tags(): Tag created for: " + str(tag.name))
+                # self._debug("_set_jorum_tags(): Tag created for: " + str(tag.name))
                 # TODO: Raise an error here because we should have all the jorumopen collection codes already in a fixture and loaded
             else:
-                self._debug("_set_jorum_tags(): Tag found @" + str(tag.id) + " for:" + str(tag.name))
+                # self._debug("_set_jorum_tags(): Tag found @" + str(tag.id) + " for:" + str(tag.name))
+                pass
 
             feedgroup_obj.tags.add(tag) # Indented this one more level, need to test...
         return None
@@ -245,9 +247,10 @@ class Command(NoArgsCommand):
         artwork, created = File.objects.get_or_create(url=url, function=function, defaults={'url':url, 'function':function})
         if created:
             artwork.save()
-            self._debug("Artwork item created: " + str(url))
+            # self._debug("Artwork item created: " + str(url))
         else:
-            self._debug("Artwork item found @" + str(artwork.id) + " for: " + str(url))
+            # self._debug("Artwork item found @" + str(artwork.id) + " for: " + str(url))
+            pass
 
         fif, created = FileInFeed.objects.get_or_create(file=artwork, feed=feed_obj, defaults={
             'file':artwork, 'feed':feed_obj, 'withhold':0
@@ -271,9 +274,10 @@ class Command(NoArgsCommand):
                 if created:
                     i = self._update_item(i, item_row)
                     i.save()
-                    self._debug("New Item created, id: " + str(i.id) + ". Title=" + i.title)
+                    # self._debug("New Item created, id: " + str(i.id) + ". Title=" + i.title)
                 else:
-                    self._debug("Item found for merger, id: " + str(i.id) + ". Title=" + i.title)
+                    # self._debug("Item found for merger, id: " + str(i.id) + ". Title=" + i.title)
+                    pass
 
                 # Make import link
                 iii = ImportItemItem()
@@ -282,12 +286,12 @@ class Command(NoArgsCommand):
                 iii.save()
             else:
                 i = item_row.importitemitem_set.get(item=item_row).ffm_item
-                self._debug("Item found, id: " + str(i.id) + ". Title=" + i.title)
+                # self._debug("Item found, id: " + str(i.id) + ". Title=" + i.title)
 
             if not item_row.deleted: #Only overwrite the item information if this is not a deleted item
                 i = self._update_item(i, item_row)
                 i.save()
-                self._debug("Item details updated from oxitems row:" + str(item_row.id))
+                # self._debug("Item details updated from oxitems row:" + str(item_row.id))
             else:
                 # TODO: Consider what happens if all the items we're grouping here are deleted
                 # Consider whether we really even need to do anything after determining that this item has been deleted
@@ -306,9 +310,10 @@ class Command(NoArgsCommand):
                 if created:
                     f = self._update_file(f, item_row)
                     f.save()
-                    self._debug("New File created, id: " + str(f.id) + ". Url=" + f.url)
+                    # self._debug("New File created, id: " + str(f.id) + ". Url=" + f.url)
                 else:
-                    self._debug("File found, id: " + str(f.id) + ". Url=" + f.url)
+                    # self._debug("File found, id: " + str(f.id) + ". Url=" + f.url)
+                    pass
 
                 # Make import link
                 ifi = ImportFileItem()
@@ -355,7 +360,7 @@ class Command(NoArgsCommand):
         if len(oxitem_obj.item_startdate) > 6:
             item_obj.publish_start = parser.parse(oxitem_obj.item_startdate)
 
-        # self._debug("item_recording_date='" + oxitem_obj.item_recording_date + "'")
+        self._debug("item_recording_date='" + oxitem_obj.item_recording_date + "'")
         if len(oxitem_obj.item_recording_date) > 6:
             item_obj.recording_date = parser.parse(oxitem_obj.item_recording_date)
 
@@ -432,9 +437,10 @@ class Command(NoArgsCommand):
                 defaults=person_dict)
             if created:
                 person.save()
-                self._debug("_parse_people(): Person created for: " + person.short_name())
+                # self._debug("_parse_people(): Person created for: " + person.short_name())
             else:
-                self._debug("_parse_people(): Person found @" + str(person.id) + " for: " + person.short_name())
+                # self._debug("_parse_people(): Person found @" + str(person.id) + " for: " + person.short_name())
+                pass
 
             # Create a role link
             role = Role()
@@ -455,7 +461,7 @@ class Command(NoArgsCommand):
                     continue
                 person = {}
                 person["additional_information"] = n.strip()
-                self._debug("_parse_people(): Examining(;):" + n.strip())
+                # self._debug("_parse_people(): Examining(;):" + n.strip())
                 name = cs.findall(n)[0].strip().split(" ")
                 _person(name, person)
         else: # Deal with names separated by comma
@@ -466,13 +472,13 @@ class Command(NoArgsCommand):
                     for n2 in names2:
                         person = {}
                         person["additional_information"] = n2.strip()
-                        self._debug("_parse_people(): Examining(and):" + n2.strip())
+                        # self._debug("_parse_people(): Examining(and):" + n2.strip())
                         name2 = br.sub('',n2).strip().split(" ")
                         _person(name2, person)
                 else:
                     person = {}
                     person["additional_information"] = n.strip()
-                    self._debug("_parse_people(): Examining(,):" + n.strip())
+                    # self._debug("_parse_people(): Examining(,):" + n.strip())
                     name = br.sub('',n).strip().split(" ") # Presumes names don't exist in brackets - though, yes, there are some
                     _person(name, person)
 
@@ -495,9 +501,10 @@ class Command(NoArgsCommand):
             tag, created = Tag.objects.get_or_create(name=t,group=g, defaults={'name':t, 'group':g})
             if created:
                 tag.save()
-                self._debug("_parse_keywords(): Tag created for: " + tag.name)
+                # self._debug("_parse_keywords(): Tag created for: " + tag.name)
             else:
-                self._debug("_parse_keywords(): Tag found @" + str(tag.id) + " for:" + tag.name)
+                # self._debug("_parse_keywords(): Tag found @" + str(tag.id) + " for:" + tag.name)
+                pass
 
             item_obj.tags.add(tag)
         return None
@@ -517,9 +524,10 @@ class Command(NoArgsCommand):
             tag, created = Tag.objects.get_or_create(name=t,group=g, defaults={'name':t, 'group':g})
             if created:
                 tag.save()
-                self._debug("_parse_jacs_code(): Tag created for: " + tag.name)
+                # self._debug("_parse_jacs_code(): Tag created for: " + tag.name)
             else:
-                self._debug("_parse_jacs_code(): Tag found @" + str(tag.id) + " for:" + tag.name)
+                # self._debug("_parse_jacs_code(): Tag found @" + str(tag.id) + " for:" + tag.name)
+                pass
 
             fif_obj.jacs_codes.add(tag)
         return None
