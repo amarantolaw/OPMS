@@ -411,9 +411,9 @@ class Command(NoArgsCommand):
                     defaults=person)
                 if created:
                     person.save()
-                    self._debug("_parse_people(): Person created for: " + person.short_name)
+                    self._debug("_parse_people(): Person created for: " + person.short_name())
                 else:
-                    self._debug("_parse_people(): Person found @" + str(person.id) + " for: " + person.short_name)
+                    self._debug("_parse_people(): Person found @" + str(person.id) + " for: " + person.short_name())
 
                 # Create a role link
                 role = Role()
@@ -436,9 +436,9 @@ class Command(NoArgsCommand):
                     defaults=person)
                 if created:
                     person.save()
-                    self._debug("_parse_people(): Person created for: " + person.short_name)
+                    self._debug("_parse_people(): Person created for: " + person.short_name())
                 else:
-                    self._debug("_parse_people(): Person found @" + str(person.id) + " for: " + person.short_name)
+                    self._debug("_parse_people(): Person found @" + str(person.id) + " for: " + person.short_name())
 
                 # Create a role link
                 role = Role()
