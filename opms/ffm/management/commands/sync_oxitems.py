@@ -5,7 +5,7 @@ from optparse import make_option
 from django.core.management.base import NoArgsCommand, CommandError
 from opms.ffm.models import *
 from opms.oxitems.models import *
-import sys
+import sys, re
 from datetime import datetime
 from dateutil import parser
 from django.utils.encoding import smart_str, smart_unicode
@@ -401,7 +401,8 @@ class Command(NoArgsCommand):
             title = name[0].lower()
             if title.startswith("prof") or title.startswith("dr") or title.startswith("lord")\
                 or title.startswith("mr") or title.startswith("ms") or title.startswith("rt")\
-                or title.startswith("lieutenant") or title.startswith("president") or title.startswith("baron"):
+                or title.startswith("lieutenant") or title.startswith("president")\
+                or title.startswith("baron") or title.startswith("dame") or title.startswith("sir"):
                 person_dict["titles"] = name[0][:100]
                 try:
                     person_dict["first_name"] = name[1][:50]
@@ -430,13 +431,15 @@ class Command(NoArgsCommand):
             role.save()
             return None
 
+        # Remove anything in brackets ()
+        br = re.compile('\(*.*?\)', re.DOTALL)
         if in_str.count(";") > 0: # Deal with names separated by semi colons
             names = in_str.split(";")
             for n in names:
                 person = {}
                 person["additional_information"] = n.strip()
                 self._debug("_parse_people(): Examining(;):" + n.strip())
-                name = n.split(",")[0].strip().split(" ")
+                name = br.sub('',n).split(",")[0].strip().split(" ")
                 _person(name, person)
         else: # Deal with names separated by comma
             names = in_str.split(",")
@@ -447,13 +450,13 @@ class Command(NoArgsCommand):
                         person = {}
                         person["additional_information"] = n2.strip()
                         self._debug("_parse_people(): Examining(and):" + n2.strip())
-                        name2 = n2.strip().split(" ")
+                        name2 = br.sub('',n2).strip().split(" ")
                         _person(name2, person)
                 else:
                     person = {}
                     person["additional_information"] = n.strip()
                     self._debug("_parse_people(): Examining(,):" + n.strip())
-                    name = n.strip().split(" ")
+                    name = br.sub('',n).strip().split(" ")
                     _person(name, person)
 
 
