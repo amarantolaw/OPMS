@@ -39,29 +39,35 @@ class Command(NoArgsCommand):
         self._errorlog_start('sync_oxitems.log')
 
         # Reset statistics
-        self.import_stats['update_count'] = 0
-        self.import_stats['update_timeoutskips'] = 0
+        self.import_stats['channel_count'] = 0
+        self.import_stats['item_count'] = 0
+        self.import_stats['person_created'] = 0
+        self.import_stats['tag_created'] = 0
+        self.import_stats['file_created'] = 0
+        self.import_stats['feed_created'] = 0
+        self.import_stats['feedgroup_created'] = 0
         self.import_stats['update_starttime'] = datetime.utcnow()
 
         self.stopcount = int(options.get('stopcount', 0))
 
         if not self.debug:
+            print "Synchronising Databases (OxItems -> OPMS)"
             # Copy Oxitems remote to Oxitems local, overwrite existing
             remote_channels = Rg07Channels.objects.using('oxitems').filter(channel_categories__icontains='simple-podcasting')
             total_count = len(remote_channels)
             for counter, row in enumerate(remote_channels):
                 row.save(using='default')
                 if counter == 0 or (counter % 100) == 0:
-                    self._debug("Copied %s of %s channels" % (counter,total_count))
-            self._debug("Channels copy finished")
+                    print "Copied %s of %s channels" % (counter,total_count)
+            print "Channels copy finished"
 
             remote_items = Rg07Items.objects.using('oxitems').filter(item_channel__channel_categories__icontains='simple-podcasting')
             total_count = len(remote_items)
             for counter, row in enumerate(remote_items):
                 row.save(using='default')
                 if counter == 0 or (counter % 100) == 0:
-                    self._debug("Copied %s of %s items" % (counter,total_count))
-            self._debug("Items copy finished")
+                    print "Copied %s of %s items" % (counter,total_count)
+            print "Items copy finished"
 
 
         # Import OxItems.Channels
@@ -75,6 +81,7 @@ class Command(NoArgsCommand):
                 fg, created = FeedGroup.objects.get_or_create(title=row.title, defaults=feed_group)
                 if created:
                     self._debug("New FeedGroup created, id: " + str(fg.id) + ". Title=" + fg.title)
+                    self.import_stats['feedgroup_created'] = self.import_stats.get('feedgroup_created') + 1
                     fg.save()
                 else:
                     self._debug("FeedGroup found for merger, id: " + str(fg.id) + ". Title=" + fg.title)
@@ -110,6 +117,7 @@ class Command(NoArgsCommand):
                 ifc.channel = row
                 ifc.save()
                 self._debug("Feed created, id:" + str(f.id) + ". slug=" + row.name)
+                self.import_stats['feed_created'] = self.import_stats.get('feed_created') + 1
             else:
                 f = row.importfeedchannel_set.get(channel=row).feed #NB: Channels N -> 1 Feed relationship, even though it looks M2M
                 self._debug("Feed found, id:" + str(f.id) + ". slug=" + row.name)
@@ -136,8 +144,9 @@ class Command(NoArgsCommand):
         #    self.import_stats['update_rate'] = 0
 
         print "\nUpdate finished at " + str(datetime.utcnow()) +\
+            "\nFeedGroups created: " + str(self.import_stats.get('feedgroup_created')) + "." +\
+            "\nFeedGroups created: " + str(self.import_stats.get('feed_created')) + "." +\
         ""
-        #    "\nSkipped " + str(self.import_stats.get('update_timeoutskips')) + " IP Addresses. " +\
         #    "\nIP addresses parsed: " + str(self.import_stats.get('update_count')) +\
         #    "\nImported at " + str(self.import_stats.get('update_rate'))[0:6] + " IP Addresses/sec\n"
 
@@ -385,15 +394,14 @@ class Command(NoArgsCommand):
 
 
     def _parse_people(self, oxitem_obj, item_obj):
-        # TODO: parse the people associated with this item - YOU ARE WORKING HERE!!!
-        # In = String of text, probably CSV-like
+        # In = String of text, mostly CSV-like
         in_str = oxitem_obj.item_enclosure_artists
 
-        # Clear out any existing role links?
+        # Clear out any existing role links
         item_obj.people.clear()
 
         if len(in_str) < 3:
-            # This should likely throw some sort of error about missing people?
+            # TODO: This should likely throw some sort of error about missing people?
             return None
 
         # Some manual exceptions for people parsing...
@@ -411,7 +419,7 @@ class Command(NoArgsCommand):
                 try:
                     person_dict["first_name"] = name[1][:50]
                 except IndexError:
-                    # Throw an error here as this name is likely screwy
+                    # TODO: Throw an error here as this name is likely screwy
                     person_dict["first_name"] = name[0][:50]
             else:
                 person_dict["first_name"] = name[0][:50]
@@ -442,6 +450,8 @@ class Command(NoArgsCommand):
         if in_str.count(";") > 0: # Deal with names separated by semi colons
             names = in_str.strip().split(";")
             for n in names:
+                if len(n)<1:
+                    continue
                 person = {}
                 person["additional_information"] = n.strip()
                 self._debug("_parse_people(): Examining(;):" + n.strip())
@@ -465,9 +475,7 @@ class Command(NoArgsCommand):
                     name = br.sub('',n).strip().split(" ") # Presumes names don't exist in brackets - though, yes, there are some
                     _person(name, person)
 
-
         # TODO: Will need to have a merge records method for manual use
-
         return None
 
 
