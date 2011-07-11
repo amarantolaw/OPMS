@@ -387,29 +387,68 @@ class Command(NoArgsCommand):
     def _parse_people(self, oxitem_obj, item_obj):
         # TODO: parse the people associated with this item - YOU ARE WORKING HERE!!!
         # In = String of text, probably CSV-like
-        # Out, a link to a person record that can be manually curated later.
-        # TODO: Will need to have a merge records method for manual use
+        in_str = oxitem_obj.item_enclosure_artists
 
-        # Clear out any existing role links
+        # Clear out any existing role links?
+        item_obj.people.clear()
 
-        if len(oxitem_obj.item_enclosure_artists) < 3:
+        if len(in_str) < 3:
+            # This should likely throw some sort of error about missing people?
             return None
 
-        people = oxitem_obj.item_enclosure_artists.split(',')
-        for p in people:
-            if len(p) < 1:
-                continue
-            names = p.split(' ')
-            
-            person = {'first_name':'', 'last_name':'', 'middle_names':'', 'additional_information':''}
-            tag, created = Tag.objects.get_or_create(name=t,group=g, defaults={'name':t, 'group':g})
-            if created:
-                tag.save()
-                self._debug("_parse_keywords(): Tag created for: " + tag.name)
-            else:
-                self._debug("_parse_keywords(): Tag found @" + str(tag.id) + " for:" + tag.name)
+        if in_str.count(";") > 1:
+            names = in_str.split(";")
+            for n in names:
+                person = {}
+                person["additional_information"] = n.strip()
+                name = n.split(",")[0].strip().split(" ")
+                person["first_name"] = name[0]
+                person["last_name"] = name[-1]
 
-            item_obj.tags.add(tag)
+                # Get or create a person record for this one
+                person, created = Person.objects.get_or_create(
+                    additional_information=person.get("additional_information"),
+                    defaults=person)
+                if created:
+                    person.save()
+                    self._debug("_parse_people(): Person created for: " + person.short_name)
+                else:
+                    self._debug("_parse_people(): Person found @" + str(person.id) + " for: " + person.short_name)
+
+                # Create a role link
+                role = Role()
+                role.person = person
+                role.item = item_obj
+                role.role = u'25.16' # From models.py: ROLES: u'Speaker / Lecturer / Causeur')
+                role.save()
+        else:
+            names = in_str.split(",")
+            for n in names:
+                person = {}
+                person["additional_information"] = n.strip()
+                name = n.strip().split(" ")
+                person["first_name"] = name[0]
+                person["last_name"] = name[-1]
+
+                # Get or create a person record for this one
+                person, created = Person.objects.get_or_create(
+                    additional_information=person.get("additional_information"),
+                    defaults=person)
+                if created:
+                    person.save()
+                    self._debug("_parse_people(): Person created for: " + person.short_name)
+                else:
+                    self._debug("_parse_people(): Person found @" + str(person.id) + " for: " + person.short_name)
+
+                # Create a role link
+                role = Role()
+                role.person = person
+                role.item = item_obj
+                role.role = u'25.16' # From models.py: ROLES: u'Speaker / Lecturer / Causeur')
+                role.save()
+
+        # TODO: Will need to have a merge records method for manual use
+
         return None
 
 
