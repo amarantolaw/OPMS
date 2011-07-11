@@ -434,22 +434,24 @@ class Command(NoArgsCommand):
                 self._debug("_parse_people(): Examining(;):" + n.strip())
                 name = n.split(",")[0].strip().split(" ")
                 _person(name, person)
-        elif in_str.count(",") > 0: # Deal with names separated by comma
+        else: # Deal with names separated by comma
             names = in_str.split(",")
             for n in names:
-                person = {}
-                person["additional_information"] = n.strip()
-                self._debug("_parse_people(): Examining(,):" + n.strip())
-                name = n.strip().split(" ")
-                _person(name, person)
-        else: # Deal with single people or couples split with an "and"
-            names = in_str.split(" and ")
-            for n in names:
-                person = {}
-                person["additional_information"] = n.strip()
-                self._debug("_parse_people(): Examining(and):" + n.strip())
-                name = n.strip().split(" ")
-                _person(name, person)
+                if n.count(" and ") > 0:
+                    names2 = in_str.split(" and ")
+                    for n in names2:
+                        person = {}
+                        person["additional_information"] = n.strip()
+                        self._debug("_parse_people(): Examining(and):" + n.strip())
+                        name = n.strip().split(" ")
+                        _person(name, person)
+                else:
+                    person = {}
+                    person["additional_information"] = n.strip()
+                    self._debug("_parse_people(): Examining(,):" + n.strip())
+                    name = n.strip().split(" ")
+                    _person(name, person)
+
 
         # TODO: Will need to have a merge records method for manual use
 
