@@ -432,21 +432,21 @@ class Command(NoArgsCommand):
                 person = {}
                 person["additional_information"] = n.strip()
                 name = n.split(",")[0].strip().split(" ")
-                self._person(name)
+                _person(name)
         elif in_str.count(",") > 0: # Deal with names separated by comma
             names = in_str.split(",")
             for n in names:
                 person = {}
                 person["additional_information"] = n.strip()
                 name = n.strip().split(" ")
-                self._person(name)
+                _person(name)
         else: # Deal with single people or couples split with an "and"
             names = in_str.split(" and ")
             for n in names:
                 person = {}
                 person["additional_information"] = n.strip()
                 name = n.strip().split(" ")
-                self._person(name)
+                _person(name)
 
         # TODO: Will need to have a merge records method for manual use
 
