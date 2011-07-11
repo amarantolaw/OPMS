@@ -126,6 +126,7 @@ class Command(NoArgsCommand):
             # NB: THESE ARE NOT UNIQUE IN OXITEMS. For the moment, cheat. Don't imported deleted, hence no duplicates.
             f.slug = row.name
             f.last_updated = row.channel_updated
+            f.feed_group = fg
             f.save()
 
             # Things to do after the Feed is created
