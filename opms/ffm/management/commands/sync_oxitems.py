@@ -65,20 +65,27 @@ class Command(NoArgsCommand):
             total_count = len(remote_items)
             for counter, row in enumerate(remote_items):
                 row.save(using='default')
-                if counter == 0 or (counter % 100) == 0:
-                    print "Copied %s of %s items" % (counter,total_count)
+                if counter == 0 or (counter % int(total_count / 10)) == 0: # Aim for reports every 10% complete
+                    # print "Copied %s of %s items" % (counter,total_count)
+                    percentage = int(counter % int(total_count / 10)) * 10
+                    print "Copied %s\% of items"
             print "Items copy finished"
 
 
         # Import OxItems.Channels
-        oxitems_channels = Rg07Channels.objects.filter(deleted=False)
+        oxitems_channels = Rg07Channels.objects.all() # filter(deleted=False)
         total_count = len(oxitems_channels)
         print "Processing OxItems Channel Data into OPMS (" + str(total_count) + " rows to do)"
         for counter, row in enumerate(oxitems_channels):
             # Update or create FeedGroup?
             if len(row.importfeedgroupchannel_set.all()) == 0:
                 # Does this need merging with an existing feedgroup? Compare with existing titles. Basic exact match first...
-                feed_group = {'title': row.title}
+                feed_group = {
+                    'title': row.title, 
+                    'description':row.description,
+                    'internal_comments':row.channel_emailaddress,
+                    'owning_unit':self._get_or_create_owning_unit(row.oxpoints_units)
+                }
                 fg, created = FeedGroup.objects.get_or_create(title=row.title, defaults=feed_group)
                 if created:
                     self._debug("New FeedGroup created, id: " + str(fg.id) + ". Title=" + fg.title)
@@ -96,38 +103,46 @@ class Command(NoArgsCommand):
                 fg = row.importfeedgroupchannel_set.get(channel=row).feedgroup #NB: Channels N -> 1 FeedGroup relationship, even though it looks M2M
                 self._debug("FeedGroup found, id: " + str(fg.id) + ". Title=" + fg.title)
 
-            # NB: This will overwrite with the last item found to match, and there is no sort order on the list...
-            fg.title = row.title
-            fg.description = row.description
-            fg.internal_comments = row.channel_emailaddress
-            fg.owning_unit = self._get_or_create_owning_unit(row.oxpoints_units)
-            fg.save()
-            # Things to do after the FeedGroup is created/found
+            # Update the information if this is not a deleted record
+            if not row.deleted:
+                fg.title = row.title
+                fg.description = row.description
+                fg.internal_comments = row.channel_emailaddress
+                fg.owning_unit = self._get_or_create_owning_unit(row.oxpoints_units)
+                fg.save()
+            # Things to do after the FeedGroup is created/found, regardless of deleted state
             self._get_or_create_link(fg, row.link)
             self._set_jorum_tags(fg, row.channel_jorumopen_collection)
 
             # Update or create Feed?
             if len(row.importfeedchannel_set.all()) == 0: # Create Feed
-                f = Feed()
-                f.feed_group = fg
-                f.save()
+                feed = {
+                    'slug':row.name,
+                    'feed_group':fg,
+                    'last_updated':row.channel_updated
+                }
+                f, created = Feed.objects.get_or_create(slug=row.name, defaults=feed)
+                if created:
+                    f.save()
+                    self._debug("Feed created, id:" + str(f.id) + ". slug=" + f.slug)
+                    self.import_stats['feed_created'] = self.import_stats.get('feed_created') + 1
+                else:
+                    self._debug("Feed found for merger, id: " + str(f.id) + ". slug=" + f.slug)
 
                 # Make link to import
                 ifc = ImportFeedChannel()
                 ifc.feed = f
                 ifc.channel = row
                 ifc.save()
-                self._debug("Feed created, id:" + str(f.id) + ". slug=" + row.name)
-                self.import_stats['feed_created'] = self.import_stats.get('feed_created') + 1
             else:
                 f = row.importfeedchannel_set.get(channel=row).feed #NB: Channels N -> 1 Feed relationship, even though it looks M2M
                 self._debug("Feed found, id:" + str(f.id) + ". slug=" + row.name)
 
-            # NB: THESE ARE NOT UNIQUE IN OXITEMS. For the moment, cheat. Don't imported deleted, hence no duplicates.
-            f.slug = row.name
-            f.last_updated = row.channel_updated
-            f.feed_group = fg
-            f.save()
+            # NB: Slugs/name ARE NOT UNIQUE IN OXITEMS. So merge with existing, but only update if not deleted
+            if not row.deleted:
+                f.last_updated = row.channel_updated
+                f.feed_group = fg
+                f.save()
 
             # Things to do after the Feed is created
             self._set_feed_destinations(f, row.channel_guid, row.channel_tpi, row.deleted)
