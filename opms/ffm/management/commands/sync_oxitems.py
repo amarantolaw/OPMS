@@ -68,7 +68,7 @@ class Command(NoArgsCommand):
                 if counter == 0 or (counter % int(total_count / 10)) == 0: # Aim for reports every 10% complete
                     # print "Copied %s of %s items" % (counter,total_count)
                     percentage = int(counter % int(total_count / 10)) * 10
-                    print "Copied %s% of items" % (percentage)
+                    print "Copied %s%% of items" % (percentage)
             print "Items copy finished"
 
 
