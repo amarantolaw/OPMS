@@ -167,6 +167,11 @@ class FileFunction(models.Model):
     def __unicode__(self):
         return smart_unicode(self.name + ' (' + self.file_category + ')')
 
+class FileURL(models.Model):
+    # A unique file can be presented on multiple URLS, use this table to track and associate them
+    # TODO: Investigate http://docs.python.org/library/urlparse.html for url parsing
+    url = models.URLField("file url", verify_exists=True) # Everything in this system should be hosted on a URL
+
 
 class File(models.Model):
     MIMETYPES = [
@@ -189,16 +194,15 @@ class File(models.Model):
     def get_mimetype_display(self):
         return MIMETYPES.get(self.mimetype, 'unknown')
 
-    def create_guid():
-        return 'OPMS-file:' + str(uuid.uuid4())
-
     #v2.0 file = models.FileField(upload_to='')
+    # filehash = models.CharField("filehash", max_length=32) Some form of string value uniquely identifying the file, so if it changes we'll know about it. Likely use sha256
+    # Filehash notes at: http://docs.python.org/library/hashlib.html; http://en.wikipedia.org/wiki/Cryptographic_hash_function#Cryptographic_hash_algorithms
+    # and a memory friendly method of applying this at http://stackoverflow.com/questions/1131220/get-md5-hash-of-a-files-without-open-it-in-python
+    # Also note filecomparison functions at http://docs.python.org/library/filecmp.html
     function = models.ForeignKey(FileFunction, verbose_name="file function", default=1)
-    guid = models.CharField("file GUID", max_length=100, default=create_guid)
     item = models.ForeignKey(Item, verbose_name="Owning Item", default=None, null=True) # Some files belong to feeds, or licences, not just items
     mimetype = models.CharField("mime type", max_length=50, choices=MIMETYPES, default='unknown')
-    # TODO: Investigate http://docs.python.org/library/urlparse.html for url parsing
-    url = models.URLField("file url", verify_exists=True) # Everything in this system should be hosted on a URL
+    urls = models.ForeignKey(FileURL, verbose_name="file urls")
     # Optional extras
     duration = models.IntegerField("duration in seconds", null=True)
     size = models.IntegerField("file size in bytes", null=True)
@@ -400,9 +404,14 @@ class FileInFeed(models.Model):
         (112104, u'Psychology & Research'),
         (112105, u'Special Education'),
     ]
+
+    def create_guid():
+        return 'OPMS-file:' + str(uuid.uuid4())
+
     file = models.ForeignKey(File, verbose_name="file")
     feed = models.ForeignKey(Feed, verbose_name="feed")
     alternative_title = models.CharField("alternative file title", max_length=256, null=True)
+    guid = models.CharField("file GUID", max_length=100, default=create_guid) # Used to identify a file uniquely dependant on the feed it is placed in (tracking)
     order = models.IntegerField("manual sort order for feed", default=0)
     withhold = models.IntegerField("publishing status", default=100) # Default to being withheld
     # Optional additional categorising information
