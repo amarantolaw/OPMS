@@ -77,7 +77,7 @@ class Command(NoArgsCommand):
         total_count = len(oxitems_channels)
         print "Processing OxItems Channel Data into OPMS (" + str(total_count) + " rows to do)"
         for counter, row in enumerate(oxitems_channels):
-            # Update or create FeedGroup?
+            # Update or create ***FeedGroup***
             if len(row.importfeedgroupchannel_set.all()) == 0:
                 # Does this need merging with an existing feedgroup? Compare with existing titles. Basic exact match first...
                 feed_group = {
@@ -114,7 +114,7 @@ class Command(NoArgsCommand):
             self._get_or_create_link(fg, row.link)
             self._set_jorum_tags(fg, row.channel_jorumopen_collection)
 
-            # Update or create Feed?
+            # Update or create ***Feed***
             if len(row.importfeedchannel_set.all()) == 0: # Create Feed
                 feed = {
                     'slug':row.name,
@@ -282,7 +282,7 @@ class Command(NoArgsCommand):
         print "Found " + str(len(oxitems)) + " OxItems to process for " + str(feed_obj.slug)
 
         for counter, item_row in enumerate(oxitems):
-            # Update or create an item
+            # Update or create an ***Item***
             if len(item_row.importitemitem_set.all()) == 0:
                 # Does this need merging with an existing Item? Compare with existing titles...
                 item = {'title':item_row.item_title} # NB: May fail without a person record to store...
@@ -318,18 +318,26 @@ class Command(NoArgsCommand):
             # self._get_or_create_link() - There are no links in Oxitems Items :(
             self._parse_keywords(item_row, i)
 
-            # Update or create File for this Item
+            # Update or create ***File*** for this Item
             if len(item_row.importfileitem_set.all()) == 0:
                 # Does this file already exist?
-                file = {'url':item_row.item_enclosure_href}
-                f, created = File.objects.get_or_create(url=item_row.item_enclosure_href, defaults=file)
-                if created:
-                    f = self._update_file(f, item_row, i)
-                    f.save()
-                    # self._debug("New File created, id: " + str(f.id) + ". Url=" + f.url)
-                else:
-                    # self._debug("File found, id: " + str(f.id) + ". Url=" + f.url)
-                    pass
+                # Search by guid...
+                f = FileInFeed.objects.filter(guid__iexact=item_row.item_guid)[0]
+                if len(f)<1:
+                    # Search by url
+                    f = FeedURL.objects.filter(url__iexact=item_row.item_enclosure_href)[0]
+                    if len(f)<1:
+                        # Not found anything to match it by (and no filehash checking yet), so create a new File
+                        file = {'url':item_row.item_enclosure_href} # TODO: Can't match on URL really, as this is now an external table field
+                        f, created = File.objects.get_or_create(url=item_row.item_enclosure_href, defaults=file)
+                        if created:
+                            f = self._update_file(f, item_row, i)
+                            f.save()
+                            # self._debug("New File created, id: " + str(f.id) + ". Url=" + f.url)
+                        else:
+                            # self._debug("File found, id: " + str(f.id) + ". Url=" + f.url)
+                            pass
+                # TODO: YOU ARE WORKING HERE
 
                 # Make import link
                 ifi = ImportFileItem()
