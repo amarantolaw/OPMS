@@ -170,6 +170,7 @@ class FileFunction(models.Model):
 class FileURL(models.Model):
     # A unique file can be presented on multiple URLS, use this table to track and associate them
     # TODO: Investigate http://docs.python.org/library/urlparse.html for url parsing
+    file = models.ForeignKey(File, verbose_name="file urls")
     url = models.URLField("file url", verify_exists=True) # Everything in this system should be hosted on a URL
 
 
@@ -202,7 +203,6 @@ class File(models.Model):
     function = models.ForeignKey(FileFunction, verbose_name="file function", default=1)
     item = models.ForeignKey(Item, verbose_name="Owning Item", default=None, null=True) # Some files belong to feeds, or licences, not just items
     mimetype = models.CharField("mime type", max_length=50, choices=MIMETYPES, default='unknown')
-    urls = models.ForeignKey(FileURL, verbose_name="file urls")
     # Optional extras
     duration = models.IntegerField("duration in seconds", null=True)
     size = models.IntegerField("file size in bytes", null=True)
