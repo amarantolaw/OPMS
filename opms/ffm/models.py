@@ -167,12 +167,6 @@ class FileFunction(models.Model):
     def __unicode__(self):
         return smart_unicode(self.name + ' (' + self.file_category + ')')
 
-class FileURL(models.Model):
-    # A unique file can be presented on multiple URLS, use this table to track and associate them
-    # TODO: Investigate http://docs.python.org/library/urlparse.html for url parsing
-    file = models.ForeignKey(File, verbose_name="file urls")
-    url = models.URLField("file url", verify_exists=True) # Everything in this system should be hosted on a URL
-
 
 class File(models.Model):
     MIMETYPES = [
@@ -218,6 +212,14 @@ class File(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.url + ' (' + self.title +')')
+
+
+
+class FileURL(models.Model):
+    # A unique file can be presented on multiple URLS, use this table to track and associate them
+    # TODO: Investigate http://docs.python.org/library/urlparse.html for url parsing
+    file = models.ForeignKey(File, verbose_name="file urls")
+    url = models.URLField("file url", verify_exists=True) # Everything in this system should be hosted on a URL
 
 
 class Destination(models.Model):
