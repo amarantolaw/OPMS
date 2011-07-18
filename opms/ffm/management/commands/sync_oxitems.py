@@ -50,7 +50,7 @@ class Command(NoArgsCommand):
 
         self.no_sync = bool(options.get('no_sync', False))
 
-        if not self.debug or self.no_sync:
+        if (not self.debug) or self.no_sync:
             print "Synchronising Databases (OxItems -> OPMS)"
             # Copy Oxitems remote to Oxitems local, overwrite existing
             remote_channels = Rg07Channels.objects.using('oxitems').filter(channel_categories__icontains='simple-podcasting')
@@ -271,8 +271,8 @@ class Command(NoArgsCommand):
             f.save()
             # self._debug("_get_or_create_feedartwork(): New File created, id: " + str(f.id) + ". Url=" + f.url)
 
-            # Now create a FeedURL object and link
-            furl = FeedURL()
+            # Now create a FileURL object and link
+            furl = FileURL()
             furl.url = url
             furl.file = f
             furl.save()
@@ -344,8 +344,8 @@ class Command(NoArgsCommand):
                         f.save()
                         # self._debug("New File created, id: " + str(f.id) + ". Url=" + f.url)
 
-                        # Now create a FeedURL object and link
-                        furl = FeedURL()
+                        # Now create a FileURL object and link
+                        furl = FileURL()
                         furl.url = item_row.item_enclosure_href
                         furl.file = f
                         furl.save()
