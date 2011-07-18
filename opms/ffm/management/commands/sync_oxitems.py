@@ -261,7 +261,7 @@ class Command(NoArgsCommand):
         # Trust the URL for the timebeing...
         function = FileFunction.objects.get(pk=3) # Hardcoded for fixture loaded FileFunction FeedArt
 
-        f = FeedURL.objects.filter(file__function__iexact = function).filter(url__iexact=url)[0].file
+        f = FileURL.objects.filter(file__function__iexact = function).filter(url__iexact=url)[0].file
         if len(f)<1:
             # Not found anything to match it by (and no filehash to get_or_create on yet), so create a new File
             f = File()
@@ -335,7 +335,7 @@ class Command(NoArgsCommand):
                 f = FileInFeed.objects.filter(guid__iexact=item_row.item_guid)[0].file
                 if len(f)<1:
                     # Search by url...
-                    f = FeedURL.objects.filter(url__iexact=item_row.item_enclosure_href)[0].file
+                    f = FileURL.objects.filter(url__iexact=item_row.item_enclosure_href)[0].file
                     if len(f)<1:
                         # Not found anything to match it by (and no filehash to get_or_create on yet), so create a new File
                         f = File()
