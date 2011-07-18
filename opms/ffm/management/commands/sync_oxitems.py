@@ -51,7 +51,7 @@ class Command(NoArgsCommand):
 
         self.no_sync = bool(options.get('no_sync', False))
 
-        if (not self.debug) or self.no_sync:
+        if not self.debug and not self.no_sync:
             print "Synchronising Databases (OxItems -> OPMS)"
             # Copy Oxitems remote to Oxitems local, overwrite existing
             remote_channels = Rg07Channels.objects.using('oxitems').filter(channel_categories__icontains='simple-podcasting')
@@ -262,8 +262,9 @@ class Command(NoArgsCommand):
         # Trust the URL for the timebeing...
         function = FileFunction.objects.get(pk=3) # Hardcoded for fixture loaded FileFunction FeedArt
 
-        f = FileURL.objects.filter(file__function__exact = function).filter(url__iexact=url)[0].file
-        if len(f)<1:
+        try:
+            f = FileURL.objects.filter(file__function__exact=function).filter(url__iexact=url)[0].file
+        except IndexError:
             # Not found anything to match it by (and no filehash to get_or_create on yet), so create a new File
             f = File()
             f.item = i
@@ -333,11 +334,13 @@ class Command(NoArgsCommand):
                 f = item_row.importfileitem_set.get(item=item_row).file
             except DoesNotExist:
                 # Does this file already exist? Search by guid...
-                f = FileInFeed.objects.filter(guid__iexact=item_row.item_guid)[0].file
-                if len(f)<1:
+                try:
+                    f = FileInFeed.objects.filter(guid__iexact=item_row.item_guid)[0].file
+                except IndexError:
                     # Search by url...
-                    f = FileURL.objects.filter(url__iexact=item_row.item_enclosure_href)[0].file
-                    if len(f)<1:
+                    try:
+                        f = FileURL.objects.filter(url__iexact=item_row.item_enclosure_href)[0].file
+                    except IndexError:
                         # Not found anything to match it by (and no filehash to get_or_create on yet), so create a new File
                         f = File()
                         f.item = i
