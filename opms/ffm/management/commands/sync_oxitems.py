@@ -14,7 +14,7 @@ class Command(NoArgsCommand):
     help = 'Scan through OxItems database and import into OPMS:FFM'
     option_list = NoArgsCommand.option_list + (
         make_option('--no-sync', action='store', dest='no_sync',
-            default=False, help='Use this to skip the sync with OxItems live data'),
+            default=True, help='Use this to skip the sync with OxItems live data'),
     )
 
     def __init__(self):
