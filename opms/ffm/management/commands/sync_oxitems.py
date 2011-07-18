@@ -283,7 +283,10 @@ class Command(NoArgsCommand):
 
         for counter, item_row in enumerate(oxitems):
             # Update or create an ***Item***
-            if len(item_row.importitemitem_set.all()) == 0:
+            try:
+                i = item_row.importitemitem_set.get(item=item_row).ffm_item
+                # self._debug("Item found, id: " + str(i.id) + ". Title=" + i.title)
+            except DoesNotExist:
                 # Does this need merging with an existing Item? Compare with existing titles...
                 item = {'title':item_row.item_title} # NB: May fail without a person record to store...
                 i, created = Item.objects.get_or_create(title=item_row.item_title, defaults=item)
@@ -300,9 +303,6 @@ class Command(NoArgsCommand):
                 iii.ffm_item = i
                 iii.item = item_row
                 iii.save()
-            else:
-                i = item_row.importitemitem_set.get(item=item_row).ffm_item
-                # self._debug("Item found, id: " + str(i.id) + ". Title=" + i.title)
 
             if not item_row.deleted: #Only overwrite the item information if this is not a deleted item
                 i = self._update_item(i, item_row)
@@ -319,33 +319,33 @@ class Command(NoArgsCommand):
             self._parse_keywords(item_row, i)
 
             # Update or create ***File*** for this Item
-            if len(item_row.importfileitem_set.all()) == 0:
-                # Does this file already exist?
-                # Search by guid...
-                f = FileInFeed.objects.filter(guid__iexact=item_row.item_guid)[0]
+            try:
+                f = item_row.importfileitem_set.get(item=item_row).file
+            except DoesNotExist:
+                # Does this file already exist? Search by guid...
+                f = FileInFeed.objects.filter(guid__iexact=item_row.item_guid)[0].file
                 if len(f)<1:
-                    # Search by url
-                    f = FeedURL.objects.filter(url__iexact=item_row.item_enclosure_href)[0]
+                    # Search by url...
+                    f = FeedURL.objects.filter(url__iexact=item_row.item_enclosure_href)[0].file
                     if len(f)<1:
-                        # Not found anything to match it by (and no filehash checking yet), so create a new File
-                        file = {'url':item_row.item_enclosure_href} # TODO: Can't match on URL really, as this is now an external table field
-                        f, created = File.objects.get_or_create(url=item_row.item_enclosure_href, defaults=file)
-                        if created:
-                            f = self._update_file(f, item_row, i)
-                            f.save()
-                            # self._debug("New File created, id: " + str(f.id) + ". Url=" + f.url)
-                        else:
-                            # self._debug("File found, id: " + str(f.id) + ". Url=" + f.url)
-                            pass
-                # TODO: YOU ARE WORKING HERE
+                        # Not found anything to match it by (and no filehash to get_or_create on yet), so create a new File
+                        f = File()
+                        f.item = i
+                        f = self._update_file(f, item_row, i)
+                        f.save()
+                        # self._debug("New File created, id: " + str(f.id) + ". Url=" + f.url)
+
+                        # Now create a FeedURL object and link
+                        furl = FeedURL()
+                        furl.url = item_row.item_enclosure_href
+                        furl.file = f
+                        furl.save()
 
                 # Make import link
                 ifi = ImportFileItem()
                 ifi.file = f
                 ifi.item = item_row
                 ifi.save()
-            else:
-                f = item_row.importfileitem_set.get(item=item_row).file
 
             if not item_row.deleted:
                 f = self._update_file(f, item_row, i)
@@ -353,7 +353,13 @@ class Command(NoArgsCommand):
 
             # feed_obj.files.add(f) -- Not a simple M2M link
             # Update or create a link for this FileInFeed. There is always a link for historical tracking reasons
-            fileinfeed = {'file':f, 'feed':feed_obj, 'withhold':item_row.item_checked, 'itunesu_category':item_row.item_cc}
+            fileinfeed = {
+                'file':f,
+                'feed':feed_obj,
+                'withhold':item_row.item_checked,
+                'itunesu_category':item_row.item_cc,
+                'guid':item_row.item_guid
+            }
             fif, created = FileInFeed.objects.get_or_create(file=f, feed=feed_obj, defaults=fileinfeed)
             if created:
                 fif.save()
@@ -404,7 +410,6 @@ class Command(NoArgsCommand):
 
 
     def _update_file(self, file_obj, oxitem_obj, item_obj):
-        file_obj.guid = oxitem_obj.item_guid
         file_obj.item = item_obj
         if len(oxitem_obj.item_enclosure_length)>0:
             file_obj.size = int(oxitem_obj.item_enclosure_length)
