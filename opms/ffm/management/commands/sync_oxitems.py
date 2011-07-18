@@ -11,11 +11,11 @@ from dateutil import parser
 from django.utils.encoding import smart_str, smart_unicode
 
 class Command(NoArgsCommand):
-    help = 'Scan through OxItems database and import into OPMS:FFM'
     option_list = NoArgsCommand.option_list + (
-        make_option('--no-sync', action='store', dest='no_sync',
-            default=True, help='Use this to skip the sync with OxItems live data'),
+        make_option('--no-sync', action='store', dest='no_sync', default=True,
+                    help='Use this to skip the sync with OxItems live data'),
     )
+    help = 'Scan through OxItems database and import into OPMS:FFM'
 
     def __init__(self):
         """
@@ -28,6 +28,7 @@ class Command(NoArgsCommand):
         self.error_cache = ""
 
         self.import_stats = {}
+        self.no_sync = False
 
         super(Command, self).__init__()
 
@@ -261,7 +262,7 @@ class Command(NoArgsCommand):
         # Trust the URL for the timebeing...
         function = FileFunction.objects.get(pk=3) # Hardcoded for fixture loaded FileFunction FeedArt
 
-        f = FileURL.objects.filter(file__function__iexact = function).filter(url__iexact=url)[0].file
+        f = FileURL.objects.filter(file__function__exact = function).filter(url__iexact=url)[0].file
         if len(f)<1:
             # Not found anything to match it by (and no filehash to get_or_create on yet), so create a new File
             f = File()
