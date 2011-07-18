@@ -299,7 +299,7 @@ class Command(NoArgsCommand):
             try:
                 i = item_row.importitemitem_set.get(item=item_row).ffm_item
                 # self._debug("Item found, id: " + str(i.id) + ". Title=" + i.title)
-            except DoesNotExist:
+            except ImportItemItem.DoesNotExist:
                 # Does this need merging with an existing Item? Compare with existing titles...
                 item = {'title':item_row.item_title} # NB: May fail without a person record to store...
                 i, created = Item.objects.get_or_create(title=item_row.item_title, defaults=item)
@@ -334,7 +334,7 @@ class Command(NoArgsCommand):
             # Update or create ***File*** for this Item
             try:
                 f = item_row.importfileitem_set.get(item=item_row).file
-            except DoesNotExist:
+            except ImportFileItem.DoesNotExist:
                 # Does this file already exist? Search by guid...
                 try:
                     f = FileInFeed.objects.filter(guid__iexact=item_row.item_guid)[0].file
