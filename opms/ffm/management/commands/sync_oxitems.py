@@ -260,16 +260,25 @@ class Command(NoArgsCommand):
             return None
         # Trust the URL for the timebeing...
         function = FileFunction.objects.get(pk=3) # Hardcoded for fixture loaded FileFunction FeedArt
-        artwork, created = File.objects.get_or_create(url=url, function=function, defaults={'url':url, 'function':function})
-        if created:
-            artwork.save()
-            # self._debug("Artwork item created: " + str(url))
-        else:
-            # self._debug("Artwork item found @" + str(artwork.id) + " for: " + str(url))
-            pass
 
-        fif, created = FileInFeed.objects.get_or_create(file=artwork, feed=feed_obj, defaults={
-            'file':artwork, 'feed':feed_obj, 'withhold':0
+        f = FeedURL.objects.filter(file__function__iexact = function).filter(url__iexact=url)[0].file
+        if len(f)<1:
+            # Not found anything to match it by (and no filehash to get_or_create on yet), so create a new File
+            f = File()
+            f.item = i
+            # TODO: determine file mimetype
+            # TODO: determine proper duration and size from the file...
+            f.save()
+            # self._debug("_get_or_create_feedartwork(): New File created, id: " + str(f.id) + ". Url=" + f.url)
+
+            # Now create a FeedURL object and link
+            furl = FeedURL()
+            furl.url = url
+            furl.file = f
+            furl.save()
+
+        fif, created = FileInFeed.objects.get_or_create(file=f, feed=feed_obj, defaults={
+            'file':f, 'feed':feed_obj, 'withhold':0
         })
         if created:
             fif.save()
