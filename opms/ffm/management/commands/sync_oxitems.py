@@ -71,6 +71,8 @@ class Command(NoArgsCommand):
                     percentage = int(counter / int(total_count / 10)) * 10
                     print "Copied %s%% of items" % (percentage)
             print "Items copy finished"
+        else:
+            print "Skipping Database Synchronisation"
 
 
         # Import OxItems.Channels
@@ -267,7 +269,7 @@ class Command(NoArgsCommand):
         except IndexError:
             # Not found anything to match it by (and no filehash to get_or_create on yet), so create a new File
             f = File()
-            f.item = i
+            f.item = None # This file belongs to a Feed, not an Item, hence the FIF link below...
             # TODO: determine file mimetype
             # TODO: determine proper duration and size from the file...
             f.save()
