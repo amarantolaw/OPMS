@@ -377,6 +377,8 @@ class Command(NoArgsCommand):
             if not item_row.deleted:
                 f = self._update_file(f, item_row, i)
                 f.save()
+            else:
+                self.debug("_parse_items(): This Oxitem is marked as deleted")
 
             # feed_obj.files.add(f) -- Not a simple M2M link
             # Update or create a link for this FileInFeed. There is always a link for historical tracking reasons
@@ -405,7 +407,7 @@ class Command(NoArgsCommand):
 
 
     def _update_item(self, item_obj, oxitem_obj):
-        # self._debug("item_updated='" + oxitem_obj.item_updated + "'")
+        self._debug("_update_item(): item_updated='" + oxitem_obj.item_updated + "'")
         if len(oxitem_obj.item_updated) > 6:
             item_obj.last_updated = parser.parse(oxitem_obj.item_updated)
 
@@ -419,7 +421,7 @@ class Command(NoArgsCommand):
         if len(oxitem_obj.item_startdate) > 6:
             item_obj.publish_start = parser.parse(oxitem_obj.item_startdate)
 
-        self._debug("item_recording_date='" + oxitem_obj.item_recording_date + "'")
+        # self._debug("item_recording_date='" + oxitem_obj.item_recording_date + "'")
         if len(oxitem_obj.item_recording_date) > 6:
             item_obj.recording_date = parser.parse(oxitem_obj.item_recording_date)
 
