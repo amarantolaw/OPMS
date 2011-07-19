@@ -1,0 +1,76 @@
+{% extends "ffm/base.html" %}
+{% block head %}
+{% endblock %}
+
+{% block title %}Summary of Feeds and Groups{% endblock %}
+
+{% block navbar %}
+<div id="mainnav">
+    <h2>Main sections</h2>
+    <ul class="level-1">
+        <li><a href="/">Home</a></li>
+        <li><a href="/admin/">Admin</a></li>
+        <li><a href="/ffm/" class="currentsection">Files &amp; Feeds</a></li>
+        <li><a href="/stats/">Statistics</a></li>
+    </ul>
+</div>
+<div id="mainnav2">
+    <h3>Sub sections for Statistics</h3>
+    <ul class="level-2">
+        <li><span class="youarehere">Feeds</span></li>
+        <li><a href="items/">Items</a></li>
+        <li><a href="people/">People</a></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block breadcrumb %}&gt; <a href="/stats/">Files &amp; Feeds</a> &gt; Summary of Feeds{% endblock %}
+
+{% block content %}
+{% if summary_data %}
+<h3>Data table</h3>
+<table id="summaryTable" class="tablesorter">
+    <thead>
+        <tr>
+            <th>Week #</th>
+            <th>Week Beginning</th>
+            <th>TOTAL</th>
+            <th>Total +/-</th>
+            <th>Preview</th>
+            <th>Preview iOS</th>
+            <th>Track</th>
+            <th>Tracks</th>
+            <th>iOS</th>
+            <!-- subscriptions -->
+            <th>Subs</th>
+            <th>Enclosure</th>
+            <th>Feed</th>
+            <th>Browse</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for row in summary_data %}
+        <tr>
+            <td>{{ row.week_number }}</td>
+            <td>{{ row.week_ending|date:"Y-m-d" }}</td>
+            <td>{{ row.total_track_downloads }}</td>
+            <td class="{% if row.total_track_downloads_change >= 0 %}positive{% else %}negative{% endif %}">{{ row.total_track_downloads_change }}</td>
+            <td>{{ row.download_preview }}</td>
+            <td>{{ row.download_preview_ios }}</td>
+            <td>{{ row.download_track }}</td>
+            <td>{{ row.download_tracks }}</td>
+            <td>{{ row.download_ios }}</td>
+            <td>{{ row.subscription }}</td>
+            <td>{{ row.subscription_enclosure }}</td>
+            <td>{{ row.subscription_feed }}</td>
+            <td>{{ row.browse }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+    <p>No summary data to display here</p>
+{% endif %}
+
+{% endblock %}
