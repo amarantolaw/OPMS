@@ -431,7 +431,7 @@ class FileInFeed(models.Model):
         return ITUNESU_CATEGORIES.get(self.itunesu_category, '112')
 
     def __unicode__(self):
-        return smart_unicode(self.file.name + ' in ' + self.feed.title)
+        return smart_unicode(self.file.title + ' in ' + self.feed.title)
 
 
 class FeedDestination(models.Model):
