@@ -279,6 +279,7 @@ class Command(NoArgsCommand):
             # Not found anything to match it by (and no filehash to get_or_create on yet), so create a new File
             f = File()
             f.item = None # This file belongs to a Feed, not an Item, hence the FIF link below...
+            f.function = function
             # TODO: determine file mimetype
             # TODO: determine proper duration and size from the file...
             f.save()
