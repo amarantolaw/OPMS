@@ -41,10 +41,10 @@
     <tbody>
     {% for row in summary_data %}
         <tr>
-            <td>{{ row.feedgroup.id }}</td>
-            <td>{{ row.feedgroup.title }}</td>
-            <td>{{ row.feedgroup.description }}</td>
-            <td>{{ row.feedgroup.feed_set.count }}</td>
+            <td>{{ row.id }}</td>
+            <td>{{ row.title }}</td>
+            <td>{{ row.description }}</td>
+            <td>{{ row.feed_set.count }}</td>
         </tr>
     {% endfor %}
     </tbody>

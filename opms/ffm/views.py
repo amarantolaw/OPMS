@@ -11,14 +11,7 @@ def index(request):
 
 def summary_feeds(request):
     "List the Feedgroups and their associated feeds"
-    summary_data = []
-    for fg in FeedGroup.objects.all():
-        fg_row = {}
-        fg_row["feedgroup"] = fg
-        fg_row["feeds"] = []
-        for fe in fg.feed_set.all():
-            fg_row["feeds"].append(fe)
-        summary_data.append(fg_row)
+    summary_data = FeedGroup.objects.all()
     return render_to_response('ffm/feedgroups.html', {'summary_data': summary_data,})
 
 
