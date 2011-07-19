@@ -301,7 +301,7 @@ class Command(NoArgsCommand):
     # Import OxItems.Items, but done on a channel by channel basis
     def _parse_items(self, feed_obj, channel_obj):
         oxitems = Rg07Items.objects.filter(item_channel=channel_obj)
-        print "Found " + str(len(oxitems)) + " OxItems to process for " + str(feed_obj.slug)
+        print "Found " + str(len(oxitems)) + " OxItems to process for " + str(feed_obj.slug) + " (" + str(feed_obj.id) + ")"
 
         for counter, item_row in enumerate(oxitems):
             self._debug("_parse_items() Processing " + str(counter+1) + " of " + str(len(oxitems)))
