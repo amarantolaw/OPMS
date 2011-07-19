@@ -204,14 +204,13 @@ class File(models.Model):
     @property
     def title(self):
         # return the title of this file via Item
-        return self.item.title
-
-    class Meta:
-        verbose_name = 'Podcast enclosed data'
-        verbose_name_plural = 'Podcast enclosed data'
+        if not self.item:
+            return "Can not find parent Item"
+        else:
+            return self.item.title
 
     def __unicode__(self):
-        return smart_unicode(self.url + ' (' + self.title +')')
+        return smart_unicode(self.title)
 
 
 
@@ -220,6 +219,9 @@ class FileURL(models.Model):
     # TODO: Investigate http://docs.python.org/library/urlparse.html for url parsing
     file = models.ForeignKey(File, verbose_name="file urls")
     url = models.URLField("file url", verify_exists=True) # Everything in this system should be hosted on a URL
+
+    def __unicode__(self):
+        return smart_unicode(self.url)
 
 
 class Destination(models.Model):
