@@ -49,6 +49,7 @@ class Command(NoArgsCommand):
         self.import_stats['person_created'] = 0
         self.import_stats['tag_created'] = 0
         self.import_stats['file_created'] = 0
+        self.import_stats['file_count'] = 0
         self.import_stats['feed_created'] = 0
         self.import_stats['feedgroup_created'] = 0
         self.import_stats['update_starttime'] = datetime.utcnow()
@@ -84,7 +85,7 @@ class Command(NoArgsCommand):
         total_count = len(oxitems_channels)
         print "Processing OxItems Channel Data into OPMS (" + str(total_count) + " rows to do)"
         for counter, row in enumerate(oxitems_channels):
-            self._debug("handle_noargs(): Processing channel " + str(counter) + " of " + str(total_count))
+            self._debug("handle_noargs(): Processing channel " + str(counter+1) + " of " + str(total_count))
             # Update or create ***FeedGroup***
             if len(row.importfeedgroupchannel_set.all()) == 0:
                 # Does this need merging with an existing feedgroup? Compare with existing titles. Basic exact match first...
@@ -157,7 +158,7 @@ class Command(NoArgsCommand):
             self._get_or_create_feedartwork(f, row.channel_image)
             self._parse_items(f, row)
 
-            self._debug("Parsed %s of %s Channels" % (counter,total_count))
+            self._debug("Parsed %s of %s Channels" % (counter+1,total_count))
             self._debug("\n\nhandle_noargs(): =================================================================== \n\n")
             
 
@@ -303,7 +304,7 @@ class Command(NoArgsCommand):
         print "Found " + str(len(oxitems)) + " OxItems to process for " + str(feed_obj.slug)
 
         for counter, item_row in enumerate(oxitems):
-            self._debug("_parse_items() Processing " + str(counter) + " of " + str(len(oxitems)))
+            self._debug("_parse_items() Processing " + str(counter+1) + " of " + str(len(oxitems)))
             # Update or create an ***Item***
             try:
                 i = item_row.importitemitem_set.get(item=item_row).ffm_item
@@ -403,6 +404,9 @@ class Command(NoArgsCommand):
             self._parse_jacs_code(fif,item_row.item_jacs_codes)
 
         # TODO: Determine fif.order values based on channel_sort_values
+
+        self.import_stats['file_count'] = len(feed_obj.files.count())
+        print str(len(oxitems)) + " OxItems ==> " + str(self.import_stats.get('file_count')) + " Files in this Feed"
         return None
 
 
