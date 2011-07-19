@@ -39,30 +39,38 @@
     <tbody>
     {% for row in summary_data %}
         <tr>
-            <td>{{ row.id }}</td>
+            <td>{{ row.id }}<br/>
+            {% for fe in row.feed_set.all %}
+            <li><img width="100" src="{{ fe.artwork.fileurl_set.all.0.url }}" alt="{{ fe.artwork.fileinfeed_set.all.0.alternative_title }}"><br />
+            {% endfor %}
+            </td>
             <td><strong>Title:</strong> {{ row.title }}<br />
-            <strong>Description:</strong> {{ row.description }}<br />
+            <!-- <strong>Description:</strong> {{ row.description }}<br />-->
             <strong>Publish:</strong> {{ row.publish_start }} to {{ row.publish_stop }}<br />
             <strong>Comments:</strong> {{ row.internal_comments }}<br />
-            <strong>Tags:</strong><ul>
+            <strong>Tags:</strong>{% if row.tags.count > 0 %}<ul>
                     {% for t in row.tags.all %}
                     <li>{{ t.name }}</li>
                     {% endfor %}
-            </ul><br />
+            </ul>
+                {% else %}
+                    No Tags associated with this feed
+                {%  endif %}<br />
             <strong>Links:</strong><ul>
                     {% for l in row.links.all %}
-                    <li><a href="{{ l.url }}">{{ l.name }} ({{ l.url }})</a></li>
+                    <li>{{ l.name }} (<a href="{{ l.url }}">{{ l.url }}</a>)</li>
                     {% endfor %}
             </ul><br />
             <strong>Feeds:</strong><ul>
                     {% for fe in row.feed_set.all %}
-                    <li><img width="100" src="{{ fe.artwork.fileurl_set.all.0.url }}" alt="{{ fe.artwork.fileinfeed_set.all.0.alternative_title }}"><br />
                         <a href="{{ fe.id }}">{{ fe.slug }}</a> has {{ fe.files.count }} files.<br />
-                        <strong>Published to:</strong><ul>
+                        <strong>Published to:</strong>{% if fe.feeddestination_set.count > 0 %}<ul>
                             {% for fd in fe.feeddestination_set.all %}
                             <li><a href="{{ fd.destination.url }}">{{ fd.destination.name }}</a> = {{ fd.withhold }}</li>
                             {% endfor %}
-                        </ul>
+                        </ul>{% else %}
+                        This feed has no destinations specified
+                        {% endif %}
                     </li>
                     {% endfor %}
             </ul><br />
