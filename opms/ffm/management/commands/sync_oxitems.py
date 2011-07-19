@@ -405,7 +405,7 @@ class Command(NoArgsCommand):
 
         # TODO: Determine fif.order values based on channel_sort_values
 
-        self.import_stats['file_count'] = len(feed_obj.files.count())
+        self.import_stats['file_count'] = int(feed_obj.files.count())
         print str(len(oxitems)) + " OxItems ==> " + str(self.import_stats.get('file_count')) + " Files in this Feed"
         return None
 
