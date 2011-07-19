@@ -48,7 +48,18 @@
                     {% for t in row.tags.all %}
                     <li>{{ t.name }}</li>
                     {% endfor %}
-            </ul></td>
+            </ul><br />
+            <strong>Links:</strong><ul>
+                    {% for l in row.links.all %}
+                    <li><a href="{{ l.url }}">{{ l.name }}</a></li>
+                    {% endfor %}
+            </ul><br />
+            <strong>Feeds:</strong><ul>
+                    {% for fe in row.feed_set.all %}
+                    <li><img src="{{ fe.artwork.fileurl.url }}" alt="{{ fe.artwork.alternative_title }}">{{ fe.slug }} has {{ fe.files.count }} files</li>
+                    {% endfor %}
+            </ul><br />
+            </td>
         </tr>
     {% endfor %}
     </tbody>
