@@ -378,7 +378,7 @@ class Command(NoArgsCommand):
                 f = self._update_file(f, item_row, i)
                 f.save()
             else:
-                self.debug("_parse_items(): This Oxitem is marked as deleted")
+                self._debug("_parse_items(): This Oxitem is marked as deleted")
 
             # feed_obj.files.add(f) -- Not a simple M2M link
             # Update or create a link for this FileInFeed. There is always a link for historical tracking reasons
