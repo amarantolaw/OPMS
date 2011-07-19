@@ -445,4 +445,4 @@ class FeedDestination(models.Model):
     url = models.URLField("url of this feed")
 
     def __unicode__(self):
-        return smart_unicode(self.feed.title + ' for ' + self.destination.name + ' at:' + self.url)
+        return smart_unicode(self.feed.slug + ' for ' + self.destination.name + ' at:' + self.url)

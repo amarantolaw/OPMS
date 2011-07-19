@@ -223,6 +223,8 @@ class Command(NoArgsCommand):
                 feed_destination.guid = itunesu_guid # This is largely ignored and unused...
             if oxitems_deleted == True: # NB: whilst hacking out the slug duplicates by ignoring deleted items, this is untested...
                 feed_destination.withhold = 1000 # TODO: Need to determine some workflow values and descriptions for withhold
+            else:
+                feed_destination.withhold = 0 # If we exist above, we assume we can publish to these destinations.
             feed_destination.save()
             # self._debug(feed_obj.slug + " linked to " + dest.name)
         return None

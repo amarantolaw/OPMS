@@ -59,8 +59,8 @@
                     <li><img width="100" src="{{ fe.artwork.fileurl_set.all.0.url }}" alt="{{ fe.artwork.fileinfeed_set.all.0.alternative_title }}"><br />
                         <a href="{{ fe.id }}">{{ fe.slug }}</a> has {{ fe.files.count }} files.<br />
                         <strong>Published to:</strong><ul>
-                            {% for dest in fe.destinations.all %}
-                            <li>{{ dest.name }} = {{ dest.feeddestination_set.all.0.withhold }}</li>
+                            {% for fd in fe.feeddestination_set.all %}
+                            <li><a href="{{ fd.destination.url }}">{{ fd.destination.name }}</a> = {{ fd.withhold }}</li>
                             {% endfor %}
                         </ul>
                     </li>
