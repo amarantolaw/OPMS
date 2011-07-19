@@ -84,7 +84,7 @@ class Command(NoArgsCommand):
         total_count = len(oxitems_channels)
         print "Processing OxItems Channel Data into OPMS (" + str(total_count) + " rows to do)"
         for counter, row in enumerate(oxitems_channels):
-            self._debug("handle_noargs(): Processing channel " + str(counter) + " of " + str(len(oxitems)))
+            self._debug("handle_noargs(): Processing channel " + str(counter) + " of " + str(total_count))
             # Update or create ***FeedGroup***
             if len(row.importfeedgroupchannel_set.all()) == 0:
                 # Does this need merging with an existing feedgroup? Compare with existing titles. Basic exact match first...
