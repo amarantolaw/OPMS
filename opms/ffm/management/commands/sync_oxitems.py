@@ -284,7 +284,7 @@ class Command(NoArgsCommand):
             furl.url = url
             furl.file = f
             furl.save()
-            self._debug("_get_or_create_feedartwork(): New Artwork created, id: " + str(f.id) + ". Url=" + f.url)
+            self._debug("_get_or_create_feedartwork(): New Artwork created, id: " + str(f.id) + ". Url=" + f.fileurl_set.all()[0].url)
 
         fif, created = FileInFeed.objects.get_or_create(file=f, feed=feed_obj, defaults={
             'file':f, 'feed':feed_obj, 'withhold':0, 'alternative_title':'Album artwork for ' + f.title()
