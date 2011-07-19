@@ -34,6 +34,10 @@ class Command(NoArgsCommand):
 
 
     def handle_noargs(self, **options):
+        verbosity = int(options.get('verbosity', 0))
+        if verbosity > 1:
+            self.debug = True
+
         print "Import started at " + str(datetime.utcnow()) + "\n"
 
         # Create an error log
@@ -266,6 +270,7 @@ class Command(NoArgsCommand):
 
         try:
             f = FileURL.objects.filter(file__function__exact=function).filter(url__iexact=url)[0].file
+            self._debug("_get_or_create_feedartwork(): Existing Artwork found, id: " + str(f.id) + ". Url=" + f.fileurl_set.all()[0].url)
         except IndexError:
             # Not found anything to match it by (and no filehash to get_or_create on yet), so create a new File
             f = File()
@@ -273,16 +278,16 @@ class Command(NoArgsCommand):
             # TODO: determine file mimetype
             # TODO: determine proper duration and size from the file...
             f.save()
-            # self._debug("_get_or_create_feedartwork(): New File created, id: " + str(f.id) + ". Url=" + f.url)
 
             # Now create a FileURL object and link
             furl = FileURL()
             furl.url = url
             furl.file = f
             furl.save()
+            self._debug("_get_or_create_feedartwork(): New Artwork created, id: " + str(f.id) + ". Url=" + f.url)
 
         fif, created = FileInFeed.objects.get_or_create(file=f, feed=feed_obj, defaults={
-            'file':f, 'feed':feed_obj, 'withhold':0
+            'file':f, 'feed':feed_obj, 'withhold':0, 'alternative_title':'Album artwork for ' + f.title()
         })
         if created:
             fif.save()
@@ -295,10 +300,11 @@ class Command(NoArgsCommand):
         print "Found " + str(len(oxitems)) + " OxItems to process for " + str(feed_obj.slug)
 
         for counter, item_row in enumerate(oxitems):
+            self._debug("_parse_items() Processing " + str(counter) + " of " + str(len(oxitems)))
             # Update or create an ***Item***
             try:
                 i = item_row.importitemitem_set.get(item=item_row).ffm_item
-                # self._debug("Item found, id: " + str(i.id) + ". Title=" + i.title)
+                self._debug("Item found, id: " + str(i.id) + ". Title=" + i.title)
             except ImportItemItem.DoesNotExist:
                 # Does this need merging with an existing Item? Compare with existing titles...
                 item = {'title':item_row.item_title} # NB: May fail without a person record to store...
@@ -306,9 +312,9 @@ class Command(NoArgsCommand):
                 if created:
                     i = self._update_item(i, item_row)
                     i.save()
-                    # self._debug("New Item created, id: " + str(i.id) + ". Title=" + i.title)
+                    self._debug("New Item created, id: " + str(i.id) + ". Title=" + i.title)
                 else:
-                    # self._debug("Item found for merger, id: " + str(i.id) + ". Title=" + i.title)
+                    self._debug("Item found for merger, id: " + str(i.id) + ". Title=" + i.title)
                     pass
 
                 # Make import link
@@ -320,7 +326,7 @@ class Command(NoArgsCommand):
             if not item_row.deleted: #Only overwrite the item information if this is not a deleted item
                 i = self._update_item(i, item_row)
                 i.save()
-                # self._debug("Item details updated from oxitems row:" + str(item_row.id))
+                self._debug("Item details updated from oxitems row:" + str(item_row.id))
             else:
                 # TODO: Consider what happens if all the items we're grouping here are deleted
                 # Consider whether we really even need to do anything after determining that this item has been deleted
@@ -334,27 +340,30 @@ class Command(NoArgsCommand):
             # Update or create ***File*** for this Item
             try:
                 f = item_row.importfileitem_set.get(item=item_row).file
+                self._debug("_parse_items(): File found from importfileitem, id: " + str(f.id))
             except ImportFileItem.DoesNotExist:
                 # Does this file already exist? Search by guid...
                 try:
                     f = FileInFeed.objects.filter(guid__iexact=item_row.item_guid)[0].file
+                    self._debug("_parse_items(): File found from Guid matching, id: " + str(f.id))
                 except IndexError:
                     # Search by url...
                     try:
                         f = FileURL.objects.filter(url__iexact=item_row.item_enclosure_href)[0].file
+                        self._debug("_parse_items(): File found from URL matching, id: " + str(f.id))
                     except IndexError:
                         # Not found anything to match it by (and no filehash to get_or_create on yet), so create a new File
                         f = File()
                         f.item = i
                         f = self._update_file(f, item_row, i)
                         f.save()
-                        # self._debug("New File created, id: " + str(f.id) + ". Url=" + f.url)
 
                         # Now create a FileURL object and link
                         furl = FileURL()
                         furl.url = item_row.item_enclosure_href
                         furl.file = f
                         furl.save()
+                        self._debug("_parse_items(): New File created, id: " + str(f.id) + ". Url=" + furl.url)
 
                 # Make import link
                 ifi = ImportFileItem()
@@ -378,9 +387,11 @@ class Command(NoArgsCommand):
             fif, created = FileInFeed.objects.get_or_create(file=f, feed=feed_obj, defaults=fileinfeed)
             if created:
                 fif.save()
+                self._debug("_parse_items(): New FileInFeed link created for file " + str(fif.file_id) + " and feed " + str(fif.feed_id))
             else:
                 fif.withhold = item_row.deleted
                 fif.itunesu_category = item_row.item_cc
+                self._debug("_parse_items(): FileInFeed link found for file " + str(fif.file_id) + " and feed " + str(fif.feed_id))
             if item_row.deleted:
                 fif.withhold = 1000
             fif.save()
