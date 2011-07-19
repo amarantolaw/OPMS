@@ -266,7 +266,10 @@ class Feed(models.Model):
     @property
     def artwork(self):
         # use models.ImageField() in the future
-        return self.files.filter(function__name__iexact='feedart')
+        try:
+            return self.files.filter(function__name__iexact='feedart')[0]
+        except IndexError:
+            return None
 
     def __unicode__(self):
         return smart_unicode(self.slug) or ''
