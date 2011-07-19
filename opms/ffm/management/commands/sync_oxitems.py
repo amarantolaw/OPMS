@@ -265,6 +265,8 @@ class Command(NoArgsCommand):
     def _get_or_create_feedartwork(self, feed_obj, url):
         # TODO: Test the url is valid and do the full file analysis eventually
         if url == '':
+            self._debug("_get_or_create_feedartwork(): No Artwork supplied for this feed")
+            # TODO: Fire an error off here
             return None
         # Trust the URL for the timebeing...
         function = FileFunction.objects.get(pk=3) # Hardcoded for fixture loaded FileFunction FeedArt
