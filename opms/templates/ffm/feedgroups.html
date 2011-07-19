@@ -51,13 +51,19 @@
             </ul><br />
             <strong>Links:</strong><ul>
                     {% for l in row.links.all %}
-                    <li><a href="{{ l.url }}">{{ l.name }}</a></li>
+                    <li><a href="{{ l.url }}">{{ l.name }} ({{ l.url }})</a></li>
                     {% endfor %}
             </ul><br />
             <strong>Feeds:</strong><ul>
                     {% for fe in row.feed_set.all %}
-                    <li><img width="100" src="{{ fe.artwork.fileurl_set.all.0.url }}" alt="{{ fe.artwork.fileinfeed_set.all.0.alternative_title }}">
-                        <a href="{{ fe.id }}">{{ fe.slug }}</a> has {{ fe.files.count }} files.</li>
+                    <li><img width="100" src="{{ fe.artwork.fileurl_set.all.0.url }}" alt="{{ fe.artwork.fileinfeed_set.all.0.alternative_title }}"><br />
+                        <a href="{{ fe.id }}">{{ fe.slug }}</a> has {{ fe.files.count }} files.<br />
+                        <strong>Published to:</strong><ul>
+                            {% for dest in fe.destinations.all %}
+                            <li>{{ dest.name }} = {{ dest.feeddestination_set.all.0.withhold }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
                     {% endfor %}
             </ul><br />
             </td>
