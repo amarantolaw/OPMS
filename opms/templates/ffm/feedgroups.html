@@ -68,9 +68,9 @@
                             {% for fd in fe.feeddestination_set.all %}
                                 <li>{% if fd.withhold = 0 %}
                             <a href="{{ fd.destination.url }}">{{ fd.destination.name }}</a>
-                                {% else if fd.withhold = 1000 %}
+                                {% else %}{% if fd.withhold = 1000 %}
                                     This Feed has been Deleted from {{ fd.destination.name }}
-                                {% endif %}</li>
+                                {% endif %}{% endif %}</li>
                             {% endfor %}
                         </ul>{% else %}
                         This feed has no destinations specified
