@@ -56,7 +56,7 @@
             </ul><br />
             <strong>Feeds:</strong><ul>
                     {% for fe in row.feed_set.all %}
-                    <li><img src="{{ fe.artwork.fileurl_set.0.url }}" alt="{{ fe.artwork.fileinfeed_set.0.alternative_title }}">
+                    <li><img width="100" src="{{ fe.artwork.fileurl_set.all.0.url }}" alt="{{ fe.artwork.fileinfeed_set.0.alternative_title }}">
                         <a href="{{ fe.id }}">{{ fe.slug }}</a> has {{ fe.files.count }} files.</li>
                     {% endfor %}
             </ul><br />
