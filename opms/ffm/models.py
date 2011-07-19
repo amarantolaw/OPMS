@@ -100,7 +100,7 @@ class Item(models.Model):
     @property
     def artwork(self):
         # use models.ImageField() in the future
-        return file_set.filter(function__name__iexact='itemart')
+        return self.file_set.filter(function__name__iexact='itemart')
 
     def __unicode__(self):
         return smart_unicode(self.title) or ''
@@ -246,7 +246,7 @@ class FeedGroup(models.Model):
 
     @property
     def jorumopen_collections(self):
-        return tags.filter(group__name__iexact='JorumOPEN Collection')
+        return self.tags.filter(group__name__iexact='JorumOPEN Collection')
 
     def __unicode__(self):
         return smart_unicode(self.title) or ''
@@ -266,7 +266,7 @@ class Feed(models.Model):
     @property
     def artwork(self):
         # use models.ImageField() in the future
-        return files.filter(function__name__iexact='feedart')
+        return self.files.filter(function__name__iexact='feedart')
 
     def __unicode__(self):
         return smart_unicode(self.slug) or ''
