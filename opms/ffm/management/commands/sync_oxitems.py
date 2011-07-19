@@ -287,7 +287,7 @@ class Command(NoArgsCommand):
             self._debug("_get_or_create_feedartwork(): New Artwork created, id: " + str(f.id) + ". Url=" + f.fileurl_set.all()[0].url)
 
         fif, created = FileInFeed.objects.get_or_create(file=f, feed=feed_obj, defaults={
-            'file':f, 'feed':feed_obj, 'withhold':0, 'alternative_title':'Album artwork for ' + f.title()
+            'file':f, 'feed':feed_obj, 'withhold':0, 'alternative_title':'Album artwork for ' + f.title
         })
         if created:
             fif.save()
@@ -340,17 +340,17 @@ class Command(NoArgsCommand):
             # Update or create ***File*** for this Item
             try:
                 f = item_row.importfileitem_set.get(item=item_row).file
-                self._debug("_parse_items(): File found from importfileitem, id: " + str(f.id))
+                self._debug("_parse_items(): File found from importfileitem, id: " + str(f.id) + "-" + f.title)
             except ImportFileItem.DoesNotExist:
                 # Does this file already exist? Search by guid...
                 try:
                     f = FileInFeed.objects.filter(guid__iexact=item_row.item_guid)[0].file
-                    self._debug("_parse_items(): File found from Guid matching, id: " + str(f.id))
+                    self._debug("_parse_items(): File found from Guid matching, id: " + str(f.id) + "-" + f.title)
                 except IndexError:
                     # Search by url...
                     try:
                         f = FileURL.objects.filter(url__iexact=item_row.item_enclosure_href)[0].file
-                        self._debug("_parse_items(): File found from URL matching, id: " + str(f.id))
+                        self._debug("_parse_items(): File found from URL matching, id: " + str(f.id) + "-" + f.title)
                     except IndexError:
                         # Not found anything to match it by (and no filehash to get_or_create on yet), so create a new File
                         f = File()
@@ -363,7 +363,7 @@ class Command(NoArgsCommand):
                         furl.url = item_row.item_enclosure_href
                         furl.file = f
                         furl.save()
-                        self._debug("_parse_items(): New File created, id: " + str(f.id) + ". Url=" + furl.url)
+                        self._debug("_parse_items(): New File created, id: " + str(f.id) + "-" + f.title + ". Url=" + furl.url)
 
                 # Make import link
                 ifi = ImportFileItem()
