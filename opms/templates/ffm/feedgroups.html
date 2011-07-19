@@ -41,7 +41,7 @@
         <tr>
             <td>{{ row.id }}<br/>
             {% for fe in row.feed_set.all %}
-            <li><img width="100" src="{{ fe.artwork.fileurl_set.all.0.url }}" alt="{{ fe.artwork.fileinfeed_set.all.0.alternative_title }}"><br />
+            <img width="100" src="{{ fe.artwork.fileurl_set.all.0.url }}" alt="{{ fe.artwork.fileinfeed_set.all.0.alternative_title }}"><br />
             {% endfor %}
             </td>
             <td><strong>Title:</strong> {{ row.title }}<br />
@@ -63,7 +63,7 @@
             </ul><br />
             <strong>Feeds:</strong><ul>
                     {% for fe in row.feed_set.all %}
-                        <a href="{{ fe.id }}">{{ fe.slug }}</a> has {{ fe.files.count }} files.<br />
+                        <li><a href="{{ fe.id }}">{{ fe.slug }}</a> has {{ fe.files.count }} files.<br />
                         <strong>Published to:</strong>{% if fe.feeddestination_set.count > 0 %}<ul>
                             {% for fd in fe.feeddestination_set.all %}
                             <li><a href="{{ fd.destination.url }}">{{ fd.destination.name }}</a> = {{ fd.withhold }}</li>
