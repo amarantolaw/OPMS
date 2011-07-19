@@ -12,7 +12,7 @@ from django.utils.encoding import smart_str, smart_unicode
 
 class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
-        make_option('--no-sync', action='store', dest='no_sync', default=True,
+        make_option('--no-sync', action='store', dest='no_sync', default=False,
                     help='Use this to skip the sync with OxItems live data'),
     )
     help = 'Scan through OxItems database and import into OPMS:FFM'
