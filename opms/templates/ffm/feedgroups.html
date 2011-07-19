@@ -66,11 +66,11 @@
                         <li><a href="{{ fe.id }}">{{ fe.slug }}</a> has {{ fe.files.count }} files.<br />
                         <strong>Published to:</strong>{% if fe.feeddestination_set.count > 0 %}<ul>
                             {% for fd in fe.feeddestination_set.all %}
-                                {% if fd.withhold = 0 %}
-                            <li><a href="{{ fd.destination.url }}">{{ fd.destination.name }}</a></li>
+                                <li>{% if fd.withhold = 0 %}
+                            <a href="{{ fd.destination.url }}">{{ fd.destination.name }}</a>
                                 {% else if fd.withhold = 1000 %}
-                                    This Feed has been Deleted
-                                {% endif %}
+                                    This Feed has been Deleted from {{ fd.destination.name }}
+                                {% endif %}</li>
                             {% endfor %}
                         </ul>{% else %}
                         This feed has no destinations specified
