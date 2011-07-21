@@ -41,9 +41,10 @@
     <tbody>
     {% for row in summary_data %}
         <tr>
-            <td>{{ row.id }}</td>
-            <td><strong>Title:</strong> {{ row.title }}</td>
-            <td>[i] [cc] # of #
+            <td style="background-color: #ccc;">{{ row.id }}</td>
+            <td style="background-color: #ccc;"><strong>{{ row.title }}</strong></td>
+            <td style="background-color: #ccc;">[i] [cc] # of #
+            {#
                 <div id="info-{{ row.id }}" style="visibility: hidden; display: none;">
                     <strong>Description:</strong> {{ row.description }}<br />
                     <strong>Publish:</strong> {{ row.publish_start }} to {{ row.publish_stop }}<br />
@@ -65,6 +66,7 @@
                         {% endfor %}
                     </ul>
                 </div>
+            #}
             </td>
         </tr>
         {% for fe in row.feed_set.all %}
@@ -73,9 +75,9 @@
             <td><a href="{{ fe.id }}">{{ fe.slug }}</a> has {{ fe.files.count }} files. (iTU Feed Category here)</td>
             <td>
             {% if fe.feeddestination_set.count > 0 %}
-                <ul>
+                <ul style="display:inline; padding:0; margin:0;">
                 {% for fd in fe.feeddestination_set.all %}
-                    <li style="display:inline;">{{ fd.destination.id|pubstatus:fd.withhold }}</li>
+                    <li style="display:inline; padding:0; margin:0;">{{ fd.destination.id|pubstatus:fd.withhold }}</li>
                 {% endfor %}
                 </ul>
             {% else %}
