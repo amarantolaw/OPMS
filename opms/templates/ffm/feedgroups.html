@@ -27,6 +27,7 @@
 {% block breadcrumb %}&gt; <a href="/ffm/">Files &amp; Feeds</a> &gt; Summary of Feeds{% endblock %}
 
 {% block content %}
+{% load ffm_tags %}
 {% if summary_data %}
 <h3>Data table</h3>
 <table id="summaryTable">
@@ -34,52 +35,55 @@
         <tr>
             <th>ID</th>
             <th>FeedGroup</th>
+            <th>Info</th>
         </tr>
     </thead>
     <tbody>
     {% for row in summary_data %}
         <tr>
-            <td>{{ row.id }}<br/>
-            {% for fe in row.feed_set.all %}
-            <img width="100" src="{{ fe.artwork.fileurl_set.all.0.url }}" alt="{{ fe.artwork.fileinfeed_set.all.0.alternative_title }}"><br />
-            {% endfor %}
-            </td>
-            <td><strong>Title:</strong> {{ row.title }}<br />
-            <!-- <strong>Description:</strong> {{ row.description }}<br />-->
-            <strong>Publish:</strong> {{ row.publish_start }} to {{ row.publish_stop }}<br />
-            <strong>Comments:</strong> {{ row.internal_comments }}<br />
-            <strong>Tags:</strong>{% if row.tags.count > 0 %}<ul>
-                    {% for t in row.tags.all %}
-                    <li>{{ t.name }}</li>
-                    {% endfor %}
-            </ul>
-                {% else %}
+            <td>{{ row.id }}</td>
+            <td><strong>Title:</strong> {{ row.title }}</td>
+            <td>[i] [cc] # of #
+                <div id="info-{{ row.id }}" style="visibility: hidden; display: none;">
+                    <strong>Description:</strong> {{ row.description }}<br />
+                    <strong>Publish:</strong> {{ row.publish_start }} to {{ row.publish_stop }}<br />
+                    <strong>Comments:</strong> {{ row.internal_comments }}<br />
+                    <strong>Tags:</strong>
+                    {% if row.tags.count > 0 %}
+                        <ul>
+                        {% for t in row.tags.all %}
+                            <li>{{ t.name }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
                     No Tags associated with this feed
-                {%  endif %}<br />
-            <strong>Links:</strong><ul>
-                    {% for l in row.links.all %}
-                    <li>{{ l.name }} (<a href="{{ l.url }}">{{ l.url }}</a>)</li>
-                    {% endfor %}
-            </ul><br />
-            <strong>Feeds:</strong><ul>
-                    {% for fe in row.feed_set.all %}
-                        <li><a href="{{ fe.id }}">{{ fe.slug }}</a> has {{ fe.files.count }} files.<br />
-                        <strong>Published to:</strong>{% if fe.feeddestination_set.count > 0 %}<ul>
-                            {% for fd in fe.feeddestination_set.all %}
-                                <li>{% if fd.withhold = 0 %}
-                            <a href="{{ fd.destination.url }}">{{ fd.destination.name }}</a>
-                                {% else %}{% if fd.withhold = 1000 %}
-                                    This Feed has been Deleted from {{ fd.destination.name }}
-                                {% endif %}{% endif %}</li>
-                            {% endfor %}
-                        </ul>{% else %}
-                        This feed has no destinations specified
-                        {% endif %}
-                    </li>
-                    {% endfor %}
-            </ul><br />
+                    {%  endif %}<br />
+                    <strong>Links:</strong>
+                        <ul>
+                        {% for l in row.links.all %}
+                            <li>{{ l.name }} (<a href="{{ l.url }}">{{ l.url }}</a>)</li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </td>
         </tr>
+        {% for fe in row.feed_set.all %}
+        <tr>
+            <td><img width="30" src="{{ fe.artwork.fileurl_set.all.0.url }}" alt="{{ fe.artwork.fileinfeed_set.all.0.alternative_title }}"></td>
+            <td><a href="{{ fe.id }}">{{ fe.slug }}</a> has {{ fe.files.count }} files. (iTU Feed Category here)</td>
+            <td>
+            {% if fe.feeddestination_set.count > 0 %}
+                <ul>
+                {% for fd in fe.feeddestination_set.all %}
+                    <li style="display:inline;">{{ fd.destination.id|pubstatus:fd.withhold }}</li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                Private Feed
+            {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
     {% endfor %}
     </tbody>
 </table>
