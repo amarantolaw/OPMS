@@ -7,15 +7,15 @@ def pubstatus(obj, value):
     if obj is None:
         return
     if int(obj) == 1: # POAU
-        return self._format("[P]", value)
+        return _format("[P]", value)
     elif int(obj) == 2: # POAU-beta
-        return self._format("[b]", value)
+        return _format("[b]", value)
     elif int(obj) == 3: # iTunes U
-        return self._format("[i]", value)
+        return _format("[i]", value)
     elif int(obj) == 4: # m.ox
-        return self._format("[m]", value)
+        return _format("[m]", value)
     else:
-        return self._format("[?]", value)
+        return _format("[?]", value)
 
 
 def _format(icon, withhold):
