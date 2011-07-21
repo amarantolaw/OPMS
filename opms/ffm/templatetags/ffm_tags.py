@@ -1,4 +1,5 @@
 from django import template
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -20,8 +21,8 @@ def pubstatus(obj, value):
 
 def _format(icon, withhold):
     if withhold == 0:
-        return '<span style="color:#0f0;">' + str(icon) + '</span>'
+        return mark_safe(u'<span style="color:#0f0;">' + str(icon) + '</span>')
     elif withhold == 1000:
-        return '<span style="color:#bbb;">' + str(icon) + '</span>'
+        return mark_safe(u'<span style="color:#bbb;">' + str(icon) + '</span>')
     else:
-        return '<span style="color:#f00;">' + str(icon) + '</span>'
+        return mark_safe(u'<span style="color:#f00;">' + str(icon) + '</span>')
