@@ -43,8 +43,7 @@
         <tr>
             <td style="background-color: #ccc;">{{ row.id }}</td>
             <td style="background-color: #ccc;"><strong>{{ row.title }}</strong></td>
-            <td style="background-color: #ccc;">[i] [cc] # of #
-            {#
+            <td style="background-color: #ccc;">[i] [cc &#37;]
                 <div id="info-{{ row.id }}" style="visibility: hidden; display: none;">
                     <strong>Description:</strong> {{ row.description }}<br />
                     <strong>Publish:</strong> {{ row.publish_start }} to {{ row.publish_stop }}<br />
@@ -66,7 +65,6 @@
                         {% endfor %}
                     </ul>
                 </div>
-            #}
             </td>
         </tr>
         {% for fe in row.feed_set.all %}
