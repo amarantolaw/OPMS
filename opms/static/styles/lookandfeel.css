@@ -3,6 +3,13 @@
  */
 
 
+#breadcrumb {
+    font-size: x-small;
+    padding: 1em 0 0 0;
+}
+
+
+
 /* tables */
 table.tablesorter {
     background-color: #CDCDCD;
@@ -12,7 +19,7 @@ table.tablesorter {
 }
 table.tablesorter thead tr th, table.tablesorter tfoot tr th {
     /* background-color: #e6EEEE; */
-    background-color: #00274f; 
+    background-color: #00274f;
     color: #fff;
     /* border: 1px solid #FFF; */
     /* font-size: 0.8em; */
@@ -42,7 +49,7 @@ table.tablesorter thead tr .headerSortDown {
 }
 table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
 /* background-color: #8dbdd8; */
-    background-color: #ccc; 
+    background-color: #ccc;
     color: #000;
 }
 
@@ -52,4 +59,8 @@ table.tablesorter tbody td.positive {
 
 table.tablesorter tbody td.negative {
     color: #f00;
+}
+
+table.tablesorter tbody td.highlight-total {
+    background-color: #ddd;
 }

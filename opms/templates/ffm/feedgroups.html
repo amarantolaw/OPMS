@@ -1,0 +1,95 @@
+{% extends "ffm/base.html" %}
+{% block head %}
+{% endblock %}
+
+{% block title %}Summary of Feeds and Groups{% endblock %}
+
+{% block navbar %}
+<div id="mainnav">
+    <h2>Main sections</h2>
+    <ul class="level-1">
+        <li><a href="/">Home</a></li>
+        <li><a href="/admin/">Admin</a></li>
+        <li><a href="/ffm/" class="currentsection">Files &amp; Feeds</a></li>
+        <li><a href="/stats/">Statistics</a></li>
+    </ul>
+</div>
+<div id="mainnav2">
+    <h3>Sub sections for Files &amp; Feeds</h3>
+    <ul class="level-2">
+        <li><span class="youarehere">Feeds</span></li>
+        <li><a href="/ffm/items/">Items</a></li>
+        <li><a href="/ffm/people/">People</a></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block breadcrumb %}&gt; <a href="/ffm/">Files &amp; Feeds</a> &gt; Summary of Feeds{% endblock %}
+
+{% block content %}
+{% load ffm_tags %}
+{% if summary_data %}
+<h3>Data table</h3>
+<table id="summaryTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>FeedGroup</th>
+            <th>Info</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for row in summary_data %}
+        <tr>
+            <td style="background-color: #ccc;">{{ row.id }}</td>
+            <td style="background-color: #ccc;"><strong>{{ row.title }}</strong></td>
+            <td style="background-color: #ccc;">[i] [cc &#37;]
+                <div id="info-{{ row.id }}" style="visibility: hidden; display: none;">
+                    <strong>Description:</strong> {{ row.description }}<br />
+                    <strong>Publish:</strong> {{ row.publish_start }} to {{ row.publish_stop }}<br />
+                    <strong>Comments:</strong> {{ row.internal_comments }}<br />
+                    <strong>Tags:</strong>
+                    {% if row.tags.count > 0 %}
+                        <ul>
+                        {% for t in row.tags.all %}
+                            <li>{{ t.name }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                    No Tags associated with this feed
+                    {%  endif %}<br />
+                    <strong>Links:</strong>
+                        <ul>
+                        {% for l in row.links.all %}
+                            <li>{{ l.name }} (<a href="{{ l.url }}">{{ l.url }}</a>)</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </td>
+        </tr>
+        {% for fe in row.feed_set.all %}
+        <tr>
+            <td><img width="30" src="{{ fe.artwork.fileurl_set.all.0.url }}" alt="{{ fe.artwork.fileinfeed_set.all.0.alternative_title }}"></td>
+            <td><a href="{{ fe.id }}">{{ fe.slug }}</a> has {{ fe.files.count }} files. (iTU Feed Category here)</td>
+            <td>
+            {% if fe.feeddestination_set.count > 0 %}
+                <ul style="display:inline; padding:0; margin:0;">
+                {% for fd in fe.feeddestination_set.all %}
+                    <li style="display:inline; padding:0; margin:0;">{{ fd.destination.id|pubstatus:fd.withhold }}</li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                Private Feed
+            {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+    <p>No summary data to display here</p>
+{% endif %}
+
+{% endblock %}

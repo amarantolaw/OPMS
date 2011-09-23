@@ -1,0 +1,338 @@
+[
+    {
+        "model": "ffm.tag",
+        "pk": 1,
+        "fields": {
+            "group":3,
+            "name":"FE - Agriculture Horticulture & Animal Care"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 2,
+        "fields": {
+            "group":3,
+            "name":"FE - Area Studies / Cultural Studies / Languages / Literature"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 3,
+        "fields": {
+            "group":3,
+            "name":"FE - Arts & Crafts"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 4,
+        "fields": {
+            "group":3,
+            "name":"FE - Business / Management / Office Studies"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 5,
+        "fields": {
+            "group":3,
+            "name":"FE - Catering / Food / Leisure Services / Tourism"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 6,
+        "fields": {
+            "group":3,
+            "name":"FE - Communication / Media / Publishing"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 7,
+        "fields": {
+            "group":3,
+            "name":"FE - Construction & Property (Built Environment)"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 8,
+        "fields": {
+            "group":3,
+            "name":"FE - Education / Training / Teaching"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 9,
+        "fields": {
+            "group":3,
+            "name":"FE - Engineering"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 10,
+        "fields": {
+            "group":3,
+            "name":"FE - Environment Protection / Energy / Cleansing / Security"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 11,
+        "fields": {
+            "group":3,
+            "name":"FE - Family Care / Personal Development / Personal Care & Appearance"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 12,
+        "fields": {
+            "group":3,
+            "name":"FE - Health Care / Medicine / Health & Safety"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 13,
+        "fields": {
+            "group":3,
+            "name":"FE - Humanities (History / Archaeology / Religious Studies / Philosophy)"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 14,
+        "fields": {
+            "group":3,
+            "name":"FE - Information Technology & Information"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 15,
+        "fields": {
+            "group":3,
+            "name":"FE - Logistics / Distribution / Transport / Driving"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 16,
+        "fields": {
+            "group":3,
+            "name":"FE - Manufacturing / Production Work"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 17,
+        "fields": {
+            "group":3,
+            "name":"FE - Oil / Mining / Plastics / Chemicals"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 18,
+        "fields": {
+            "group":3,
+            "name":"FE - Performing Arts"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 19,
+        "fields": {
+            "group":3,
+            "name":"FE - Politics / Economics / Law / Social Sciences"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 20,
+        "fields": {
+            "group":3,
+            "name":"FE - Sales Marketing & Retailing"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 21,
+        "fields": {
+            "group":3,
+            "name":"FE - Sciences & Mathematics"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 22,
+        "fields": {
+            "group":3,
+            "name":"FE - Services to Industry & Commerce"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 23,
+        "fields": {
+            "group":3,
+            "name":"FE - Sports Games & Recreation"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 24,
+        "fields": {
+            "group":3,
+            "name":"HE - Architecture, Building and Planning"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 25,
+        "fields": {
+            "group":3,
+            "name":"HE - Biological Sciences"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 26,
+        "fields": {
+            "group":3,
+            "name":"HE - Business and Administrative studies"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 27,
+        "fields": {
+            "group":3,
+            "name":"HE - Creative Arts and Design"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 28,
+        "fields": {
+            "group":3,
+            "name":"HE - Eastern, Asiatic, African, American and Australasian Languages, Literature and related subjects"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 29,
+        "fields": {
+            "group":3,
+            "name":"HE - Education"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 30,
+        "fields": {
+            "group":3,
+            "name":"HE - Engineering"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 31,
+        "fields": {
+            "group":3,
+            "name":"HE - European Languages, Literature and related subjects"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 32,
+        "fields": {
+            "group":3,
+            "name":"HE - Historical and Philosophical studies"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 33,
+        "fields": {
+            "group":3,
+            "name":"HE - Law"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 34,
+        "fields": {
+            "group":3,
+            "name":"HE - Linguistics, Classics and related subjects"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 35,
+        "fields": {
+            "group":3,
+            "name":"HE - Mass Communications and Documentation"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 36,
+        "fields": {
+            "group":3,
+            "name":"HE - Mathematical and Computer Sciences"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 37,
+        "fields": {
+            "group":3,
+            "name":"HE - Medicine and Dentistry"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 38,
+        "fields": {
+            "group":3,
+            "name":"HE - Physical Sciences"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 39,
+        "fields": {
+            "group":3,
+            "name":"HE - Social studies"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 40,
+        "fields": {
+            "group":3,
+            "name":"HE - Subjects allied to Medicine"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 41,
+        "fields": {
+            "group":3,
+            "name":"HE - Technologies"
+        }
+    },
+    {
+        "model": "ffm.tag",
+        "pk": 42,
+        "fields": {
+            "group":3,
+            "name":"HE - Veterinary Sciences, Agriculture and related subjects"
+        }
+    }
+]

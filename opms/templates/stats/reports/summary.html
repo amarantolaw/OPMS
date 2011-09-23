@@ -21,24 +21,23 @@
     <h3>Sub sections for Statistics</h3>
     <ul class="level-2">
         <li><span class="youarehere">Summary</span></li>
-        <li><a href="#">Feeds</a></li>
-        <li><a href="#">Platforms</a></li>
-        <li><a href="#">Geography</a></li>
+        <li><a href="feeds/">Feeds</a></li>
     </ul>
 </div>
 {% endblock %}
 
+{% block breadcrumb %}&gt; <a href="/stats/">Statistics</a> &gt; Apple Summary{% endblock %}
 
 {% block content %}
 <script>
-$(document).ready(function() 
-    { 
-        $("#summaryTable").tablesorter( {sortList: [[1,1]]} ); 
+$(document).ready(function()
+    {
+        $("#summaryTable").tablesorter( {sortList: [[1,1]]} );
         $("a.codeShowA").click(function(){$("div.sectionA").toggle("blind",{}, "slow"); return false;});
         $("div.sectionA").toggle("blind",{}, "fast");
         $("a.codeShowB").click(function(){$("div.sectionB").toggle("blind",{}, "slow"); return false;});
         $("div.sectionB").toggle("blind",{}, "fast");
-    } 
+    }
 );
 </script>
 
@@ -46,14 +45,14 @@ $(document).ready(function()
 <h1>Apple supplied Summary Data <a href="#" class="codeShowA">[?]</a></h1>
 <div class="sectionA">
     <h2>About Apple Statistics</h2>
-    <p>Apple provides a weekly report covering a four-week period and contains multiple worksheets, 
-        each including information about a different week of site usage. The main worksheet, Summary, 
+    <p>Apple provides a weekly report covering a four-week period and contains multiple worksheets,
+        each including information about a different week of site usage. The main worksheet, Summary,
         contains a week-by-week overview of our site activity.</p>
-    <p>iTunes U Public Site Manager captures weekly report data using a Sunday through Saturday 
-        schedule, Pacific Time. Sunday is the start of the report week. iTunes U Public Site Manager 
-        displays Sunday’s date in the individual worksheet tabs and the Summary worksheet columns. 
-        For example, if our site was created on Monday, 2010-09-20, our first weekly report would use 
-        the start date of Sunday and display 2010-09-19 in the individual worksheet tabs and Summary 
+    <p>iTunes U Public Site Manager captures weekly report data using a Sunday through Saturday
+        schedule, Pacific Time. Sunday is the start of the report week. iTunes U Public Site Manager
+        displays Sunday’s date in the individual worksheet tabs and the Summary worksheet columns.
+        For example, if our site was created on Monday, 2010-09-20, our first weekly report would use
+        the start date of Sunday and display 2010-09-19 in the individual worksheet tabs and Summary
         worksheet column. Apple emails our detailed Excel spreadsheet report each Wednesday evening (GMT).</p>
     <p>More information can be found at <a href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/UnderstandingiTunesUreports/chapter_13_section_2.html#//apple_ref/doc/uid/iTUPSM-CH16-SW3">iTunes U Public Site Manager Guide</a>.</p>
 </div>
@@ -67,9 +66,9 @@ $(document).ready(function()
 
 <div class="sectionB">
     <h3>Understanding summary data</h3>
-    <p>The Summary worksheet lists aggregate values for the individual worksheet user actions. The 
+    <p>The Summary worksheet lists aggregate values for the individual worksheet user actions. The
     following table describes what occurs for the user actions returned in the Summary sheet:</p>
-    
+
     <table border = "0" cellspacing="0" cellpadding="5">
         <tr>
             <th scope="col">This user action</th>
@@ -96,7 +95,7 @@ $(document).ready(function()
         <tr>
             <td scope="row"><strong>DownloadTracks / DownloadRedirectedTracks</strong></td>
             <td>A user clicks the Get All button to download all items in a <a class="content_text" href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/Glossary/chapter_998_section_1.html#//apple_ref/doc/uid/iTUPSM-CH3-SW10">collection page</a>
-            in the iTunes desktop. This action appears multiple times in the report; once for each item 
+            in the iTunes desktop. This action appears multiple times in the report; once for each item
             the user downloads.</td>
         </tr>
         <tr>
@@ -109,12 +108,12 @@ $(document).ready(function()
         </tr>
         <tr>
             <td scope="row"><strong>SubscriptionEnclosure / SubscriptionRedirectedEnclosure</strong></td>
-            <td>The podcast reader downloads a new item in the collection. If the podcast reader detects 
+            <td>The podcast reader downloads a new item in the collection. If the podcast reader detects
             new content in the collection, it downloads the content.</td>
         </tr>
         <tr>
             <td scope="row"><strong>SubscriptionFeed</strong></td>
-            <td>The podcast reader automatically checks for new content in the collection. Podcast 
+            <td>The podcast reader automatically checks for new content in the collection. Podcast
             readers automatically check for new content at regular intervals.</td>
         </tr>
         <!-- We don't use these...
@@ -125,24 +124,24 @@ $(document).ready(function()
         </tr>
         <tr>
             <td scope="row"><strong>Not Listed</strong></td>
-            <td>Includes all actions not explicitly listed. In the Summary sheet, Not Listed indicates 
+            <td>Includes all actions not explicitly listed. In the Summary sheet, Not Listed indicates
             all unlisted versions of iTunes.</td>
         </tr>
         -->
         <tr>
             <td scope="row"><strong>Total Track Downloads</strong></td>
-            <td>The Total Track Downloads value is a combination of items downloaded for a 
-            collection subscription (SubscriptionEnclosure / SubscriptionRedirectedEnclosure), items downloaded 
-            from an iPhone, iPad, or iPod (DownloadiOS), and items downloaded when a user clicks Free 
-            (DownloadTrack / DownloadRedirectedTrack) or Get All (DownloadTracks / DownloadRedirectedTracks). 
+            <td>The Total Track Downloads value is a combination of items downloaded for a
+            collection subscription (SubscriptionEnclosure / SubscriptionRedirectedEnclosure), items downloaded
+            from an iPhone, iPad, or iPod (DownloadiOS), and items downloaded when a user clicks Free
+            (DownloadTrack / DownloadRedirectedTrack) or Get All (DownloadTracks / DownloadRedirectedTracks).
             The Total Track Downloads value does not include preview data.</td>
         </tr>
     </table>
     <!-- Have not seen any evidence of this attribute...
     <p><strong>Notes:</strong></p>
     <ul class="ul">
-      <li class="li"><p>iTunes U Public Site Manager uses a content caching system for some content 
-      available in the iTunes Store. iTunes U Public Site Manager reports some user actions routed 
+      <li class="li"><p>iTunes U Public Site Manager uses a content caching system for some content
+      available in the iTunes Store. iTunes U Public Site Manager reports some user actions routed
       through the content caching system as “Redirected’ actions.</p></li>
     </ul>
     -->
@@ -175,14 +174,14 @@ $(document).ready(function()
             <td>{{ row.week_ending|date:"Y-m-d" }}</td>
             <td>{{ row.total_track_downloads }}</td>
             <td class="{% if row.total_track_downloads_change >= 0 %}positive{% else %}negative{% endif %}">{{ row.total_track_downloads_change }}</td>
-            <td>{{ row.download_preview }}</td> 
-            <td>{{ row.download_preview_ios }}</td> 
-            <td>{{ row.download_track }}</td> 
-            <td>{{ row.download_tracks }}</td> 
-            <td>{{ row.download_ios }}</td> 
-            <td>{{ row.subscription }}</td> 
-            <td>{{ row.subscription_enclosure }}</td> 
-            <td>{{ row.subscription_feed }}</td>        
+            <td>{{ row.download_preview }}</td>
+            <td>{{ row.download_preview_ios }}</td>
+            <td>{{ row.download_track }}</td>
+            <td>{{ row.download_tracks }}</td>
+            <td>{{ row.download_ios }}</td>
+            <td>{{ row.subscription }}</td>
+            <td>{{ row.subscription_enclosure }}</td>
+            <td>{{ row.subscription_feed }}</td>
             <td>{{ row.browse }}</td>
         </tr>
     {% endfor %}
