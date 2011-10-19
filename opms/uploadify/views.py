@@ -10,3 +10,9 @@ def upload(request, *args, **kwargs):
     return HttpResponse('True')
 
 
+def upload_received_handler(sender, data, **kwargs):
+     if file:
+          # process the received file here
+          print data.file
+
+upload_recieved.connect(upload_received_handler, dispatch_uid='opms.uploadify.upload_received')
