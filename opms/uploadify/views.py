@@ -15,4 +15,4 @@ def upload_received_handler(sender, data, **kwargs):
           # process the received file here
           print data.file
 
-upload_recieved.connect(upload_received_handler, dispatch_uid='opms.uploadify.upload_received')
+upload_received.connect(upload_received_handler, dispatch_uid='opms.uploadify.upload_received')
