@@ -51,7 +51,7 @@ def upload_file(request):
         upload = request.FILES['Filedata']
         try:
             print 'Attempting to write to:' + settings.MEDIA_ROOT + '/uploads/' + upload.name
-            dest = open(settings.MEDIA_ROOT + '/uploads/' + upload.name, "wb+")
+            dest = open(settings.MEDIA_ROOT + 'uploads/' + upload.name, "wb+")
             for block in upload.chunks():
                 dest.write(block)
             dest.close()

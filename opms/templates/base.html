@@ -31,7 +31,10 @@
 //            'fileExt'   : '*.mp3;*.ogg;*.flac',
 //            'fileDesc'  : 'Music Files',
             'queueID'   : 'file_upload_queue',
-            'removeCompleted': false
+            'removeCompleted': false,
+            'onError'   : function (event,ID,fileObj,errorObj) {
+                alert(errorObj.type + ' Error: ' + errorObj.info);
+            } 
         });
     });
     </script>
