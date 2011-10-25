@@ -1,3 +1,4 @@
+from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.http import  HttpResponse, HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
