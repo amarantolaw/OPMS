@@ -50,10 +50,12 @@ def upload_file(request):
     if request.method == "POST":
         upload = request.FILES['Filedata']
         try:
-            print 'Attempting to write to:' + settings.MEDIA_ROOT + '/uploads/' + upload.name
+            print 'Attempting to write to:' + settings.MEDIA_ROOT + 'uploads/' + upload.name
             dest = open(settings.MEDIA_ROOT + 'uploads/' + upload.name, "wb+")
+            print 'Beginning write process'
             for block in upload.chunks():
                 dest.write(block)
+            print 'Finishing write process'
             dest.close()
         except IOError:
             print 'IOError has been raised for ' + upload.name
