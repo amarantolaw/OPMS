@@ -1,9 +1,10 @@
-from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.http import  HttpResponse, HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
 from ffm.models import *
 from opms import settings
+import time
+from os import path
 
 
 # Default FFM module homepage
@@ -50,17 +51,23 @@ def person_detail(request, person_id):
 def upload_file(request):
     if request.method == "POST":
         upload = request.FILES['Filedata']
-        try:
-            print 'Attempting to write to:' + settings.MEDIA_ROOT + 'uploads/' + upload.name
-            dest = open(settings.MEDIA_ROOT + 'uploads/' + upload.name, "wb+")
-            print 'Beginning write process'
-            for block in upload.chunks():
-                dest.write(block)
-            print 'Finishing write process'
-            dest.close()
-        except IOError:
-            print 'IOError has been raised for ' + upload.name
-            return HttpResponseServerError(content='File upload failed for '+upload.name)
+        file_path = settings.MEDIA_ROOT + 'podcastingNAS/'
+        if path.ismount(file_path):
+            # Adding timestamp as a way to avoid issue with existing filenames, and to give an easy sort option
+            file_name = str(int(time.time()*1000)) + '-' + upload.name
+            try:
+                print 'Attempting to write to:' + file_path + file_name
+                dest = open(file_path + file_name, "wb+")
+                print 'Beginning write process'
+                for block in upload.chunks():
+                    dest.write(block)
+                print 'Finishing write process'
+                dest.close()
+            except IOError:
+                print 'IOError has been raised for ' + upload.name
+                return HttpResponseServerError(content='File upload failed for '+upload.name)
+        else:
+            return HttpResponseServerError(content='File upload failed for '+upload.name+' due to missing path')
 
     response = HttpResponse()
     response.write("%s\r\n" % upload.name)
