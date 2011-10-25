@@ -1,6 +1,8 @@
 from django.shortcuts import render_to_response
-from django.http import Http404, HttpResponse
+from django.http import  HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from ffm.models import *
+from opms import settings
 
 
 # Default FFM module homepage
@@ -40,3 +42,22 @@ def summary_people(request):
 def person_detail(request, person_id):
     "Show the results for a given person"
     return HttpResponse("Hello World. You're at the PERSON (" + str(person_id) + ") DETAIL page.")
+
+
+
+@csrf_exempt
+def upload_file(request):
+    if request.method == "POST":
+        upload = request.FILES['Filedata']
+        try:
+            dest = open(settings.MEDIA_ROOT + '/uploads/' + upload.name, "wb+")
+            for block in upload.chunks():
+                dest.write(block)
+            dest.close()
+        except IOError:
+            print 'IOError has been raised for ' + upload.name
+            pass # ignore failed uploads for now
+
+    response = HttpResponse()
+    response.write("%s\r\n" % upload.name)
+    return response
