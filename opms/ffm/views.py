@@ -1,5 +1,5 @@
 from django.shortcuts import render_to_response
-from django.http import  HttpResponse
+from django.http import  HttpResponse, HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
 from ffm.models import *
 from opms import settings
@@ -50,13 +50,14 @@ def upload_file(request):
     if request.method == "POST":
         upload = request.FILES['Filedata']
         try:
+            print 'Attempting to write to:' + settings.MEDIA_ROOT + '/uploads/' + upload.name
             dest = open(settings.MEDIA_ROOT + '/uploads/' + upload.name, "wb+")
             for block in upload.chunks():
                 dest.write(block)
             dest.close()
         except IOError:
             print 'IOError has been raised for ' + upload.name
-            pass # ignore failed uploads for now
+            return HttpResponseServerError(content='File upload failed for '+upload.name)
 
     response = HttpResponse()
     response.write("%s\r\n" % upload.name)
