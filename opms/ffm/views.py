@@ -66,8 +66,8 @@ def upload_file(request):
                 dest.close()
 
                 # Send a notification email
-                send_mail('Test email',
-                          'Here is the message.',
+                send_mail('File Upload Notification',
+                          'The following file has been added to the UPLOADS folder on the Podcasting NAS: : ' + file_name,
                           'opms@ives.oucs.ox.ac.uk',
                           ['carl.marshall@oucs.ox.ac.uk'],
                           fail_silently=False)
