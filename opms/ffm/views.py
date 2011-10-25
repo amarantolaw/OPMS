@@ -5,6 +5,7 @@ from ffm.models import *
 from opms import settings
 import time
 from os import path
+from django.core.mail import send_mail
 
 
 # Default FFM module homepage
@@ -56,13 +57,20 @@ def upload_file(request):
             # Adding timestamp as a way to avoid issue with existing filenames, and to give an easy sort option
             file_name = str(int(time.time()*1000)) + '-' + upload.name
             try:
-                print 'Attempting to write to:' + file_path + file_name
+#                print 'Attempting to write to:' + file_path + file_name
                 dest = open(file_path + file_name, "wb+")
-                print 'Beginning write process'
+#                print 'Beginning write process'
                 for block in upload.chunks():
                     dest.write(block)
-                print 'Finishing write process'
+#                print 'Finishing write process'
                 dest.close()
+
+                # Send a notification email
+                send_mail('Test email',
+                          'Here is the message.',
+                          'opms@ives.oucs.ox.ac.uk',
+                          ['carl.marshall@oucs.ox.ac.uk'],
+                          fail_silently=False)
             except IOError:
                 print 'IOError has been raised for ' + upload.name
                 return HttpResponseServerError(content='File upload failed for '+upload.name)
