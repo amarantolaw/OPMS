@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="/static/styles/layout.css" media="screen,projection" />
 
     {% block head %}
+    <link rel="stylesheet" href="/static/uploadify/uploadify.css" />
     <script src="/static/scripts/jquery-1.6.4.min.js"></script>
     <script src="/static/uploadify/swfobject.js"></script>
     <script src="/static/uploadify/jquery.uploadify.v2.1.4.js"></script>
@@ -29,8 +30,9 @@
             'auto'      : true,
             'multi'     : true,
 //            'fileExt'   : '*.mp3;*.ogg;*.flac',
-//            'fileDesc'  : 'Music Files',
+            'fileDesc'  : 'Media Files for the Podcasting Team',
             'queueID'   : 'file_upload_queue',
+            'displayData' : 'percentage',
             'removeCompleted': false,
             'onError'   : function (event,ID,fileObj,errorObj) {
                 alert(errorObj.type + ' Error: ' + errorObj.info);
