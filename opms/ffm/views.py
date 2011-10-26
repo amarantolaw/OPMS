@@ -70,6 +70,7 @@ def upload_file(request):
                 mail_text = 'The following file has been added to the UPLOADS folder on the Podcasting NAS: ' +\
                             file_name + '. It is described as: ' # + description
                 print mail_text
+                print description
 #                send_mail('[OPMS] File Upload Notification',
 #                          mail_text,
 #                          'opms@ives.oucs.ox.ac.uk',
