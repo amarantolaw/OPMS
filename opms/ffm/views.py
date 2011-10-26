@@ -50,9 +50,11 @@ def person_detail(request, person_id):
 
 @csrf_exempt
 def upload_file(request):
+    print 'upload_file() started'
     if request.method == "POST":
         upload = str(request.FILES['Filedata'])
         description = str(request.POST.get('description'))
+        print description
         file_path = settings.MEDIA_ROOT + 'podcastingNAS/'
         if path.ismount(file_path):
             # Adding timestamp as a way to avoid issue with existing filenames, and to give an easy sort option
