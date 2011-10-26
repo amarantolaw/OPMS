@@ -71,6 +71,7 @@ def upload_file(request):
                             file_name + '. It is described as: ' # + description
                 print mail_text
                 print description
+                print request.POST
 #                send_mail('[OPMS] File Upload Notification',
 #                          mail_text,
 #                          'opms@ives.oucs.ox.ac.uk',
