@@ -27,23 +27,27 @@
             'script'    : '/upload/',
             'cancelImg' : '/static/uploadify/cancel.png',
 //            'folder'    : '/static/userfiles',
-            'auto'      : true,
+            'auto'      : false,
             'multi'     : true,
 //            'fileExt'   : '*.mp3;*.ogg;*.flac',
             'fileDesc'  : 'Media Files for the Podcasting Team',
             'queueID'   : 'file_upload_queue',
             'displayData' : 'percentage',
             'removeCompleted': false,
+            'scriptData': {},
             'onError'   : function (event,ID,fileObj,errorObj) {
                 alert(errorObj.type + ' Error: ' + errorObj.info);
             },
             'onAllComplete' : function(event,data) {
                 alert(data.filesUploaded + ' files uploaded successfully!\nThere were ' + data.errors + ' errors.');
             },
-            'onProgress'  : function(event,ID,fileObj,data) {
-                var bytes = Math.round(data.bytesLoaded / 1024);
-                $('#' + $(event.target).attr('id') + ID).find('.percentage').text(' - ' + bytes + 'KB Uploaded');
-                return false;
+//            'onProgress'  : function(event,ID,fileObj,data) {
+//                var bytes = Math.round(data.bytesLoaded / 1024);
+//                $('#' + $(event.target).attr('id') + ID).find('.percentage').text(' - ' + bytes + 'KB Uploaded');
+//                return false;
+//            }
+            'onSelect'    : function(event,ID,fileObj) {
+                alert('The file ' + fileObj.name + ' was added to the queue.');
             }
         });
     });
@@ -76,9 +80,11 @@
                 them on each file uploaded. Please Click on Select Files and then watch as your files are
                 uploaded.</p>
             <style>.uploadifyProgress{display:none;}</style>
+            <p>Please enter some descriptive text about the files you are about to upload:<br />
+                <input id="file_description" type="text"></p>
             <input id="file_upload" type="file" name="Filedata" />
             <p>Upload Queue:
-                <div id='file_upload_queue'>...Is Empty</div>
+                <div id='file_upload_queue'></div>
             </p>
             <p><a href="javascript:$('#file_upload').uploadifyUpload();">Start Upload</a> :
                 <a href="javascript:jQuery('#file_upload').uploadifyClearQueue()">Cancel All Uploads</a></p>
