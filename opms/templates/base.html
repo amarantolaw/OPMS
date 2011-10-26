@@ -39,13 +39,13 @@
             },
             'onAllComplete' : function(event,data) {
                 alert(data.filesUploaded + ' files uploaded successfully!\nThere were ' + data.errors + ' errors.');
-            },
+            }
         });
     });
     function updateDescription() {
         data = {'description':$('#file_description').val()};
         $('#file_upload').uploadifySettings('scriptData',data);
-        alert('data=' + $('#file_description').val());
+//        alert('data=' + $('#file_description').val());
     }
     </script>
     {% endblock %}

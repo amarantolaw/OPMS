@@ -53,20 +53,20 @@ def upload_file(request):
     if request.method == "POST":
         upload = request.FILES['Filedata']
         description = str(request.POST.get('description'))
-        print description
-        print request.POST
+#        print description
+#        print request.POST
         file_path = settings.MEDIA_ROOT + 'podcastingNAS/'
         if path.ismount(file_path):
             # Adding timestamp as a way to avoid issue with existing filenames, and to give an easy sort option
             file_name = str(int(time.time()*1000)) + '-' + upload.name
             try:
-                print 'Attempting to write to:' + file_path + file_name
+#                print 'Attempting to write to:' + file_path + file_name
                 dest = open(file_path + file_name, "wb+")
-                print 'Beginning write process'
+#                print 'Beginning write process'
                 for block in upload.chunks():
                     dest.write(block)
                 dest.close()
-                print 'Finished write process'
+#                print 'Finished write process'
 
                 # Send a notification email
                 mail_text = 'The following file has been added to the UPLOADS folder on the Podcasting NAS: ' +\
