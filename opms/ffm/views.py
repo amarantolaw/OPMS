@@ -63,8 +63,8 @@ def upload_file(request):
 #                print 'Beginning write process'
                 for block in upload.chunks():
                     dest.write(block)
-                print 'Finishing write process'
                 dest.close()
+                print 'Finished write process'
 
                 # Send a notification email
                 mail_text = 'The following file has been added to the UPLOADS folder on the Podcasting NAS: ' + \
