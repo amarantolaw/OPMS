@@ -36,7 +36,15 @@
             'removeCompleted': false,
             'onError'   : function (event,ID,fileObj,errorObj) {
                 alert(errorObj.type + ' Error: ' + errorObj.info);
-            } 
+            },
+            'onAllComplete' : function(event,data) {
+                alert(data.filesUploaded + ' files uploaded successfully!\nThere were ' + data.errors + ' errors.');
+            },
+            'onProgress'  : function(event,ID,fileObj,data) {
+                var bytes = Math.round(data.bytesLoaded / 1024);
+                $('#' + $(event.target).attr('id') + ID).find('.percentage').text(' - ' + bytes + 'KB Uploaded');
+                return false;
+            }
         });
     });
     </script>
@@ -62,6 +70,7 @@
 {% block content %}
         <h1>Oxford Podcast Management System (OPMS)</h1>
         <p>Test Upload Form</p>
+{#        <style>.uploadifyProgress{display:none;}</style>#}
         <input id="file_upload" type="file" name="Filedata" />
 {% endblock %}
     <!-- div.content closes -->
