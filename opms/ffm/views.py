@@ -1,6 +1,7 @@
 from django.shortcuts import render_to_response
 from django.http import  HttpResponse, HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.encoding import smart_unicode
 from ffm.models import *
 from opms import settings
 import time
@@ -54,7 +55,7 @@ def upload_file(request):
         upload = request.FILES['Filedata']
         print request.POST
         print request.POST.get('description')
-        description = str(request.POST.get('description'))
+        description = smart_unicode(request.POST.get('description'))
         print description
         file_path = settings.MEDIA_ROOT + 'podcastingNAS/'
         if path.ismount(file_path):
