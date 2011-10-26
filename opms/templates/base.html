@@ -34,18 +34,19 @@
             'displayData' : 'percentage',
             'removeCompleted': false,
             'scriptData': {'description':'No description has been given'},
-            'onError'   : function (event,ID,fileObj,errorObj) {
-                alert(errorObj.type + ' Error: ' + errorObj.info);
-            },
+//            'onError'   : function (event,ID,fileObj,errorObj) {
+//                alert(errorObj.type + ' Error: ' + errorObj.info);
+//            },
             'onAllComplete' : function(event,data) {
                 alert(data.filesUploaded + ' files uploaded successfully!\nThere were ' + data.errors + ' errors.');
             }
         });
     });
     function updateDescription() {
+        // Need to remove "&" from strings as jQuery/uploadify throws NPObject errors otherwise. Suspect < and > also
         value = ($('#file_description').val()).replace(/</g,'%3C').replace(/>/g,'%3E').replace(/&/g,'%26');
         $('#file_upload').uploadifySettings('scriptData',{'description':value});
-        alert('value=' + value);
+//        alert('value=' + value);
     }
     </script>
     {% endblock %}
