@@ -73,7 +73,9 @@
         <div id='upload'>
             <style>.uploadifyProgress{display:none;}</style>
             <input id="file_upload" type="file" name="Filedata" />
-            <a href="javascript:$('#file_upload').uploadifyUpload();">Upload Files</a>
+            <div id='file_upload_queue'></div>
+            <p><a href="javascript:$('#file_upload').uploadifyUpload();">Start Upload</a> :
+                <a href="javascript:jQuery('#file_upload').uploadifyClearQueue()">Cancel All Uploads</a></p>
         </div>
 {% endblock %}
     <!-- div.content closes -->
