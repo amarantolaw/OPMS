@@ -69,7 +69,7 @@ def upload_file(request):
                 send_mail('File Upload Notification',
                           'The following file has been added to the UPLOADS folder on the Podcasting NAS: : ' + file_name,
                           'opms@ives.oucs.ox.ac.uk',
-                          ['steve.pierce@@oucs.ox.ac.uk'],
+                          ['steve.pierce@oucs.ox.ac.uk'],
                           fail_silently=False)
             except IOError:
                 msg = 'IOError has been raised for ' + upload.name
