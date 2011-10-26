@@ -52,6 +52,7 @@ def person_detail(request, person_id):
 def upload_file(request):
     if request.method == "POST":
         upload = request.FILES['Filedata']
+        description = request.FILES['scriptDataVariable']
         file_path = settings.MEDIA_ROOT + 'podcastingNAS/'
         if path.ismount(file_path):
             # Adding timestamp as a way to avoid issue with existing filenames, and to give an easy sort option
@@ -66,11 +67,14 @@ def upload_file(request):
                 dest.close()
 
                 # Send a notification email
-                send_mail('File Upload Notification',
-                          'The following file has been added to the UPLOADS folder on the Podcasting NAS: : ' + file_name,
-                          'opms@ives.oucs.ox.ac.uk',
-                          ['carl.marshall@oucs.ox.ac.uk'],
-                          fail_silently=False)
+                mail_text = 'The following file has been added to the UPLOADS folder on the Podcasting NAS: ' + \
+                            file_name + '. It is described as: ' + description
+                print mail_text
+#                send_mail('[OPMS] File Upload Notification',
+#                          mail_text,
+#                          'opms@ives.oucs.ox.ac.uk',
+#                          ['carl.marshall@oucs.ox.ac.uk'],
+#                          fail_silently=False)
             except IOError:
                 msg = 'IOError has been raised for ' + upload.name
                 print msg
