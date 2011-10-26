@@ -46,7 +46,7 @@
         // Need to remove "&" from strings as jQuery/uploadify throws NPObject errors otherwise. Suspect < and > also
         value = ($('#file_description').val()).replace(/</g,'%3C').replace(/>/g,'%3E').replace(/&/g,'%26');
         $('#file_upload').uploadifySettings('scriptData',{'description':value});
-//        alert('value=' + value);
+        alert('value=' + value);
     }
     </script>
     {% endblock %}
