@@ -33,7 +33,7 @@
             'queueID'   : 'file_upload_queue',
             'displayData' : 'percentage',
             'removeCompleted': false,
-            'scriptData': {'description':'test data seen here'}, // getDescription(),
+            'scriptData': getDescription(),// {'description':'test data seen here'},
             'onError'   : function (event,ID,fileObj,errorObj) {
                 alert(errorObj.type + ' Error: ' + errorObj.info);
             },
@@ -45,7 +45,7 @@
 //            }
         });
         function getDescription() {
-            return {description:$('#file_description').val()}
+            return {'description':$('#file_description').val()}
         }
     });
     </script>
