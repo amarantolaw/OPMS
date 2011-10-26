@@ -55,7 +55,7 @@ def upload_file(request):
         upload = request.FILES['Filedata']
         print request.POST
         print request.POST.get('description')
-        description = smart_unicode(request.POST.get('description'))
+        description = smart_unicode(request.POST.get('description'), strings_only=True)
         print description
         file_path = settings.MEDIA_ROOT + 'podcastingNAS/'
         if path.ismount(file_path):
