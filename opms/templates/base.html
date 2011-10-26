@@ -41,12 +41,12 @@
                 alert(data.filesUploaded + ' files uploaded successfully!\nThere were ' + data.errors + ' errors.');
             },
         });
-        function updateDescription() {
-            data = {'description':$('#file_description').val()};
-            $('#file_upload').uploadifySettings('scriptData',data);
-            alert('onOpen data=' + $('#file_description').val());
-        }
     });
+    function updateDescription() {
+        data = {'description':$('#file_description').val()};
+        $('#file_upload').uploadifySettings('scriptData',data);
+        alert('data=' + $('#file_description').val());
+    }
     </script>
     {% endblock %}
 
