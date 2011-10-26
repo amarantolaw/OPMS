@@ -51,8 +51,8 @@ def person_detail(request, person_id):
 @csrf_exempt
 def upload_file(request):
     if request.method == "POST":
-        upload = request.FILES['Filedata']
-        description = request.POST.get('description')
+        upload = str(request.FILES['Filedata'])
+        description = str(request.POST.get('description'))
         file_path = settings.MEDIA_ROOT + 'podcastingNAS/'
         if path.ismount(file_path):
             # Adding timestamp as a way to avoid issue with existing filenames, and to give an easy sort option
@@ -68,10 +68,8 @@ def upload_file(request):
 
                 # Send a notification email
                 mail_text = 'The following file has been added to the UPLOADS folder on the Podcasting NAS: ' +\
-                            file_name + '. It is described as: ' # + description
+                            file_name + '. It is described as: ' + description
                 print mail_text
-                print description
-                print request.POST
 #                send_mail('[OPMS] File Upload Notification',
 #                          mail_text,
 #                          'opms@ives.oucs.ox.ac.uk',
