@@ -69,11 +69,17 @@
         <div id="breadcrumb"><strong>You are at:</strong> <a href="/">Home</a> {% block breadcrumb %}{% endblock %}</div>
 {% block content %}
         <h1>Oxford Podcast Management System (OPMS)</h1>
-        <p>Test Upload Form</p>
+
+        <h2>Test Upload Form</h2>
         <div id='upload'>
+            <p>This short form will allow you to send files directly to the podcasting team, and will alert
+                them on each file uploaded. Please Click on Select Files and then watch as your files are
+                uploaded.</p>
             <style>.uploadifyProgress{display:none;}</style>
             <input id="file_upload" type="file" name="Filedata" />
-            <div id='file_upload_queue'></div>
+            <p>Upload Queue:
+                <div id='file_upload_queue'>...Is Empty</div>
+            </p>
             <p><a href="javascript:$('#file_upload').uploadifyUpload();">Start Upload</a> :
                 <a href="javascript:jQuery('#file_upload').uploadifyClearQueue()">Cancel All Uploads</a></p>
         </div>

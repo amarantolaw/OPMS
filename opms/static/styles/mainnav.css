@@ -4,7 +4,7 @@ This stylesheet provides styling for the main navigation elements in your site
 
 */
 
-div#mainnav, div#mainnav2
+#mainnav, #mainnav2
 {
     height: 2em;
     position: absolute;
@@ -15,13 +15,13 @@ div#mainnav, div#mainnav2
     background-color: #00274F;
     letter-spacing: 0.15em;
 }
-div#mainnav2 
+#mainnav2 
 {
     top:10.5em;
     background-color: #ccc;
 }
 
-div#mainnav h2, div#mainnav2 h3
+#mainnav h2, #mainnav2 h3
 {
     position: absolute;
     left: -2100px;
@@ -69,19 +69,19 @@ div#mainnav h2, div#mainnav2 h3
 
 
 
-div#mainnav ul li a:hover, div#mainnav ul li a:focus,
-div#mainnav2 ul li a:hover, div#mainnav2 ul li a:focus
+#mainnav ul li a:hover, #mainnav ul li a:focus,
+#mainnav2 ul li a:hover, #mainnav2 ul li a:focus
 {
     color:#fff;
     background-color: #666;
 }
 
-div#mainnav ul li span.youarehere, div#mainnav ul li a.currentsection, div#mainnav ul li a.selected
+#mainnav ul li span.youarehere, #mainnav ul li a.currentsection, #mainnav ul li a.selected
 {
     color: #333;
     background-color: #ccc;
 }
-div#mainnav2 ul li span.youarehere, div#mainnav2 ul li a.currentsection, div#mainnav2 ul li a.selected
+#mainnav2 ul li span.youarehere, #mainnav2 ul li a.currentsection, #mainnav2 ul li a.selected
 {
     color: #333;
     background-color: #fff;
