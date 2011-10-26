@@ -41,9 +41,8 @@
                 alert(data.filesUploaded + ' files uploaded successfully!\nThere were ' + data.errors + ' errors.');
             },
             'onOpen'    : function(event,ID,fileObj) {
-                data = {'description':$('#file_description').val()}
+                data = {'description':$('#file_description').val()};
                 $('#file_upload').uploadifySettings('scriptData',data);
-//                alert('getDescription called. data=' + data);
             }
         });
     });
