@@ -33,21 +33,19 @@
             'queueID'   : 'file_upload_queue',
             'displayData' : 'percentage',
             'removeCompleted': false,
-            'scriptData': getDescription(), // {'description':'test data seen here'},
+            'scriptData': {'description':'test data seen here'},
             'onError'   : function (event,ID,fileObj,errorObj) {
                 alert(errorObj.type + ' Error: ' + errorObj.info);
             },
             'onAllComplete' : function(event,data) {
                 alert(data.filesUploaded + ' files uploaded successfully!\nThere were ' + data.errors + ' errors.');
             },
-//            'onSelect'    : function(event,ID,fileObj) {
-//                alert('The file ' + fileObj.name + ' was added to the queue.');
-//            }
+            'onSelect'    : function(event,ID,fileObj) {
+                data = {'description':$('#file_description').val()}
+                $('#file_upload').uploadifySettings('scriptData',data);
+                alert('getDescription called. data=' + data);
+            }
         });
-        function getDescription() {
-            alert('getDescription called');
-            return {'description':$('#file_description').val()}
-        }
     });
     </script>
     {% endblock %}
