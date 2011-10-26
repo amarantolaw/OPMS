@@ -72,10 +72,13 @@ def upload_file(request):
                           ['steve.pierce@@oucs.ox.ac.uk'],
                           fail_silently=False)
             except IOError:
-                print 'IOError has been raised for ' + upload.name
-                return HttpResponseServerError(content='File upload failed for '+upload.name)
+                msg = 'IOError has been raised for ' + upload.name
+                print msg
+                return HttpResponseServerError(content=msg)
         else:
-            return HttpResponseServerError(content='File upload failed for '+upload.name+' due to missing path')
+            msg = 'File upload failed for '+upload.name+' due to storage problems on the server'
+            print msg
+            return HttpResponseServerError(content=msg)
 
     response = HttpResponse()
     response.write("%s\r\n" % upload.name)
