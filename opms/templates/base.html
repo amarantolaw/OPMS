@@ -33,7 +33,7 @@
             'queueID'   : 'file_upload_queue',
             'displayData' : 'percentage',
             'removeCompleted': false,
-            'scriptData': {'description':'test data seen here'},
+            'scriptData': {'description':'No description has been given'},
             'onError'   : function (event,ID,fileObj,errorObj) {
                 alert(errorObj.type + ' Error: ' + errorObj.info);
             },
@@ -41,7 +41,7 @@
                 alert(data.filesUploaded + ' files uploaded successfully!\nThere were ' + data.errors + ' errors.');
             },
             'onOpen'    : function(event,ID,fileObj) {
-//                data = {'description':$('#file_description').val()}
+                data = {'description':$('#file_description').val()}
                 $('#file_upload').uploadifySettings('scriptData',data);
 //                alert('getDescription called. data=' + data);
             }
