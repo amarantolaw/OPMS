@@ -43,9 +43,9 @@
         });
     });
     function updateDescription() {
-        data = {'description':$('#file_description').val()};
-        $('#file_upload').uploadifySettings('scriptData',data);
-        alert('data=' + $('#file_description').val());
+        value = ($('#file_description').val()).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/&/g,'&amp;');
+        $('#file_upload').uploadifySettings('scriptData',{'description':value});
+        alert('value=' + value);
     }
     </script>
     {% endblock %}
