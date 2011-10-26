@@ -26,7 +26,6 @@
             'uploader'  : '/static/uploadify/uploadify.swf',
             'script'    : '/upload/',
             'cancelImg' : '/static/uploadify/cancel.png',
-//            'folder'    : '/static/userfiles',
             'auto'      : false,
             'multi'     : true,
 //            'fileExt'   : '*.mp3;*.ogg;*.flac',
@@ -41,14 +40,9 @@
             'onAllComplete' : function(event,data) {
                 alert(data.filesUploaded + ' files uploaded successfully!\nThere were ' + data.errors + ' errors.');
             },
-//            'onProgress'  : function(event,ID,fileObj,data) {
-//                var bytes = Math.round(data.bytesLoaded / 1024);
-//                $('#' + $(event.target).attr('id') + ID).find('.percentage').text(' - ' + bytes + 'KB Uploaded');
-//                return false;
+//            'onSelect'    : function(event,ID,fileObj) {
+//                alert('The file ' + fileObj.name + ' was added to the queue.');
 //            }
-            'onSelect'    : function(event,ID,fileObj) {
-                alert('The file ' + fileObj.name + ' was added to the queue.');
-            }
         });
         function getDescription() {
             return {description:$('#file_description').val()}
