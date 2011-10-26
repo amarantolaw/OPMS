@@ -53,6 +53,7 @@ def upload_file(request):
     if request.method == "POST":
         upload = request.FILES['Filedata']
         print request.POST
+        print request.POST.get('description')
         description = str(request.POST.get('description'))
         print description
         file_path = settings.MEDIA_ROOT + 'podcastingNAS/'
