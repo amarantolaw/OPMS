@@ -51,7 +51,7 @@ def person_detail(request, person_id):
 @csrf_exempt
 def upload_file(request):
     if request.method == "POST":
-        upload = str(request.FILES['Filedata'])
+        upload = request.FILES['Filedata']
         description = str(request.POST.get('description'))
         print description
         print request.POST
