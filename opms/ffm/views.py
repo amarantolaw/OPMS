@@ -67,8 +67,8 @@ def upload_file(request):
                 print 'Finished write process'
 
                 # Send a notification email
-                mail_text = 'The following file has been added to the UPLOADS folder on the Podcasting NAS: ' +\
-                            file_name + '. It is described as: ' + description
+                mail_text = 'The following file has been added to the UPLOADS folder on the Podcasting NAS: ' #+\
+                            #file_name + '. It is described as: ' + description
                 print mail_text
 #                send_mail('[OPMS] File Upload Notification',
 #                          mail_text,
