@@ -53,10 +53,10 @@ def person_detail(request, person_id):
 def upload_file(request):
     if request.method == "POST":
         upload = request.FILES['Filedata']
-        print 'POST:' + request.POST
-        print 'REQUEST:' + request.POST.get('description')
+        print request.POST
+        print request.POST.get('description')
         description = smart_unicode(request.POST.get('description'), strings_only=True)
-        print 'DESCRIPTION:' + description
+        print description
         file_path = settings.MEDIA_ROOT + 'podcastingNAS/'
         if path.ismount(file_path):
             # Adding timestamp as a way to avoid issue with existing filenames, and to give an easy sort option
