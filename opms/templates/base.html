@@ -40,12 +40,12 @@
             'onAllComplete' : function(event,data) {
                 alert(data.filesUploaded + ' files uploaded successfully!\nThere were ' + data.errors + ' errors.');
             },
-            'onOpen'    : function(event,ID,fileObj) {
-                data = {'description':$('#file_description').val()};
-                $('#file_upload').uploadifySettings('scriptData',data);
-                alert('onOpen data=' + $('#file_description').val());
-            }
         });
+        function updateDescription() {
+            data = {'description':$('#file_description').val()};
+            $('#file_upload').uploadifySettings('scriptData',data);
+            alert('onOpen data=' + $('#file_description').val());
+        }
     });
     </script>
     {% endblock %}
@@ -74,7 +74,7 @@
         <div id='upload'>
             <p>This short form will allow you to send files directly to the Podcasting Team, and will alert
                 them on each file uploaded. Please Click on Select Files, Select up to 20 files, enter some text
-                describing those files, click "<a href="javascript:$('#file_upload').uploadifyUpload();">Start
+                describing those files, click "<a href="javascript:updateDescription();$('#file_upload').uploadifyUpload();">Start
                 Upload</a>" and then watch as your files are uploaded.</p>
             <p>Please enter some descriptive text for the files you are about to upload:<br />
                 <textarea id="file_description" cols="60" rows="6"></textarea></p>
@@ -83,7 +83,7 @@
                 <div id='file_upload_queue'></div>
             </p>
             <p><a href="javascript:$('#file_upload').uploadifyUpload();">Start Upload</a> :
-                <a href="javascript:jQuery('#file_upload').uploadifyClearQueue()">Cancel All Uploads</a></p>
+                <a href="javascript:updateDescription();jQuery('#file_upload').uploadifyClearQueue()">Cancel All Uploads</a></p>
         </div>
 {% endblock %}
     <!-- div.content closes -->
