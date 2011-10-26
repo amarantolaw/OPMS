@@ -33,7 +33,7 @@
             'queueID'   : 'file_upload_queue',
             'displayData' : 'percentage',
             'removeCompleted': false,
-            'scriptData': getDescription(),// {'description':'test data seen here'},
+            'scriptData': getDescription(), // {'description':'test data seen here'},
             'onError'   : function (event,ID,fileObj,errorObj) {
                 alert(errorObj.type + ' Error: ' + errorObj.info);
             },
@@ -45,6 +45,7 @@
 //            }
         });
         function getDescription() {
+            alert('getDescription called');
             return {'description':$('#file_description').val()}
         }
     });
