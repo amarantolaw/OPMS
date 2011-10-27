@@ -20,6 +20,9 @@ urlpatterns = patterns('',
     
     # FFM module urls
     (r'^ffm/', include('opms.ffm.urls')),
+
+    # Uploadify utility app urls
+    (r'^upload/', 'opms.ffm.views.upload_file'),
     
     # Root homepage
     (r'^', direct_to_template, {'template': 'base.html'}),

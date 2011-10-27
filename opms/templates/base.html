@@ -1,32 +1,70 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-gb" >
+<!DOCTYPE html>
+<html lang="en-gb" >
 <head>
-    <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8"/>
-    <link rel="icon" href="/static/images/favicon.ico" type="image/x-icon" />
-    <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon" />
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/static/images/favicon.ico" />
+    <link rel="shortcut icon" href="/static/images/favicon.ico" />
     <meta name="author" content="University of Oxford" />
 
     <title>{% block title %}Welcome{% endblock %} :: The OPMS</title>
 
-    <link media="all" href="/static/styles/basic.css" rel="stylesheet" type="text/css"/>
-    <link media="print" href="/static/styles/print.css" rel="stylesheet" type="text/css"/>
-    <link media="screen,projection" href="/static/styles/oxService.css" rel="stylesheet" type="text/css"/>
-    <link media="screen,projection" href="/static/styles/mainnav.css" rel="stylesheet" type="text/css"/>
-    <link media="screen,projection" href="/static/styles/lookandfeel.css" rel="stylesheet" type="text/css"/>
-    <link media="screen,projection" href="/static/styles/layout.css" rel="stylesheet" type="text/css"/>
-
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta http-equiv="Content-Language" content="en-gb" />
-    <meta http-equiv="Content-Script-Type" content="text/javascript" />
+    <link rel="stylesheet" href="/static/styles/basic.css" media="all" />
+    <link rel="stylesheet" href="/static/styles/print.css" media="print" />
+    <link rel="stylesheet" href="/static/styles/oxService.css" media="screen,projection" />
+    <link rel="stylesheet" href="/static/styles/mainnav.css" media="screen,projection" />
+    <link rel="stylesheet" href="/static/styles/lookandfeel.css" media="screen,projection" />
+    <link rel="stylesheet" href="/static/styles/layout.css" media="screen,projection" />
 
     {% block head %}
+    <link rel="stylesheet" href="/static/uploadify/uploadify.css" />
+    <script src="/static/scripts/jquery-1.6.4.min.js"></script>
+    <script src="/static/uploadify/swfobject.js"></script>
+    <script src="/static/uploadify/jquery.uploadify.v2.1.4.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('#file_upload').uploadify({
+            'uploader'  : '/static/uploadify/uploadify.swf',
+            'script'    : '/upload/',
+            'cancelImg' : '/static/uploadify/cancel.png',
+            'auto'      : false,
+            'multi'     : true,
+//            'fileExt'   : '*.mp3;*.ogg;*.flac',
+            'fileDesc'  : 'Media Files for the Podcasting Team',
+            'queueID'   : 'file_upload_queue',
+            'displayData' : 'percentage',
+            'removeCompleted': false,
+            'scriptData': {'description':'No description has been given'},
+            'sizeLimit' : 838860800, // 800Mb limit per file
+            'queueSizeLimit' : 20,
+//            'onError'   : function (event,ID,fileObj,errorObj) {
+//                alert(errorObj.type + ' Error: ' + errorObj.info);
+//            },
+            'onAllComplete' : function(event,data) {
+                alert(data.filesUploaded + ' files uploaded successfully!\nThere were ' + data.errors + ' errors.');
+            }
+        });
+    });
+    function prepareUpload() {
+        // Need to remove "&" from strings as jQuery/uploadify throws NPObject errors otherwise.
+        // Suspect < and > also cause problems (and certainly do if converted to &lt; &gt;
+        value = ($('#file_description').val()).replace(/</g,'%3C').replace(/>/g,'%3E').replace(/&/g,'%26');
+        $('#file_upload').uploadifySettings('scriptData',{'description':value});
+//        alert('value=' + value);
+        if (value.length < 10) {
+            alert('Please enter some descriptive text before starting the upload');
+        }
+        else {
+            $('#file_upload').uploadifyUpload();
+        }
+    }
+    </script>
     {% endblock %}
 
 </head>
 
 <body>
 {% block navbar %}
-<div id="mainnav">
+<nav id="mainnav">
     <h2>Main sections</h2>
     <ul class="level-1">
         <li><span class="youarehere">Home</span></li>
@@ -34,32 +72,49 @@
         <li><a href="/ffm/">Files &amp; Feeds</a></li>
         <li><a href="/stats/">Statistics</a></li>
     </ul>
-</div>
+</nav>
 {% endblock %}
 
     <div id="content" >
         <div id="breadcrumb"><strong>You are at:</strong> <a href="/">Home</a> {% block breadcrumb %}{% endblock %}</div>
 {% block content %}
         <h1>Oxford Podcast Management System (OPMS)</h1>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus vel diam quis arcu egestas feugiat. Pellentesque in ligula. Nullam commodo. Ut aliquam mi eu tellus. In hac habitasse platea dictumst. Cras commodo sapien vitae dolor. In volutpat, mauris ac hendrerit tincidunt, magna sapien porttitor ligula, id rhoncus turpis tellus in nibh. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Morbi tincidunt lectus in nisl. Nunc vel augue ut felis ultrices ornare. Maecenas suscipit consectetur turpis. Sed nisl. Vivamus eu orci. Integer tellus mauris, euismod ut, tincidunt tincidunt, fringilla eget, mi. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
 
-        <p>Nulla sollicitudin quam at ante. Nunc porttitor fermentum neque. Proin blandit congue urna. Nulla nec erat quis urna accumsan interdum. Aenean iaculis. Nulla facilisi. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum, libero ornare placerat mattis, orci massa venenatis libero, et ultrices ligula lacus at arcu. Praesent pharetra orci quis felis. Aenean semper tellus eu magna. Quisque tempus malesuada orci. Etiam consequat vestibulum metus. Mauris ut nibh. Phasellus in diam. Etiam neque. Aliquam erat volutpat.</p>
+        <h2>File Upload Form</h2>
+        <div id='upload'>
+            <p>This short form will allow you to send files directly to the Podcasting Team, and will alert
+                them on each file uploaded. To use:</p>
+            <ol>
+                <li>Click on Select Files.</li>
+                <li>Select up to 20 files, with no one file larger than 800Mb.</li>
+                <li>Enter some text describing those files.</li>
+                <li>Click "<a href="javascript:prepareUpload();">Start Upload</a>" ...and then sit back and watch as your files are uploaded.</li>
+                <li>Wait for the final pop up alert to confirm file transfer status.</li>
+            </ol>
+
+            <p><input id="file_upload" type="file" name="Filedata" /></p>
+            <p>Please enter some descriptive text for the files you are about to upload:<br />
+                <textarea id="file_description" cols="60" rows="6"></textarea></p>
+            <p>Upload Queue:
+                <div id='file_upload_queue'></div>
+            </p>
+            <p><strong><a href="javascript:prepareUpload();">Start Upload</a></strong> :
+                <a href="javascript:jQuery('#file_upload').uploadifyClearQueue()">Cancel All Uploads</a></p>
+        </div>
 {% endblock %}
     <!-- div.content closes -->
     </div>
 
-    <div id="footer" >
+    <footer id="footer" >
         <div id="site-info"  >
             <h2   class="nonvis-exposition">Site Information</h2>
-
 			<dl>
 				<dt class="nonvis-exposition">Institution</dt><dd id="institution"><a id="oxcrest"  href="http://www.ox.ac.uk/">University of Oxford</a></dd>
 				<dt class="nonvis-exposition">Service</dt><dd id="serviceName" >OPMS - Oxford Podcast Management System</dd>
 			</dl>
-
 		<!-- div#site-info closes -->
 		</div>
 	<!-- div#footer closes -->
-	 </div>
+	</footer>
 </body>
 </html>

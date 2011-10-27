@@ -146,6 +146,9 @@ def summary_feeds_cc(request):
     listing = TrackCount.merged.psuedo_feeds_cc()
     return render_to_response('stats/reports/feeds-cc.html',{'listing':listing})
 
+def feed_detail_cc(request):
+    return HttpResponse("Hello, world. You're at the feed_detail_cc view.")
+
 ######
 # =================================================================================
 # =============================  GRAPHS AND IMAGES  ===============================

@@ -27,3 +27,10 @@ DATABASES = {
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = ''
 
+EMAIL_HOST = ''
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_TLS = True
+EMAIL_SUBJECT_PREFIX = '[OPMS]'
+
+OPMS_EMAIL_ALERTS = ''
