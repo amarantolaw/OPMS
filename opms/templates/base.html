@@ -48,7 +48,7 @@
         value = ($('#file_description').val()).replace(/</g,'%3C').replace(/>/g,'%3E').replace(/&/g,'%26');
         $('#file_upload').uploadifySettings('scriptData',{'description':value});
 //        alert('value=' + value);
-        if (len(value) < 10) {
+        if (value.length < 10) {
             alert('Please enter some descriptive text before starting the upload');
         }
         else {
