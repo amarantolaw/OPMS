@@ -99,5 +99,4 @@ INSTALLED_APPS = (
     'stats',
     'ffm',
     'oxitems', # This is to temporarily link OPMS with the OxItems database whilst it is definitive
-    'uploadify',
 )
