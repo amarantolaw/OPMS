@@ -80,27 +80,28 @@
 {% block content %}
         <h1>Oxford Podcast Management System (OPMS)</h1>
 
-        <h2>File Upload Form</h2>
-        <div id='upload'>
-            <p>This short form will allow you to send files directly to the Podcasting Team, and will alert
-                them on each file uploaded. To use:</p>
-            <ol>
-                <li>Click on Select Files.</li>
-                <li>Select up to 20 files, with no one file larger than 800Mb.</li>
-                <li>Enter some text describing those files.</li>
-                <li>Click "<a href="javascript:prepareUpload();">Start Upload</a>" ...and then sit back and watch as your files are uploaded.</li>
-                <li>Wait for the final pop up alert to confirm file transfer status.</li>
-            </ol>
-
-            <p><input id="file_upload" type="file" name="Filedata" /></p>
-            <p>Please enter some descriptive text for the files you are about to upload:<br />
-                <textarea id="file_description" cols="60" rows="6"></textarea></p>
-            <p>Upload Queue:
-                <div id='file_upload_queue'></div>
-            </p>
-            <p><strong><a href="javascript:prepareUpload();">Start Upload</a></strong> :
-                <a href="javascript:jQuery('#file_upload').uploadifyClearQueue()">Cancel All Uploads</a></p>
-        </div>
+{#    UPLOADIFY CODE - REJECTED BECAUSE IT DOESN'T WORK WITH WEBAUTH #}
+{#        <h2>File Upload Form</h2>#}
+{#        <div id='upload'>#}
+{#            <p>This short form will allow you to send files directly to the Podcasting Team, and will alert#}
+{#                them on each file uploaded. To use:</p>#}
+{#            <ol>#}
+{#                <li>Click on Select Files.</li>#}
+{#                <li>Select up to 20 files, with no one file larger than 800Mb.</li>#}
+{#                <li>Enter some text describing those files.</li>#}
+{#                <li>Click "<a href="javascript:prepareUpload();">Start Upload</a>" ...and then sit back and watch as your files are uploaded.</li>#}
+{#                <li>Wait for the final pop up alert to confirm file transfer status.</li>#}
+{#            </ol>#}
+{##}
+{#            <p><input id="file_upload" type="file" name="Filedata" /></p>#}
+{#            <p>Please enter some descriptive text for the files you are about to upload:<br />#}
+{#                <textarea id="file_description" cols="60" rows="6"></textarea></p>#}
+{#            <p>Upload Queue:#}
+{#                <div id='file_upload_queue'></div>#}
+{#            </p>#}
+{#            <p><strong><a href="javascript:prepareUpload();">Start Upload</a></strong> :#}
+{#                <a href="javascript:jQuery('#file_upload').uploadifyClearQueue()">Cancel All Uploads</a></p>#}
+{#        </div>#}
 {% endblock %}
     <!-- div.content closes -->
     </div>
