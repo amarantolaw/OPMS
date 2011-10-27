@@ -34,6 +34,8 @@
             'displayData' : 'percentage',
             'removeCompleted': false,
             'scriptData': {'description':'No description has been given'},
+            'sizeLimit' : 838860800, // 800Mb limit per file
+            'queueSizeLimit' : 20,
 //            'onError'   : function (event,ID,fileObj,errorObj) {
 //                alert(errorObj.type + ' Error: ' + errorObj.info);
 //            },
@@ -81,13 +83,15 @@
         <h2>File Upload Form</h2>
         <div id='upload'>
             <p>This short form will allow you to send files directly to the Podcasting Team, and will alert
-                them on each file uploaded. To use:<ol>
-                    <li>Click on Select Files</li>
-                    <li>Select up to 20 files</li>
-                    <li>Enter some text describing those files</li>
-                    <li>Click "<a href="javascript:prepareUpload();">Start Upload</a>"</li>
-                </ol>
-                ...and then sit back and watch as your files are uploaded.</p>
+                them on each file uploaded. To use:</p>
+            <ol>
+                <li>Click on Select Files.</li>
+                <li>Select up to 20 files, with no one file larger than 800Mb.</li>
+                <li>Enter some text describing those files.</li>
+                <li>Click "<a href="javascript:prepareUpload();">Start Upload</a>" ...and then sit back and watch as your files are uploaded.</li>
+                <li>Wait for the final pop up alert to confirm file transfer status.</li>
+            </ol>
+
             <p><input id="file_upload" type="file" name="Filedata" /></p>
             <p>Please enter some descriptive text for the files you are about to upload:<br />
                 <textarea id="file_description" cols="60" rows="6"></textarea></p>
