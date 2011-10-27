@@ -77,7 +77,7 @@ def upload_file(request):
                 send_mail('[OPMS] File Upload Notification',
                           mail_text,
                           'opms@ives.oucs.ox.ac.uk',
-                          ['carl.marshall@oucs.ox.ac.uk'],
+                          [settings.OPMS_EMAIL_ALERTS],
                           fail_silently=False)
             except IOError:
                 msg = 'IOError has been raised for ' + upload.name

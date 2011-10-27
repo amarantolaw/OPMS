@@ -42,11 +42,18 @@
             }
         });
     });
-    function updateDescription() {
-        // Need to remove "&" from strings as jQuery/uploadify throws NPObject errors otherwise. Suspect < and > also
+    function prepareUpload() {
+        // Need to remove "&" from strings as jQuery/uploadify throws NPObject errors otherwise.
+        // Suspect < and > also cause problems (and certainly do if converted to &lt; &gt;
         value = ($('#file_description').val()).replace(/</g,'%3C').replace(/>/g,'%3E').replace(/&/g,'%26');
         $('#file_upload').uploadifySettings('scriptData',{'description':value});
 //        alert('value=' + value);
+        if (len(value) < 10) {
+            alert('Please enter some descriptive text before starting the upload');
+        }
+        else {
+            $('#file_upload').uploadifyUpload();
+        }
     }
     </script>
     {% endblock %}
@@ -74,17 +81,21 @@
         <h2>File Upload Form</h2>
         <div id='upload'>
             <p>This short form will allow you to send files directly to the Podcasting Team, and will alert
-                them on each file uploaded. Please Click on Select Files, Select up to 20 files, enter some text
-                describing those files, click "<a href="javascript:updateDescription();$('#file_upload').uploadifyUpload();">Start
-                Upload</a>" and then watch as your files are uploaded.</p>
+                them on each file uploaded. To use:<ol>
+                    <li>Click on Select Files</li>
+                    <li>Select up to 20 files</li>
+                    <li>Enter some text describing those files</li>
+                    <li>Click "<a href="javascript:prepareUpload();">Start Upload</a>"</li>
+                </ol>
+                ...and then sit back and watch as your files are uploaded.</p>
+            <p><input id="file_upload" type="file" name="Filedata" /></p>
             <p>Please enter some descriptive text for the files you are about to upload:<br />
                 <textarea id="file_description" cols="60" rows="6"></textarea></p>
-            <input id="file_upload" type="file" name="Filedata" />
             <p>Upload Queue:
                 <div id='file_upload_queue'></div>
             </p>
-            <p><a href="javascript:$('#file_upload').uploadifyUpload();">Start Upload</a> :
-                <a href="javascript:updateDescription();jQuery('#file_upload').uploadifyClearQueue()">Cancel All Uploads</a></p>
+            <p><strong><a href="javascript:prepareUpload();">Start Upload</a></strong> :
+                <a href="javascript:jQuery('#file_upload').uploadifyClearQueue()">Cancel All Uploads</a></p>
         </div>
 {% endblock %}
     <!-- div.content closes -->
