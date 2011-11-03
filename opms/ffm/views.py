@@ -17,7 +17,7 @@ def index(request):
 
 def summary_feeds(request):
     "List the Feedgroups and their associated feeds"
-    summary_data = FeedGroup.objects.all().order_by('title')
+    summary_data = FeedGroup.objects.all().order_by('title').select_related()
     return render_to_response('ffm/feedgroups.html', {'summary_data': summary_data,})
 
 
