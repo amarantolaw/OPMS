@@ -28,53 +28,30 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         print "Scan URLs started at " + str(datetime.datetime.utcnow()) + "\n"
 
-        # Loop through stats.URLMonitorTask entries, build list of tasks to execute
+        # Create an error log
+        self._errorlog_start('scan_urls.log')
+
+        # Loop through stats.URLMonitorTask entries, build list of urls to test
         tasks = []
-        for task in URLMonitorTask.objects.all():
-            tasks.append(task)
+        task_counter = {}
+        for task in URLMonitorTask.objects.filter(time_of_scan__isnull=True):
+            tasks.extend([task]*task.iterations)
+            task_counter[task] = 1
+            # Update the task to show it has been run
+            task.time_of_scan = datetime.datetime.utcnow()
+            task.save()
         shuffle(tasks)
 
+        for task in tasks:
+            request = URLMonitorRequest()
+            request.task = task
+            request.iteration = int(task_counter.get(task))
+            task_counter[task] += 1
+            request.time_of_request, request.ttfb, request.ttlb = self.scan_url(task.url.url)
+            request.save()
+#            print request
 
-            record.resolved_name = self._rdns_lookup(record.ip_address)
-            self.update_stats['update_count'] += 1
-            if record.resolved_name == 'Unknown':
-                self.update_stats['update_timeoutskips'] += 1
-
-            # Update the record! - even if it comes back as Unknown, as the timestamp needs updating.
-            record.last_updated = datetime.datetime.utcnow()
-            record.save()
-
-            if (self.update_stats.get('update_count') % 10) == 0:
-                # Output the status
-                try:
-                    self.update_stats['update_rate'] = float(self.update_stats.get('update_count')) /\
-                        float((datetime.datetime.utcnow() - self.update_stats.get('update_starttime')).seconds)
-                except ZeroDivisionError:
-                    self.update_stats['update_rate'] = 0
-
-                print str(datetime.datetime.utcnow()) + ": " +\
-                    "Parsed " + str(self.update_stats.get('update_count')) + " IP Addresses. " +\
-                    "Skipped " + str(self.update_stats.get('update_timeoutskips')) + " IP Addresses. " +\
-                    "Rate: " + str(self.update_stats.get('update_rate'))[0:6] + " IP Addresses/sec. "
-
-                # Write the error cache to disk
-                self._error_log_save()
-
-            if self.stopcount > 0 and self.update_stats.get('update_count') > self.stopcount:
-                print 'Stopping now having reached update limit\n'
-                break
-
-        # Final stats output at end of file
-        try:
-            self.update_stats['update_rate'] = float(self.update_stats.get('update_count')) /\
-                float((datetime.datetime.utcnow() - self.update_stats.get('update_starttime')).seconds)
-        except ZeroDivisionError:
-            self.update_stats['update_rate'] = 0
-
-        print "\nUpdate finished at " + str(datetime.datetime.utcnow()) +\
-            "\nSkipped " + str(self.update_stats.get('update_timeoutskips')) + " IP Addresses. " +\
-            "\nIP addresses parsed: " + str(self.update_stats.get('update_count')) +\
-            "\nImported at " + str(self.update_stats.get('update_rate'))[0:6] + " IP Addresses/sec\n"
+        print "\nScan URLs finished at " + str(datetime.datetime.utcnow())
 
         # Write the error cache to disk
         self._error_log_save()
@@ -83,15 +60,26 @@ class Command(NoArgsCommand):
         return None
 
 
-def scan_url(url):
-    USER_AGENT = 'OPMS/1.0 (Ubuntu 10.04; Virtual Server) Django/1.3.1'
-    request = urllib2.Request(url)
-    request.add_header('User-Agent', USER_AGENT)
-    opener = urllib2.build_opener()
-    time_of_request = time.localtime()
-    start = time.time()
-    request = opener.open(request)
-    ttfb = time.time() - start
-    output = request.read()
-    ttlb = time.time() - start
-    return url, time_of_request, ttfb, ttlb
+    def scan_url(url):
+        USER_AGENT = 'OPMS/1.0 (Ubuntu 10.04; Virtual Server) Django/1.3.1'
+        request = urllib2.Request(url)
+        request.add_header('User-Agent', USER_AGENT)
+        opener = urllib2.build_opener()
+        time_of_request = time.localtime()
+        start = time.time()
+        request = opener.open(request)
+        ttfb = time.time() - start
+        output = request.read()
+        ttlb = time.time() - start
+        return time_of_request, ttfb, ttlb
+
+
+
+    def setup_tasks(iterations = 10, comment = 'No Comment'):
+        for target in URLMonitorTarget.objects.all():
+            t = URLMonitorTask()
+            t.url = target
+            t.iterations = int(iterations)
+            t.comment = str(comment)
+            t.save()
+        return None
