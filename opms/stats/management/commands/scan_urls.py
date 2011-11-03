@@ -50,8 +50,7 @@ class Command(NoArgsCommand):
             task_counter[task] += 1
             request.time_of_request, request.ttfb, request.ttlb = self.scan_url(task.url.url)
             request.save()
-#            print request
-            print "Scanned " + str(n) + " of " + str(len(tasks))
+            print "Scanned " + str(n+1) + " of " + str(len(tasks))
 
         print "\nScan URLs finished at " + str(datetime.datetime.utcnow())
 
