@@ -42,7 +42,7 @@ class Command(NoArgsCommand):
             task.save()
         shuffle(tasks)
 
-        for task in tasks:
+        for n, task in enumerate(tasks):
             request = URLMonitorRequest()
             request.task = task
             request.iteration = int(task_counter.get(task))
@@ -50,6 +50,7 @@ class Command(NoArgsCommand):
             request.time_of_request, request.ttfb, request.ttlb = self.scan_url(task.url.url)
             request.save()
 #            print request
+            print "Scanned " + str(n) + " of " + str(len(tasks))
 
         print "\nScan URLs finished at " + str(datetime.datetime.utcnow())
 
@@ -71,6 +72,7 @@ class Command(NoArgsCommand):
         ttfb = time.time() - start
         output = request.read()
         ttlb = time.time() - start
+        print str(time_of_request) + ":" + url + " - TTFB=" + str(ttfb) + " - TTLB=" + str(ttlb)
         return time_of_request, ttfb, ttlb
 
 
