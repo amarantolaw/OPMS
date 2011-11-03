@@ -521,7 +521,7 @@ class URLMonitorTask(models.Model):
     comment = models.CharField(max_length=200)
     url = models.ForeignKey(URLMonitorTarget)
     iterations = models.SmallIntegerField()
-    time_of_scan = models.DateTimeField()
+    time_of_scan = models.DateTimeField(null=True)
 
     def __unicode__(self):
         return str(self.url.url) + " * " + str(self.iterations) + ": " + str(self.comment)
