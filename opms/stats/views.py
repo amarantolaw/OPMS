@@ -140,6 +140,12 @@ def item_detail(request, item_id):
 
 
 
+def summary_urlmonitoring(request):
+    "Show the results for a url monitoring"
+    return HttpResponse("Hello World. You're at the SUMMARY of URL MONITORING page.")
+
+
+
 
 # TEMP FUNCTIONS
 def summary_feeds_cc(request):
