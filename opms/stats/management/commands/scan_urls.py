@@ -41,6 +41,7 @@ class Command(NoArgsCommand):
             task.time_of_scan = datetime.datetime.utcnow()
             task.save()
         shuffle(tasks)
+        print str(len(tasks)) + " tasks created"
 
         for n, task in enumerate(tasks):
             request = URLMonitorRequest()
@@ -66,7 +67,7 @@ class Command(NoArgsCommand):
         request = urllib2.Request(url)
         request.add_header('User-Agent', USER_AGENT)
         opener = urllib2.build_opener()
-        time_of_request = time.localtime()
+        time_of_request = datetime.datetime.utcnow()
         start = time.time()
         request = opener.open(request)
         ttfb = time.time() - start
