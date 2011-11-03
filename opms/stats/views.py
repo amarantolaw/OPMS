@@ -142,7 +142,9 @@ def item_detail(request, item_id):
 
 def summary_urlmonitoring(request):
     "Show the results for a url monitoring"
-    return HttpResponse("Hello World. You're at the SUMMARY of URL MONITORING page.")
+#    return HttpResponse("Hello World. You're at the SUMMARY of URL MONITORING page.")
+    summary_data = URLMonitorRequest.objects.all()
+    return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,})
 
 
 
