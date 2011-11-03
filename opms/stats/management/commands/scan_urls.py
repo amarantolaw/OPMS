@@ -60,7 +60,7 @@ class Command(NoArgsCommand):
         return None
 
 
-    def scan_url(url):
+    def scan_url(self, url):
         USER_AGENT = 'OPMS/1.0 (Ubuntu 10.04; Virtual Server) Django/1.3.1'
         request = urllib2.Request(url)
         request.add_header('User-Agent', USER_AGENT)
@@ -74,15 +74,14 @@ class Command(NoArgsCommand):
         return time_of_request, ttfb, ttlb
 
 
-
-    def setup_tasks(iterations = 10, comment = 'No Comment'):
-        for target in URLMonitorTarget.objects.all():
-            t = URLMonitorTask()
-            t.url = target
-            t.iterations = int(iterations)
-            t.comment = str(comment)
-            t.save()
-        return None
+#    def setup_tasks(iterations = 10, comment = 'No Comment'):
+#        for target in URLMonitorTarget.objects.all():
+#            t = URLMonitorTask()
+#            t.url = target
+#            t.iterations = int(iterations)
+#            t.comment = str(comment)
+#            t.save()
+#        return None
 
 
     # DEBUG AND INTERNAL HELP METHODS ==============================================================
