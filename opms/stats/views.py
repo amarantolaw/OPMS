@@ -150,13 +150,13 @@ def summary_urlmonitoring(request):
 def urlmonitoring_task(request, task_id):
     "Show the results for a url monitoring of a specific task"
 #    return HttpResponse("Hello World. You're at the SUMMARY of URL MONITORING page.")
-    summary_data = URLMonitorRequest.objects.filter(task_id__exact=task_id).select_related().order_by('-task__time_of_scan', 'iteration')
+    summary_data = URLMonitorRequest.objects.filter(task__id__exact=task_id).select_related().order_by('-task__time_of_scan', 'iteration')
     return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,})
 
 def urlmonitoring_url(request, url_id):
     "Show the results for a url monitoring of specific url"
 #    return HttpResponse("Hello World. You're at the SUMMARY of URL MONITORING page.")
-    summary_data = URLMonitorRequest.objects.filter(task__url_id__exact=url_id).select_related().order_by('-task__time_of_scan', 'iteration')
+    summary_data = URLMonitorRequest.objects.filter(task__url__id__exact=url_id).select_related().order_by('-task__time_of_scan', 'iteration')
     return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,})
 
 
