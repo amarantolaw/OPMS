@@ -20,14 +20,14 @@
 <div id="mainnav2">
     <h3>Sub sections for Statistics</h3>
     <ul class="level-2">
-{#        <li><span class="youarehere">Summary</span></li>#}
-        <li><a href="/stats/">Summary</a></li>
-        <li><a href="feeds/">Feeds</a></li>
+        <li><span class="youarehere">URL Monitoring</span></li>
+        <li><a href="/stats/report/summary/">Summary</a></li>
+        <li><a href="/stats/report/summary/feeds/">Feeds</a></li>
     </ul>
 </div>
 {% endblock %}
 
-{% block breadcrumb %}&gt; <a href="/stats/">Statistics</a> &gt; URL Monitoring Summary{% endblock %}
+{% block breadcrumb %}&gt; <a href="/stats/">Statistics</a> &gt; <a href="/stats/report/urlmonitoring/">URL Monitoring Summary</a>{% endblock %}
 
 {% block content %}
 <h2>URL Reporting</h2>
@@ -59,10 +59,10 @@ $(document).ready(function()
     <tbody>
     {% for row in summary_data %}
         <tr>
-            <td><a href="task/{{ row.task.id }}">{{ row.task.time_of_scan|date:"Y-m-d h:m:s" }}</a></td>
+            <td><a href="/stats/report/urlmonitoring/task/{{ row.task.id }}">{{ row.task.time_of_scan|date:"Y-m-d h:m:s" }}</a></td>
             <td>{{ row.task.comment }}</td>
 {#            <td>{{ row.week_ending|date:"Y-m-d" }}</td>#}
-            <td><a href="url/{{ row.task.url.id }}">{{ row.task.url.url }}</a></td>
+            <td><a href="/stats/report/urlmonitoring/url/{{ row.task.url.id }}">{{ row.task.url.url }}</a></td>
 {#            <td class="{% if row.total_track_downloads_change >= 0 %}positive{% else %}negative{% endif %}">{{ row.total_track_downloads_change }}</td>#}
             <td>{{ row.iteration }}</td>
             <td>{{ row.time_of_request }}</td>
