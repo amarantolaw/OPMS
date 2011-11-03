@@ -37,7 +37,7 @@
 <script>
 $(document).ready(function()
     {
-        $("#summaryTable").tablesorter( {sortList: [[1,1]]} );
+        $("#summaryTable").tablesorter( {sortList: [[0,1]]} );
     }
 );
 </script>
@@ -59,10 +59,10 @@ $(document).ready(function()
     <tbody>
     {% for row in summary_data %}
         <tr>
-            <td>{{ row.task.time_of_scan|date:"Y-m-d h:m:s" }}</td>
+            <td><a href="task/{{ row.task.id }}">{{ row.task.time_of_scan|date:"Y-m-d h:m:s" }}</a></td>
             <td>{{ row.task.comment }}</td>
 {#            <td>{{ row.week_ending|date:"Y-m-d" }}</td>#}
-            <td>{{ row.task.url.url }}</td>
+            <td><a href="url/{{ row.task.url.id }}">{{ row.task.url.url }}</a></td>
 {#            <td class="{% if row.total_track_downloads_change >= 0 %}positive{% else %}negative{% endif %}">{{ row.total_track_downloads_change }}</td>#}
             <td>{{ row.iteration }}</td>
             <td>{{ row.time_of_request }}</td>
