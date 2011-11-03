@@ -477,6 +477,60 @@ class PreviewCount(models.Model):
 
 
 
+
+######
+# Apple iTunes Store analysis classes
+######
+
+# Log of items in the Top Collections Charts for iTunes U
+#class ITunesChartLog(models.Model):
+#    CHART_TYPE_CHOICES = (
+#        (u'itu-collection', u'Top iTunes U Collections'),
+#        (u'itu-downloads', u'Top iTunes U Downloads'),
+#        (u'ox-itu-downloads', u'Top iTunes U Downloads'),
+#    )
+#    date_created = models.DateTimeField(verbose_name="Date of observation", auto_now_add=True)
+#    chart_type = models.CharField(verbose_name="Name of Chart", max_length=100, choices=CHART_TYPE_CHOICES)
+#    index = models.IntegerField(verbose_name="Chart position")
+#    title = models.CharField(verbose_name="Item Name", max_length=200)
+#    artist = models.CharField(verbose_name="Artist Text", max_length=200)
+#    institution_label = models.CharField(verbose_name="Institution from URL", max_length=100)
+#    institution_id = models.IntegerField(verbose_name="Institution ID", blank=True)
+#    item_url = models.URLField(verbose_name="Item URL in iTunes", blank=True)
+#    artwork_url = models.URLField(verbose_name="Artwork URL in iTunes", blank=True)
+#
+#    def __unicode__(self):
+#        return str(date.strftime(self.date_created,"%Y-%m-%d")) + ": #" + str(self.index) + ")" + \
+#               str(self.title)
+
+
+######
+# URL Monitoring Task/Metrics
+######
+
+#The following models are used in testing a series of urls (Targets) on a periodic basis (Tasks) and
+#recording some simple metrics on the results.
+class URLMonitorTarget(models.Model):
+    url = models.URLField()
+
+class URLMonitorTask(models.Model):
+    comment = models.CharField(max_length=200)
+    url = models.ForeignKey(URLMonitorTarget)
+    iterations = models.SmallIntegerField()
+
+class URLMonitorRequest(models.Model):
+    task = models.ForeignKey(URLMonitorTask)
+    ttfb = models.FloatField()
+    ttlb = models.FloatField()
+    iteration = models.SmallIntegerField()
+    time_of_request = models.DateTimeField()
+
+
+
+
+
+
+
 ######
 # Apache log analysis classes
 ######
