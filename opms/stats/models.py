@@ -513,10 +513,18 @@ class PreviewCount(models.Model):
 class URLMonitorTarget(models.Model):
     url = models.URLField()
 
+    def __unicode__(self):
+        return str(self.url)
+
+
 class URLMonitorTask(models.Model):
     comment = models.CharField(max_length=200)
     url = models.ForeignKey(URLMonitorTarget)
     iterations = models.SmallIntegerField()
+
+    def __unicode__(self):
+        return str(self.url.url) + " * " + str(self.iterations) + ": " + str(self.comment)
+
 
 class URLMonitorRequest(models.Model):
     task = models.ForeignKey(URLMonitorTask)
@@ -525,6 +533,9 @@ class URLMonitorRequest(models.Model):
     iteration = models.SmallIntegerField()
     time_of_request = models.DateTimeField()
 
+    def __unicode__(self):
+        return str(date.strftime(self.time_of_request,"%Y-%m-%d")) + ": "+ str(self.task.url.url) +\
+               " #" + str(self.iteration) + ": TTFB:" + str(self.ttfb)
 
 
 
