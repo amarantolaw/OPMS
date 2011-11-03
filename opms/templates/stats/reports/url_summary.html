@@ -34,12 +34,20 @@
 
 {% if summary_data %}
 <h3>Data visualisation</h3>
+<script>
+$(document).ready(function()
+    {
+        $("#summaryTable").tablesorter( {sortList: [[1,1]]} );
+    }
+);
+</script>
 {#<p><img src="/stats/graph/apple/summary-total.png" /><br />#}
 {#    <a href="/stats/graph/apple/summary-total.png?dpi=300">[Print Version]</a> <a href="/stats/graph/apple/summary-total.png?dpi=600">[High Resolution]</a></p>#}
 
 <table id="summaryTable" class="tablesorter">
     <thead>
         <tr>
+            <th>Time of Scan</th>
             <th>Task Comment</th>
             <th>URL</th>
             <th>Iteration</th>
@@ -51,6 +59,7 @@
     <tbody>
     {% for row in summary_data %}
         <tr>
+            <td>{{ row.task.time_of_scan|date:"Y-m-d h:m:s" }}</td>
             <td>{{ row.task.comment }}</td>
 {#            <td>{{ row.week_ending|date:"Y-m-d" }}</td>#}
             <td>{{ row.task.url.url }}</td>
