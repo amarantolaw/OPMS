@@ -207,16 +207,18 @@ def graph_urlmonitoring_url(request, url_id = 0):
         y2.append(item.ttlb)
 #    ind = matplotlib.numpy.arange(len(s)) # the x locations for the groups
 
-    ax1.plot(x,y1,'o')
+    ax1.plot(x,y1,'o', color='blue')
 #    cols = ['blue']*len(ind)
 #    ax1.bar(ind, tracks, color=cols, linewidth=0, edgecolor='w')
     ax1.set_ylabel("y1 label", color='blue', size='small')
+    ax1.set_yscale('log')
     for tl in ax1.get_yticklabels():
         tl.set_color('b')
 #    # ax1.yaxis.major.formatter.set_powerlimits((-3,3))
 
-    ax2.plot(x, y2, '+')
+    ax2.plot(x, y2, '+', color='red')
     ax2.set_ylabel("y2 label", color='red', size='small')
+    ax2.set_yscale('log')
     for tl in ax2.get_yticklabels():
         tl.set_color('r')
     # ax2.yaxis.major.formatter.set_powerlimits((-3,6))
