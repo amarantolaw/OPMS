@@ -217,7 +217,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
             x_dates.append(item.time_of_request)
 
 #    ax1.plot(x, ttfb, 'o', color=ttfb_cols, zorder=1)
-    ax1.scatter(x, ttfb, 'o', color=ttfb_cols, zorder=1)
+    ax1.scatter(x, ttfb, s=len(x), 'o', color=ttfb_cols, zorder=1)
 
     ax1.set_ylabel("TTFB in Seconds", color='blue', size='small')
     ax1.set_yscale('log')
@@ -225,7 +225,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
         tl.set_color('b')
 
 #    ax2.plot(x, ttlb, '+', color=ttlb_cols, zorder=1)
-    ax2.scatter(x, ttlb, '+', color=ttlb_cols, zorder=1)
+    ax2.scatter(x, ttlb, s=len(x), '+', color=ttlb_cols, zorder=1)
     ax2.set_ylabel("TTLB in Seconds", color='red', size='small')
     ax2.set_yscale('log')
     for tl in ax2.get_yticklabels():
