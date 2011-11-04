@@ -190,17 +190,14 @@ def graph_urlmonitoring_url(request, url_id = 0):
     ax1 = fig.add_subplot(1,1,1)
     ax2 = ax1.twinx()
 
-    title = u"Title to be determined"
-    ax1.set_title(title)
-        
     s = URLMonitorRequest.objects.filter(task__url__id__exact=url_id).select_related().order_by('-task__time_of_scan', 'iteration')
     x = []
     y1 = []
     y2 = []
-    xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
-#    running_total = 0
-#    count = 0
-#    latest_date = ''
+
+    title = u"Data for " + str(s[0].task.url.url)
+    ax1.set_title(title)
+#    xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
     for item in s:
         x.append(item.time_of_request)
         y1.append(item.ttfb)
@@ -208,22 +205,18 @@ def graph_urlmonitoring_url(request, url_id = 0):
 #    ind = matplotlib.numpy.arange(len(s)) # the x locations for the groups
 
     ax1.plot(x,y1,'o', color='blue')
-#    cols = ['blue']*len(ind)
-#    ax1.bar(ind, tracks, color=cols, linewidth=0, edgecolor='w')
-    ax1.set_ylabel("y1 label", color='blue', size='small')
+    ax1.set_ylabel("TTFB in Seconds", color='blue', size='small')
     ax1.set_yscale('log')
     for tl in ax1.get_yticklabels():
         tl.set_color('b')
-#    # ax1.yaxis.major.formatter.set_powerlimits((-3,3))
 
     ax2.plot(x, y2, '+', color='red')
-    ax2.set_ylabel("y2 label", color='red', size='small')
+    ax2.set_ylabel("TTLB in Seconds", color='red', size='small')
     ax2.set_yscale('log')
     for tl in ax2.get_yticklabels():
         tl.set_color('r')
-    # ax2.yaxis.major.formatter.set_powerlimits((-3,6))
 
-    ax1.set_xticks(xticks - 0.6)
+#    ax1.set_xticks(xticks - 0.6)
     ax1.set_xticklabels(x, rotation=270, size=5, ha='center', va='top')
     ax1.set_xlabel("Time of Request")
 
