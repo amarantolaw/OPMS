@@ -233,6 +233,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
 
 #    ax1.set_xticks(xticks)
 #    ax1.set_xticklabels(x, rotation=335, size=5, ha='center', va='top')
+    ax1.set_autoscalex_on(False)
     ax1.set_xlabel("Time of Request")
 
     canvas = FigureCanvas(fig)
