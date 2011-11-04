@@ -8,10 +8,10 @@ import datetime, sys, urllib2, time
 
 class Command(LabelCommand):
     help = 'Scan through URL Monitor Target entries and generate new Tasks'
-#    option_list = NoArgsCommand.option_list + (
-#        make_option('--stop-at', action='store', dest='stopcount',
-#            default=0, help='Optional limit to the number of IP addresses to parse'),
-#    )
+    option_list = NoArgsCommand.option_list + (
+        make_option('--iterations', action='store', dest='iterations',
+            default=10, help='Specify a number of iterations each URLs is to be scanned'),
+    )
 
     def __init__(self):
         # Toggle debug statements on/off
@@ -23,16 +23,14 @@ class Command(LabelCommand):
         super(Command, self).__init__()
 
 
-    def handle_label(self, iterations = 0, comment = '', **options):
+    def handle_label(self, comment = '', **options):
         print "Scan URLs started at " + str(datetime.datetime.utcnow()) + "\n"
 
         # Some basic checking
         if comment == '':
            raise CommandError("Please specify a comment for this scan.\n\n")
-        if int(iterations) < 1:
-           raise CommandError("Please specify a comment for this scan.\n\n")
-        else:
-            iterations = int(iterations)
+
+        iterations = int(options.get('iterations', 10))
 
         # Create an error log
         self._errorlog_start('scan_urls.log')
