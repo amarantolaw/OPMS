@@ -24,7 +24,7 @@ class Command(LabelCommand):
 
 
     def handle_label(self, iterations = 0, comment = '', **options):
-        print "Generate Tasks started at " + str(datetime.datetime.utcnow()) + "\n"
+        print "Scan URLs started at " + str(datetime.datetime.utcnow()) + "\n"
 
         # Some basic checking
         if comment == '':
@@ -35,7 +35,7 @@ class Command(LabelCommand):
             iterations = int(iterations)
 
         # Create an error log
-        self._errorlog_start('generate_tasks.log')
+        self._errorlog_start('scan_urls.log')
 
         t = URLMonitorTask()
         t.comment = str(comment)
@@ -57,7 +57,7 @@ class Command(LabelCommand):
                 count += 1
         print str(count-1) + " scans performed (" + str(iterations) + " iterations of " + str(len(targets)) + " urls)"
 
-        print "\nGenerate Tasks finished at " + str(datetime.datetime.utcnow())
+        print "\nScan URLs finished at " + str(datetime.datetime.utcnow())
 
         # Write the error cache to disk
         self._error_log_save()
