@@ -34,6 +34,7 @@ class Command(LabelCommand):
 
         # Create an error log
         self._errorlog_start('scan_urls.log')
+        self._errorlog("Log started for: " + comment)
 
         t = URLMonitorTask()
         t.comment = str(comment)
@@ -53,7 +54,9 @@ class Command(LabelCommand):
                     s.status_code = e.code
                 s.save()
                 count += 1
-        print str(count-1) + " scans performed (" + str(iterations) + " iterations of " + str(len(targets)) + " urls)"
+        out_str = str(count-1) + " scans performed (" + str(iterations) + " iterations of " + str(len(targets)) + " urls)"
+        print out_str
+        self._errorlog(out_str)
 
         print "\nScan URLs finished at " + str(datetime.datetime.utcnow())
 
