@@ -192,7 +192,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
     ax1 = fig.add_subplot(1,1,1)
     ax2 = ax1.twinx()
 
-    s = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')
+    s = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('time_of_request')
     x = []
     x_dates = []
     ttfb = []
@@ -208,8 +208,8 @@ def graph_urlmonitoring_url(request, url_id = 0):
         ttfb.append(item.ttfb)
         ttlb.append(item.ttlb)
         if item.iteration == 1:
-            ttfb_cols.append('#0000ff')
-            ttlb_cols.append('#ff0000')
+            ttfb_cols.append('#0000FF')
+            ttlb_cols.append('#FF0000')
         else:
             ttfb_cols.append('#000099')
             ttlb_cols.append('#990000')
