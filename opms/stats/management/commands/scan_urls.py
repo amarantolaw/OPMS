@@ -8,7 +8,7 @@ import datetime, sys, urllib2, time
 
 class Command(LabelCommand):
     help = 'Scan through URL Monitor Target entries and generate new Tasks'
-    option_list = NoArgsCommand.option_list + (
+    option_list = LabelCommand.option_list + (
         make_option('--iterations', action='store', dest='iterations',
             default=10, help='Specify a number of iterations each URLs is to be scanned'),
     )
