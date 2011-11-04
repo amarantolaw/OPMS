@@ -219,7 +219,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
     for tl in ax2.get_yticklabels():
         tl.set_color('r')
 
-    ax1.set_xticks(xticks)
+#    ax1.set_xticks(xticks)
     ax1.set_xticklabels(x_dates, rotation=335, size=5, ha='center', va='top')
     ax1.set_xlabel("Time of Request")
 
