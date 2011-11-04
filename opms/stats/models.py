@@ -521,11 +521,14 @@ class URLMonitorTask(models.Model):
     comment = models.CharField(max_length=200, default="No Comment Set")
     completed = models.BooleanField(default=False)
 
-#    def iterations(self): # Count the number of Scans related to this task
-#        return self.
+    def iterations(self): # Count the number of Scans related to this task
+        return self.urlmonitorscan_set.count()
 
     def __unicode__(self):
-        return str(date.strftime(self.time_of_scan,"%Y-%m-%d %h:%i:%s")) + " * " + str(self.iterations) + ": " + str(self.comment)
+        if self.completed:
+            return str(self.comment) + " has completed"
+        else:
+            return str(self.comment) + " has not yet run"
 
 
 class URLMonitorScan(models.Model):

@@ -143,21 +143,23 @@ def item_detail(request, item_id):
 def summary_urlmonitoring(request):
     "Show the results for a url monitoring"
 #    return HttpResponse("Hello World. You're at the SUMMARY of URL MONITORING page.")
-    summary_data = URLMonitorRequest.objects.all().select_related().order_by('-task__time_of_scan', 'iteration')
-    return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,})
+#    summary_data = URLMonitorRequest.objects.all().select_related().order_by('-task__time_of_scan', 'iteration')
+#    url_data_raw = URLMonitorTask.objects.all().order_by('url', '-time_of_scan').select_related()
+    url_data = []
+#    for task in url_data_raw:
+
+    return render_to_response('stats/reports/url_summary.html', {'url_data': url_data,})
 
 
 def urlmonitoring_task(request, task_id):
     "Show the results for a url monitoring of a specific task"
-#    return HttpResponse("Hello World. You're at the SUMMARY of URL MONITORING page.")
-    summary_data = URLMonitorRequest.objects.filter(task__id__exact=task_id).select_related().order_by('-task__time_of_scan', 'iteration')
+    summary_data = URLMonitorScan.objects.filter(task__id__exact=task_id).select_related().order_by('-url__url', 'iteration')
     return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,})
 
 
 def urlmonitoring_url(request, url_id):
     "Show the results for a url monitoring of specific url"
-#    return HttpResponse("Hello World. You're at the SUMMARY of URL MONITORING page.")
-    summary_data = URLMonitorRequest.objects.filter(task__url__id__exact=url_id).select_related().order_by('-task__time_of_scan', 'iteration')
+    summary_data = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request', 'iteration')
     return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,'url_id':url_id})
 
 

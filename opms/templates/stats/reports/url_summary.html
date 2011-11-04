@@ -42,8 +42,8 @@ $(document).ready(function()
 );
 </script>
 {% if url_id %}
-<p><img src="/stats/graph/urlmonitoring/url_by_time/url_id.png" /><br />
-    <a href="/stats/graph/urlmonitoring/url_by_time/url_id.png?dpi=300">[Print Version]</a> <a href="/stats/graph/urlmonitoring/url_by_time/url_id.png?dpi=600">[High Resolution]</a></p>
+<p><img src="/stats/graph/urlmonitoring/url_by_time/{{ url_id }}.png" /><br />
+    <a href="/stats/graph/urlmonitoring/url_by_time/{{ url_id }}.png?dpi=300">[Print Version]</a> <a href="/stats/graph/urlmonitoring/url_by_time/{{ url_id }}.png?dpi=600">[High Resolution]</a></p>
 {% endif %}
 
 <table id="summaryTable" class="tablesorter">
@@ -61,7 +61,7 @@ $(document).ready(function()
     <tbody>
     {% for row in summary_data %}
         <tr>
-            <td><a href="/stats/report/urlmonitoring/task/{{ row.task.id }}">{{ row.task.time_of_scan|date:"Y-m-d h:m:s" }}</a></td>
+            <td><a href="/stats/report/urlmonitoring/task/{{ row.task.id }}">{{ row.task.time_of_scan|date:"Y-m-d h:i:s" }}</a></td>
             <td>{{ row.task.comment }}</td>
 {#            <td>{{ row.week_ending|date:"Y-m-d" }}</td>#}
             <td><a href="/stats/report/urlmonitoring/url/{{ row.task.url.id }}">{{ row.task.url.url }}</a></td>
