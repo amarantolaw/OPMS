@@ -208,11 +208,11 @@ def graph_urlmonitoring_url(request, url_id = 0):
         ttfb.append(item.ttfb)
         ttlb.append(item.ttlb)
         if item.iteration == 1:
-            ttfb_cols.append((0,0,1,1))
-            ttlb_cols.append((1,0,0,1))
+            ttfb_cols.append('#0000ff')
+            ttlb_cols.append('#ff0000')
         else:
-            ttfb_cols.append((0,0,0.5,1))
-            ttlb_cols.append((0.5,0,0,1))
+            ttfb_cols.append('#000099')
+            ttlb_cols.append('#990000')
         if count % 10 == 0:
             x_dates.append(item.time_of_request)
 
