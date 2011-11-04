@@ -190,7 +190,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
 
     fig = Figure(figsize=(9,5), dpi=resolution, facecolor='white', edgecolor='white')
     ax1 = fig.add_subplot(1,1,1)
-    ax2 = ax1.twinx()
+#    ax2 = ax1.twinx()
 
     s = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('time_of_request')
     x = []
@@ -225,14 +225,14 @@ def graph_urlmonitoring_url(request, url_id = 0):
         tl.set_color('b')
 
 #    ax2.plot(x, ttlb, '+', color=ttlb_cols, zorder=1)
-    ax2.scatter(x, ttlb, marker='+', color=ttlb_cols)
-    ax2.set_ylabel("TTLB in Seconds", color='red', size='small')
-    ax2.set_yscale('log')
-    for tl in ax2.get_yticklabels():
-        tl.set_color('r')
+#    ax2.scatter(x, ttlb, marker='+', color=ttlb_cols)
+#    ax2.set_ylabel("TTLB in Seconds", color='red', size='small')
+#    ax2.set_yscale('log')
+#    for tl in ax2.get_yticklabels():
+#        tl.set_color('r')
 
 #    ax1.set_xticks(xticks)
-    ax1.set_xticklabels(x, rotation=335, size=5, ha='center', va='top')
+#    ax1.set_xticklabels(x, rotation=335, size=5, ha='center', va='top')
     ax1.set_xlabel("Time of Request")
 
     canvas = FigureCanvas(fig)
