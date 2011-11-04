@@ -221,8 +221,8 @@ def graph_urlmonitoring_url(request, url_id = 0):
         tl.set_color('r')
     # ax2.yaxis.major.formatter.set_powerlimits((-3,6))
 
-    ax1.set_xticks(xticks - 0.6)
-    ax1.set_xticklabels(dates, rotation=270, size=5, ha='center', va='top')
+#    ax1.set_xticks(xticks - 0.6)
+#    ax1.set_xticklabels(dates, rotation=270, size=5, ha='center', va='top')
     ax1.set_xlabel("Time of Request")
 
     canvas = FigureCanvas(fig)
