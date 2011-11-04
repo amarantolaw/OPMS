@@ -198,7 +198,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
     y1 = []
     y2 = []
 
-    title = u"Data for " + str(s[0].task.url.url)
+    title = u"Data for " + str(s[0].url.url)
     ax1.set_title(title)
 #    xticks = matplotlib.numpy.arange(1,len(x),10) # Only show the date every 10 values
     for count, item in enumerate(s):

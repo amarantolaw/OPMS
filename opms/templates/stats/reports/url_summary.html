@@ -49,7 +49,6 @@ $(document).ready(function()
 <table id="summaryTable" class="tablesorter">
     <thead>
         <tr>
-            <th>Time of Scan</th>
             <th>Task Comment</th>
             <th>URL</th>
             <th>Iteration</th>
@@ -61,13 +60,11 @@ $(document).ready(function()
     <tbody>
     {% for row in summary_data %}
         <tr>
-            <td><a href="/stats/report/urlmonitoring/task/{{ row.task.id }}">{{ row.task.time_of_scan|date:"Y-m-d h:i:s" }}</a></td>
-            <td>{{ row.task.comment }}</td>
-{#            <td>{{ row.week_ending|date:"Y-m-d" }}</td>#}
+            <td><a href="/stats/report/urlmonitoring/task/{{ row.task.id }}">{{ row.task.id }}</a>:{{ row.task.comment }}</td>
             <td><a href="/stats/report/urlmonitoring/url/{{ row.task.url.id }}">{{ row.task.url.url }}</a></td>
-{#            <td class="{% if row.total_track_downloads_change >= 0 %}positive{% else %}negative{% endif %}">{{ row.total_track_downloads_change }}</td>#}
             <td>{{ row.iteration }}</td>
-            <td>{{ row.time_of_request }}</td>
+            <td>{{ row.time_of_request|date:"Y-m-d h:i:s" }}</td>
+            {#            <td class="{% if row.total_track_downloads_change >= 0 %}positive{% else %}negative{% endif %}">{{ row.total_track_downloads_change }}</td>#}
             <td>{{ row.ttfb }}</td>
             <td>{{ row.ttlb }}</td>
         </tr>
