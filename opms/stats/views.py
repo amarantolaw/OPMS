@@ -178,7 +178,7 @@ def feed_detail_cc(request):
 ######
 
 def graph_urlmonitoring_url(request, url_id = 0):
-    "Generate the Apple summary chart. Allow for a high resolution version to be produced"
+    "Generate a plot of request times over a series of scans. Allow for a high resolution version to be produced"
     try:
         resolution = int(request.GET.get('dpi', 100))
     except ValueError:
@@ -192,7 +192,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
     ax1 = fig.add_subplot(1,1,1)
     ax2 = ax1.twinx()
 
-    s = URLMonitorRequest.objects.filter(task__url__id__exact=url_id).select_related().order_by('-task__time_of_scan', 'iteration')
+    s = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')
     x = []
     x_dates = []
     y1 = []
