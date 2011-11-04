@@ -518,24 +518,27 @@ class URLMonitorTarget(models.Model):
 
 
 class URLMonitorTask(models.Model):
-    comment = models.CharField(max_length=200)
-    url = models.ForeignKey(URLMonitorTarget)
-    iterations = models.SmallIntegerField()
-    time_of_scan = models.DateTimeField(null=True)
+    comment = models.CharField(max_length=200, default="No Comment Set")
+    completed = models.BooleanField(default=False)
+
+#    def iterations(self): # Count the number of Scans related to this task
+#        return self.
 
     def __unicode__(self):
-        return str(self.url.url) + " * " + str(self.iterations) + ": " + str(self.comment)
+        return str(date.strftime(self.time_of_scan,"%Y-%m-%d %h:%i:%s")) + " * " + str(self.iterations) + ": " + str(self.comment)
 
 
-class URLMonitorRequest(models.Model):
+class URLMonitorScan(models.Model):
     task = models.ForeignKey(URLMonitorTask)
-    ttfb = models.FloatField()
-    ttlb = models.FloatField()
+    url = models.ForeignKey(URLMonitorTarget)
     iteration = models.SmallIntegerField()
-    time_of_request = models.DateTimeField()
+    status_code = models.SmallIntegerField(null=True)
+    ttfb = models.FloatField(null=True)
+    ttlb = models.FloatField(null=True)
+    time_of_request = models.DateTimeField(null=True)
 
     def __unicode__(self):
-        return str(date.strftime(self.time_of_request,"%Y-%m-%d")) + ": "+ str(self.task.url.url) +\
+        return str(date.strftime(self.time_of_request,"%Y-%m-%d %h:%i:%s")) + ": "+ str(self.url.url) +\
                " #" + str(self.iteration) + ": TTFB:" + str(self.ttfb)
 
 
