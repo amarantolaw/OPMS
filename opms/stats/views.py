@@ -153,6 +153,7 @@ def urlmonitoring_task(request, task_id):
     summary_data = URLMonitorRequest.objects.filter(task__id__exact=task_id).select_related().order_by('-task__time_of_scan', 'iteration')
     return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,})
 
+
 def urlmonitoring_url(request, url_id):
     "Show the results for a url monitoring of specific url"
 #    return HttpResponse("Hello World. You're at the SUMMARY of URL MONITORING page.")
@@ -173,6 +174,65 @@ def feed_detail_cc(request):
 # =============================  GRAPHS AND IMAGES  ===============================
 # =================================================================================
 ######
+
+def graph_urlmonitoring_url(request, url_id = 0):
+    "Generate the Apple summary chart. Allow for a high resolution version to be produced"
+    try:
+        resolution = int(request.GET.get('dpi', 100))
+    except ValueError:
+        resolution = 100
+    if resolution > 600:
+        resolution = 600
+    elif resolution < 100:
+        resolution = 100
+
+    fig = Figure(figsize=(9,5), dpi=resolution, facecolor='white', edgecolor='white')
+    ax1 = fig.add_subplot(1,1,1)
+    ax2 = ax1.twinx()
+
+    title = u"Title to be determined"
+    ax1.set_title(title)
+        
+    s = URLMonitorRequest.objects.filter(task__url__id__exact=url_id).select_related().order_by('-task__time_of_scan', 'iteration')
+    x = []
+    y1 = []
+    y2 = []
+#    xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
+#    running_total = 0
+#    count = 0
+#    latest_date = ''
+    for item in s:
+        x.append(item.time_of_request)
+        y1.append(item.ttfb)
+        y2.append(item.ttlb)
+#    ind = matplotlib.numpy.arange(len(s)) # the x locations for the groups
+
+    ax1.plot(x,y1,'o')
+#    cols = ['blue']*len(ind)
+#    ax1.bar(ind, tracks, color=cols, linewidth=0, edgecolor='w')
+    ax1.set_ylabel("y1 label", color='blue', size='small')
+    for tl in ax1.get_yticklabels():
+        tl.set_color('b')
+#    # ax1.yaxis.major.formatter.set_powerlimits((-3,3))
+
+    ax2.plot(x, y2, '+')
+    ax2.set_ylabel("y2 label", color='red', size='small')
+    for tl in ax2.get_yticklabels():
+        tl.set_color('r')
+    # ax2.yaxis.major.formatter.set_powerlimits((-3,6))
+
+    ax1.set_xticks(xticks - 0.6)
+    ax1.set_xticklabels(dates, rotation=270, size=5, ha='center', va='top')
+    ax1.set_xlabel("Time of Request")
+
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response)
+    return response
+
+
+
+
 
 def graph_apple_summary_totals(request):
     "Generate the Apple summary chart. Allow for a high resolution version to be produced"
