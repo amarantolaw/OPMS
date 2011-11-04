@@ -159,7 +159,7 @@ def urlmonitoring_task(request, task_id):
 
 def urlmonitoring_url(request, url_id):
     "Show the results for a url monitoring of specific url"
-    summary_data = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request', 'iteration')
+    summary_data = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')
     return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,'url_id':url_id})
 
 
