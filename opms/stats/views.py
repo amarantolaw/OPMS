@@ -195,26 +195,36 @@ def graph_urlmonitoring_url(request, url_id = 0):
     s = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')
     x = []
     x_dates = []
-    y1 = []
-    y2 = []
+    ttfb1 = []
+    ttfbx = []
+    ttlb1 = []
+    ttlbx = []
 
     title = u"Data for " + str(s[0].url.url)
     ax1.set_title(title)
 #    xticks = matplotlib.numpy.arange(1,len(x),10) # Only show the date every 10 values
     for count, item in enumerate(s):
         x.append(item.time_of_request)
-        y1.append(item.ttfb)
-        y2.append(item.ttlb)
+        if item.iteration == 1:
+            ttfb1.append(item.ttfb)
+        else:
+            ttfbx.append(item.ttfb)
+        if item.iteration == 1:
+            ttlb1.append(item.ttlb)
+        else:
+            ttlbx.append(item.ttlb)
         if count % 10 == 0:
             x_dates.append(item.time_of_request)
 
-    ax1.plot(x,y1,'o', color='blue')
+    ax1.plot(x,ttfb1,'o', color=(0,0,1,1))
+#    ax1.plot(x,ttfbx,'o', color=(0,0,0.5,1))
     ax1.set_ylabel("TTFB in Seconds", color='blue', size='small')
     ax1.set_yscale('log')
     for tl in ax1.get_yticklabels():
         tl.set_color('b')
 
-    ax2.plot(x, y2, '+', color='red')
+    ax2.plot(x, ttlb1, '+', color=(1,0,0,1))
+#    ax2.plot(x, ttlbx, '+', color=(0.5,0,0,1))
     ax2.set_ylabel("TTLB in Seconds", color='red', size='small')
     ax2.set_yscale('log')
     for tl in ax2.get_yticklabels():

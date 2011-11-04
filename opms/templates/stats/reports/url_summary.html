@@ -64,8 +64,8 @@ $(document).ready(function()
             <td><a href="/stats/report/urlmonitoring/url/{{ row.url.id }}">{{ row.url.url }}</a></td>
             <td>{{ row.iteration }}</td>
             <td>{{ row.time_of_request|date:"Y-m-d h:i:s" }}</td>
-            <td class="{% if row.ttfb < 1 %}positive{% else %}negative{% endif %}">{{ row.ttfb }}</td>
-            <td class="{% if row.ttlb < 1 %}positive{% else %}negative{% endif %}">{{ row.ttlb }}</td>
+            <td class="{% if row.ttfb < 0.5 %}positive{% else %}negative{% endif %}">{{ row.ttfb }}</td>
+            <td class="{% if row.ttlb < 0.5 %}positive{% else %}negative{% endif %}">{{ row.ttlb }}</td>
         </tr>
     {% endfor %}
     </tbody>
