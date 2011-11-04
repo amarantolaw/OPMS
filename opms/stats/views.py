@@ -197,7 +197,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
     x = []
     y1 = []
     y2 = []
-#    xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
+    xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
 #    running_total = 0
 #    count = 0
 #    latest_date = ''
@@ -223,7 +223,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
         tl.set_color('r')
     # ax2.yaxis.major.formatter.set_powerlimits((-3,6))
 
-#    ax1.set_xticks(xticks - 0.6)
+    ax1.set_xticks(xticks - 0.6)
     ax1.set_xticklabels(x, rotation=270, size=5, ha='center', va='top')
     ax1.set_xlabel("Time of Request")
 
