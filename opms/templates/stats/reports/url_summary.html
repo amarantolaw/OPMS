@@ -41,8 +41,10 @@ $(document).ready(function()
     }
 );
 </script>
-{#<p><img src="/stats/graph/apple/summary-total.png" /><br />#}
-{#    <a href="/stats/graph/apple/summary-total.png?dpi=300">[Print Version]</a> <a href="/stats/graph/apple/summary-total.png?dpi=600">[High Resolution]</a></p>#}
+{% if url_id %}
+<p><img src="/stats/graph/urlmonitoring/url_by_time/url_id.png" /><br />
+    <a href="/stats/graph/urlmonitoring/url_by_time/url_id.png?dpi=300">[Print Version]</a> <a href="/stats/graph/urlmonitoring/url_by_time/url_id.png?dpi=600">[High Resolution]</a></p>
+{% endif %}
 
 <table id="summaryTable" class="tablesorter">
     <thead>

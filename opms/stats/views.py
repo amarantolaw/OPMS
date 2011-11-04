@@ -158,7 +158,7 @@ def urlmonitoring_url(request, url_id):
     "Show the results for a url monitoring of specific url"
 #    return HttpResponse("Hello World. You're at the SUMMARY of URL MONITORING page.")
     summary_data = URLMonitorRequest.objects.filter(task__url__id__exact=url_id).select_related().order_by('-task__time_of_scan', 'iteration')
-    return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,})
+    return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,'url_id':url_id})
 
 
 # TEMP FUNCTIONS
@@ -198,14 +198,13 @@ def graph_urlmonitoring_url(request, url_id = 0):
 
     title = u"Data for " + str(s[0].task.url.url)
     ax1.set_title(title)
-    xticks = matplotlib.numpy.arange(1,len(x),10) # Only show the date every 10 values
+#    xticks = matplotlib.numpy.arange(1,len(x),10) # Only show the date every 10 values
     for count, item in enumerate(s):
         x.append(item.time_of_request)
         y1.append(item.ttfb)
         y2.append(item.ttlb)
         if count % 10 == 0:
             x_dates.append(item.time_of_request)
-#    ind = matplotlib.numpy.arange(len(s)) # the x locations for the groups
 
     ax1.plot(x,y1,'o', color='blue')
     ax1.set_ylabel("TTFB in Seconds", color='blue', size='small')
@@ -220,7 +219,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
         tl.set_color('r')
 
 #    ax1.set_xticks(xticks)
-    ax1.set_xticklabels(x_dates, rotation=335, size=5, ha='center', va='top')
+#    ax1.set_xticklabels(x_dates, rotation=335, size=5, ha='center', va='top')
     ax1.set_xlabel("Time of Request")
 
     canvas = FigureCanvas(fig)
