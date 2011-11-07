@@ -52,6 +52,7 @@ class Command(LabelCommand):
                     s.status_code, s.time_of_request, s.ttfb, s.ttlb = self.scan_url(target.url)
                 except urllib2.HTTPError, e:
                     s.status_code = e.code
+                    s.time_of_request = datetime.datetime.utcnow()
                 s.save()
                 count += 1
         out_str = str(count-1) + " scans performed (" + str(iterations) + " iterations of " + str(len(targets)) + " urls)"

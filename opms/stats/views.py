@@ -260,6 +260,8 @@ def graph_urlmonitoring_url(request, url_id = 0):
 
 #    xticks = matplotlib.numpy.arange(1,len(x),10) # Only show the date every 10 values
     for count, item in enumerate(s):
+        if item.time_of_request == None:
+            continue # Skip data where we failed to write a time of request...
         x.append(item.time_of_request)
         try:
             ttfb.append(float(item.ttfb))
