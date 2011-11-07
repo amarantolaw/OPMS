@@ -214,8 +214,8 @@ def graph_urlmonitoring_url(request, url_id = 0):
             ttfb_cols.append('#0000FF')
             ttlb_cols.append('#FF0000')
         else:
-            ttfb_cols.append('#000099')
-            ttlb_cols.append('#990000')
+            ttfb_cols.append('#000066')
+            ttlb_cols.append('#660000')
 #        if count % 10 == 0:
 #            x_dates.append(item.time_of_request)
 
@@ -223,18 +223,16 @@ def graph_urlmonitoring_url(request, url_id = 0):
     N = len(x)
     xind = np.arange(N)
 
-    def format_date(x, pos=None):
-        thisind = np.clip(int(x+0.5), 0, N-1)
+    def format_date(xin, pos=None):
+        thisind = np.clip(int(xin+0.5), 0, N-1)
         return x[thisind].strftime('%Y-%m-%d %h:%i:%s')
 
-#    ax1.plot(x, ttfb, 'o', color=ttfb_cols, zorder=1)
     ax1.scatter(xind, ttfb, marker='o', color=ttfb_cols)
     ax1.set_ylabel("TTFB in Seconds", color='blue', size='small')
     ax1.set_yscale('log')
     for tl in ax1.get_yticklabels():
         tl.set_color('b')
 
-#    ax2.plot(x, ttlb, '+', color=ttlb_cols, zorder=1)
     ax2.scatter(xind, ttlb, marker='+', color=ttlb_cols)
     ax2.set_ylabel("TTLB in Seconds", color='red', size='small')
     ax2.set_yscale('log')
@@ -244,7 +242,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
 #    ax1.set_xticks(xticks)
 #    ax1.set_xticklabels(x, rotation=335, size=5, ha='center', va='top')
     ax1.xaxis.set_major_formatter(ticker.FuncFormatter(format_date))
-    ax1.set_autoscalex_on(False)
+#    ax1.set_autoscalex_on(False)
     ax1.set_xlabel("Time of Request")
     fig.autofmt_xdate()
 
