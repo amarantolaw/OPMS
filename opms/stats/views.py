@@ -166,7 +166,7 @@ def summary_urlmonitoring(request):
             for task in tasks:
                 scan_count = int(
                     # This is SLOW!!!
-                    task.urlmonitorscan_set.filter(url__id__exact=url.id).count()
+                    task.urlmonitorscan_set.filter(url__exact=url.id).count()
                 )
 #                if scan_count > 0:
 #                    row_data.append('<a href="">' + str(scan_count) + '</a>')
