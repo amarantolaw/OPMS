@@ -541,7 +541,7 @@ class URLMonitorScan(models.Model):
     time_of_request = models.DateTimeField(null=True)
 
     def __unicode__(self):
-        return str(date.strftime(self.time_of_request,"%Y-%m-%d %h:%i:%s")) + ": "+ str(self.url.url) +\
+        return str(date.strftime(self.time_of_request,"%Y-%m-%d %H:%i:%s")) + ": "+ str(self.url.url) +\
                " #" + str(self.iteration) + ": TTFB:" + str(self.ttfb)
 
 
