@@ -129,6 +129,23 @@ def feed_detail(request, partial_guid):
 
 
 
+def summary_items(request):
+    #listing = TrackCount.merged.psuedo_feeds()
+    #return render_to_response('stats/reports/items.html',{'listing':listing})
+    "Show the results for all items"
+    return HttpResponse("Hello World. You're at the ITEMS LISTING page.")
+
+
+
+def item_detail(request, item_id):
+    "Show the results for a given item"
+    return HttpResponse("Hello World. You're at the ITEM DETAIL page.")
+
+
+
+
+
+
 def summary_urlmonitoring(request):
     "Show the results for a url monitoring"
     # Create a pivot table for Tasks vs URLs
@@ -140,9 +157,6 @@ def summary_urlmonitoring(request):
 
     tasks = URLMonitorTask.objects.all().order_by('id')
     urls = URLMonitorTarget.objects.all().order_by('url')
-    #    i = TrackCount.merged.feed_items(partial_guid)
-    #    w = TrackCount.merged.feed_weeks(partial_guid)
-    #    c = TrackCount.merged.feed_counts(partial_guid, orientation)
 
 
     summary_data = []
@@ -156,9 +170,9 @@ def summary_urlmonitoring(request):
                     .filter(task__id__exact=task.id)\
                     .count()
                 )
-                #                if scan_count > 0:
-                #                    row_data.append('<a href="">' + str(scan_count) + '</a>')
-                #                else:
+#                if scan_count > 0:
+#                    row_data.append('<a href="">' + str(scan_count) + '</a>')
+#                else:
                 row_data.append(str(scan_count))
             summary_data.append({
                 'url':'<a href="">' + str(url.url) + '</a>',
@@ -174,18 +188,6 @@ def summary_urlmonitoring(request):
 
     return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,})
 
-
-def summary_items(request):
-    #listing = TrackCount.merged.psuedo_feeds()
-    #return render_to_response('stats/reports/items.html',{'listing':listing})
-    "Show the results for all items"
-    return HttpResponse("Hello World. You're at the ITEMS LISTING page.")
-
-
-
-def item_detail(request, item_id):
-    "Show the results for a given item"
-    return HttpResponse("Hello World. You're at the ITEM DETAIL page.")
 
 
 def urlmonitoring_task(request, task_id):

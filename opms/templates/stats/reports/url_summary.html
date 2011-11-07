@@ -32,7 +32,40 @@
 {% block content %}
 <h2>URL Reporting</h2>
 {% if summary_data %}
-    <p>Summary data here</p>
+<script>
+$(document).ready(function()
+    {
+        $("#summaryTable").tablesorter( {sortList: [[0,1]]} );
+    }
+);
+</script>
+
+<h3>Data table</h3>
+<p>Display with columns of: <a href="?orientation=0">Tasks</a> or <a href="?orientation=1">URLs</a></p>
+<table id="summaryTable" class="tablesorter">
+    <thead>
+        {% for row in summary_data %}
+        {% if forloop.counter0 == 0 %}
+        <tr>
+            <th>{{ row.url|default:"" }}</th>
+            {% for item in row.data %}
+            <th>{{ item }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% endif %}
+        {% if forloop.counter0 > 0 %}
+        <tr>
+            <td>{{ row.url }}</td>
+            {% for item in row.data %}
+            <td>{{ item }}</td>
+            {% endfor %}
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
 {% endif %}
 
 {% if scan_data %}
@@ -75,8 +108,6 @@ $(document).ready(function()
     {% endfor %}
     </tbody>
 </table>
-{% else %}
-    <p>No scan data to display here</p>
 {% endif %}
 
 {% endblock %}
