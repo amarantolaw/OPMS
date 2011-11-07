@@ -155,7 +155,7 @@ def summary_urlmonitoring(request):
     except ValueError:
         orientation = 0
 
-    tasks = URLMonitorTask.objects.all().order_by('id').select_related()
+    tasks = URLMonitorTask.objects.all().order_by('id').select_related('urlmonitorscan_set')
     urls = URLMonitorTarget.objects.all().order_by('url')
 
 
@@ -165,11 +165,8 @@ def summary_urlmonitoring(request):
             row_data = []
             for task in tasks:
                 scan_count = int(
+                    # This is SLOW!!!
                     task.urlmonitorscan_set.filter(url__id__exact=url.id).count()
-#                    URLMonitorScan.objects\
-#                    .filter(url__id__exact=url.id)\
-#                    .filter(task__id__exact=task.id)\
-#                    .count()
                 )
 #                if scan_count > 0:
 #                    row_data.append('<a href="">' + str(scan_count) + '</a>')
