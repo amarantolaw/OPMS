@@ -225,7 +225,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
 
     def format_date(xin, pos=None):
         thisind = np.clip(int(xin+0.5), 0, N-1)
-        return x[thisind].strftime('%Y-%m-%d %h:%i:%s')
+        return x[thisind].strftime("%Y-%m-%d")
 
     ax1.scatter(xind, ttfb, marker='o', color=ttfb_cols)
     ax1.set_ylabel("TTFB in Seconds", color='blue', size='small')
@@ -239,7 +239,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
     for tl in ax2.get_yticklabels():
         tl.set_color('r')
 
-    ax1.set_xticklabels(xind, rotation=335, size=5, ha='center', va='top')
+    ax1.set_xticklabels(xind, rotation=300, size=5, ha='center', va='top')
 #    ax1.set_autoscalex_on(False)
     ax1.xaxis.set_major_formatter(ticker.FuncFormatter(format_date))
     ax1.set_xlabel("Time of Request")
