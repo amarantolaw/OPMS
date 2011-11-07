@@ -263,11 +263,11 @@ def graph_urlmonitoring_url(request, url_id = 0):
         x.append(item.time_of_request)
         try:
             ttfb.append(float(item.ttfb))
-        except ValueError:
+        except ValueError, TypeError:
             ttfb.append(float(0.0))
         try:
             ttlb.append(float(item.ttlb))
-        except ValueError:
+        except ValueError, TypeError:
             ttlb.append(float(0.0))
         if item.iteration == 1:
             ttfb_cols.append('#0000FF')
