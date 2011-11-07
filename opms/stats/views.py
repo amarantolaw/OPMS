@@ -2,10 +2,12 @@ from django.shortcuts import render_to_response
 from django.http import Http404, HttpResponse
 from stats.models import *
 
-import array
+#import array
 import pylab
+import numpy as np
 import matplotlib
 import matplotlib.dates
+import matplotlib.ticker as ticker
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
@@ -217,15 +219,23 @@ def graph_urlmonitoring_url(request, url_id = 0):
 #        if count % 10 == 0:
 #            x_dates.append(item.time_of_request)
 
+    # Generate the x axis manually.
+    N = len(x)
+    xind = np.arange(N)
+
+    def format_date(x, pos=None):
+        thisind = np.clip(int(x+0.5), 0, N-1)
+        return x[thisind].strftime('%Y-%m-%d %h:%i:%s')
+
 #    ax1.plot(x, ttfb, 'o', color=ttfb_cols, zorder=1)
-    ax1.scatter(x, ttfb, marker='o', color=ttfb_cols)
+    ax1.scatter(xind, ttfb, marker='o', color=ttfb_cols)
     ax1.set_ylabel("TTFB in Seconds", color='blue', size='small')
     ax1.set_yscale('log')
     for tl in ax1.get_yticklabels():
         tl.set_color('b')
 
 #    ax2.plot(x, ttlb, '+', color=ttlb_cols, zorder=1)
-    ax2.scatter(x, ttlb, marker='+', color=ttlb_cols)
+    ax2.scatter(xind, ttlb, marker='+', color=ttlb_cols)
     ax2.set_ylabel("TTLB in Seconds", color='red', size='small')
     ax2.set_yscale('log')
     for tl in ax2.get_yticklabels():
@@ -233,8 +243,10 @@ def graph_urlmonitoring_url(request, url_id = 0):
 
 #    ax1.set_xticks(xticks)
 #    ax1.set_xticklabels(x, rotation=335, size=5, ha='center', va='top')
+    ax1.xaxis.set_major_formatter(ticker.FuncFormatter(format_date))
     ax1.set_autoscalex_on(False)
     ax1.set_xlabel("Time of Request")
+    fig.autofmt_xdate()
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
