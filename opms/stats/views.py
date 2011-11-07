@@ -202,7 +202,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
     ttfb_cols = []
     ttlb_cols = []
 
-    title = u"Data for " + str(s[0].url.url)
+    title = u"Data for " + str(s[0].url.url)[:100]
     ax1.set_title(title)
 
 #    xticks = matplotlib.numpy.arange(1,len(x),10) # Only show the date every 10 values
