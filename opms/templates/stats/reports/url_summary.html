@@ -40,6 +40,7 @@
 </ul>
 {% endif %}
 
+{# THIS SECTION SHOULD BE REDUNDANT AS RUNNING IT IS PAIN #}
 {% if summary_data %}
 <script>
 $(document).ready(function()
@@ -76,6 +77,7 @@ $(document).ready(function()
     </tbody>
 </table>
 {% endif %}
+{# END OF REDUNDANT SECTION#}
 
 {% if scan_data %}
 <h3>Data visualisation</h3>
@@ -86,8 +88,10 @@ $(document).ready(function()
     }
 );
 </script>
+
 {% if url_id %}
-<p><img src="/stats/graph/urlmonitoring/url_by_time/{{ url_id }}.png" /><br />
+<p>Legend: Blue Dots = TTFB; Red Crosses = TTLB; Lightest colours represent the first iteration of each scan<br />
+    <img src="/stats/graph/urlmonitoring/url_by_time/{{ url_id }}.png" /><br />
     <a href="/stats/graph/urlmonitoring/url_by_time/{{ url_id }}.png?dpi=300">[Print Version]</a> <a href="/stats/graph/urlmonitoring/url_by_time/{{ url_id }}.png?dpi=600">[High Resolution]</a></p>
 {% endif %}
 
