@@ -148,43 +148,57 @@ def item_detail(request, item_id):
 
 def summary_urlmonitoring(request):
     "Show the results for a url monitoring"
+    # List the URLS and the number of scans for that URL
+    summary_listing = []
+
+    urls = URLMonitorTarget.objects.all().order_by('url')
+    for url in urls:
+        summary_listing.append(
+            '<a href="/stats/report/urlmonitoring/url/' + str(url.id) + '">' + str(url.url) + '</a> (' +\
+            str(url.urlmonitorscan_set.count()) + ')'
+        )
+    return render_to_response('stats/reports/url_summary.html', {'summary_listing': summary_listing,})
+
+
+
+
     # Create a pivot table for Tasks vs URLs
     # Orientation 0 is tasks on x, urls on y. Anything else is urls on x, tasks on y.
-    try:
-        orientation = int(request.GET.get('orientation', 0))
-    except ValueError:
-        orientation = 0
-
-    tasks = URLMonitorTask.objects.all().order_by('id').select_related('urlmonitorscan_set')
-    urls = URLMonitorTarget.objects.all().order_by('url')
-
-
-    summary_data = []
-    if orientation == 0:
-        for url in urls:
-            row_data = []
-            for task in tasks:
-                scan_count = int(
-                    # This is SLOW!!!
-                    task.urlmonitorscan_set.filter(url__exact=url.id).count()
-                )
-#                if scan_count > 0:
-#                    row_data.append('<a href="">' + str(scan_count) + '</a>')
-#                else:
-                row_data.append(str(scan_count))
-            summary_data.append({
-                'url':'<a href="/stats/report/urlmonitoring/url/' + str(url.id) + '">' + str(url.url) + '</a>',
-                'data':row_data,
-                })
-
-
-    # Put column headers and totals into listing array - values, then headings
-    row_data = []
-    for task in tasks:
-        row_data.append('<a href="/stats/report/urlmonitoring/task/' + str(task.id) + '">' + str(task.comment) + '</a>')
-    summary_data.insert(0,{'url':'', 'data':row_data,})
-
-    return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,})
+#    try:
+#        orientation = int(request.GET.get('orientation', 0))
+#    except ValueError:
+#        orientation = 0
+#
+#    tasks = URLMonitorTask.objects.all().order_by('id').select_related('urlmonitorscan_set')
+#    urls = URLMonitorTarget.objects.all().order_by('url')
+#
+#
+#    summary_data = []
+#    if orientation == 0:
+#        for url in urls:
+#            row_data = []
+#            for task in tasks:
+#                scan_count = int(
+#                    # This is SLOW!!!
+#                    task.urlmonitorscan_set.filter(url__exact=url.id).count()
+#                )
+##                if scan_count > 0:
+##                    row_data.append('<a href="">' + str(scan_count) + '</a>')
+##                else:
+#                row_data.append(str(scan_count))
+#            summary_data.append({
+#                'url':'<a href="/stats/report/urlmonitoring/url/' + str(url.id) + '">' + str(url.url) + '</a>',
+#                'data':row_data,
+#                })
+#
+#
+#    # Put column headers and totals into listing array - values, then headings
+#    row_data = []
+#    for task in tasks:
+#        row_data.append('<a href="/stats/report/urlmonitoring/task/' + str(task.id) + '">' + str(task.comment) + '</a>')
+#    summary_data.insert(0,{'url':'', 'data':row_data,})
+#
+#    return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,})
 
 
 
