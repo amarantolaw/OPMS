@@ -190,7 +190,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
 
     fig = Figure(figsize=(9,5), dpi=resolution, facecolor='white', edgecolor='white')
     ax1 = fig.add_subplot(1,1,1)
-#    ax2 = ax1.twinx()
+    ax2 = ax1.twinx()
 
     s = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('time_of_request')
     x = []
