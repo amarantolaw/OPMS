@@ -129,6 +129,52 @@ def feed_detail(request, partial_guid):
 
 
 
+def summary_urlmonitoring(request):
+    "Show the results for a url monitoring"
+    # Create a pivot table for Tasks vs URLs
+    # Orientation 0 is tasks on x, urls on y. Anything else is urls on x, tasks on y.
+    try:
+        orientation = int(request.GET.get('orientation', 0))
+    except ValueError:
+        orientation = 0
+
+    tasks = URLMonitorTask.objects.all().order_by('id')
+    urls = URLMonitorTarget.objects.all().order_by('url')
+    #    i = TrackCount.merged.feed_items(partial_guid)
+    #    w = TrackCount.merged.feed_weeks(partial_guid)
+    #    c = TrackCount.merged.feed_counts(partial_guid, orientation)
+
+
+    summary_data = []
+    if orientation == 0:
+        for url in urls:
+            row_data = []
+            for task in tasks:
+                scan_count = int(
+                    URLMonitorScan.objects\
+                    .filter(url__id__exact=url.id)\
+                    .filter(task__id__exact=task.id)\
+                    .count()
+                )
+                #                if scan_count > 0:
+                #                    row_data.append('<a href="">' + str(scan_count) + '</a>')
+                #                else:
+                row_data.append(str(scan_count))
+            summary_data.append({
+                'url':'<a href="">' + str(url.url) + '</a>',
+                'data':row_data,
+                })
+
+
+    # Put column headers and totals into listing array - values, then headings
+    row_data = []
+    for task in tasks:
+        row_data.append('<a href="">' + str(task.comment) + '</a>')
+    summary_data.insert(0,{'url':'', 'data':row_data,})
+
+    return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,})
+
+
 def summary_items(request):
     #listing = TrackCount.merged.psuedo_feeds()
     #return render_to_response('stats/reports/items.html',{'listing':listing})
@@ -136,33 +182,22 @@ def summary_items(request):
     return HttpResponse("Hello World. You're at the ITEMS LISTING page.")
 
 
+
 def item_detail(request, item_id):
     "Show the results for a given item"
     return HttpResponse("Hello World. You're at the ITEM DETAIL page.")
 
 
-
-def summary_urlmonitoring(request):
-    "Show the results for a url monitoring"
-#    return HttpResponse("Hello World. You're at the SUMMARY of URL MONITORING page.")
-#    summary_data = URLMonitorRequest.objects.all().select_related().order_by('-task__time_of_scan', 'iteration')
-#    url_data_raw = URLMonitorTask.objects.all().order_by('url', '-time_of_scan').select_related()
-    url_data = []
-#    for task in url_data_raw:
-
-    return render_to_response('stats/reports/url_summary.html', {'url_data': url_data,})
-
-
 def urlmonitoring_task(request, task_id):
     "Show the results for a url monitoring of a specific task"
-    summary_data = URLMonitorScan.objects.filter(task__id__exact=task_id).select_related().order_by('-url__url', 'iteration')
-    return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,})
+    scan_data = URLMonitorScan.objects.filter(task__id__exact=task_id).select_related().order_by('-url__url', 'iteration')
+    return render_to_response('stats/reports/url_summary.html', {'scan_data': scan_data,})
 
 
 def urlmonitoring_url(request, url_id):
     "Show the results for a url monitoring of specific url"
-    summary_data = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')
-    return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,'url_id':url_id})
+    scan_data = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')
+    return render_to_response('stats/reports/url_summary.html', {'scan_data': scan_data,'url_id':url_id})
 
 
 # TEMP FUNCTIONS
@@ -202,7 +237,11 @@ def graph_urlmonitoring_url(request, url_id = 0):
     ttfb_cols = []
     ttlb_cols = []
 
-    title = u"Data for " + str(s[0].url.url)[:50]
+    url = str(s[0].url.url)
+    if len(url) > 55:
+        title = u"Data for " + str(s[0].url.url)[:55] + "..."
+    else:
+        title = u"Data for " + str(s[0].url.url)
     ax1.set_title(title)
 
 #    xticks = matplotlib.numpy.arange(1,len(x),10) # Only show the date every 10 values
