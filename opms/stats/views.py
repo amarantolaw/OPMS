@@ -155,7 +155,7 @@ def summary_urlmonitoring(request):
     except ValueError:
         orientation = 0
 
-    tasks = URLMonitorTask.objects.all().order_by('id')
+    tasks = URLMonitorTask.objects.all().order_by('id').select_related()
     urls = URLMonitorTarget.objects.all().order_by('url')
 
 
@@ -165,17 +165,18 @@ def summary_urlmonitoring(request):
             row_data = []
             for task in tasks:
                 scan_count = int(
-                    URLMonitorScan.objects\
-                    .filter(url__id__exact=url.id)\
-                    .filter(task__id__exact=task.id)\
-                    .count()
+                    task.urlmonitorscan_set.filter(url__id__exact=url.id).count()
+#                    URLMonitorScan.objects\
+#                    .filter(url__id__exact=url.id)\
+#                    .filter(task__id__exact=task.id)\
+#                    .count()
                 )
 #                if scan_count > 0:
 #                    row_data.append('<a href="">' + str(scan_count) + '</a>')
 #                else:
                 row_data.append(str(scan_count))
             summary_data.append({
-                'url':'<a href="">' + str(url.url) + '</a>',
+                'url':'<a href="/stats/report/urlmonitoring/url/' + str(url.id) + '">' + str(url.url) + '</a>',
                 'data':row_data,
                 })
 
@@ -183,7 +184,7 @@ def summary_urlmonitoring(request):
     # Put column headers and totals into listing array - values, then headings
     row_data = []
     for task in tasks:
-        row_data.append('<a href="">' + str(task.comment) + '</a>')
+        row_data.append('<a href="/stats/report/urlmonitoring/task/' + str(task.id) + '">' + str(task.comment) + '</a>')
     summary_data.insert(0,{'url':'', 'data':row_data,})
 
     return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,})

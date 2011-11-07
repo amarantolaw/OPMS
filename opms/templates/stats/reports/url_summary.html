@@ -47,9 +47,9 @@ $(document).ready(function()
         {% for row in summary_data %}
         {% if forloop.counter0 == 0 %}
         <tr>
-            <th>{{ row.url|default:"" }}</th>
+            <th>{{ row.url|default:"URLs" }}</th>
             {% for item in row.data %}
-            <th>{{ item }}</th>
+            <th>{{ item|safe }}</th>
             {% endfor %}
         </tr>
     </thead>
@@ -57,7 +57,7 @@ $(document).ready(function()
         {% endif %}
         {% if forloop.counter0 > 0 %}
         <tr>
-            <td>{{ row.url }}</td>
+            <td>{{ row.url|safe }}</td>
             {% for item in row.data %}
             <td>{{ item }}</td>
             {% endfor %}
