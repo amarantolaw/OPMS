@@ -261,8 +261,14 @@ def graph_urlmonitoring_url(request, url_id = 0):
 #    xticks = matplotlib.numpy.arange(1,len(x),10) # Only show the date every 10 values
     for count, item in enumerate(s):
         x.append(item.time_of_request)
-        ttfb.append(item.ttfb)
-        ttlb.append(item.ttlb)
+        try:
+            ttfb.append(float(item.ttfb))
+        except ValueError:
+            ttfb.append(float(0.0))
+        try:
+            ttlb.append(float(item.ttlb))
+        except ValueError:
+            ttlb.append(float(0.0))
         if item.iteration == 1:
             ttfb_cols.append('#0000FF')
             ttlb_cols.append('#FF0000')
