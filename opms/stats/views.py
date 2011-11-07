@@ -225,15 +225,15 @@ def graph_urlmonitoring_url(request, url_id = 0):
         tl.set_color('b')
 
 #    ax2.plot(x, ttlb, '+', color=ttlb_cols, zorder=1)
-#    ax2.scatter(x, ttlb, marker='+', color=ttlb_cols)
-#    ax2.set_ylabel("TTLB in Seconds", color='red', size='small')
-#    ax2.set_yscale('log')
-#    for tl in ax2.get_yticklabels():
-#        tl.set_color('r')
+    ax2.scatter(x, ttlb, marker='+', color=ttlb_cols)
+    ax2.set_ylabel("TTLB in Seconds", color='red', size='small')
+    ax2.set_yscale('log')
+    for tl in ax2.get_yticklabels():
+        tl.set_color('r')
 
 #    ax1.set_xticks(xticks)
 #    ax1.set_xticklabels(x, rotation=335, size=5, ha='center', va='top')
-    ax1.set_autoscalex_on(False)
+    ax1.set_autoscalex_on(True)
     ax1.set_xlabel("Time of Request")
 
     canvas = FigureCanvas(fig)

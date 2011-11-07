@@ -53,6 +53,7 @@ $(document).ready(function()
             <th>URL</th>
             <th>Iteration</th>
             <th>Time of Request</th>
+            <th>Status Code</th>
             <th>TTFB</th>
             <th>TTLB</th>
         </tr>
@@ -64,6 +65,7 @@ $(document).ready(function()
             <td><a href="/stats/report/urlmonitoring/url/{{ row.url.id }}">{{ row.url.url }}</a></td>
             <td>{{ row.iteration }}</td>
             <td>{{ row.time_of_request|date:"Y-m-d h:i:s" }}</td>
+            <td class="{% if row.status_code == 200 %}positive{% else %}negative{% endif %}">{{ row.status_code }}</td>
             <td class="{% if row.ttfb < 0.5 %}positive{% else %}negative{% endif %}">{{ row.ttfb }}</td>
             <td class="{% if row.ttlb < 0.5 %}positive{% else %}negative{% endif %}">{{ row.ttlb }}</td>
         </tr>
