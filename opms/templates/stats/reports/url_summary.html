@@ -35,7 +35,7 @@
 <p>The following URLs have been scanned by this system:</p>
 <ul>
     {% for item in summary_listing %}
-    <li>{{ item }}</li>
+    <li>{{ item|safe }}</li>
     {% endfor %}
 </ul>
 {% endif %}
