@@ -1,8 +1,8 @@
 {% extends "stats/base.html" %}
 {% block head %}
-    <script src="/static/scripts/jquery-1.6.4.min.js"></script>
-    <script src="/static/scripts/jquery.tablesorter.min.js"></script>
-    <script src="/static/scripts/jquery-ui-1.8.13.min.js"></script>
+    <script src="{{ STATIC_URL }}scripts/jquery-1.6.4.min.js"></script>
+    <script src="{{ STATIC_URL }}scripts/jquery.tablesorter.min.js"></script>
+    <script src="{{ STATIC_URL }}scripts/jquery-ui-1.8.13.min.js"></script>
 {% endblock %}
 
 {% block title %}Summary Data from URL Monitoring{% endblock %}

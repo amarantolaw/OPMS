@@ -42,7 +42,7 @@ ADMIN_MEDIA_PREFIX = '/media/'
 # Many projects will also have static assets that aren't tied to a particular app; you can give
 # staticfiles additional directories to search via the STATICFILES_DIRS setting .
 STATICFILES_DIRS = (
-    os.path.join(PROJECT_ROOT, 'static'),
+    os.path.join(PROJECT_ROOT, 'templates/static'),
 )
 STATIC_URL = '/static/'
 
