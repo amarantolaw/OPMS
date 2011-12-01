@@ -512,6 +512,7 @@ class PreviewCount(models.Model):
 #recording some simple metrics on the results.
 class URLMonitorTarget(models.Model):
     url = models.URLField()
+    active = models.BooleanField(default=True)
 
     def __unicode__(self):
         return str(self.url)

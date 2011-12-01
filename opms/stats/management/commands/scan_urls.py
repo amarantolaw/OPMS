@@ -40,7 +40,7 @@ class Command(LabelCommand):
         t.comment = str(comment)
         t.save()
 
-        targets = URLMonitorTarget.objects.all()
+        targets = URLMonitorTarget.objects.filter(active__exact=True)
         count = 1
         for iter in range(1,iterations+1):
             for target in targets:

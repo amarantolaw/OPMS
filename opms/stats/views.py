@@ -210,7 +210,8 @@ def urlmonitoring_task(request, task_id):
 
 def urlmonitoring_url(request, url_id):
     "Show the results for a url monitoring of specific url"
-    scan_data = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')
+    # Limit to the last 7 days' worth of scans (10 scans * 4 times an hour * 24 hours * 7 days)
+    scan_data = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')[:6720]
     return render_to_response('stats/reports/url_summary.html', {'scan_data': scan_data,'url_id':url_id})
 
 
@@ -243,7 +244,8 @@ def graph_urlmonitoring_url(request, url_id = 0):
     ax1 = fig.add_subplot(1,1,1)
 #    ax2 = ax1.twinx()
 
-    s = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('time_of_request')
+    # Limit to the last 7 days' worth of scans (10 scans * 4 times an hour * 24 hours * 7 days)
+    s = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('time_of_request')[:6720]
     x = []
     x_dates = []
     ttfb = []
