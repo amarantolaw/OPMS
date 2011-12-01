@@ -245,7 +245,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
 #    ax2 = ax1.twinx()
 
     # Limit to the last 7 days' worth of scans (10 scans * 4 times an hour * 24 hours * 7 days)
-    s = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('time_of_request')[:6720]
+    s = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')[:6720]
     x = []
     x_dates = []
     ttfb = []
