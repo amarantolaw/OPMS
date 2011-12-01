@@ -1,31 +1,33 @@
+{% load static %}
+{% get_static_prefix as STATIC_PREFIX %}
 <!DOCTYPE html>
 <html lang="en-gb" >
 <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="{{ STATIC_URL }}images/favicon.ico" />
-    <link rel="shortcut icon" href="{{ STATIC_URL }}images/favicon.ico" />
+    <link rel="icon" href="{{ STATIC_PREFIX }}images/favicon.ico" />
+    <link rel="shortcut icon" href="{{ STATIC_PREFIX }}images/favicon.ico" />
     <meta name="author" content="University of Oxford" />
 
     <title>{% block title %}Welcome{% endblock %} :: The OPMS</title>
 
-    <link rel="stylesheet" href="{{ STATIC_URL }}styles/basic.css" media="all" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}print.css" media="print" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}styles/oxService.css" media="screen,projection" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}styles/mainnav.css" media="screen,projection" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}styles/lookandfeel.css" media="screen,projection" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}styles/layout.css" media="screen,projection" />
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/basic.css" media="all" />
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}print.css" media="print" />
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/oxService.css" media="screen,projection" />
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/mainnav.css" media="screen,projection" />
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/lookandfeel.css" media="screen,projection" />
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/layout.css" media="screen,projection" />
 
     {% block head %}
-    <link rel="stylesheet" href="{{ STATIC_URL }}uploadify/uploadify.css" />
-    <script src="{{ STATIC_URL }}scripts/jquery-1.6.4.min.js"></script>
-    <script src="{{ STATIC_URL }}uploadify/swfobject.js"></script>
-    <script src="{{ STATIC_URL }}uploadify/jquery.uploadify.v2.1.4.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}uploadify/uploadify.css" />
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-1.6.4.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}uploadify/swfobject.js"></script>
+    <script src="{{ STATIC_PREFIX }}uploadify/jquery.uploadify.v2.1.4.js"></script>
     <script>
     $(document).ready(function() {
         $('#file_upload').uploadify({
-            'uploader'  : '{{ STATIC_URL }}uploadify/uploadify.swf',
+            'uploader'  : '{{ STATIC_PREFIX }}uploadify/uploadify.swf',
             'script'    : '/upload/',
-            'cancelImg' : '{{ STATIC_URL }}uploadify/cancel.png',
+            'cancelImg' : '{{ STATIC_PREFIX }}uploadify/cancel.png',
             'auto'      : false,
             'multi'     : true,
 //            'fileExt'   : '*.mp3;*.ogg;*.flac',
