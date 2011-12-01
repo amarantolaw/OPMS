@@ -245,7 +245,7 @@ def graph_urlmonitoring_url(request, url_id = 0):
 #    ax2 = ax1.twinx()
 
     # Limit to the last 7 days' worth of scans (10 scans * 4 times an hour * 24 hours * 7 days)
-    s = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')[:6720].reverse()
+    s = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')[:6720]
     x = []
     x_dates = []
     ttfb = []
@@ -261,24 +261,25 @@ def graph_urlmonitoring_url(request, url_id = 0):
     ax1.set_title(title)
 
 #    xticks = matplotlib.numpy.arange(1,len(x),10) # Only show the date every 10 values
+    # Note that the resultset is in reverse order, so will have to build the lists in reverse order, hence insert over append
     for count, item in enumerate(s):
         if item.time_of_request == None:
             continue # Skip data where we failed to write a time of request...
-        x.append(item.time_of_request)
+        x.insert(0,item.time_of_request)
         try:
-            ttfb.append(float(item.ttfb))
+            ttfb.insert(0,float(item.ttfb))
         except (ValueError, TypeError):
-            ttfb.append(float(0.0))
+            ttfb.insert(0,float(0.0))
         try:
-            ttlb.append(float(item.ttlb))
+            ttlb.insert(0,float(item.ttlb))
         except (ValueError, TypeError):
-            ttlb.append(float(0.0))
+            ttlb.insert(0,float(0.0))
         if item.iteration == 1:
-            ttfb_cols.append('#0000FF')
-            ttlb_cols.append('#FF0000')
+            ttfb_cols.insert(0,'#0000FF')
+            ttlb_cols.insert(0,'#FF0000')
         else:
-            ttfb_cols.append('#000066')
-            ttlb_cols.append('#660000')
+            ttfb_cols.insert(0,'#000066')
+            ttlb_cols.insert(0,'#660000')
 #        if count % 10 == 0:
 #            x_dates.append(item.time_of_request)
 
