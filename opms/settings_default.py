@@ -26,7 +26,6 @@ USE_I18N = True
 # calendars according to the current locale
 USE_L10N = True
 
-
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = os.path.join(PROJECT_PATH, "media")
@@ -35,7 +34,6 @@ MEDIA_ROOT = os.path.join(PROJECT_PATH, "media")
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = '/media/'
-
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
@@ -50,7 +48,7 @@ STATIC_URL = '/static/'
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = 'static/admin/'
+ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # Many projects will also have static assets that aren't tied to a particular app; you can give
 # staticfiles additional directories to search via the STATICFILES_DIRS setting .
