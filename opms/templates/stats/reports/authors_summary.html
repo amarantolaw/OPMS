@@ -59,8 +59,8 @@ $(document).ready(function()
             <td>{{ row.titles }}</td>
             <td>{{ row.first_name }}</td>
             <td>{{ row.last_name }}</td>
-            <td><ul>{% for guid in row.guids %}
-                    <li>{{ guid }}</li>
+            <td><ul>{% for track in row.guids %}
+                    <li>{{ track.name }} [{{ track.guid }}] = {{ track.count }}</li>
                 {% endfor %}</ul>
             </td>
         </tr>

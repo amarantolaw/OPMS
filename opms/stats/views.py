@@ -157,7 +157,16 @@ def summary_authors(request):
             for file in files:
                 fifs = file.fileinfeed_set.all()
                 for fif in fifs:
-                    guids.append(fif.guid)
+                    tracks = TrackCount.objects.filter(guid__guid=fif.guid)
+                    total_count = 0
+                    for track in tracks:
+                        total_count += int(track.count)
+                    result = {
+                        'name': item.title,
+                        'guid': fif.guid,
+                        'count': total_count,
+                    }
+                    guids.append(result)
         listing.append({
             'titles': author.titles,
             'first_name': author.first_name,
