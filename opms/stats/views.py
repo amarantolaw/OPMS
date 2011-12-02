@@ -1,8 +1,6 @@
 from django.shortcuts import render_to_response
 from django.http import Http404, HttpResponse
 from stats.models import *
-
-#import array
 import pylab
 import numpy as np
 import matplotlib
@@ -142,6 +140,12 @@ def item_detail(request, item_id):
     return HttpResponse("Hello World. You're at the ITEM DETAIL page.")
 
 
+
+
+
+def summary_authors(request):
+    "Show a list of all people with a 25.16 role, and the Feed GUIDs associated with them"
+    return HttpResponse("Hello from the Summary Authors Page")
 
 
 

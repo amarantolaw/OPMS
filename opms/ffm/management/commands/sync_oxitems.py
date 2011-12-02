@@ -453,6 +453,13 @@ class Command(NoArgsCommand):
             file_obj.size = int(oxitem_obj.item_enclosure_length)
         file_obj.duration = int(oxitem_obj.item_duration)
         # TODO: determine file function
+        # Hack - determine if audio or video based on file extension...
+        extension = str(oxitem_obj.item_enclosure_href.split(".")[-1]).lower().strip()
+        if len(extension) < 5:
+            if extension == 'mp3' or extension == 'm4a':
+                file_obj.function = FileFunction.objects.get(pk=4) # Hardcoded for fixture loaded FileFunction Default Audio
+            elif extension == 'mp4' or extension == 'm4v':
+                file_obj.function = FileFunction.objects.get(pk=6) # Hardcoded for fixture loaded FileFunction Default Video
         # TODO: determine file mimetype
         # TODO: determine proper duration and size from the file...
         return file_obj
@@ -499,7 +506,8 @@ class Command(NoArgsCommand):
                 person_dict["first_name"] = name[0][:50]
             person_dict["last_name"] = name[-1][:50]
 
-            # NOTE: Forcing additional information to lowercase to allow names to be matched case-insensitively. The actual name should still be accurate in the separate fields though.
+            # NOTE: Forcing additional information to lowercase to allow names to be matched case-insensitively.
+            # The actual name should still be accurate in the separate fields though - apart from any "middle" names...
             person_dict["additional_information"] = person_dict["additional_information"].lower()
 
             # Get or create a person record for this one
