@@ -499,10 +499,12 @@ class Command(NoArgsCommand):
                 person_dict["first_name"] = name[0][:50]
             person_dict["last_name"] = name[-1][:50]
 
-            # Get or create a person record for this one
             # NOTE: Forcing additional information to lowercase to allow names to be matched case-insensitively. The actual name should still be accurate in the separate fields though.
+            person_dict["additional_information"] = person_dict["additional_information"].lower()
+
+            # Get or create a person record for this one
             person, created = Person.objects.get_or_create(
-                additional_information=person_dict.get("additional_information").lower(),
+                additional_information=person_dict.get("additional_information"),
                 defaults=person_dict)
             if created:
                 person.save()
