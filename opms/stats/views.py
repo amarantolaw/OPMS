@@ -151,11 +151,11 @@ def summary_authors(request):
     listing = []
     for author in authors:
         guids = []
-        roles = ffm_models.Role.objects.filter(person_id__exact=author.id)
+        roles = ffm_models.Role.objects.filter(person__exact=author.id)
         for role in roles:
-            files = ffm_models.File.objects.filter(item_id__exact=role.item_id)
+            files = ffm_models.File.objects.filter(item__exact=role.item_id)
             for file in files:
-                fifs = ffm_models.FileInFeed.objects.filter(file_id__exact=file.id)
+                fifs = ffm_models.FileInFeed.objects.filter(file__exact=file.id)
                 for fif in fifs:
                     guids.append(fif.guid)
         listing.append({
