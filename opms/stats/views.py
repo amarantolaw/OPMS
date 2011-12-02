@@ -148,8 +148,14 @@ def summary_authors(request):
     "Show a list of all people with a 25.16 role, and the Feed GUIDs associated with them"
     # return HttpResponse("Hello from the Summary Authors Page")
     authors = ffm_models.Person.objects.all().order_by('last_name').order_by('first_name')
-    listing = None
-    return render_to_response('stats/reports/authors_summary.html',{'listing':authors})
+    listing = []
+    for author in authors:
+        listing = {
+            'titles': author.titles,
+            'first_name': author.first_name,
+            'last_name': author.last_name,
+        }
+    return render_to_response('stats/reports/authors_summary.html',{'listing':listing})
 
 
 
