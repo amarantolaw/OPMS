@@ -1,6 +1,7 @@
 from django.shortcuts import render_to_response
 from django.http import Http404, HttpResponse
 from stats.models import *
+import ffm.models as ffm_models
 import pylab
 import numpy as np
 import matplotlib
@@ -146,8 +147,9 @@ def item_detail(request, item_id):
 def summary_authors(request):
     "Show a list of all people with a 25.16 role, and the Feed GUIDs associated with them"
     # return HttpResponse("Hello from the Summary Authors Page")
+    authors = ffm_models.Person.objects.all().order_by('last_name').order_by('first_name')
     listing = None
-    return render_to_response('stats/reports/authors_summary.html',{'listing':listing})
+    return render_to_response('stats/reports/authors_summary.html',{'listing':authors})
 
 
 
