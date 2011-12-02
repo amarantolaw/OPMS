@@ -150,11 +150,11 @@ def summary_authors(request):
     authors = ffm_models.Person.objects.all().order_by('last_name').order_by('first_name')
     listing = []
     for author in authors:
-        listing = {
+        listing.append({
             'titles': author.titles,
             'first_name': author.first_name,
             'last_name': author.last_name,
-        }
+        })
     return render_to_response('stats/reports/authors_summary.html',{'listing':listing})
 
 
