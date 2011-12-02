@@ -81,7 +81,7 @@ class Command(NoArgsCommand):
 
 
         # Import OxItems.Channels
-        oxitems_channels = Rg07Channels.objects.all() # filter(deleted=False)
+        oxitems_channels = Rg07Channels.objects.all().order_by('modified') # filter(deleted=False); Work on basis that most recently edited come last - not quite so critical here?
         total_count = len(oxitems_channels)
         print "Processing OxItems Channel Data into OPMS (" + str(total_count) + " rows to do)"
         for counter, row in enumerate(oxitems_channels):
@@ -303,7 +303,7 @@ class Command(NoArgsCommand):
 
     # Import OxItems.Items, but done on a channel by channel basis
     def _parse_items(self, feed_obj, channel_obj):
-        oxitems = Rg07Items.objects.filter(item_channel=channel_obj)
+        oxitems = Rg07Items.objects.filter(item_channel=channel_obj).order_by('modified') # Order-by: Assume the most recently edited version is the best...?
         print "Found " + str(len(oxitems)) + " OxItems to process for " + str(feed_obj.slug) + " (" + str(feed_obj.id) + ")"
 
         for counter, item_row in enumerate(oxitems):
@@ -500,8 +500,9 @@ class Command(NoArgsCommand):
             person_dict["last_name"] = name[-1][:50]
 
             # Get or create a person record for this one
+            # NOTE: Forcing additional information to lowercase to allow names to be matched case-insensitively. The actual name should still be accurate in the separate fields though.
             person, created = Person.objects.get_or_create(
-                additional_information=person_dict.get("additional_information"),
+                additional_information=person_dict.get("additional_information").lower(),
                 defaults=person_dict)
             if created:
                 person.save()
