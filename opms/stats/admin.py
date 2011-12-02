@@ -13,3 +13,4 @@ class URLMonitorTaskAdmin(admin.ModelAdmin):
     list_filter = ['completed']
 
 admin.site.register(URLMonitorTask, URLMonitorTaskAdmin)
+
