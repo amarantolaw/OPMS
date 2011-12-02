@@ -59,7 +59,10 @@ $(document).ready(function()
             <td>{{ row.titles }}</td>
             <td>{{ row.first_name }}</td>
             <td>{{ row.last_name }}</td>
-            <td>&nbsp;</td>
+            <td><ul>{% for guid in row.guids %}
+                    <li>{{ guid }}</li>
+                {% endfor %}</ul>
+            </td>
         </tr>
         {% endfor %}
     </tbody>

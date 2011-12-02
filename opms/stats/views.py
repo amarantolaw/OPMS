@@ -150,10 +150,19 @@ def summary_authors(request):
     authors = ffm_models.Person.objects.all().order_by('last_name').order_by('first_name')
     listing = []
     for author in authors:
+        guids = []
+        roles = ffm_models.Role.objects.filter(person_id__exact=author.id)
+        for role in roles:
+            files = ffm_models.File.objects.filter(item_id__exact=role.item_id)
+            for file in files:
+                fifs = ffm_models.FileInFeed.objects.filter(file_id__exact=file.id)
+                for fif in fifs:
+                    guids.append(fif.guid)
         listing.append({
             'titles': author.titles,
             'first_name': author.first_name,
             'last_name': author.last_name,
+            'guids' : guids
         })
     return render_to_response('stats/reports/authors_summary.html',{'listing':listing})
 
