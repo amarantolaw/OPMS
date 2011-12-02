@@ -145,7 +145,9 @@ def item_detail(request, item_id):
 
 def summary_authors(request):
     "Show a list of all people with a 25.16 role, and the Feed GUIDs associated with them"
-    return HttpResponse("Hello from the Summary Authors Page")
+    # return HttpResponse("Hello from the Summary Authors Page")
+    listing = None
+    return render_to_response('stats/reports/authors_summary.html',{'listing':listing})
 
 
 
