@@ -155,17 +155,17 @@ def summary_authors(request):
     guids = []
     for author in authors:
         guids.append({
-            'name': author.title,
-            'guid': author.guid,
+            'name': author.get("title"),
+            'guid': author.get("guid"),
             'count': track_counts.get(author.guid,0)
         })
         author_track_count += track_counts.get(author.guid,0)
         if author.get('last_name') != previous_author.get('last_name','') or \
             author.get('first_name') != previous_author.get('first_name',''): # move onto a clean slate
             listing.append({
-                'titles': author.titles,
-                'first_name': author.first_name,
-                'last_name': author.last_name,
+                'titles': author.get("titles"),
+                'first_name': author.get("first_name"),
+                'last_name': author.get("last_name"),
                 'total_count': author_track_count,
                 'guids' : guids
             })
