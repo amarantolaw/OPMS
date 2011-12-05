@@ -149,33 +149,28 @@ def summary_authors(request):
     "Show a list of all people with a 25.16 role, and the Feed GUIDs associated with them"
     # return HttpResponse("Hello from the Summary Authors Page")
     track_counts = dict((x['guid__guid'], x['count__sum']) for x in TrackCount.objects.values('guid__guid').annotate(Sum('count')))
-    
-    authors = ffm_models.Person.objects.select_related('item_set__file_set__fileinfeed_set__guid').order_by('last_name', 'first_name')
+    authors = ffm_models.Person.extended.get_all_guids()
     listing = []
+    previous_author = {}
+    guids = []
     for author in authors:
-        guids = []
-        author_track_count = 0
-        for item in author.item_set.all(): # Shortcut because we know all roles are 25.16
-            for file in item.file_set.all():
-                for fif in file.fileinfeed_set.all():
-                    #tracks = TrackCount.objects.filter(guid__guid=fif.guid)
-                    #track_count = 0
-                    #for track in tracks:
-                    #    track_count += int(track.count)
-                    result = {
-                        'name': item.title,
-                        'guid': fif.guid,
-                        'count': track_counts.get('fif.guid',0),
-                    }
-                    guids.append(result)
-                    author_track_count += track_counts.get('fif.guid',0)
-        listing.append({
-            'titles': author.titles,
-            'first_name': author.first_name,
-            'last_name': author.last_name,
-            'total_count': author_track_count,
-            'guids' : guids
+        guids.append({
+            'name': author.title,
+            'guid': author.guid,
+            'count': track_counts.get(author.guid,0)
         })
+        author_track_count += track_counts.get(author.guid,0)
+        if author.get('last_name') != previous_author.get('last_name','') or \
+            author.get('first_name') != previous_author.get('first_name',''): # move onto a clean slate
+            listing.append({
+                'titles': author.titles,
+                'first_name': author.first_name,
+                'last_name': author.last_name,
+                'total_count': author_track_count,
+                'guids' : guids
+            })
+            previous_author = author
+            guids = []
     return render_to_response('stats/reports/authors_summary.html',{'listing':listing})
 
 
