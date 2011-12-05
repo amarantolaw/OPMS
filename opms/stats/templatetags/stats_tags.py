@@ -3,8 +3,8 @@ from django.utils.safestring import mark_safe
 
 register = template.Library()
 
-@register.tag(name="submenu-stats")
-def submenu(parser, current_section=0):
+@register.simple_tag(name="submenu-stats")
+def submenu(current_section=0):
     menu_html = u'''<h3>Sub sections for Statistics</h3>
     <ul class="level-2">'''
     if int(current_section) == 1:
