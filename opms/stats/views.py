@@ -187,7 +187,7 @@ def summary_urlmonitoring(request):
     # List the URLS and the number of scans for that URL
     summary_listing = []
 
-    urls = URLMonitorTarget.objects.all().order_by('url')
+    urls = URLMonitorTarget.objects.all().order_by('active', 'url')
     # TODO: Take out the hard coded HTML from here and put that in the template where it belongs!
     for url in urls:
         if url.active:
@@ -197,7 +197,7 @@ def summary_urlmonitoring(request):
             )
         else:
             summary_listing.append(
-                '<strong>[INACTIVE]</strong><a href="/stats/report/urlmonitoring/url/' + str(url.id) + '">' + str(url.url) + '</a> (' +\
+                '<strong>[INACTIVE]</strong> a href="/stats/report/urlmonitoring/url/' + str(url.id) + '">' + str(url.url) + '</a> (' +\
                 str(url.urlmonitorscan_set.count()) + ')'
             )
     return render_to_response('stats/reports/url_summary.html', {'summary_listing': summary_listing,})
