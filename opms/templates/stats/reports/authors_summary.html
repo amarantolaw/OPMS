@@ -1,5 +1,5 @@
 {% extends "stats/base.html" %}
-{% load static %}
+{% load static stats_tags%}
 {% get_static_prefix as STATIC_PREFIX %}
 {% block head %}
     <script src="{{ STATIC_PREFIX }}scripts/jquery-1.6.4.min.js"></script>
@@ -19,13 +19,7 @@
     </ul>
 </div>
 <div id="mainnav2">
-    <h3>Sub sections for Statistics</h3>
-    <ul class="level-2">
-        <li><a href="/stats/report/urlmonitoring/">URL Monitoring</a></li>
-        <li><a href="/stats/report/summary/">Summary</a></li>
-        <li><a href="/stats/report/summary/feeds/">Feeds</a></li>
-        <li><span class="youarehere">Contributors</span></li>
-    </ul>
+    {% submenu-stats %}
 </div>
 {% endblock %}
 
