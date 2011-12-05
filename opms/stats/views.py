@@ -152,6 +152,7 @@ def summary_authors(request):
     authors = ffm_models.Person.extended.get_all_guids()
     listing = []
     previous_author = {}
+    author_track_count = 0
     guids = []
     for author in authors:
         try:
@@ -174,6 +175,7 @@ def summary_authors(request):
                 'guids' : guids
             })
             previous_author = author
+            author_track_count = 0
             guids = []
     return render_to_response('stats/reports/authors_summary.html',{'listing':listing})
 
