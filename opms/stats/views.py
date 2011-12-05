@@ -157,9 +157,9 @@ def summary_authors(request):
         guids.append({
             'name': author.get("title"),
             'guid': author.get("guid"),
-            'count': track_counts.get(int(author.get("guid"),0))
+            'count': track_counts.get(int(author.get("guid",0)))
         })
-        author_track_count += track_counts.get(int(author.get("guid"),0))
+        author_track_count += track_counts.get(int(author.get("guid",0)))
         if author.get('last_name') != previous_author.get('last_name','') or \
             author.get('first_name') != previous_author.get('first_name',''): # move onto a clean slate
             listing.append({
