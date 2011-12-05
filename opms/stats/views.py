@@ -165,6 +165,8 @@ def summary_authors(request):
             'count': count
         })
         if count is not None:
+            if author_track_count is None:
+                author_track_count = 0
             author_track_count += count
         if author.get('last_name') != previous_author.get('last_name','') or \
             author.get('first_name') != previous_author.get('first_name',''): # move onto a clean slate
