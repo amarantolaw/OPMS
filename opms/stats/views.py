@@ -147,10 +147,11 @@ def item_detail(request, item_id):
 def summary_authors(request):
     "Show a list of all people with a 25.16 role, and the Feed GUIDs associated with them"
     # return HttpResponse("Hello from the Summary Authors Page")
-    authors = ffm_models.Person.objects.all().order_by('last_name').order_by('first_name')
+    authors = ffm_models.Person.objects.all().order_by('last_name', 'first_name').select_related('item_set__fileinfeed_set')
     listing = []
     for author in authors:
         guids = []
+        author_track_count = 0
         items = author.item_set.all() # Shortcut because we know all roles are 25.16
         for item in items:
             files = item.file_set.all()
@@ -158,19 +159,21 @@ def summary_authors(request):
                 fifs = file.fileinfeed_set.all()
                 for fif in fifs:
                     tracks = TrackCount.objects.filter(guid__guid=fif.guid)
-                    total_count = 0
+                    track_count = 0
                     for track in tracks:
-                        total_count += int(track.count)
+                        track_count += int(track.count)
                     result = {
                         'name': item.title,
                         'guid': fif.guid,
-                        'count': total_count,
+                        'count': track_count,
                     }
                     guids.append(result)
+                    author_track_count += track_count
         listing.append({
             'titles': author.titles,
             'first_name': author.first_name,
             'last_name': author.last_name,
+            'total_count': author_track_count,
             'guids' : guids
         })
     return render_to_response('stats/reports/authors_summary.html',{'listing':listing})
