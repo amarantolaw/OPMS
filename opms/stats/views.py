@@ -329,24 +329,25 @@ def graph_apple_summary_feeds(request):
         if counter == 0 or (counter % 10) == 0:
             xvalues.append(str(row.get("feed")))
 
-        colour_scale = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#000099', '#006666', '#0000cc']
+        colour_scale = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#000099', '#006666', '#000033']
         #Create a colour scale
-        if int(row.get("count")) > 10000000:
+        #if int(row.get("count")) > 10000000:
+        #    cols.append(colour_scale[0])
+        #el
+        if int(row.get("count")) > 1000000:
             cols.append(colour_scale[0])
-        elif int(row.get("count")) > 1000000:
-            cols.append(colour_scale[1])
         elif int(row.get("count")) > 100000:
-            cols.append(colour_scale[2])
+            cols.append(colour_scale[1])
         elif int(row.get("count")) > 10000:
-            cols.append(colour_scale[3])
+            cols.append(colour_scale[2])
         elif int(row.get("count")) > 1000:
-            cols.append(colour_scale[4])
+            cols.append(colour_scale[3])
         elif int(row.get("count")) > 100:
-            cols.append(colour_scale[5])
+            cols.append(colour_scale[4])
         elif int(row.get("count")) > 10:
-            cols.append(colour_scale[6])
+            cols.append(colour_scale[5])
         else:
-            cols.append(colour_scale[7])
+            cols.append(colour_scale[6])
 
     ind = matplotlib.numpy.arange(len(bars)) # the x locations for the groups
 
