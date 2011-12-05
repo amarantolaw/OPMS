@@ -147,28 +147,26 @@ def item_detail(request, item_id):
 def summary_authors(request):
     "Show a list of all people with a 25.16 role, and the Feed GUIDs associated with them"
     # return HttpResponse("Hello from the Summary Authors Page")
+    track_counts = dict((x['guid__guid'], x['count__sum']) for x in TrackCount.objects.values('guid__guid').annotate(Sum('count')))
     authors = ffm_models.Person.objects.all().order_by('last_name', 'first_name').select_related('item_set__fileinfeed_set')
     listing = []
     for author in authors:
         guids = []
         author_track_count = 0
-        items = author.item_set.all() # Shortcut because we know all roles are 25.16
-        for item in items:
-            files = item.file_set.all()
-            for file in files:
-                fifs = file.fileinfeed_set.all()
-                for fif in fifs:
-                    tracks = TrackCount.objects.filter(guid__guid=fif.guid)
-                    track_count = 0
-                    for track in tracks:
-                        track_count += int(track.count)
+        for item in author.item_set.all(): # Shortcut because we know all roles are 25.16
+            for file in item.file_set.all():
+                for fif in file.fileinfeed_set.all():
+                    #tracks = TrackCount.objects.filter(guid__guid=fif.guid)
+                    #track_count = 0
+                    #for track in tracks:
+                    #    track_count += int(track.count)
                     result = {
                         'name': item.title,
                         'guid': fif.guid,
-                        'count': track_count,
+                        'count': track_counts.get('fif.guid',0),
                     }
                     guids.append(result)
-                    author_track_count += track_count
+                    author_track_count += track_counts.get('fif.guid',0)
         listing.append({
             'titles': author.titles,
             'first_name': author.first_name,
