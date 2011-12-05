@@ -149,6 +149,7 @@ def summary_authors(request):
     "Show a list of all people with a 25.16 role, and the Feed GUIDs associated with them"
     # return HttpResponse("Hello from the Summary Authors Page")
     track_counts = dict((x['guid__guid'], x['count__sum']) for x in TrackCount.objects.values('guid__guid').annotate(Sum('count')))
+    
     authors = ffm_models.Person.objects.select_related('item_set__file_set__fileinfeed_set__guid').order_by('last_name', 'first_name')
     listing = []
     for author in authors:

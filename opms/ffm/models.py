@@ -9,6 +9,25 @@ import uuid
 # python manage.py migrate ffm
 # NB: Can't convert existing fields to foreignkeys in one step. Need to do two migrations. http://south.aeracode.org/ticket/498
 
+class PersonManager(models.Manager):
+    def get_all_guids(self):
+        from django.db import connection
+        cursor = connection.cursor()
+        cursor.execute("""
+            SELECT p.titles, p.first_name, p.last_name, i.title, fif.guid
+            FROM ffm_person as p
+              LEFT OUTER JOIN ffm_role as r ON p.id = r.person_id
+              LEFT OUTER JOIN ffm_item as i ON r.item_id = i.id
+              LEFT OUTER JOIN ffm_file as f ON i.id = f.item_id
+              LEFT OUTER JOIN ffm_fileinfeed as fif ON f.id = fif.file_id
+            ORDER BY 3,2;
+        """)
+        desc = cursor.description
+        return [
+            dict(zip([col[0] for col in desc], row))
+            for row in cursor.fetchall()
+        ]
+
 class Person(models.Model): # This should be in the CRM or OxDB App
     titles = models.CharField("Honorifics and Titles", max_length=100, default='')
     first_name = models.CharField("First Name", max_length=50, default='Unknown')
@@ -33,6 +52,9 @@ class Person(models.Model): # This should be in the CRM or OxDB App
 
     def __unicode__(self):
         return self.full_name()
+
+    extended = PersonManager() # Manager for merged data
+    objects = models.Manager() # Default manager
 
 
 class Unit(models.Model):
