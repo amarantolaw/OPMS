@@ -11,7 +11,7 @@ def submenu(current_section=0):
         menu_html += '<li><span class="youarehere">iTU-Summary</span></li>\n'
     else:
         menu_html += '<li><a href="/stats/report/summary/">iTU-Summary</a></li>\n'
-    if int(current_section) == 2
+    if int(current_section) == 2:
         menu_html += '<li><span class="youarehere">Feeds</span></li>\n'
     else:
         menu_html += '<li><a href="/stats/report/summary/feeds/">Feeds</a></li>\n'
