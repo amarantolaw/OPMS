@@ -18,6 +18,9 @@ def index(request):
     return render_to_response('stats/base.html', {})
 
 
+#####
+# APPLE/iTU Subviews
+#####
 def summary_index(request):
     "Show the Apple 'Summary' User Action results"
     # return HttpResponse("Summary Report")
@@ -25,6 +28,9 @@ def summary_index(request):
     return render_to_response('stats/reports/summary.html', {'summary_data': summary_data,})
 
 
+#####
+# FEEDS Subviews
+#####
 def summary_feeds(request):
     listing = TrackCount.merged.psuedo_feeds()
     return render_to_response('stats/reports/feeds.html',{'listing':listing})
@@ -127,28 +133,18 @@ def feed_detail(request, partial_guid):
         'listing':listing, 'ref':partial_guid, 'summary':summary
         })
 
-
-
-def summary_items(request):
-    #listing = TrackCount.merged.psuedo_feeds()
-    #return render_to_response('stats/reports/items.html',{'listing':listing})
-    "Show the results for all items"
-    return HttpResponse("Hello World. You're at the ITEMS LISTING page.")
-
-
-
-def item_detail(request, item_id):
-    "Show the results for a given item"
-    return HttpResponse("Hello World. You're at the ITEM DETAIL page.")
-
-
-
-
+#####
+# CONTRIBUTORS Subviews
+#####
 
 def summary_authors(request):
-    "Show a list of all people with a 25.16 role, and the Feed GUIDs associated with them"
-    # return HttpResponse("Hello from the Summary Authors Page")
+    """
+    Show a list of all people with a 25.16 role, the Feed GUIDs associated with them and a count of the iTU downloads.
+    Note: None means that no stats were found for this GUID, whereas 0 means stats found, but no downloads.
+    """
+    # Get a dictionary of GUIDS and their aggregated summed counts
     track_counts = dict((x['guid__guid'], x['count__sum']) for x in TrackCount.objects.values('guid__guid').annotate(Sum('count')))
+    # Now get a list of dictionaries containing all the GUIDs in the FFM
     authors = ffm_models.Person.extended.get_all_guids()
     listing = []
     previous_author = {}
@@ -182,8 +178,9 @@ def summary_authors(request):
             guids = []
     return render_to_response('stats/reports/authors_summary.html',{'listing':listing})
 
-
-
+######
+# URL Monitoring Subviews
+######
 
 def summary_urlmonitoring(request):
     "Show the results for a url monitoring"
@@ -199,48 +196,6 @@ def summary_urlmonitoring(request):
     return render_to_response('stats/reports/url_summary.html', {'summary_listing': summary_listing,})
 
 
-
-
-    # Create a pivot table for Tasks vs URLs
-    # Orientation 0 is tasks on x, urls on y. Anything else is urls on x, tasks on y.
-#    try:
-#        orientation = int(request.GET.get('orientation', 0))
-#    except ValueError:
-#        orientation = 0
-#
-#    tasks = URLMonitorTask.objects.all().order_by('id').select_related('urlmonitorscan_set')
-#    urls = URLMonitorTarget.objects.all().order_by('url')
-#
-#
-#    summary_data = []
-#    if orientation == 0:
-#        for url in urls:
-#            row_data = []
-#            for task in tasks:
-#                scan_count = int(
-#                    # This is SLOW!!!
-#                    task.urlmonitorscan_set.filter(url__exact=url.id).count()
-#                )
-##                if scan_count > 0:
-##                    row_data.append('<a href="">' + str(scan_count) + '</a>')
-##                else:
-#                row_data.append(str(scan_count))
-#            summary_data.append({
-#                'url':'<a href="/stats/report/urlmonitoring/url/' + str(url.id) + '">' + str(url.url) + '</a>',
-#                'data':row_data,
-#                })
-#
-#
-#    # Put column headers and totals into listing array - values, then headings
-#    row_data = []
-#    for task in tasks:
-#        row_data.append('<a href="/stats/report/urlmonitoring/task/' + str(task.id) + '">' + str(task.comment) + '</a>')
-#    summary_data.insert(0,{'url':'', 'data':row_data,})
-#
-#    return render_to_response('stats/reports/url_summary.html', {'summary_data': summary_data,})
-
-
-
 def urlmonitoring_task(request, task_id):
     "Show the results for a url monitoring of a specific task"
     scan_data = URLMonitorScan.objects.filter(task__id__exact=task_id).select_related().order_by('-url__url', 'iteration')
@@ -253,14 +208,6 @@ def urlmonitoring_url(request, url_id):
     scan_data = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')[:6720]
     return render_to_response('stats/reports/url_summary.html', {'scan_data': scan_data,'url_id':url_id})
 
-
-# TEMP FUNCTIONS
-def summary_feeds_cc(request):
-    listing = TrackCount.merged.psuedo_feeds_cc()
-    return render_to_response('stats/reports/feeds-cc.html',{'listing':listing})
-
-def feed_detail_cc(request):
-    return HttpResponse("Hello, world. You're at the feed_detail_cc view.")
 
 ######
 # =================================================================================
