@@ -152,7 +152,7 @@ def summary_authors(request):
     authors = ffm_models.Person.extended.get_all_guids()
     listing = []
     previous_author = {}
-    author_track_count = 0
+    author_track_count = None
     guids = []
     for author in authors:
         try:
@@ -164,7 +164,8 @@ def summary_authors(request):
             'guid': author.get("guid"),
             'count': count
         })
-        author_track_count += count
+        if count is not None:
+            author_track_count += count
         if author.get('last_name') != previous_author.get('last_name','') or \
             author.get('first_name') != previous_author.get('first_name',''): # move onto a clean slate
             listing.append({
@@ -175,7 +176,7 @@ def summary_authors(request):
                 'guids' : guids
             })
             previous_author = author
-            author_track_count = 0
+            author_track_count = None
             guids = []
     return render_to_response('stats/reports/authors_summary.html',{'listing':listing})
 
