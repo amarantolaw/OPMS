@@ -333,15 +333,15 @@ def graph_apple_summary_feeds(request):
         if int(row.get("count")) > 10000000:
             cols.append('#ff0000')
         elif int(row.get("count")) > 1000000:
-            cols.append('#990000')
+            cols.append('#aa0000')
         elif int(row.get("count")) > 100000:
-            cols.append('#333300')
+            cols.append('#666600')
         elif int(row.get("count")) > 10000:
-            cols.append('#009900')
+            cols.append('#00aa00')
         elif int(row.get("count")) > 1000:
             cols.append('#00ff00')
         elif int(row.get("count")) > 100:
-            cols.append('#003333')
+            cols.append('#006666')
         elif int(row.get("count")) > 10:
             cols.append('#000099')
         else:
