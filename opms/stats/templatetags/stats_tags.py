@@ -3,7 +3,7 @@ from django.utils.safestring import mark_safe
 
 register = template.Library()
 
-@register.simple_tag(name="submenu-stats")
+@register.simple_tag
 def submenu(current_section=0):
     menu_html = u'''<h3>Sub sections for Statistics</h3>
     <ul class="level-2">'''
