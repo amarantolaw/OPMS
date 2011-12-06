@@ -1,4 +1,5 @@
 {% extends "ffm/base.html" %}
+{% load ffm_tags %}
 {% block head %}
 {% endblock %}
 
@@ -15,12 +16,7 @@
     </ul>
 </div>
 <div id="mainnav2">
-    <h3>Sub sections for Files &amp; Feeds</h3>
-    <ul class="level-2">
-        <li><a href="/ffm/feeds/">Feeds</a></li>
-        <li><span class="youarehere">Items</span></li>
-        <li><a href="/ffm/people/">People</a></li>
-    </ul>
+    {% submenu 2 %}
 </div>
 {% endblock %}
 
