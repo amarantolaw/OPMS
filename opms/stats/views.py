@@ -151,15 +151,16 @@ def summary_authors(request):
     author_track_count = None
     guids = []
     for author in authors:
-        try:
-            count = int(track_counts.get(author.get("guid","")))
-        except TypeError:
-            count = None
-        guids.append({
-            'name': author.get("title"),
-            'guid': author.get("guid"),
-            'count': count
-        })
+        if author.get("guid") is not None:
+            try:
+                count = int(track_counts.get(author.get("guid","")))
+            except TypeError:
+                count = None
+            guids.append({
+                'name': author.get("title"),
+                'guid': author.get("guid"),
+                'count': count
+            })
         if count is not None:
             if author_track_count is None:
                 author_track_count = 0
