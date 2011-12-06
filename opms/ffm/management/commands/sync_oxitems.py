@@ -81,7 +81,7 @@ class Command(NoArgsCommand):
 
 
         # Import OxItems.Channels
-        oxitems_channels = Rg07Channels.objects.all() # filter(deleted=False)
+        oxitems_channels = Rg07Channels.objects.all().order_by('modified') # filter(deleted=False); Work on basis that most recently edited come last - not quite so critical here?
         total_count = len(oxitems_channels)
         print "Processing OxItems Channel Data into OPMS (" + str(total_count) + " rows to do)"
         for counter, row in enumerate(oxitems_channels):
@@ -303,7 +303,7 @@ class Command(NoArgsCommand):
 
     # Import OxItems.Items, but done on a channel by channel basis
     def _parse_items(self, feed_obj, channel_obj):
-        oxitems = Rg07Items.objects.filter(item_channel=channel_obj)
+        oxitems = Rg07Items.objects.filter(item_channel=channel_obj).order_by('modified') # Order-by: Assume the most recently edited version is the best...?
         print "Found " + str(len(oxitems)) + " OxItems to process for " + str(feed_obj.slug) + " (" + str(feed_obj.id) + ")"
 
         for counter, item_row in enumerate(oxitems):
@@ -453,6 +453,13 @@ class Command(NoArgsCommand):
             file_obj.size = int(oxitem_obj.item_enclosure_length)
         file_obj.duration = int(oxitem_obj.item_duration)
         # TODO: determine file function
+        # Hack - determine if audio or video based on file extension...
+        extension = str(oxitem_obj.item_enclosure_href.split(".")[-1]).lower().strip()
+        if len(extension) < 5:
+            if extension == 'mp3' or extension == 'm4a':
+                file_obj.function = FileFunction.objects.get(pk=4) # Hardcoded for fixture loaded FileFunction Default Audio
+            elif extension == 'mp4' or extension == 'm4v':
+                file_obj.function = FileFunction.objects.get(pk=6) # Hardcoded for fixture loaded FileFunction Default Video
         # TODO: determine file mimetype
         # TODO: determine proper duration and size from the file...
         return file_obj
@@ -498,6 +505,10 @@ class Command(NoArgsCommand):
             else:
                 person_dict["first_name"] = name[0][:50]
             person_dict["last_name"] = name[-1][:50]
+
+            # NOTE: Forcing additional information to lowercase to allow names to be matched case-insensitively.
+            # The actual name should still be accurate in the separate fields though - apart from any "middle" names...
+            person_dict["additional_information"] = person_dict["additional_information"].lower()
 
             # Get or create a person record for this one
             person, created = Person.objects.get_or_create(

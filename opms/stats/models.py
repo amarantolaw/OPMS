@@ -477,6 +477,79 @@ class PreviewCount(models.Model):
 
 
 
+
+######
+# Apple iTunes Store analysis classes
+######
+
+# Log of items in the Top Collections Charts for iTunes U
+#class ITunesChartLog(models.Model):
+#    CHART_TYPE_CHOICES = (
+#        (u'itu-collection', u'Top iTunes U Collections'),
+#        (u'itu-downloads', u'Top iTunes U Downloads'),
+#        (u'ox-itu-downloads', u'Top iTunes U Downloads'),
+#    )
+#    date_created = models.DateTimeField(verbose_name="Date of observation", auto_now_add=True)
+#    chart_type = models.CharField(verbose_name="Name of Chart", max_length=100, choices=CHART_TYPE_CHOICES)
+#    index = models.IntegerField(verbose_name="Chart position")
+#    title = models.CharField(verbose_name="Item Name", max_length=200)
+#    artist = models.CharField(verbose_name="Artist Text", max_length=200)
+#    institution_label = models.CharField(verbose_name="Institution from URL", max_length=100)
+#    institution_id = models.IntegerField(verbose_name="Institution ID", blank=True)
+#    item_url = models.URLField(verbose_name="Item URL in iTunes", blank=True)
+#    artwork_url = models.URLField(verbose_name="Artwork URL in iTunes", blank=True)
+#
+#    def __unicode__(self):
+#        return str(date.strftime(self.date_created,"%Y-%m-%d")) + ": #" + str(self.index) + ")" + \
+#               str(self.title)
+
+
+######
+# URL Monitoring Task/Metrics
+######
+
+#The following models are used in testing a series of urls (Targets) on a periodic basis (Tasks) and
+#recording some simple metrics on the results.
+class URLMonitorTarget(models.Model):
+    url = models.URLField()
+    active = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return str(self.url)
+
+
+class URLMonitorTask(models.Model):
+    comment = models.CharField(max_length=200, default="No Comment Set")
+    completed = models.BooleanField(default=False)
+
+    def iterations(self): # Count the number of Scans related to this task
+        return self.urlmonitorscan_set.count()
+
+    def __unicode__(self):
+        if self.completed:
+            return str(self.comment) + " has completed"
+        else:
+            return str(self.comment) + " has not yet run"
+
+
+class URLMonitorScan(models.Model):
+    task = models.ForeignKey(URLMonitorTask)
+    url = models.ForeignKey(URLMonitorTarget)
+    iteration = models.SmallIntegerField()
+    status_code = models.SmallIntegerField(null=True)
+    ttfb = models.FloatField(null=True)
+    ttlb = models.FloatField(null=True)
+    time_of_request = models.DateTimeField(null=True)
+
+    def __unicode__(self):
+        return str(date.strftime(self.time_of_request,"%Y-%m-%d %H:%i:%s")) + ": "+ str(self.url.url) +\
+               " #" + str(self.iteration) + ": TTFB:" + str(self.ttfb)
+
+
+
+
+
+
 ######
 # Apache log analysis classes
 ######

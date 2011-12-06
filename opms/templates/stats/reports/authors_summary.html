@@ -1,0 +1,71 @@
+{% extends "stats/base.html" %}
+{% load static stats_tags %}
+{% get_static_prefix as STATIC_PREFIX %}
+{% block head %}
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-1.6.4.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
+{% endblock %}
+
+{% block title %}Summary List of Authors and iTU Stats{% endblock %}
+
+{% block navbar %}
+<div id="mainnav">
+    <h2>Main sections</h2>
+    <ul class="level-1">
+        <li><a href="/">Home</a></li>
+        <li><a href="/admin/">Admin</a></li>
+        <li><a href="/ffm/">Files &amp; Feeds</a></li>
+        <li><a href="/stats/" class="currentsection">Statistics</a></li>
+    </ul>
+</div>
+<div id="mainnav2">
+    {% submenu 3 %}
+</div>
+{% endblock %}
+
+{% block breadcrumb %}&gt; <a href="/stats/">Statistics</a> &gt; Contributor Stats{% endblock %}
+
+{% block content %}
+<h1>Summary List of Authors and Related GUIDs</h1>
+
+{% if listing %}
+<script>
+$(document).ready(function()
+    {
+        $("#summaryTable").tablesorter( {} );
+    }
+);
+</script>
+
+<h3>Results table</h3>
+<table id="summaryTable" class="tablesorter">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Total</th>
+            <th>GUID</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in listing %}
+        <tr>
+            <td>{{ row.titles }}</td>
+            <td>{{ row.first_name }}</td>
+            <td>{{ row.last_name }}</td>
+            <td>{{ row.total_count }}</td>
+            <td><ul>{% for track in row.guids %}
+                    <li>{{ track.name }} [{{ track.guid }}] = {{ track.count }}</li>
+                {% endfor %}</ul>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Data is missing</p>
+{% endif %}
+
+
+{% endblock %}

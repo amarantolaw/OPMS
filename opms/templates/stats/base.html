@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load stats_tags%}
 {% block title %}Statistics{% endblock %}
 
 {% block navbar %}
@@ -12,11 +13,7 @@
     </ul>
 </div>
 <div id="mainnav2">
-    <h3>Sub sections for Statistics</h3>
-    <ul class="level-2">
-        <li><a href="/stats/report/summary/">Summary</a></li>
-        <li><a href="/stats/report/summary/feeds/">Feeds</a></li>
-    </ul>
+    {% submenu %}
 </div>
 {% endblock %}
 

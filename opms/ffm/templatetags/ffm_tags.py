@@ -26,3 +26,23 @@ def _format(icon, withhold):
         return mark_safe(u'<span style="color:#bbb;">' + str(icon) + '</span>')
     else:
         return mark_safe(u'<span style="color:#f00;">' + str(icon) + '</span>')
+
+
+@register.simple_tag
+def submenu(current_section=0):
+    menu_html = u'''<h3>Sub sections for Files and Feeds</h3>
+    <ul class="level-2">'''
+    if int(current_section) == 1:
+        menu_html += '<li><span class="youarehere">Feeds</span></li>\n'
+    else:
+        menu_html += '<li><a href="/ffm/feeds/">Feeds</a></li>\n'
+    if int(current_section) == 2:
+        menu_html += '<li><span class="youarehere">Items</span></li>\n'
+    else:
+        menu_html += '<li><a href="/ffm/items/">Items</a></li>\n'
+    if int(current_section) == 3:
+        menu_html += '<li><span class="youarehere">People</span></li>\n'
+    else:
+        menu_html += '<li><a href="/ffm/people/">People</a></li>\n'
+    menu_html += '</ul>'
+    return mark_safe(menu_html)

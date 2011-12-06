@@ -1,8 +1,10 @@
 {% extends "stats/base.html" %}
+{% load static stats_tags %}
+{% get_static_prefix as STATIC_PREFIX %}
 {% block head %}
-    <script src="/static/scripts/jquery-1.6.4.min.js"></script>
-    <script src="/static/scripts/jquery.tablesorter.min.js"></script>
-    <script src="/static/scripts/jquery-ui-1.8.13.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-1.6.4.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
 {% endblock %}
 
 {% block title %}Summary Data from Apple iTU Reporting{% endblock %}
@@ -18,11 +20,7 @@
     </ul>
 </div>
 <div id="mainnav2">
-    <h3>Sub sections for Statistics</h3>
-    <ul class="level-2">
-        <li><span class="youarehere">Summary</span></li>
-        <li><a href="feeds/">Feeds</a></li>
-    </ul>
+    {% submenu 1 %}
 </div>
 {% endblock %}
 
