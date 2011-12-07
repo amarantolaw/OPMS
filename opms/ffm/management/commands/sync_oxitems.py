@@ -200,7 +200,7 @@ class Command(NoArgsCommand):
             unit, created = Unit.objects.get_or_create(name=oucs_unit,
                                                    defaults={'name':oucs_unit, 'oxpoints_id': oxpoint})
             if created:
-                self._debug("New Unit created, id[%s] = %s : %s" % (unit.id, unit.name, unit.oxpoint_id))
+                self._debug("New Unit created, id[%s] = %s : %s" % (unit.id, unit.name, unit.oxpoints_id))
                 unit.save()
             else:
                 self._debug("Unit found for '%s', id: %s." % (unit.name, unit.id))
