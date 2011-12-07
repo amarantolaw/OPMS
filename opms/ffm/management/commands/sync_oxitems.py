@@ -198,7 +198,7 @@ class Command(NoArgsCommand):
         self._debug("_get_or_create_owning_unit(%s) found oxpoint of: %s" % (oucs_unit, oxpoint))
         if oxpoint.isdigit():
             unit, created = Unit.objects.get_or_create(name=oucs_unit,
-                                                   defaults={'name':oucs_unit, 'oxpoint_id': oxpoint})
+                                                   defaults={'name':oucs_unit, 'oxpoints_id': oxpoint})
             if created:
                 self._debug("New Unit created, id[%s] = %s : %s" % (unit.id, unit.name, unit.oxpoint_id))
                 unit.save()
