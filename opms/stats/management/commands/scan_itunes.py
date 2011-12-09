@@ -46,20 +46,22 @@ class Command(LabelCommand):
 
             # TODO: Check that the pattern of the URL looks like what we expect of an institutional url
             # TODO: Get the institutions collections
-            collection = itunes.get_institution_collections(url)
+            #collection = itunes.get_institution_collections(url)
             # TODO: Iterate, parse and store the items from the collection
-            series = itunes.get_collection_items(series_url)
+            #series = itunes.get_collection_items(series_url)
+            print comment
         elif mode == 2:
             comment = "Scan of an Top Collections Chart from %s" % url
             self._errorlog("Log started for: %s" % comment)
+            print comment
 
         elif mode == 3:
             comment = "Scan of an Top Downloads Chart from %s" % url
             self._errorlog("Log started for: %s" % comment)
+            print comment
         else:
             comment = "We shouldn't ever get this scan..."
-
-
+            print comment
 
 
         print "\nScan iTunes finished at " + str(datetime.datetime.utcnow())
