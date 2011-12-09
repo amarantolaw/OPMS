@@ -28,9 +28,16 @@ class Command(BaseCommand):
 
     def handle(self, url = None,**options):
         # Some basic error checking
-        mode = options.get("mode",1)
-        if not mode.isdigit() or mode < 1 or mode > 3:
-           raise CommandError("""Please specify a mode for this scan.
+        try:
+            mode = int(options.get("mode",1))
+        except TypeError:
+            raise CommandError("""Please specify a mode for this scan.
+               1) Scan an institution's collection
+               2) Scan the Top Collections chart
+               3) Scan the Top Downloads chart
+               """)
+        if mode < 1 or mode > 3:
+            raise CommandError("""Please specify a mode for this scan.
                1) Scan an institution's collection
                2) Scan the Top Collections chart
                3) Scan the Top Downloads chart
