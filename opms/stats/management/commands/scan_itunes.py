@@ -32,7 +32,7 @@ class Command(BaseCommand):
             raise CommandError("Please specify the url to scan.")
         try:
             mode = int(options.get("mode",1))
-        except TypeError:
+        except ValueError:
             raise CommandError("""Please specify a valid mode for this scan.
                1) Scan an institution's collection
                2) Scan the Top Collections chart
