@@ -450,14 +450,6 @@ class Command(LabelCommand):
         else:
             fr.argument_string = ""
         
-        # Crude file typing (in lieu of an actual file database...)
-        # Take the last three letters of the filename and compare to known types
-        ft = fr.uri_string[-3:].lower()
-        fr.file_type = ""
-        for item in FileRequest.FILE_TYPE_CHOICES:
-            if ft == item[0]:
-                fr.file_type = ft
-        
         # Attempt to locate in memory cache
         for item in self.cache_file_request:
             if item.method == fr.method and item.uri_string == fr.uri_string and \
