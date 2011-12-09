@@ -4,15 +4,15 @@
 from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
 from opms.stats.models import *
-from opms.utils import *
+from opms.stats.utils import itunes as itunes
 import datetime, sys, urllib2, time
 
 
 class Command(LabelCommand):
-    help = 'Scan through URL Monitor Target entries and generate new Tasks'
+    help = 'Scan iTunes U Service (1:Institutional collection; 2:Top Collections; 3:Top Downloads)'
     option_list = LabelCommand.option_list + (
-        make_option('--iterations', action='store', dest='iterations',
-            default=10, help='Specify a number of iterations each URLs is to be scanned'),
+#        make_option('--iterations', action='store', dest='iterations',
+#            default=10, help='Specify a number of iterations each URLs is to be scanned'),
     )
 
     def __init__(self):
@@ -24,44 +24,45 @@ class Command(LabelCommand):
 
         super(Command, self).__init__()
 
-
-    def handle_label(self, comment = '', **options):
-        print "Scan URLs started at " + str(datetime.datetime.utcnow()) + "\n"
+    def handle_label(self, mode = 0, url = '',**options):
+        print "Scan iTunes started at " + str(datetime.datetime.utcnow()) + "\n"
 
         # Some basic checking
-        if comment == '':
-           raise CommandError("Please specify a comment for this scan.\n\n")
-
-        iterations = int(options.get('iterations', 10))
+        if not mode.isdigit() or mode < 1 or mode > 3:
+           raise CommandError("""Please specify a mode for this scan.\n\n
+               1) Scan an institution's collection\n
+               2) Scan the Top Collections chart\n
+               3) Scan the Top Downloads chart
+               """)
+        if url == '':
+            raise CommandError("Please specify the url to scan.")
 
         # Create an error log
-        self._errorlog_start('scan_urls.log')
-        self._errorlog("Log started for: " + comment)
+        self._errorlog_start('scan_itunes.log')
 
-        t = URLMonitorTask()
-        t.comment = str(comment)
-        t.save()
+        if mode == 1:
+            comment = "Scan of an Institution's collection from %s" % url
+            self._errorlog("Log started for: %s" % comment)
 
-        targets = URLMonitorTarget.objects.filter(active__exact=True)
-        count = 1
-        for iter in range(1,iterations+1):
-            for target in targets:
-                s = URLMonitorScan()
-                s.url = target
-                s.task = t
-                s.iteration = iter
-                try:
-                    s.status_code, s.time_of_request, s.ttfb, s.ttlb = self.scan_url(target.url)
-                except urllib2.HTTPError, e:
-                    s.status_code = e.code
-                    s.time_of_request = datetime.datetime.utcnow()
-                s.save()
-                count += 1
-        out_str = str(count-1) + " scans performed (" + str(iterations) + " iterations of " + str(len(targets)) + " urls)"
-        print out_str
-        self._errorlog(out_str)
+            # TODO: Check that the pattern of the URL looks like what we expect of an institutional url
+            # TODO: Get the institutions collections
+            collection = itunes.get_institution_collections(url)
+            # TODO: Iterate, parse and store the items from the collection
+            series = itunes.get_collection_items(series_url)
+        elif mode == 2:
+            comment = "Scan of an Top Collections Chart from %s" % url
+            self._errorlog("Log started for: %s" % comment)
 
-        print "\nScan URLs finished at " + str(datetime.datetime.utcnow())
+        elif mode == 3:
+            comment = "Scan of an Top Downloads Chart from %s" % url
+            self._errorlog("Log started for: %s" % comment)
+        else:
+            comment = "We shouldn't ever get this scan..."
+
+
+
+
+        print "\nScan iTunes finished at " + str(datetime.datetime.utcnow())
 
         # Write the error cache to disk
         self._error_log_save()
@@ -70,20 +71,6 @@ class Command(LabelCommand):
         return None
 
 
-    def scan_url(self, url):
-        USER_AGENT = 'OPMS/1.0 (Ubuntu 10.04; Virtual Server) Django/1.3.1'
-        request = urllib2.Request(url)
-        request.add_header('User-Agent', USER_AGENT)
-        opener = urllib2.build_opener()
-        time_of_request = datetime.datetime.utcnow()
-        start = time.time()
-        request = opener.open(request)
-        ttfb = time.time() - start
-        output = request.read()
-        status = 200 # Presumed because there would be an error otherwise
-        ttlb = time.time() - start
-        print str(time_of_request) + ":" + url + " - TTFB=" + str(ttfb) + " - TTLB=" + str(ttlb)
-        return status, time_of_request, ttfb, ttlb
 
 
     # DEBUG AND INTERNAL HELP METHODS ==============================================================

@@ -713,6 +713,9 @@ class LogEntry(models.Model):
     # This needs to be optional, as there may 0-n tracking tags on this entry
     tracking = models.ManyToManyField(Tracking, verbose_name="tracking on this entry")
 
+    def status_code_string(self):
+        return self.STATUS_CODE_CHOICES.get(self.status_code,'')
+
     def __unicode__(self):
         return '%s:%s' % (self.time_of_request,self.file_request)
 
