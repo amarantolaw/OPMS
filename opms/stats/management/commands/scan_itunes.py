@@ -28,22 +28,22 @@ class Command(BaseCommand):
 
     def handle(self, url = None,**options):
         # Some basic error checking
+        if url is None:
+            raise CommandError("Please specify the url to scan.")
         try:
             mode = int(options.get("mode",1))
         except TypeError:
-            raise CommandError("""Please specify a mode for this scan.
+            raise CommandError("""Please specify a valid mode for this scan.
                1) Scan an institution's collection
                2) Scan the Top Collections chart
                3) Scan the Top Downloads chart
                """)
         if mode < 1 or mode > 3:
-            raise CommandError("""Please specify a mode for this scan.
+            raise CommandError("""Please specify a valid mode for this scan.
                1) Scan an institution's collection
                2) Scan the Top Collections chart
                3) Scan the Top Downloads chart
                """)
-        if url is None:
-            raise CommandError("Please specify the url to scan.")
 
         print "Scan iTunes started at " + str(datetime.datetime.utcnow()) + "\n"
         # Create an error log
