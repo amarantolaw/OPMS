@@ -12,7 +12,7 @@ class Command(BaseCommand):
     help = 'Scan iTunes U Service (1:Institutional collection <default>; 2:Top Collections; 3:Top Downloads)'
     args = "<url>"
     label = "url"
-    option_list = LabelCommand.option_list + (
+    option_list = BaseCommand.option_list + (
         make_option('--mode', action='store', dest='mode',
             default=1, help='Specify the type of scan to be done (1,2,3)'),
     )
