@@ -192,7 +192,6 @@ class Command(NoArgsCommand):
 
 
     def _get_or_create_owning_unit(self, oucs_unit=''):
-        # TODO: Work out how to determine owning units for these objects, both Items and FeedGroups
         # Find the Oxpoints reference (id number only), then do a Unit get or create
         oxpoint = self.oxpoints.get(oucs_unit,'').split("/")[-1] #Does this unit tag exist in the oxpoints dict?
         self._debug("_get_or_create_owning_unit(%s) found oxpoint of: %s" % (oucs_unit, oxpoint))

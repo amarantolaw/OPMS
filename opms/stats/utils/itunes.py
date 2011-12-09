@@ -1,7 +1,7 @@
 import urllib2, plistlib
 from xml.parsers import expat
-from BeautifulSoup import BeautifulSoup
 from lxml import etree
+#from BeautifulSoup import BeautifulSoup
 
 # First, Apple-store-front is sensitive to use of comma to separate values
 # Default language code appears to be 0, which returns XHTML. Apart from on homepage which gives a redirect plist
@@ -86,7 +86,7 @@ def write_page(url, language = 1, filename=''):
 
 # Get Collection info
 def get_collection_info(url):
-    print "get_collection_info(%s) called" % url
+    # print "get_collection_info(%s) called" % url
     info = {}
     try:
         xml = get_page(url)
@@ -147,7 +147,7 @@ def get_topdownloads(url):
         item_dict['series_img_75'] = subtree[0].get("url")
         subtree = item.xpath('.//itms:TextView/itms:SetFontStyle/itms:GotoURL',
                              namespaces={'itms':'http://www.apple.com/itms/'})
-        item_dict['item_name'] = subtree[0].text.strip()
+        item_dict['item'] = subtree[0].text.strip()
         item_dict['item_url'] = subtree[0].get("url")
         item_dict['item_id'] = item_dict['item_url'].split('/')[-1].split('?')[-1].split('=')[-1]
         # item_dict['item_info'] = get_collection_info(item_dict.get('item_url'))
@@ -166,45 +166,40 @@ def get_topcollections(url):
     for i,item in enumerate(items): # Now have a mix of HBoxViews and Views, around 100 of each...
         # print i
         # print int(float(item[0][0].text))
+        item_dict = {}
         sub = item.xpath('.//itms:TextView/itms:SetFontStyle/itms:GotoURL',
                          namespaces={'itms':'http://www.apple.com/itms/'})
-        collection.append({
-            'chart_position': int(float(item[0][0].text)),
-            'series_img_75': item[2][0][0][0][0].get("url"),
-            'series': sub[0].text.strip(),
-            'series_url': sub[0].get("url"),
-            'publisher_name': sub[1].text.strip(),
-            'institution': sub[1].get("draggingName"),
-            'institution_url': sub[1].get("url"),
-            'genre': sub[2].get("draggingName"), # Saves cutting off "Category:"
-            'genre_url': sub[2].get("url"),
-            })
+        item_dict['chart_position'] = int(float(item[0][0].text)) # Somewhat hacky...
+        item_dict['series_img_75'] = item[2][0][0][0][0].get("url")
+        item_dict['publisher_name'] = sub[1].text.strip()
+        item_dict = dict(item_dict.items() + get_collection_info(sub[0].get("url")).items())
+        collection.append(item_dict)
     return collection
 
 
-# Parse Oxford Collections
-# Show Oxford Top Collections (aka list all Oxford feeds in order of downloads)
-url = 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=381699182' # Redirects to --->
-url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?id=381699182"
-# Ox results sorted by video? It isn't just video results, it's all results (link from xml of the above page)
-url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?id=381699182&subMediaType=Video"
-# Ox results sorted by audio? (link from xml of the above page) ... but then, the pagination urls suggest this query isn't fully supported
-url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?id=381699182&subMediaType=Audio"
-
-# Sort by:
-# Album Name - Duff URL
-url="http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=0&amp;id=381699182&amp;mt=10"
-# Bestsellers - DEFAULT for Top Collections
-url="http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&amp;id=381699182&amp;mt=10"
-# Release Date - Duff URL
-url="http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=2&amp;id=381699182&amp;mt=10"
-
-# Data is paginated (21 results per xml page), so followup URLS look like...
-url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=1&mt=10" # First follow-on call... Note SortMode
-url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=2&mt=10"
-url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=12&mt=10"
-url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=13&mt=10"
-url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=14&mt=10" # For a 15 page result, batchNumber 14 is last call
+## Parse Oxford Collections
+## Show Oxford Top Collections (aka list all Oxford feeds in order of downloads)
+#url = 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=381699182' # Redirects to --->
+#url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?id=381699182"
+## Ox results sorted by video? It isn't just video results, it's all results (link from xml of the above page)
+#url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?id=381699182&subMediaType=Video"
+## Ox results sorted by audio? (link from xml of the above page) ... but then, the pagination urls suggest this query isn't fully supported
+#url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?id=381699182&subMediaType=Audio"
+#
+## Sort by:
+## Album Name - Duff URL
+#url="http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=0&amp;id=381699182&amp;mt=10"
+## Bestsellers - DEFAULT for Top Collections
+#url="http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&amp;id=381699182&amp;mt=10"
+## Release Date - Duff URL
+#url="http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=2&amp;id=381699182&amp;mt=10"
+#
+## Data is paginated (21 results per xml page), so followup URLS look like...
+#url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=1&mt=10" # First follow-on call... Note SortMode
+#url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=2&mt=10"
+#url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=12&mt=10"
+#url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=13&mt=10"
+#url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=14&mt=10" # For a 15 page result, batchNumber 14 is last call
 
 def get_institution_collections(url):
     collection = []
@@ -221,9 +216,23 @@ def get_institution_collections(url):
     items = root.xpath('.//itms:VBoxView/itms:VBoxView/itms:VBoxView/itms:HBoxView/itms:VBoxView/itms:GotoURL/itms:PictureButtonView[@alt="next page"]/../@url',namespaces={'itms':'http://www.apple.com/itms/'}) # Looking for the follow on page links...
     if len(items) == 1:
         next_page_url = items[0]
-        print 'Next URL is: %s' % next_page_url
+        # print 'Next URL is: %s' % next_page_url
         collection = collection + get_institution_collections(next_page_url)
     return collection
+
+
+def get_collection_items(url):
+    try:
+        xml = get_page(url)
+    except ValueError: # If there's a bad URL, skip this link
+        return stats
+    if xml == None:
+        return stats
+    root = etree.fromstring(xml)
+    # Get the tracklisting for this collection
+    items = root.xpath('.//itms:TrackList',namespaces={'itms':'http://www.apple.com/itms/'})
+    plist = plistlib.readPlistFromString(etree.tostring(items[0]))
+    return plist.get('items')
 
 
 # Get data about a single collection, in this instance Critical Reasoning for Begineers (Audio)
@@ -347,134 +356,135 @@ def get_overall_statistics(url):
     # print stats
     return None
 
-# Oxford University
-url = 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=381699182'
-# Open University
-url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=380206132"
-# UCL
-url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=390402969"
-# Cambridge
-url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=380451095"
-# Warwick
-url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=407474356"
-# Nottingham
-url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=396415869"
-
-# UC Berkeley - Most of their feeds don't report all the data!
-url = 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=354813951'
-# MIT
-url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=341593265"
-# Yale
-url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=341649956"
-# Stanford
-url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=384228265"
-
-    
-{
-    'anonymous': True,
-    'artistName': 'Marianne Talbot',
-    'buyParams': 'http://deimos.apple.com/WebObjects/Core.woa/DownloadTrack/ox-ac-uk-public-dz.4486656253.04486656255.4486656318',
-    'description': 'Part six of a six-part series on critical reasoning. In this final lecture we will look at fallacies. These are bad arguments that can easily be mistaken for good arguments. Creative Commons Attribution-Non-Commercial-Share Alike 2.0 UK: England & Wales;',
-    'duration': 3423000,  # Value in Milliseconds!
-    'explicit': 0,
-    'feedURL': 'https://deimos.apple.com/WebObjects/Core.woa/Feed/ox-ac-uk-public-dz.4486656253.04486656255',
-    'fileExtension': 'mp3',
-    'genre': 'Philosophy',
-    'isEpisode': False,
-    'itemId': 86181490,
-    'kind': 'unknown',
-    'longDescription': 'Part six of a six-part series on critical reasoning. In this final lecture we will look at fallacies. These are bad arguments that can easily be mistaken for good arguments. Creative Commons Attribution-Non-Commercial-Share Alike 2.0 UK: England & Wales; http://creativecommons.org/licenses/by-nc-sa/2.0/uk/',
-    'playlistId': 387875756,
-    'playlistName': 'Critical Reasoning for Beginners',
-    'popularity': '0.0',
-    'previewLength': 3423,
-    'previewURL': 'http://deimos.apple.com/WebObjects/Core.woa/DownloadRedirectedTrackPreview/ox-ac-uk-public-dz.4486656253.04486656255.4486656318.mp3',
-    'price': 0,
-    'priceDisplay': 'Free',
-    'rank': 11,
-    'releaseDate': '2010-03-18T11:02:29Z',
-    's': 1000000,
-    'songName': 'Evaluating Arguments Part Two',
-    'url': 'http://itunes.apple.com/gb/itunes-u/evaluating-arguments-part/id387875756?i=86181490'
-}
-
-{
-    'anonymous': True,
-    'artistName': 'Marianne Talbot',
-    'buyParams': 'http://deimos.apple.com/WebObjects/Core.woa/DownloadTrack/ox-ac-uk-public-dz.4486656253.04486656255.4486656324',
-    'description': 'Part six of a six-part series on critical reasoning. In this final lecture we will look at fallacies. These are bad arguments that can easily be mistaken for good arguments. Creative Commons Attribution-Non-Commercial-Share Alike 2.0 UK: England & Wales;',
-    # DURATION MISSING
-    'explicit': 0,
-    'feedURL': 'https://deimos.apple.com/WebObjects/Core.woa/Feed/ox-ac-uk-public-dz.4486656253.04486656255',
-    'fileExtension': 'pdf',
-    'genre': 'Philosophy',
-    'isEpisode': False,
-    'itemId': 86181487,
-    'kind': 'pdf',
-    'longDescription': 'Part six of a six-part series on critical reasoning. In this final lecture we will look at fallacies. These are bad arguments that can easily be mistaken for good arguments. Creative Commons Attribution-Non-Commercial-Share Alike 2.0 UK: England & Wales; http://creativecommons.org/licenses/by-nc-sa/2.0/uk/',
-    'playlistId': 387875756,
-    'playlistName': 'Critical Reasoning for Beginners',
-    'popularity': '0.0',
-    'previewLength': 0,
-    'previewURL': 'http://deimos.apple.com/WebObjects/Core.woa/DownloadRedirectedTrackPreview/ox-ac-uk-public-dz.4486656253.04486656255.4486656324.pdf',
-    'price': 0,
-    'priceDisplay': 'Free',
-    'rank': 12,
-    'releaseDate': '2010-03-18T11:02:29Z',
-    's': 1000000,
-    'songName': 'Evaluating Arguments Part Two (slides)',
-    'url': 'http://itunes.apple.com/gb/itunes-u/evaluating-arguments-part/id387875756?i=86181487'
-}
-
-
-
-# Universities and Colleges Listing
-url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewiTunesUProviders?id=EDU" # -->
-url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewGrouping?id=27753&mt=10&s=143444" # ??? This is the front page
-
-# iTunes U Homepage
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewGenre?id=40000000' # PList returned sometimes, redirecting to...
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewGrouping?id=27753&mt=10&s=143444' # xml data???
-
-# Noteworthy - See All link
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewRoom?fcId=433198506&amp;genreIdString=40000000&amp;mediaTypeString=iTunes+U'
-
-# Show Oxford on iTunes U (Homepage)
-url = 'http://itunes.apple.com/gb/institution/oxford-university/id381699182'
-
-
-
-
-# Show an Oxford Series (New Depression)
-url = 'http://itunes.apple.com/gb/itunes-u/the-new-psychology-depression/id474787597' # Redirects to...
-url = 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewPodcast?cc=gb&id=474787597'
-# Looking for rating of Series...
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/customerReviews?displayable-kind=4&id=474787597'
-
-# View "For History Buffs" . Note, these seem to be called "Rooms"
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewRoom?fcId=433198516&amp;genreIdString=40000000&amp;mediaTypeString=iTunes+U'
-#... same but Language Learning with Emory University
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewRoom?fcId=433198510&amp;genreIdString=40000000&amp;mediaTypeString=iTunes+U'
-
-# Block adverts ("Bricks") - Second set
-# Intro College Courses
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewMultiRoom?fcId=451295083&amp;s=143444'
-# Business
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewGenre?id=40000001&amp;mt=10'
-# Language
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewGenre?id=40000056&amp;mt=10'
-# Health and Medicine
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewGenre?id=40000026&amp;mt=10'
-# STEM Education
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewMultiRoom?fcId=421972407&amp;s=143444'
-
-# Block adverts/Bricks - First set
-# William Shakespeare
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewMultiRoom?fcId=473868067&amp;s=143444'
-# The Middle East
-url = 'http://itunes.apple.com/gb/collection/the-middle-east/id27753?fcId=439695493&amp;mt=10'
-# Ancient Greece and Rome
-url = 'http://itunes.apple.com/gb/collection/ancient-greece-rome/id27753?fcId=395458516&amp;mt=10'
+### Institutional Collections
+## Oxford University
+#url = 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=381699182'
+## Open University
+#url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=380206132"
+## UCL
+#url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=390402969"
+## Cambridge
+#url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=380451095"
+## Warwick
+#url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=407474356"
+## Nottingham
+#url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=396415869"
+#
+## UC Berkeley - Most of their feeds don't report all the data!
+#url = 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=354813951'
+## MIT
+#url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=341593265"
+## Yale
+#url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=341649956"
+## Stanford
+#url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=384228265"
+#
+#
+#{
+#    'anonymous': True,
+#    'artistName': 'Marianne Talbot',
+#    'buyParams': 'http://deimos.apple.com/WebObjects/Core.woa/DownloadTrack/ox-ac-uk-public-dz.4486656253.04486656255.4486656318',
+#    'description': 'Part six of a six-part series on critical reasoning. In this final lecture we will look at fallacies. These are bad arguments that can easily be mistaken for good arguments. Creative Commons Attribution-Non-Commercial-Share Alike 2.0 UK: England & Wales;',
+#    'duration': 3423000,  # Value in Milliseconds!
+#    'explicit': 0,
+#    'feedURL': 'https://deimos.apple.com/WebObjects/Core.woa/Feed/ox-ac-uk-public-dz.4486656253.04486656255',
+#    'fileExtension': 'mp3',
+#    'genre': 'Philosophy',
+#    'isEpisode': False,
+#    'itemId': 86181490,
+#    'kind': 'unknown',
+#    'longDescription': 'Part six of a six-part series on critical reasoning. In this final lecture we will look at fallacies. These are bad arguments that can easily be mistaken for good arguments. Creative Commons Attribution-Non-Commercial-Share Alike 2.0 UK: England & Wales; http://creativecommons.org/licenses/by-nc-sa/2.0/uk/',
+#    'playlistId': 387875756,
+#    'playlistName': 'Critical Reasoning for Beginners',
+#    'popularity': '0.0',
+#    'previewLength': 3423,
+#    'previewURL': 'http://deimos.apple.com/WebObjects/Core.woa/DownloadRedirectedTrackPreview/ox-ac-uk-public-dz.4486656253.04486656255.4486656318.mp3',
+#    'price': 0,
+#    'priceDisplay': 'Free',
+#    'rank': 11,
+#    'releaseDate': '2010-03-18T11:02:29Z',
+#    's': 1000000,
+#    'songName': 'Evaluating Arguments Part Two',
+#    'url': 'http://itunes.apple.com/gb/itunes-u/evaluating-arguments-part/id387875756?i=86181490'
+#}
+#
+#{
+#    'anonymous': True,
+#    'artistName': 'Marianne Talbot',
+#    'buyParams': 'http://deimos.apple.com/WebObjects/Core.woa/DownloadTrack/ox-ac-uk-public-dz.4486656253.04486656255.4486656324',
+#    'description': 'Part six of a six-part series on critical reasoning. In this final lecture we will look at fallacies. These are bad arguments that can easily be mistaken for good arguments. Creative Commons Attribution-Non-Commercial-Share Alike 2.0 UK: England & Wales;',
+#    # DURATION MISSING
+#    'explicit': 0,
+#    'feedURL': 'https://deimos.apple.com/WebObjects/Core.woa/Feed/ox-ac-uk-public-dz.4486656253.04486656255',
+#    'fileExtension': 'pdf',
+#    'genre': 'Philosophy',
+#    'isEpisode': False,
+#    'itemId': 86181487,
+#    'kind': 'pdf',
+#    'longDescription': 'Part six of a six-part series on critical reasoning. In this final lecture we will look at fallacies. These are bad arguments that can easily be mistaken for good arguments. Creative Commons Attribution-Non-Commercial-Share Alike 2.0 UK: England & Wales; http://creativecommons.org/licenses/by-nc-sa/2.0/uk/',
+#    'playlistId': 387875756,
+#    'playlistName': 'Critical Reasoning for Beginners',
+#    'popularity': '0.0',
+#    'previewLength': 0,
+#    'previewURL': 'http://deimos.apple.com/WebObjects/Core.woa/DownloadRedirectedTrackPreview/ox-ac-uk-public-dz.4486656253.04486656255.4486656324.pdf',
+#    'price': 0,
+#    'priceDisplay': 'Free',
+#    'rank': 12,
+#    'releaseDate': '2010-03-18T11:02:29Z',
+#    's': 1000000,
+#    'songName': 'Evaluating Arguments Part Two (slides)',
+#    'url': 'http://itunes.apple.com/gb/itunes-u/evaluating-arguments-part/id387875756?i=86181487'
+#}
+#
+#
+#
+## Universities and Colleges Listing
+#url = "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewiTunesUProviders?id=EDU" # -->
+#url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewGrouping?id=27753&mt=10&s=143444" # ??? This is the front page
+#
+## iTunes U Homepage
+#url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewGenre?id=40000000' # PList returned sometimes, redirecting to...
+#url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewGrouping?id=27753&mt=10&s=143444' # xml data???
+#
+## Noteworthy - See All link
+#url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewRoom?fcId=433198506&amp;genreIdString=40000000&amp;mediaTypeString=iTunes+U'
+#
+## Show Oxford on iTunes U (Homepage)
+#url = 'http://itunes.apple.com/gb/institution/oxford-university/id381699182'
+#
+#
+#
+#
+## Show an Oxford Series (New Depression)
+#url = 'http://itunes.apple.com/gb/itunes-u/the-new-psychology-depression/id474787597' # Redirects to...
+#url = 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewPodcast?cc=gb&id=474787597'
+## Looking for rating of Series...
+#url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/customerReviews?displayable-kind=4&id=474787597'
+#
+## View "For History Buffs" . Note, these seem to be called "Rooms"
+#url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewRoom?fcId=433198516&amp;genreIdString=40000000&amp;mediaTypeString=iTunes+U'
+##... same but Language Learning with Emory University
+#url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewRoom?fcId=433198510&amp;genreIdString=40000000&amp;mediaTypeString=iTunes+U'
+#
+## Block adverts ("Bricks") - Second set
+## Intro College Courses
+#url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewMultiRoom?fcId=451295083&amp;s=143444'
+## Business
+#url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewGenre?id=40000001&amp;mt=10'
+## Language
+#url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewGenre?id=40000056&amp;mt=10'
+## Health and Medicine
+#url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewGenre?id=40000026&amp;mt=10'
+## STEM Education
+#url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewMultiRoom?fcId=421972407&amp;s=143444'
+#
+## Block adverts/Bricks - First set
+## William Shakespeare
+#url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewMultiRoom?fcId=473868067&amp;s=143444'
+## The Middle East
+#url = 'http://itunes.apple.com/gb/collection/the-middle-east/id27753?fcId=439695493&amp;mt=10'
+## Ancient Greece and Rome
+#url = 'http://itunes.apple.com/gb/collection/ancient-greece-rome/id27753?fcId=395458516&amp;mt=10'
 
 
 

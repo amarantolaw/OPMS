@@ -364,7 +364,7 @@ class TrackHandle(models.Model):
 class TrackGUID(models.Model):
     guid = models.CharField("GUID", max_length=255, db_index=True, unique=True)
     # Eventually there will be a link here to a File record from the FFM module
-    file = models.ForeignKey(ffm_models.File, null=True)
+    # file = models.ForeignKey(ffm_models.File, null=True)
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
 
     def __unicode__(self):
@@ -619,7 +619,7 @@ class FileRequest(models.Model):
     argument_string = models.TextField("arguments in request string")
     protocol = models.CharField("request protocol", max_length=20)
     # Eventually there will be a link here to a File record from the FFM module
-    file = models.ForeignKey(ffm_models.File, null=True)
+    # file = models.ForeignKey(ffm_models.File, null=True)
 
     def __unicode__(self):
         return self.uri_string
@@ -715,3 +715,102 @@ class LogEntry(models.Model):
 
     def __unicode__(self):
         return '%s:%s' % (self.time_of_request,self.file_request)
+
+
+
+
+
+
+
+######
+# iTU Store analysis classes
+######
+
+class ItuGenre(models.Model):
+    name = models.CharField(max_length=255)
+    itu_id = models.IntegerField()
+    url = models.URLField()
+
+    def __unicode__(self):
+        return 'Genre: %s=%s' % (self.name,self.url)
+
+class ItuInstitution(models.Model):
+    name = models.CharField(max_length=255)
+    itu_id = models.IntegerField()
+    url = models.URLField()
+    # Institutional Stats - to be done as methods
+
+    def __unicode__(self):
+        return 'Institution: %s=%s' % (self.name,self.url)
+
+class ItuSeries(models.Model):
+    name = models.CharField(max_length=255)
+    itu_id = models.IntegerField()
+    img170 = models.URLField(null=True)
+    img75 = models.URLField(null=True)
+    url = models.URLField()
+    language = models.CharField(max_length=100)
+    last_modified = models.DateField()
+    genre = models.ForeignKey(ItuGenre)
+    institution = models.ForeignKey(ItuInstitution)
+    # Series Stats - to be done as methods
+    updated = models.DateTimeField(auto_now=True) # Update timestamp
+    missing = models.DateTimeField(null=True) # When did this series go missing?
+
+    def __unicode__(self):
+        return 'Series: %s=%s' % (self.name,self.url)
+
+
+class ItuItem(models.Model):
+    name = models.CharField(max_length=255) # Labelled as "songName" in plist
+    itu_id = models.IntegerField() # Labelled as "itemId" in plist
+    url = models.URLField()
+    genre = models.ForeignKey(ItuGenre)
+    institution = models.ForeignKey(ItuInstitution)
+    series = models.ForeignKey(ItuSeries)
+    # anonymous = models.BooleanField()
+    artist_name = models.CharField()
+    # buy_params = models.URLField()
+    description = models.TextField()
+    duration = models.IntegerField()
+    explicit = models.IntegerField()
+    feed_url = models.URLField()
+    file_extension = models.CharField()
+    # is_episode = models.BooleanField()
+    kind = models.CharField()
+    long_description = models.TextField()
+    playlist_id = models.IntegerField()
+    playlist_name = models.CharField()
+    popularity = models.FloatField()
+    preview_length = models.IntegerField()
+    preview_url = models.URLField()
+    # price = models.FloatField()
+    # price_display = models.CharField()
+    rank = models.IntegerField()
+    release_date = models.DateTimeField()
+    # s = models.IntegerField()
+    updated = models.DateTimeField(auto_now=True) # Update timestamp
+    missing = models.DateTimeField(null=True) # When did this item go missing?
+
+    def __unicode__(self):
+        return 'Item: %s=%s' % (self.name, self.url)
+
+
+class ItuDownloadChart(models.Model):
+    date = models.DateTimeField() # Date of chart scan
+    position = models.SmallIntegerField()
+    item = models.ForeignKey(ItuItem)
+
+    def __unicode__(self):
+        return 'Download@%s: %s (%s)' % (self.position, self.item.name, self.item.itu_id)
+
+
+class ItuCollectionChart(models.Model):
+    date = models.DateTimeField() # Date of chart scan
+    position = models.SmallIntegerField()
+    series = models.ForeignKey(ItuSeries)
+
+    def __unicode__(self):
+        return 'Collection@%s: %s (%s)' % (self.position, self.series.name, self.series.itu_id)
+
+
