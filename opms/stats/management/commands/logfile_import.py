@@ -94,15 +94,25 @@ class Command(LabelCommand):
 
         # Final stats output at end of file
         try:
+            self.import_stats['import_duration'] = float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
             self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')-self.import_stats.get('import_startline')) /\
-                float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
+                                                    self.import_stats['import_duration']
         except ZeroDivisionError:
-            self.import_stats['import_rate'] = 0               
+            self.import_stats['import_rate'] = 0
         
-        print "\nImport finished at " + str(datetime.datetime.utcnow()) +\
-            "\nLines parsed: " + str(self.import_stats.get('line_counter')) +\
-            "\nDuplicates: " + str(self.import_stats.get('duplicatecount')) +\
-            "\nImported at " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec\n"
+#        print "\nImport finished at " + str(datetime.datetime.utcnow()) +\
+#            "\nLines parsed: " + str(self.import_stats.get('line_counter')) +\
+#            "\nDuplicates: " + str(self.import_stats.get('duplicatecount')) +\
+#            "\nImported at " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec\n"
+        print """
+            Import finished at %s
+            %s Lines parsed over %s seconds
+            Giving a rate of %s lines/sec
+            """ % (datetime.datetime.utcnow(),
+                   self.import_stats.get('line_counter'),
+                   self.import_stats.get('import_duration'),
+                   str(self.import_stats.get('import_rate'))[0:6]
+            )
         
         # Write the error cache to disk
         self._error_log_save()
@@ -167,15 +177,16 @@ class Command(LabelCommand):
                 previous_line = line
                 continue
             
-            # Test for duplicate log entries immediately preceding
-            if line == previous_line:
-                self._errorlog("##### DUPLICATE LINE DETECTED ##### \n" +\
-                    "Line # :" + str(self.import_stats.get('line_counter')) + "\n" +\
-                    "Line   : " + str(line) + "\n")
-                self.import_stats['duplicatecount'] += 1
-            else:
-                # Parse and store the line
-                self._parseline(parser, line, logfile_obj)
+#            # Test for duplicate log entries immediately preceding
+#            if line == previous_line:
+#                self._errorlog("##### DUPLICATE LINE DETECTED ##### \n" +\
+#                    "Line # :" + str(self.import_stats.get('line_counter')) + "\n" +\
+#                    "Line   : " + str(line) + "\n")
+#                self.import_stats['duplicatecount'] += 1
+#            else:
+#                # Parse and store the line
+#           Removing the Duplicate line detection as I can't rule out the 0.5-1% of duplicates as being invalid yet: CM 9-12-11
+            self._parseline(parser, line, logfile_obj)
 
             # Print progress report every 500 lines.
             if (self.import_stats.get('line_counter') % 500) == 0:
@@ -292,14 +303,15 @@ class Command(LabelCommand):
         # self._debug('log_entry=' + str(log_entry))
         
         # Create if there isn't already a duplicate record in place
-        obj, created = self._get_or_create_log_entry(
-            time_of_request = log_entry.get('time_of_request'),
-            server = log_entry.get('server'),
-            remote_rdns = log_entry.get('remote_rdns'),
-            size_of_response = log_entry.get('size_of_response'),
-            status_code = log_entry.get('status_code'),
-            file_request = log_entry.get('file_request'),
-            defaults = log_entry)
+#        obj, created = self._get_or_create_log_entry(
+#            time_of_request = log_entry.get('time_of_request'),
+#            server = log_entry.get('server'),
+#            remote_rdns = log_entry.get('remote_rdns'),
+#            size_of_response = log_entry.get('size_of_response'),
+#            status_code = log_entry.get('status_code'),
+#            file_request = log_entry.get('file_request'),
+#            defaults = log_entry)
+        obj, created = self._get_or_create_log_entry(defaults = log_entry)
 
         # Analyse obj.file_request.argument_string & obj.referer.full_string as part of another process
 
@@ -308,8 +320,9 @@ class Command(LabelCommand):
 
 
 
-    def _get_or_create_log_entry(self, time_of_request, server, remote_rdns, size_of_response, \
-        status_code, file_request, defaults = {}):
+#    def _get_or_create_log_entry(self, time_of_request, server, remote_rdns, size_of_response,
+#                                 status_code, file_request, defaults = {}):
+    def _get_or_create_log_entry(self, defaults = {}):
         obj = LogEntry()
         # Set this manually, longhand because the for key,value loop causes errors
         obj.logfile = defaults.get('logfile')
@@ -323,45 +336,49 @@ class Command(LabelCommand):
         obj.file_request = defaults.get('file_request')
         obj.referer = defaults.get('referer')
         obj.user_agent = defaults.get('user_agent')
-        
-        # Trusting that items in the import log appear in chronological order
-        if len(self.cache_log_entry) == 0 or len(self.cache_log_entry) > (self.cache_log_entry_size*2):
-            time_limit = time_of_request+datetime.timedelta(minutes=10)
-            self.cache_log_entry = list(LogEntry.objects.filter(\
-                time_of_request__gte=time_of_request, time_of_request__lte=time_limit, \
-                server=server).order_by('time_of_request')[:self.cache_log_entry_size])
 
-        # Attempt to locate in memory cache
-        for item in self.cache_log_entry:
-            if item.time_of_request == obj.time_of_request and item.server == obj.server and \
-                item.remote_rdns == obj.remote_rdns and item.size_of_response == obj.size_of_response and \
-                item.status_code == obj.status_code and item.file_request == obj.file_request:
-                    
-                self._errorlog("##### DUPLICATE RECORD AT INSERTION DETECTED ##### \n" +\
-                    "Database row id: " + str(item.id) + "\n" +\
-                    "DB: " + str(item) + "\n" +\
-                    "Logfile line number:" + str(self.import_stats.get('line_counter')) + "\n")
-                self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
-                
-                return item, False
+# Removing the need for a memory cache as we don't acknowledge duplicates and trust the log file is exactly as we want
+# CM 9-12-11
+        obj.save()
+
+#        # Trusting that items in the import log appear in chronological order
+#        if len(self.cache_log_entry) == 0 or len(self.cache_log_entry) > (self.cache_log_entry_size*2):
+#            time_limit = time_of_request+datetime.timedelta(minutes=10)
+#            self.cache_log_entry = list(LogEntry.objects.filter(\
+#                time_of_request__gte=time_of_request, time_of_request__lte=time_limit, \
+#                server=server).order_by('time_of_request')[:self.cache_log_entry_size])
+
+#        # Attempt to locate in memory cache
+#        for item in self.cache_log_entry:
+#            if item.time_of_request == obj.time_of_request and item.server == obj.server and \
+#                item.remote_rdns == obj.remote_rdns and item.size_of_response == obj.size_of_response and \
+#                item.status_code == obj.status_code and item.file_request == obj.file_request:
+#
+#                self._errorlog("##### DUPLICATE RECORD AT INSERTION DETECTED ##### \n" +\
+#                    "Database row id: " + str(item.id) + "\n" +\
+#                    "DB: " + str(item) + "\n" +\
+#                    "Logfile line number:" + str(self.import_stats.get('line_counter')) + "\n")
+#                self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
+#
+#                return item, False
         
-        # Shortcut to escape if this is purely a single process import
-        if self.single_import:
-            obj.save()
-            self.cache_log_entry.append(obj)
-            return obj, True
-        
-        # Couldn't find it in the list, check the database incase another process has added it
-        try:
-            obj = LogEntry.objects.get(time_of_request = obj.time_of_request, server = obj.server, 
-                remote_rdns = obj.remote_rdns, size_of_response = obj.size_of_response,
-                status_code = obj.status_code, file_request = obj.file_request)
-        except LogEntry.DoesNotExist:
-            obj.save()
-        except LogEntry.MultipleObjectsReturned:
-            self._errorlog("Funky shit just happened(!). MultipleObjectsReturned: " + str(obj) + "\n")
+#        # Shortcut to escape if this is purely a single process import
+#        if self.single_import:
+#            obj.save()
+#            self.cache_log_entry.append(obj)
+#            return obj, True
+#
+#        # Couldn't find it in the list, check the database incase another process has added it
+#        try:
+#            obj = LogEntry.objects.get(time_of_request = obj.time_of_request, server = obj.server,
+#                remote_rdns = obj.remote_rdns, size_of_response = obj.size_of_response,
+#                status_code = obj.status_code, file_request = obj.file_request)
+#        except LogEntry.DoesNotExist:
+#            obj.save()
+#        except LogEntry.MultipleObjectsReturned:
+#            self._errorlog("Funky shit just happened(!). MultipleObjectsReturned: " + str(obj) + "\n")
             
-        self.cache_log_entry.append(obj)
+#        self.cache_log_entry.append(obj)
         return obj, True
 
 
