@@ -745,13 +745,13 @@ class ItuInstitution(models.Model):
 
 class ItuSeries(models.Model):
     name = models.CharField(max_length=255)
-    itu_id = models.IntegerField()
+    itu_id = models.IntegerField(null=True) # Historical records don't have this :-(
     img170 = models.URLField(null=True)
     img75 = models.URLField(null=True)
-    url = models.URLField()
-    language = models.CharField(max_length=100)
-    last_modified = models.DateField()
-    genre = models.ForeignKey(ItuGenre)
+    url = models.URLField(null=True) # Historical records don't have this :-(
+    language = models.CharField(max_length=100, null=True) # Historical records don't have this
+    last_modified = models.DateField(null=True) # Historical records don't have this
+    genre = models.ForeignKey(ItuGenre, null=True) # Historical records don't have this)
     institution = models.ForeignKey(ItuInstitution)
     # Series Stats - to be done as methods
     updated = models.DateTimeField(auto_now=True) # Update timestamp
@@ -769,18 +769,18 @@ class ItuItem(models.Model):
     institution = models.ForeignKey(ItuInstitution)
     series = models.ForeignKey(ItuSeries)
     # anonymous = models.BooleanField()
-    artist_name = models.CharField()
+    artist_name = models.CharField(max_length=255) # Length rather arbitary
     # buy_params = models.URLField()
     description = models.TextField()
     duration = models.IntegerField()
     explicit = models.IntegerField()
     feed_url = models.URLField()
-    file_extension = models.CharField()
+    file_extension = models.CharField(max_length=20)
     # is_episode = models.BooleanField()
-    kind = models.CharField()
+    kind = models.CharField(max_length=100)
     long_description = models.TextField()
     playlist_id = models.IntegerField()
-    playlist_name = models.CharField()
+    playlist_name = models.CharField(max_length=255)
     popularity = models.FloatField()
     preview_length = models.IntegerField()
     preview_url = models.URLField()
@@ -812,5 +812,3 @@ class ItuCollectionChart(models.Model):
 
     def __unicode__(self):
         return 'Collection@%s: %s (%s)' % (self.position, self.series.name, self.series.itu_id)
-
-
