@@ -5,7 +5,7 @@ from optparse import make_option
 from django.core.management.base import NoArgsCommand, CommandError
 from opms.ffm.models import *
 from opms.oxitems.models import *
-import sys, re
+import sys, re, csv, urllib
 from datetime import datetime
 from dateutil import parser
 from django.utils.encoding import smart_str, smart_unicode
@@ -79,6 +79,11 @@ class Command(NoArgsCommand):
         else:
             print "Skipping Database Synchronisation"
 
+        # Create an up to date list of units from the OxPoints data (Command care of Alex D)
+        try:
+            self.oxpoints = dict(csv.reader(urllib.urlopen("http://data.ox.ac.uk/sparql/?query=select+*+where+%7B+%3Funit+^oxp%3AhasOUCSCode+%3Foucs+%7D&format=csv&common_prefixes=on")))
+        except:
+            self.oxpoints = {}
 
         # Import OxItems.Channels
         oxitems_channels = Rg07Channels.objects.all().order_by('modified') # filter(deleted=False); Work on basis that most recently edited come last - not quite so critical here?
@@ -86,6 +91,10 @@ class Command(NoArgsCommand):
         print "Processing OxItems Channel Data into OPMS (" + str(total_count) + " rows to do)"
         for counter, row in enumerate(oxitems_channels):
             self._debug("handle_noargs(): Processing channel " + str(counter+1) + " of " + str(total_count))
+            unit = row.oxpoints_units
+            if len(unit) < 1:
+                # Derive the unit from the guid if we can...
+                unit = str(row.channel_guid).split(':')[-1].split('/')[0].strip()
             # Update or create ***FeedGroup***
             if len(row.importfeedgroupchannel_set.all()) == 0:
                 # Does this need merging with an existing feedgroup? Compare with existing titles. Basic exact match first...
@@ -93,7 +102,7 @@ class Command(NoArgsCommand):
                     'title': row.title, 
                     'description':row.description,
                     'internal_comments':row.channel_emailaddress,
-                    'owning_unit':self._get_or_create_owning_unit(row.oxpoints_units)
+                    'owning_unit':self._get_or_create_owning_unit(unit)
                 }
                 fg, created = FeedGroup.objects.get_or_create(title=row.title, defaults=feed_group)
                 if created:
@@ -117,7 +126,7 @@ class Command(NoArgsCommand):
                 fg.title = row.title
                 fg.description = row.description
                 fg.internal_comments = row.channel_emailaddress
-                fg.owning_unit = self._get_or_create_owning_unit(row.oxpoints_units)
+                fg.owning_unit = self._get_or_create_owning_unit(unit)
                 fg.save()
             # Things to do after the FeedGroup is created/found, regardless of deleted state
             self._get_or_create_link(fg, row.link)
@@ -182,10 +191,21 @@ class Command(NoArgsCommand):
         return None
 
 
-    def _get_or_create_owning_unit(self, oxpoints_unit=''):
-        # Datafield is blank so we improvise in the meantime
-        # TODO: Work out how to determine owning units for these objects, both Items and FeedGroups
-        return Unit.objects.get(pk=1)
+    def _get_or_create_owning_unit(self, oucs_unit=''):
+        # Find the Oxpoints reference (id number only), then do a Unit get or create
+        oxpoint = self.oxpoints.get(oucs_unit,'').split("/")[-1] #Does this unit tag exist in the oxpoints dict?
+        self._debug("_get_or_create_owning_unit(%s) found oxpoint of: %s" % (oucs_unit, oxpoint))
+        if oxpoint.isdigit():
+            unit, created = Unit.objects.get_or_create(name=oucs_unit,
+                                                   defaults={'name':oucs_unit, 'oxpoints_id': oxpoint})
+            if created:
+                self._debug("New Unit created, id[%s] = %s : %s" % (unit.id, unit.name, unit.oxpoints_id))
+                unit.save()
+            else:
+                self._debug("Unit found for '%s', id: %s." % (unit.name, unit.id))
+            return unit
+        else: # No number found? Default to the 'Unknown Unit' value
+            return Unit.objects.get(pk=1)
 
 
     def _set_feed_destinations(self, feed_obj, itunesu_guid, oxitems_destination, oxitems_deleted):
@@ -443,7 +463,9 @@ class Command(NoArgsCommand):
             item_obj.publish_stop = parser.parse(oxitem_obj.item_expires)
 
         item_obj.license = self._get_licence(oxitem_obj.item_licence) # TODO: Correct and standardise all spellings of licence/license
-        item_obj.owning_unit = self._get_or_create_owning_unit('')
+        # Try to get the unit from the guid
+        unit = str(oxitem_obj.item_guid).split(':')[-1].split('/')[0].strip()
+        item_obj.owning_unit = self._get_or_create_owning_unit(unit)
         return item_obj
 
 
