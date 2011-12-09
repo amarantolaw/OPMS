@@ -10,6 +10,8 @@ import datetime, sys, urllib2, time
 
 class Command(LabelCommand):
     help = 'Scan iTunes U Service (1:Institutional collection; 2:Top Collections; 3:Top Downloads)'
+    args = "<mode>"
+    label = "mode"
     option_list = LabelCommand.option_list + (
 #        make_option('--iterations', action='store', dest='iterations',
 #            default=10, help='Specify a number of iterations each URLs is to be scanned'),
@@ -24,19 +26,18 @@ class Command(LabelCommand):
 
         super(Command, self).__init__()
 
-    def handle_label(self, mode = 0, url = '',**options):
-        print "Scan iTunes started at " + str(datetime.datetime.utcnow()) + "\n"
-
-        # Some basic checking
+    def handle_label(self, mode = 0, url = None,**options):
+        # Some basic error checking
         if not mode.isdigit() or mode < 1 or mode > 3:
-           raise CommandError("""Please specify a mode for this scan.\n\n
-               1) Scan an institution's collection\n
-               2) Scan the Top Collections chart\n
+           raise CommandError("""Please specify a mode for this scan.
+               1) Scan an institution's collection
+               2) Scan the Top Collections chart
                3) Scan the Top Downloads chart
                """)
-        if url == '':
+        if url is None:
             raise CommandError("Please specify the url to scan.")
 
+        print "Scan iTunes started at " + str(datetime.datetime.utcnow()) + "\n"
         # Create an error log
         self._errorlog_start('scan_itunes.log')
 
