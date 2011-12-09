@@ -2,19 +2,19 @@
 # Author: Carl Marshall
 # Last Edited: 08-12-2011
 from optparse import make_option
-from django.core.management.base import LabelCommand, CommandError
+from django.core.management.base import BaseCommand, CommandError
 from opms.stats.models import *
 from opms.stats.utils import itunes as itunes
 import datetime, sys, urllib2, time
 
 
-class Command(LabelCommand):
-    help = 'Scan iTunes U Service (1:Institutional collection; 2:Top Collections; 3:Top Downloads)'
-    args = "<mode>"
-    label = "mode"
+class Command(BaseCommand):
+    help = 'Scan iTunes U Service (1:Institutional collection <default>; 2:Top Collections; 3:Top Downloads)'
+    args = "<url>"
+    label = "url"
     option_list = LabelCommand.option_list + (
-#        make_option('--iterations', action='store', dest='iterations',
-#            default=10, help='Specify a number of iterations each URLs is to be scanned'),
+        make_option('--mode', action='store', dest='mode',
+            default=1, help='Specify the type of scan to be done (1,2,3)'),
     )
 
     def __init__(self):
@@ -26,8 +26,9 @@ class Command(LabelCommand):
 
         super(Command, self).__init__()
 
-    def handle_label(self, mode = 0, url = None,**options):
+    def handle(self, url = None,**options):
         # Some basic error checking
+        mode = options.get("mode",1)
         if not mode.isdigit() or mode < 1 or mode > 3:
            raise CommandError("""Please specify a mode for this scan.
                1) Scan an institution's collection
