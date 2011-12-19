@@ -713,6 +713,7 @@ class LogEntry(models.Model):
     # This needs to be optional, as there may 0-n tracking tags on this entry
     tracking = models.ManyToManyField(Tracking, verbose_name="tracking on this entry")
 
+    @property
     def status_code_string(self):
         return self.STATUS_CODE_CHOICES.get(self.status_code,'')
 
@@ -728,6 +729,26 @@ class LogEntry(models.Model):
 ######
 # iTU Store analysis classes
 ######
+
+class ItuScanLog(models.Model):
+    MODE_CHOICES = (
+        (0,"Unknown"),
+        (1,"Institutional Scan"),
+        (2,"Top Collections Scan"),
+        (3,"Top Downloads Scan")
+    )
+    starting_url = models.URLField(null=True)
+    time = models.DateTimeField(auto_now_add=True)
+    mode = models.SmallIntegerField(default=0, choices=MODE_CHOICES) # Zero = Unknown mode
+    comments = models.TextField(null=True)
+
+    @property
+    def mode_string(self):
+        return self.MODE_CHOICES.get(self.mode,'')
+
+    def __unicode__(self):
+        return 'Scanlog: %s=%s' % (self.name,self.url)
+
 
 class ItuGenre(models.Model):
     name = models.CharField(max_length=255)
@@ -757,8 +778,15 @@ class ItuSeries(models.Model):
     genre = models.ForeignKey(ItuGenre, null=True) # Historical records don't have this)
     institution = models.ForeignKey(ItuInstitution)
     # Series Stats - to be done as methods
-    updated = models.DateTimeField(auto_now=True) # Update timestamp
+    # updated = models.DateTimeField(auto_now=True) # Update timestamp
+    scanlog = models.ForeignKey(ItuScanLog)
     missing = models.DateTimeField(null=True) # When did this series go missing?
+    # Eventual link to an FFM feed (not Feedgroup because iTU only does feeds)
+#    feed = models.ForeignKey(ffm_models.Feed, null=True)
+#
+#    @property
+#    def updated(self):
+#        return self.scanlog.time
 
     def __unicode__(self):
         return 'Series: %s=%s' % (self.name,self.url)
@@ -792,8 +820,15 @@ class ItuItem(models.Model):
     rank = models.IntegerField()
     release_date = models.DateTimeField()
     # s = models.IntegerField()
-    updated = models.DateTimeField(auto_now=True) # Update timestamp
+    # updated = models.DateTimeField(auto_now=True) # Update timestamp
+    scanlog = models.ForeignKey(ItuScanLog)
     missing = models.DateTimeField(null=True) # When did this item go missing?
+    # Eventual link to an FFM FileInFeed, because all we really know is which FileInFeed should have been used here
+#    fileinfeed = models.ForeignKey(ffm_models.FileInFeed, null=True)
+#
+#    @property
+#    def updated(self):
+#        return self.scanlog.time
 
     def __unicode__(self):
         return 'Item: %s=%s' % (self.name, self.url)
@@ -803,6 +838,12 @@ class ItuDownloadChart(models.Model):
     date = models.DateTimeField() # Date of chart scan
     position = models.SmallIntegerField()
     item = models.ForeignKey(ItuItem)
+    # updated = models.DateTimeField(auto_now=True) # Update timestamp
+    scanlog = models.ForeignKey(ItuScanLog)
+#
+#    @property
+#    def updated(self):
+#        return self.scanlog.time
 
     def __unicode__(self):
         return 'Download@%s: %s (%s)' % (self.position, self.item.name, self.item.itu_id)
@@ -812,6 +853,12 @@ class ItuCollectionChart(models.Model):
     date = models.DateTimeField() # Date of chart scan
     position = models.SmallIntegerField()
     series = models.ForeignKey(ItuSeries)
+    # updated = models.DateTimeField(auto_now=True) # Update timestamp
+    scanlog = models.ForeignKey(ItuScanLog)
+#
+#    @property
+#    def updated(self):
+#        return self.scanlog.time
 
     def __unicode__(self):
         return 'Collection@%s: %s (%s)' % (self.position, self.series.name, self.series.itu_id)

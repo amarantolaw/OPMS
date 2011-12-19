@@ -50,15 +50,19 @@ class Command(BaseCommand):
         self._errorlog_start('scan_itunes.log')
 
         if mode == 1:
-            comment = "Scan of an Institution's collection from %s" % url
+            comment = "Scan (and update) of an Institution's collection from %s" % url
             self._errorlog("Log started for: %s" % comment)
+            print comment
 
             # TODO: Check that the pattern of the URL looks like what we expect of an institutional url
-            # TODO: Get the institutions collections
-            #collection = itunes.get_institution_collections(url)
+            collection = itunes.get_institution_collections(url)
             # TODO: Iterate, parse and store the items from the collection
-            #series = itunes.get_collection_items(series_url)
-            print comment
+            for s, series in enumerate(collection):
+                series_obj, created = self._get_or_create_series(series)
+                # Scan for items
+                series = itunes.get_collection_items(series.get("series_url"))
+                # TODO: Scan for items in this series that we haven't just updated and mark as missing
+            # TODO: Scan for series in this institution that we haven't just updated and mark as missing
         elif mode == 2:
             comment = "Scan of an Top Collections Chart from %s" % url
             self._errorlog("Log started for: %s" % comment)
@@ -81,7 +85,24 @@ class Command(BaseCommand):
 
         return None
 
+    def _get_or_create_genre(self, id):
+        return None
 
+    def _get_or_create_institution(self, id):
+        return None
+
+    def _get_or_create_series(self, series_???):
+#        series_dict = {}
+#        series_dict['name'] =
+#        series_dict['itu_id'] =
+#        series_dict['img170'] =
+#        series_dict['img75'] =
+#        series_dict['url'] =
+#        series_dict['language'] =
+#        series_dict['last_modified'] =
+#        series_dict['genre'] =
+#        series_dict['institution'] =
+        return None, False
 
 
     # DEBUG AND INTERNAL HELP METHODS ==============================================================
