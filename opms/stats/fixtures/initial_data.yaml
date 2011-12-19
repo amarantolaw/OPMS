@@ -1,0 +1,7 @@
+- model: stats.ituscanlog
+  pk: 1
+  fields:
+    starting_url: null
+    time: 2011-12-19 00:00
+    mode: 1
+    comments: This is a default holding scanlog entry with no real purpose
