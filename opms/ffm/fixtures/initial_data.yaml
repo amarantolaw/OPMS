@@ -1,24 +1,701 @@
-- model: ffm.taggroup
+- model: ffm.tag
   pk: 1
   fields:
-    name: Unsorted Tags
-    description: Old and assorted tags often imported from OxItems and need migrating
-- model: ffm.taggroup
+    name: 100
+    description: Business
+    group: 4
+    parent: null
   pk: 2
   fields:
-    name: JACS Codes
-    description: Codes used for OER markup of items
-- model: ffm.taggroup
+    name: 100100
+    description: Economics
+    group: 4
+    parent: 1
   pk: 3
   fields:
-    name: JorumOPEN Collection
-    description: Codes used for JorumOPEN markup of feeds
+    name: 100101
+    description: Finance
+    group: 4
+    parent: 1
+  pk: 4
+  fields:
+    name: 100102
+    description: Hospitality
+    group: 4
+    parent: 1
+  pk: 5
+  fields:
+    name: 100103
+    description: Management
+    group: 4
+    parent: 1
+  pk: 6
+  fields:
+    name: 100104
+    description: Marketing
+    group: 4
+    parent: 1
+  pk: 7
+  fields:
+    name: 100105
+    description: Personal Finance
+    group: 4
+    parent: 1
+  pk: 8
+  fields:
+    name: 100106
+    description: Real Estate
+    group: 4
+    parent: 1
+  pk: 9
+  fields:
+    name: 101
+    description: Engineering
+    group: 4
+    parent: null
+  pk: 10
+  fields:
+    name: 101100
+    description: Chemical & Petroleum
+    group: 4
+    parent: 9
+  pk: 11
+  fields:
+    name: 101101
+    description: Civil
+    group: 4
+    parent: 9
+  pk: 12
+  fields:
+    name: 101102
+    description: Computer Science
+    group: 4
+    parent: 9
+  pk: 13
+  fields:
+    name: 101103
+    description: Electrical
+    group: 4
+    parent: 9
+  pk: 14
+  fields:
+    name: 101104
+    description: Environmental
+    group: 4
+    parent: 9
+  pk: 15
+  fields:
+    name: 101105
+    description: Mechanical
+    group: 4
+    parent: 9
+  pk: 16
+  fields:
+    name: 102
+    description: Fine Arts
+    group: 4
+    parent: null
+  pk: 17
+  fields:
+    name: 102100
+    description: Architecture
+    group: 4
+    parent: 16
+  pk: 18
+  fields:
+    name: 102101
+    description: Art
+    group: 4
+    parent: 16
+  pk: 19
+  fields:
+    name: 102102
+    description: Art History
+    group: 4
+    parent: 16
+  pk: 20
+  fields:
+    name: 102103
+    description: Dance
+    group: 4
+    parent: 16
+  pk: 21
+  fields:
+    name: 102104
+    description: Film
+    group: 4
+    parent: 16
+  pk: 22
+  fields:
+    name: 102105
+    description: Graphic Design
+    group: 4
+    parent: 16
+  pk: 23
+  fields:
+    name: 102106
+    description: Interior Design
+    group: 4
+    parent: null
+  pk: 24
+  fields:
+    name: 102107
+    description: Music
+    group: 4
+    parent: null
+  pk: 25
+  fields:
+    name: 102108
+    description: Theater
+    group: 4
+    parent: null
+  pk: 26
+  fields:
+    name: 103
+    description: Health & Medicine
+    group: 4
+    parent: null
+  pk: 27
+  fields:
+    name: 103100
+    description: Anatomy & Physiology
+    group: 4
+    parent: 26
+  pk: 28
+  fields:
+    name: 103101
+    description: Behavioral Science
+    group: 4
+    parent: 26
+  pk: 29
+  fields:
+    name: 103102
+    description: Dentistry
+    group: 4
+    parent: 26
+  pk: 30
+  fields:
+    name: 103103
+    description: Diet & Nutrition
+    group: 4
+    parent: 26
+  pk: 31
+  fields:
+    name: 103104
+    description: Emergency
+    group: 4
+    parent: 26
+  pk: 32
+  fields:
+    name: 103105
+    description: Genetics
+    group: 4
+    parent: 26
+  pk: 33
+  fields:
+    name: 103106
+    description: Gerontology
+    group: 4
+    parent: 26
+  pk: 34
+  fields:
+    name: 103107
+    description: Health & Exercise Science
+    group: 4
+    parent: 26
+  pk: 35
+  fields:
+    name: 103108
+    description: Immunology
+    group: 4
+    parent: 26
+  pk: 36
+  fields:
+    name: 103109
+    description: Neuroscience
+    group: 4
+    parent: 26
+  pk: 37
+  fields:
+    name: 103110
+    description: Pharmacology & Toxicology
+    group: 4
+    parent: 26
+  pk: 38
+  fields:
+    name: 103111
+    description: Psychiatry
+    group: 4
+    parent: 26
+  pk: 39
+  fields:
+    name: 103112
+    description: Public Health
+    group: 4
+    parent: 26
+  pk: 40
+  fields:
+    name: 103113
+    description: Radiology
+    group: 4
+    parent: 26
+  pk: 41
+  fields:
+    name: 104
+    description: History
+    group: 4
+    parent: null
+  pk: 42
+  fields:
+    name: 104100
+    description: Ancient
+    group: 4
+    parent: 41
+  pk: 43
+  fields:
+    name: 104101
+    description: Medieval
+    group: 4
+    parent: 41
+  pk: 44
+  fields:
+    name: 104102
+    description: Military
+    group: 4
+    parent: 41
+  pk: 45
+  fields:
+    name: 104103
+    description: Modern
+    group: 4
+    parent: 41
+  pk: 46
+  fields:
+    name: 104104
+    description: African
+    group: 4
+    parent: 41
+  pk: 47
+  fields:
+    name: 104105
+    description: Asian
+    group: 4
+    parent: 41
+  pk: 48
+  fields:
+    name: 104106
+    description: European
+    group: 4
+    parent: 41
+  pk: 49
+  fields:
+    name: 104107
+    description: Middle Eastern
+    group: 4
+    parent: 41
+  pk: 50
+  fields:
+    name: 104108
+    description: North American
+    group: 4
+    parent: 41
+  pk: 51
+  fields:
+    name: 104109
+    description: South American
+    group: 4
+    parent: 41
+  pk: 52
+  fields: 105
+    name: Humanities
+    description:
+    group: 4
+    parent: null
+  pk: 53
+  fields:
+    name: 105100
+    description: Communications
+    group: 4
+    parent: 52
+  pk: 54
+  fields:
+    name: 105101
+    description: Philosophy
+    group: 4
+    parent: 52
+  pk: 55
+  fields:
+    name: 105102
+    description: Religion
+    group: 4
+    parent: 52
+  pk: 56
+  fields:
+    name: 106
+    description: Language
+    group: 4
+    parent: null
+  pk: 57
+  fields:
+    name: 106100
+    description: African
+    group: 4
+    parent: 56
+  pk: 58
+  fields:
+    name: 106101
+    description: Ancient
+    group: 4
+    parent: 56
+  pk: 59
+  fields:
+    name: 106102
+    description: Asian
+    group: 4
+    parent: 56
+  pk: 60
+  fields:
+    name: 106103
+    description: Eastern European/Slavic
+    group: 4
+    parent: 56
+  pk: 61
+  fields:
+    name: 106104
+    description: English
+    group: 4
+    parent: 56
+  pk: 62
+  fields:
+    name: 106105
+    description: English Language Learners
+    group: 4
+    parent: 56
+  pk: 63
+  fields:
+    name: 106106
+    description: French
+    group: 4
+    parent: 56
+  pk: 64
+  fields:
+    name: 106107
+    description: German
+    group: 4
+    parent: 56
+  pk: 65
+  fields:
+    name: 106108
+    description: Italian
+    group: 4
+    parent: 56
+  pk: 66
+  fields:
+    name: 106109
+    description: Linguistics
+    group: 4
+    parent: 56
+  pk: 67
+  fields:
+    name: 106110
+    description: Middle Eastern
+    group: 4
+    parent: 56
+  pk: 68
+  fields:
+    name: 106111
+    description: Spanish & Portuguese
+    group: 4
+    parent: 56
+  pk: 69
+  fields:
+    name: 106112
+    description: Speech Pathology
+    group: 4
+    parent: 56
+  pk: 70
+  fields:
+    name: 107
+    description: Literature
+    group: 4
+    parent: null
+  pk: 71
+  fields:
+    name: 107100
+    description: Anthologies
+    group: 4
+    parent: 70
+  pk: 72
+  fields:
+    name: 107101
+    description: Biography
+    group: 4
+    parent: 70
+  pk: 73
+  fields:
+    name: 107102
+    description: Classics
+    group: 4
+    parent: 70
+  pk: 74
+  fields:
+    name: 107103
+    description: Criticism
+    group: 4
+    parent: 70
+  pk: 75
+  fields:
+    name: 107104
+    description: Fiction
+    group: 4
+    parent: 70
+  pk: 76
+  fields:
+    name: 107105
+    description: Poetry
+    group: 4
+    parent: 70
+  pk: 77
+  fields:
+    name: 108
+    description: Mathematics
+    group: 4
+    parent: null
+  pk: 78
+  fields:
+    name: 108100
+    description: Advanced Mathematics
+    group: 4
+    parent: 77
+  pk: 79
+  fields:
+    name: 108101
+    description: Algebra
+    group: 4
+    parent: 77
+  pk: 80
+  fields:
+    name: 108102
+    description: Arithmetic
+    group: 4
+    parent: 77
+  pk: 81
+  fields:
+    name: 108103
+    description: Calculus
+    group: 4
+    parent: 77
+  pk: 82
+  fields:
+    name: 108104
+    description: Geometry
+    group: 4
+    parent: 77
+  pk: 83
+  fields:
+    name: 108105
+    description: Statistics
+    group: 4
+    parent: 77
+  pk: 84
+  fields:
+    name: 109
+    description: Science
+    group: 4
+    parent: null
+  pk: 85
+  fields:
+    name: 109100
+    description: Agricultural
+    group: 4
+    parent: 84
+  pk: 86
+  fields:
+    name: 109101
+    description: Astronomy
+    group: 4
+    parent: null
+  pk: 87
+  fields:
+    name: 109102
+    description: Atmospheric
+    group: 4
+    parent: 84
+  pk: 88
+  fields:
+    name: 109103
+    description: Biology
+    group: 4
+    parent: 84
+  pk: 89
+  fields:
+    name: 109104
+    description: Chemistry
+    group: 4
+    parent: 84
+  pk: 90
+  fields:
+    name: 109105
+    description: Ecology
+    group: 4
+    parent: 84
+  pk: 91
+  fields:
+    name: 109106
+    description: Geography
+    group: 4
+    parent: 84
+  pk: 92
+  fields:
+    name: 109107
+    description: Geology
+    group: 4
+    parent: 84
+  pk: 93
+  fields:
+    name: 109108
+    description: Physics
+    group: 4
+    parent: 84
+  pk: 94
+  fields:
+    name: 110
+    description: Social Science
+    group: 4
+    parent: null
+  pk: 95
+  fields:
+    name: 110100
+    description: Law
+    group: 4
+    parent: 94
+  pk: 96
+  fields:
+    name: 110101
+    description: Political Science
+    group: 4
+    parent: 94
+  pk: 97
+  fields:
+    name: 110102
+    description: Public Administration
+    group: 4
+    parent: 94
+  pk: 98
+  fields:
+    name: 110103
+    description: Psychology
+    group: 4
+    parent: 94
+  pk: 99
+  fields:
+    name: 110104
+    description: Social Welfare
+    group: 4
+    parent: 94
+  pk: 100
+  fields:
+    name: 110105
+    description: Sociology
+    group: 4
+    parent: 94
+  pk: 101
+  fields:
+    name: 111
+    description: Society
+    group: 4
+    parent: null
+  pk: 102
+  fields:
+    name: 111100
+    description: African-American Studies
+    group: 4
+    parent: 101
+  pk: 103
+  fields:
+    name: 111101
+    description: Asian Studies
+    group: 4
+    parent: 101
+  pk: 104
+  fields:
+    name: 111102
+    description: European & Russian Studies
+    group: 4
+    parent: 101
+  pk: 105
+  fields:
+    name: 111103
+    description: Indigenous Studies
+    group: 4
+    parent: 101
+  pk: 106
+  fields:
+    name: 111104
+    description: Latin & Caribbean Studies
+    group: 4
+    parent: 101
+  pk: 107
+  fields:
+    name: 111105
+    description: Middle Eastern Studies
+    group: 4
+    parent: 101
+  pk: 108
+  fields:
+    name: 111106
+    description: Women's Studies
+    group: 4
+    parent: 101
+  pk: 109
+  fields:
+    name: 112
+    description: Teaching & Education
+    group: 4
+    parent: null
+  pk: 110
+  fields:
+    name: 112100
+    description: Curriculum & Teaching
+    group: 4
+    parent: 109
+  pk: 111
+  fields:
+    name: 112101
+    description: Educational Leadership
+    group: 4
+    parent: 109
+  pk: 112
+  fields:
+    name: 112102
+    description: Family & Childcare
+    group: 4
+    parent: 109
+  pk: 113
+  fields:
+    name: 112103
+    description: Learning Resources
+    group: 4
+    parent: 109
+  pk: 114
+  fields:
+    name: 112104
+    description: Psychology & Research
+    group: 4
+    parent: 109
+  pk: 115
+  fields:
+    name: 112105
+    description: Special Education
+    group: 4
+    parent: 109
 
-- model: ffm.unit
+- model: ffm.filetype
   pk: 1
   fields:
-    name: Unknown Unit
-    oxpoints_id: null
+    name: Unknown
+    description: Unknown file type and function
+    category: unknown
 
 - model: ffm.licence
   pk: 1
@@ -42,63 +719,18 @@
     url: http://creativecommons.org/licenses/by-nc-nd/3.0/
     image: null
 
-- model: ffm.filefunction
-  pk: 1
-  fields:
-    name: Unknown
-    description: Unknown file type and function
-    category: unknown
-- model: ffm.filefunction
-  pk: 2
-  fields:
-    name: ItemArt
-    description: Album artwork for a specific item
-    category: image
-- model: ffm.filefunction
-  pk: 3
-  fields:
-    name: FeedArt
-    description: Album artwork for a specific feed
-    category: image
-- model: ffm.filefunction
-  pk: 4
-  fields:
-    name: AudioPodcast
-    description: Default Audio Podcast (typically mp3)
-    category: audio
-- model: ffm.filefunction
-  pk: 5
-  fields:
-    name: VideoSoundtrack
-    description: Audio soundtrack of a video podcast
-    category: audio
-- model: ffm.filefunction
-  pk: 6
-  fields:
-    name: VideoPodcast
-    description: Default Video Podcast (typically mp4)
-    category: video
-
-- model: ffm.destination
+- model: ffm.feedtemplate
   pk: 1
   fields:
     name: POAU
     description: The primary podcasts.ox.ac.uk portal website
-    url: http://podcasts.ox.ac.uk/
 - model: ffm.destination
   pk: 2
   fields:
-    name: POAU-beta
-    description: The drupal based beta.podcasts.ox.ac.uk portal website
-    url: http://beta.podcasts.ox.ac.uk/
-- model: ffm.destination
-  pk: 3
-  fields:
     name: iTunes U
     description: The iTunes U Oxford portal
-    url: http://www.ox.ac.uk/itunes/
 - model: ffm.destination
-  pk: 4
+  pk: 3
   fields:
     name: mobileOxford
     description: The Mobile Oxford Webportal
@@ -110,9 +742,3 @@
     name: Oxford University Homepage
     description: The primary university website
     url: http://www.ox.ac.uk/
-
-- model: ffm.feedgroup
-  pk: 1
-  fields:
-    title: Master Unknown Feed
-    owning_unit: 1
