@@ -3,7 +3,7 @@ from django.utils.encoding import smart_str, smart_unicode
 from datetime import date, datetime
 from opms.ffm.models import *
 from opms.core.models import Person, Unit
-from django.contrib.auth import User
+from django.contrib.auth.models import User
 import uuid
 
 # Remember: this application is managed by Django South so when you change this file, do the following:
