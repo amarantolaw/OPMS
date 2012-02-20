@@ -14,7 +14,7 @@ import uuid
 
 # Common fields
 #    created_by = models.ForeignKey(User, null=True)
-#    created_on = models.DateTimeField(auto_created=True)
+#    created_on = models.DateTimeField(auto_now_add=True)
 #    # c1
 #    name = models.CharField("name", max_length=100, default="")
 #    description = models.TextField("description", default="")
@@ -57,7 +57,7 @@ EBU_ROLES = [
 #class TagGroup(models.Model):
 #    # Groups of Tags. How to create collection types
 #    created_by = models.ForeignKey(User, null=True)
-#    created_on = models.DateTimeField(auto_created=True)
+#    created_on = models.DateTimeField(auto_now_add=True)
 #    name = models.CharField("name", max_length=100, default='')
 #    description = models.TextField("description", default='')
 #    last_modified_by = models.ForeignKey(User, null=True)
@@ -74,7 +74,7 @@ class Tag(models.Model):
         (4,u'iTunes U Category'), # List from: http://deimos.apple.com/rsrc/doc/iTunesUAdministrationGuide/iTunesUintheiTunesStore/chapter_13_section_3.html
     ]
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     name = models.CharField("name", max_length=100, default='')
     description = models.TextField("description", default='')
     replaced_by = models.ForeignKey("Tag", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
@@ -97,7 +97,7 @@ class Licence(models.Model):
     Expandable data table of licences we can publish with or recognise
     """
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     name = models.CharField("name", max_length=100, default="")
     description = models.TextField("description", default="")
     last_modified_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_last_modified_by")
@@ -112,7 +112,7 @@ class Licence(models.Model):
 
 class Link(models.Model):
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     name = models.CharField("name", max_length=100, default="")
     description = models.TextField("description", default="")
     replaced_by = models.ForeignKey("Link", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
@@ -124,7 +124,7 @@ class Link(models.Model):
 
 class Item(models.Model):
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     name = models.CharField("name", max_length=100, default="")
     description = models.TextField("description", default="")
     replaced_by = models.ForeignKey("Item", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
@@ -159,7 +159,7 @@ class Item(models.Model):
 
 class ItemTag(models.Model):
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("ItemTag", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
@@ -172,7 +172,7 @@ class ItemTag(models.Model):
 
 class ItemRole(models.Model):
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("ItemRole", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
@@ -189,7 +189,7 @@ class ItemRole(models.Model):
 
 class ItemLink(models.Model):
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("ItemLink", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
@@ -206,7 +206,7 @@ class Collection(models.Model):
         (u"smart",u"Smart")
     ]
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     name = models.CharField("name", max_length=100, default="")
     description = models.TextField("description", default="")
     replaced_by = models.ForeignKey("Collection", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
@@ -230,7 +230,7 @@ class Collection(models.Model):
 
 class CollectionTag(models.Model):
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("CollectionTag", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
@@ -244,7 +244,7 @@ class CollectionTag(models.Model):
 
 class CollectionRole(models.Model):
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("CollectionRole", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
@@ -261,7 +261,7 @@ class CollectionRole(models.Model):
 
 class CollectionLink(models.Model):
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("CollectionLink", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
@@ -274,7 +274,7 @@ class CollectionLink(models.Model):
 
 class Association(models.Model):
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("Association", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
@@ -287,7 +287,7 @@ class Association(models.Model):
 
 class AssociationTag(models.Model):
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("AssociationTag", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
@@ -301,7 +301,7 @@ class AssociationTag(models.Model):
 
 class FileType(models.Model):
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     name = models.CharField("name", max_length=100, default="")
     description = models.TextField("description", default="")
     last_modified_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_last_modified_by")
@@ -313,7 +313,7 @@ class FileType(models.Model):
 
 class FeedTemplate(models.Model):
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     name = models.CharField("name", max_length=100, default="")
     description = models.TextField("description", default="")
     last_modified_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_last_modified_by")
@@ -326,7 +326,7 @@ class FeedTemplate(models.Model):
 
 class Supports(models.Model):
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("Supports", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
@@ -369,7 +369,7 @@ class File(models.Model):
         return self.PUBLISH_CHOICES.get(self.publish_status, 'unknown')
 
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("File", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
@@ -401,7 +401,7 @@ class File(models.Model):
 class FileURL(models.Model):
     # A unique file can be presented on multiple URLS, use this table to track and associate them
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("FileURL", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
@@ -423,7 +423,7 @@ class Feed(models.Model):
         return self.PUBLISH_CHOICES.get(self.publish_status, 'unknown')
 
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     name = models.CharField("name", max_length=100, default="")
     description = models.TextField("description", default="")
     replaced_by = models.ForeignKey("Feed", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
@@ -460,7 +460,7 @@ def create_guid():
 
 class FileInFeed(models.Model):
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_created=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("FileInFeed", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
