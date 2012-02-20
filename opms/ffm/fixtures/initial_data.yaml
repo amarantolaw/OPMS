@@ -158,21 +158,21 @@
     name: 102106
     description: Interior Design
     group: 4
-    parent: null
+    parent: 16
 - model: ffm.tag
   pk: 24
   fields:
     name: 102107
     description: Music
     group: 4
-    parent: null
+    parent: 16
 - model: ffm.tag
   pk: 25
   fields:
     name: 102108
     description: Theater
     group: 4
-    parent: null
+    parent: 16
 - model: ffm.tag
   pk: 26
   fields:
