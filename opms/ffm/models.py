@@ -96,7 +96,7 @@ class Licence(models.Model):
     """
     Expandable data table of licences we can publish with or recognise
     """
-    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_related")
+    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
     created_on = models.DateTimeField(auto_created=True)
     name = models.CharField("name", max_length=100, default="")
     description = models.TextField("description", default="")
@@ -109,34 +109,34 @@ class Licence(models.Model):
 
 
 class Link(models.Model):
-    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_related")
+    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
     created_on = models.DateTimeField(auto_created=True)
     name = models.CharField("name", max_length=100, default="")
     description = models.TextField("description", default="")
-    replaced_by = models.ForeignKey("Link", null=True, related_name="%(app_label)s_%(class)s_related")
-    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_related")
+    replaced_by = models.ForeignKey("Link", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
+    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
 
     url = models.URLField("link url including http: etc", default='http://www.ox.ac.uk/')
 
 
 class Item(models.Model):
-    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_related")
+    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
     created_on = models.DateTimeField(auto_created=True)
     name = models.CharField("name", max_length=100, default="")
     description = models.TextField("description", default="")
-    replaced_by = models.ForeignKey("Item", null=True, related_name="%(app_label)s_%(class)s_related")
-    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_related")
+    replaced_by = models.ForeignKey("Item", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
+    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
     publish_start = models.DateTimeField("publishing start date", default=datetime.now)
     publish_stop = models.DateTimeField("publishing end date", null=True)
     recording_date = models.DateField("date of recording", null=True)
     licence_confirmed = models.BooleanField("licence confirmed?", default=False)
-    license = models.ForeignKey(Licence, verbose_name="licence", default=1, related_name="%(app_label)s_%(class)s_related")
-    tags = models.ManyToManyField(Tag, through="ItemTag", null=True, related_name="%(app_label)s_%(class)s_related")
-    people = models.ManyToManyField(Person, through="ItemRole", verbose_name="associated people", related_name="%(app_label)s_%(class)s_related")
-    links = models.ManyToManyField(Link, through="ItemLink", verbose_name="associated links", null=True, related_name="%(app_label)s_%(class)s_related")
-    collections = models.ManyToManyField("Collection", through="Association", verbose_name="associated collections", related_name="%(app_label)s_%(class)s_related")
+    license = models.ForeignKey(Licence, verbose_name="licence", default=1, related_name="%(app_label)s_%(class)s_license")
+    tags = models.ManyToManyField(Tag, through="ItemTag", null=True, related_name="%(app_label)s_%(class)s_tags")
+    people = models.ManyToManyField(Person, through="ItemRole", verbose_name="associated people", related_name="%(app_label)s_%(class)s_people")
+    links = models.ManyToManyField(Link, through="ItemLink", verbose_name="associated links", null=True, related_name="%(app_label)s_%(class)s_links")
+    collections = models.ManyToManyField("Collection", through="Association", verbose_name="associated collections", related_name="%(app_label)s_%(class)s_collections")
 
 #    def create_guid():
 #        return 'OPMS-item:' + str(uuid.uuid4())
@@ -156,27 +156,27 @@ class Item(models.Model):
 
 
 class ItemTag(models.Model):
-    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_related")
+    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
     created_on = models.DateTimeField(auto_created=True)
-    replaced_by = models.ForeignKey("ItemTag", null=True, related_name="%(app_label)s_%(class)s_related")
-    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_related")
+    replaced_by = models.ForeignKey("ItemTag", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
+    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
     ordering = models.SmallIntegerField("manual ordering", default=1)
-    tag = models.ForeignKey(Tag, verbose_name="associated tag", related_name="%(app_label)s_%(class)s_related")
-    item = models.ForeignKey(Item, verbose_name="associated item", related_name="%(app_label)s_%(class)s_related")
+    tag = models.ForeignKey(Tag, verbose_name="associated tag", related_name="%(app_label)s_%(class)s_tag")
+    item = models.ForeignKey(Item, verbose_name="associated item", related_name="%(app_label)s_%(class)s_item")
 
     def __unicode__(self):
         return smart_unicode(self.tag.name + ' is associated with ' + self.item.name)
 
 class ItemRole(models.Model):
-    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_related")
+    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
     created_on = models.DateTimeField(auto_created=True)
-    replaced_by = models.ForeignKey("ItemRole", null=True, related_name="%(app_label)s_%(class)s_related")
-    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_related")
+    replaced_by = models.ForeignKey("ItemRole", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
+    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
     role = models.CharField("role of Person", max_length=20, choices=EBU_ROLES, db_index=True)
-    person = models.ForeignKey(Person, verbose_name="associated person", related_name="%(app_label)s_%(class)s_related")
-    item = models.ForeignKey(Item, verbose_name="associated item", related_name="%(app_label)s_%(class)s_related")
+    person = models.ForeignKey(Person, verbose_name="associated person", related_name="%(app_label)s_%(class)s_person")
+    item = models.ForeignKey(Item, verbose_name="associated item", related_name="%(app_label)s_%(class)s_item")
 
     def get_role_display(self):
         return EBU_ROLES.get(self.role, 'unknown')
@@ -186,13 +186,13 @@ class ItemRole(models.Model):
 
 
 class ItemLink(models.Model):
-    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_related")
+    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
     created_on = models.DateTimeField(auto_created=True)
-    replaced_by = models.ForeignKey("ItemLink", null=True, related_name="%(app_label)s_%(class)s_related")
-    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_related")
+    replaced_by = models.ForeignKey("ItemLink", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
+    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
-    link = models.ForeignKey(Link, verbose_name="associated link", related_name="%(app_label)s_%(class)s_related")
-    item = models.ForeignKey(Item, verbose_name="associated item", related_name="%(app_label)s_%(class)s_related")
+    link = models.ForeignKey(Link, verbose_name="associated link", related_name="%(app_label)s_%(class)s_link")
+    item = models.ForeignKey(Item, verbose_name="associated item", related_name="%(app_label)s_%(class)s_item")
 
     def __unicode__(self):
         return smart_unicode(self.link.name + ' is associated with ' + self.item.name)
@@ -203,20 +203,20 @@ class Collection(models.Model):
         (u"manual",u"Manual"),
         (u"smart",u"Smart")
     ]
-    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_related")
+    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
     created_on = models.DateTimeField(auto_created=True)
     name = models.CharField("name", max_length=100, default="")
     description = models.TextField("description", default="")
-    replaced_by = models.ForeignKey("Collection", null=True, related_name="%(app_label)s_%(class)s_related")
-    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_related")
+    replaced_by = models.ForeignKey("Collection", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
+    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
     publish_start = models.DateField("start publishing from date", default=datetime.now)
     publish_stop = models.DateField("stop publishing by date", null=True)
     type = models.CharField("type",max_length=10,choices=TYPE_CHOICES,default="manual")
-    tags = models.ManyToManyField(Tag, through="CollectionTag", null=True, related_name="%(app_label)s_%(class)s_related")
-    people = models.ManyToManyField(Person, through="CollectionRole", verbose_name="associated people", related_name="%(app_label)s_%(class)s_related")
-    links = models.ManyToManyField(Link, through="CollectionLink", verbose_name="associated links", null=True, related_name="%(app_label)s_%(class)s_related")
-    items = models.ManyToManyField(Item, through="Association", verbose_name="associated collections", related_name="%(app_label)s_%(class)s_related")
+    tags = models.ManyToManyField(Tag, through="CollectionTag", null=True, related_name="%(app_label)s_%(class)s_tags")
+    people = models.ManyToManyField(Person, through="CollectionRole", verbose_name="associated people", related_name="%(app_label)s_%(class)s_people")
+    links = models.ManyToManyField(Link, through="CollectionLink", verbose_name="associated links", null=True, related_name="%(app_label)s_%(class)s_links")
+    items = models.ManyToManyField(Item, through="Association", verbose_name="associated collections", related_name="%(app_label)s_%(class)s_items")
 
 #    @property
 #    def jorumopen_collections(self):
