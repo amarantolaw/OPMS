@@ -695,7 +695,6 @@
   fields:
     name: Unknown
     description: Unknown file type and function
-    category: unknown
 
 - model: ffm.licence
   pk: 1
