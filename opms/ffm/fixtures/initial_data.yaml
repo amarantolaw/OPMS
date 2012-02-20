@@ -306,9 +306,9 @@
     group: 4
     parent: 41
   pk: 52
-  fields: 105
-    name: Humanities
-    description:
+  fields:
+    name: 105
+    description: Humanities
     group: 4
     parent: null
   pk: 53
@@ -703,38 +703,30 @@
     name: University of Oxford Personal Use
     description: Licence only for personal use. Default licence for University of Oxford Podcasts
     url: null
-    image: null
-- model: ffm.licence
   pk: 2
   fields:
     name: Creative Commons licence (BY-NC-SA E and W)
     description: Creative Commons licence (BY-NC-SA E and W)
     url: http://creativecommons.org/licenses/by-nc-sa/2.0/uk/
-    image: null
-- model: ffm.licence
   pk: 3
   fields:
     name: Creative Commons licence (BY-NC-ND E and W)
     description: Creative Commons licence (BY-NC-SA E and W)
     url: http://creativecommons.org/licenses/by-nc-nd/3.0/
-    image: null
 
 - model: ffm.feedtemplate
   pk: 1
   fields:
     name: POAU
     description: The primary podcasts.ox.ac.uk portal website
-- model: ffm.destination
-  pk: 2
+      pk: 2
   fields:
     name: iTunes U
     description: The iTunes U Oxford portal
-- model: ffm.destination
   pk: 3
   fields:
     name: mobileOxford
     description: The Mobile Oxford Webportal
-    url: http://m.ox.ac.uk/podcasts/
 
 - model: ffm.link
   pk: 1
