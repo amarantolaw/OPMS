@@ -73,17 +73,17 @@ class Tag(models.Model):
         (3,u'JorumOPEN Collection'), # Codes used for JorumOPEN markup of feeds
         (4,u'iTunes U Category'), # List from: http://deimos.apple.com/rsrc/doc/iTunesUAdministrationGuide/iTunesUintheiTunesStore/chapter_13_section_3.html
     ]
-    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_related")
+    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
     created_on = models.DateTimeField(auto_created=True)
     name = models.CharField("name", max_length=100, default='')
     description = models.TextField("description", default='')
-    replaced_by = models.ForeignKey("Tag", null=True, related_name="%(app_label)s_%(class)s_related")
-    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_related")
+    replaced_by = models.ForeignKey("Tag", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
+    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(auto_now=True)
 
 #    group = models.ForeignKey(TagGroup, verbose_name="Group tag belongs to", default=1)
     group = models.SmallIntegerField("tag group", choices=TAG_GROUP_CHOICES, default=1)
-    parent = models.ForeignKey("Tag", null=True, related_name="%(app_label)s_%(class)s_related")
+    parent = models.ForeignKey("Tag", null=True, related_name="%(app_label)s_%(class)s_parent")
 
     def get_group_name(self):
         return self.TAG_GROUP_CHOICES.get(self.group, 'Unknown')
@@ -102,7 +102,7 @@ class Licence(models.Model):
     description = models.TextField("description", default="")
 
     url = models.URLField("URL for full licence", null=True)
-    logo = models.ImageField(null=True)
+#    logo = models.ImageField(null=True, upload_to="") # Requires PIL to be installed
 
     def __unicode__(self):
         return smart_unicode(self.name)
