@@ -832,18 +832,23 @@
 - model: ffm.feedtemplate
   pk: 1
   fields:
-    name: POAU
-    description: The primary podcasts.ox.ac.uk portal website
+    name: RSS
+    description: Generic mRSS output of an entire collection
 - model: ffm.feedtemplate
   pk: 2
   fields:
-    name: iTunes U
-    description: The iTunes U Oxford portal
+    name: POAU
+    description: The primary podcasts.ox.ac.uk portal website. RSS based with extra namespace extensions
 - model: ffm.feedtemplate
   pk: 3
   fields:
+    name: iTunes U
+    description: The iTunes U Oxford portal. RSS based with extra namespace extensions
+- model: ffm.feedtemplate
+  pk: 4
+  fields:
     name: mobileOxford
-    description: The Mobile Oxford Webportal
+    description: The Mobile Oxford Webportal. RSS based with extra namespace extensions
 
 - model: ffm.link
   pk: 1

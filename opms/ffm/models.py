@@ -3,6 +3,7 @@ from django.utils.encoding import smart_str, smart_unicode
 from datetime import date, datetime
 from opms.ffm.models import *
 from opms.core.models import Person, Unit
+from opms.oxitems.models import Rg07Channels, Rg07Items
 from django.contrib.auth.models import User
 import uuid
 
@@ -13,15 +14,15 @@ import uuid
 
 
 # Common fields
-#    created_by = models.ForeignKey(User, null=True)
+#    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
 #    created_on = models.DateTimeField(auto_now_add=True)
 #    # c1
 #    name = models.CharField("name", max_length=100, default="")
 #    description = models.TextField("description", default="")
 #    # c2 & c3
-#    replaced_by = models.ForeignKey("", null=True)
-#    deleted_by = models.ForeignKey(User, null=True)
-#    deleted_on = models.DateTimeField(auto_now=True)
+#    replaced_by = models.ForeignKey("", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
+#    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
+#    deleted_on = models.DateTimeField(null=True)
 #    # c4
 #    last_modified_by = models.ForeignKey(User, null=True)
 #    last_modified_on = models.DateTimeField(auto_now=True)
@@ -79,7 +80,7 @@ class Tag(models.Model):
     description = models.TextField("description", default='')
     replaced_by = models.ForeignKey("Tag", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
 
 #    group = models.ForeignKey(TagGroup, verbose_name="Group tag belongs to", default=1)
     group = models.SmallIntegerField("tag group", choices=TAG_GROUP_CHOICES, default=1)
@@ -117,7 +118,7 @@ class Link(models.Model):
     description = models.TextField("description", default="")
     replaced_by = models.ForeignKey("Link", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
 
     url = models.URLField("link url including http: etc", default='http://www.ox.ac.uk/')
 
@@ -129,16 +130,20 @@ class Item(models.Model):
     description = models.TextField("description", default="")
     replaced_by = models.ForeignKey("Item", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
     publish_start = models.DateTimeField("publishing start date", default=datetime.now)
     publish_stop = models.DateTimeField("publishing end date", null=True)
     recording_date = models.DateField("date of recording", null=True)
     licence_confirmed = models.BooleanField("licence confirmed?", default=False)
-    license = models.ForeignKey(Licence, verbose_name="licence", default=1, related_name="%(app_label)s_%(class)s_license")
-    tags = models.ManyToManyField(Tag, through="ItemTag", null=True, related_name="%(app_label)s_%(class)s_tags")
-    people = models.ManyToManyField(Person, through="ItemRole", verbose_name="associated people", related_name="%(app_label)s_%(class)s_people")
-    links = models.ManyToManyField(Link, through="ItemLink", verbose_name="associated links", null=True, related_name="%(app_label)s_%(class)s_links")
-    collections = models.ManyToManyField("Collection", through="Association", verbose_name="associated collections", related_name="%(app_label)s_%(class)s_collections")
+    licence = models.ForeignKey(Licence, verbose_name="licence", default=1,
+                                related_name="%(app_label)s_%(class)s_licence")
+    tags = models.ManyToManyField(Tag, through="ItemTag", related_name="%(app_label)s_%(class)s_tags")
+    people = models.ManyToManyField(Person, through="ItemRole", verbose_name="associated people",
+                                    related_name="%(app_label)s_%(class)s_people")
+    links = models.ManyToManyField(Link, through="ItemLink", verbose_name="associated links",
+                                   related_name="%(app_label)s_%(class)s_links")
+    collections = models.ManyToManyField("Collection", through="Association", verbose_name="associated collections",
+                                         related_name="%(app_label)s_%(class)s_collections")
 
 #    def create_guid():
 #        return 'OPMS-item:' + str(uuid.uuid4())
@@ -162,7 +167,7 @@ class ItemTag(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("ItemTag", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
     ordering = models.SmallIntegerField("manual ordering", default=1)
     tag = models.ForeignKey(Tag, verbose_name="associated tag", related_name="%(app_label)s_%(class)s_tag")
     item = models.ForeignKey(Item, verbose_name="associated item", related_name="%(app_label)s_%(class)s_item")
@@ -175,7 +180,7 @@ class ItemRole(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("ItemRole", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
     role = models.CharField("role of Person", max_length=20, choices=EBU_ROLES, db_index=True)
     person = models.ForeignKey(Person, verbose_name="associated person", related_name="%(app_label)s_%(class)s_person")
     item = models.ForeignKey(Item, verbose_name="associated item", related_name="%(app_label)s_%(class)s_item")
@@ -192,7 +197,7 @@ class ItemLink(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("ItemLink", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
     link = models.ForeignKey(Link, verbose_name="associated link", related_name="%(app_label)s_%(class)s_link")
     item = models.ForeignKey(Item, verbose_name="associated item", related_name="%(app_label)s_%(class)s_item")
 
@@ -211,14 +216,17 @@ class Collection(models.Model):
     description = models.TextField("description", default="")
     replaced_by = models.ForeignKey("Collection", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
     publish_start = models.DateField("start publishing from date", default=datetime.now)
     publish_stop = models.DateField("stop publishing by date", null=True)
     type = models.CharField("type",max_length=10,choices=TYPE_CHOICES,default="manual")
-    tags = models.ManyToManyField(Tag, through="CollectionTag", null=True, related_name="%(app_label)s_%(class)s_tags")
-    people = models.ManyToManyField(Person, through="CollectionRole", verbose_name="associated people", related_name="%(app_label)s_%(class)s_people")
-    links = models.ManyToManyField(Link, through="CollectionLink", verbose_name="associated links", null=True, related_name="%(app_label)s_%(class)s_links")
-    items = models.ManyToManyField(Item, through="Association", verbose_name="associated collections", related_name="%(app_label)s_%(class)s_items")
+    tags = models.ManyToManyField(Tag, through="CollectionTag", related_name="%(app_label)s_%(class)s_tags")
+    people = models.ManyToManyField(Person, through="CollectionRole", verbose_name="associated people",
+                                    related_name="%(app_label)s_%(class)s_people")
+    links = models.ManyToManyField(Link, through="CollectionLink", verbose_name="associated links",
+                                   related_name="%(app_label)s_%(class)s_links")
+    items = models.ManyToManyField(Item, through="Association", verbose_name="associated collections",
+                                   related_name="%(app_label)s_%(class)s_items")
 
 #    @property
 #    def jorumopen_collections(self):
@@ -233,7 +241,7 @@ class CollectionTag(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("CollectionTag", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
     ordering = models.SmallIntegerField("manual ordering", default=1)
     tag = models.ForeignKey(Tag, verbose_name="associated tag", related_name="%(app_label)s_%(class)s_tag")
     collection = models.ForeignKey(Collection, verbose_name="associated collection", related_name="%(app_label)s_%(class)s_collection")
@@ -247,7 +255,7 @@ class CollectionRole(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("CollectionRole", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
     role = models.CharField("role of Person", max_length=20, choices=EBU_ROLES, db_index=True)
     person = models.ForeignKey(Person, verbose_name="associated person", related_name="%(app_label)s_%(class)s_person")
     collection = models.ForeignKey(Collection, verbose_name="associated collection", related_name="%(app_label)s_%(class)s_collection")
@@ -264,7 +272,7 @@ class CollectionLink(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("CollectionLink", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
     link = models.ForeignKey(Link, verbose_name="associated link", related_name="%(app_label)s_%(class)s_link")
     collection = models.ForeignKey(Collection, verbose_name="associated collection", related_name="%(app_label)s_%(class)s_collection")
 
@@ -277,7 +285,7 @@ class Association(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("Association", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
     ordering = models.SmallIntegerField("manual ordering", default=1)
     item = models.ForeignKey(Item, verbose_name="associated item", related_name="%(app_label)s_%(class)s_item")
     collection = models.ForeignKey(Collection, verbose_name="associated collection", related_name="%(app_label)s_%(class)s_collection")
@@ -290,7 +298,7 @@ class AssociationTag(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("AssociationTag", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
     ordering = models.SmallIntegerField("manual ordering", default=1)
     tag = models.ForeignKey(Tag, verbose_name="associated tag", related_name="%(app_label)s_%(class)s_tag")
     association = models.ForeignKey(Association, verbose_name="associated association", related_name="%(app_label)s_%(class)s_association")
@@ -318,7 +326,8 @@ class FeedTemplate(models.Model):
     description = models.TextField("description", default="")
     last_modified_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_last_modified_by")
     last_modified_on = models.DateTimeField(auto_now=True)
-    filetypes = models.ManyToManyField(FileType, through="Supports", verbose_name="supported filetypes", related_name="%(app_label)s_%(class)s_filetypes")
+    filetypes = models.ManyToManyField(FileType, through="Supports", verbose_name="supported filetypes",
+                                       related_name="%(app_label)s_%(class)s_filetypes")
 
     def __unicode__(self):
         return smart_unicode(self.name + ' (' + self.description + ')')
@@ -329,7 +338,7 @@ class Supports(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("Supports", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
     filetype = models.ForeignKey(FileType, related_name="%(app_label)s_%(class)s_filetype")
     feedtemplate = models.ForeignKey(FeedTemplate)
 
@@ -372,7 +381,7 @@ class File(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("File", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
     checksum = models.CharField("checksum", max_length=255, null=True) # As nice as this would be to be mandatory, I'll save that option till later
     # Filehash notes at: http://docs.python.org/library/hashlib.html; http://en.wikipedia.org/wiki/Cryptographic_hash_function#Cryptographic_hash_algorithms
     # and a memory friendly method of applying this at http://stackoverflow.com/questions/1131220/get-md5-hash-of-a-files-without-open-it-in-python
@@ -404,7 +413,7 @@ class FileURL(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("FileURL", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
     # TODO: Investigate http://docs.python.org/library/urlparse.html for url parsing
     file = models.ForeignKey(File, verbose_name="file urls", related_name="%(app_label)s_%(class)s_file")
     url = models.URLField("file url", verify_exists=True) # Everything in this system should be hosted on a URL
@@ -428,11 +437,12 @@ class Feed(models.Model):
     description = models.TextField("description", default="")
     replaced_by = models.ForeignKey("Feed", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
+    deleted_on = models.DateTimeField(null=True)
     publish_status = models.SmallIntegerField("publish status", choices=PUBLISH_CHOICES, default=0)
     collection = models.ForeignKey(Collection, verbose_name="associated collection", related_name="%(app_label)s_%(class)s_collection")
     template = models.ForeignKey(FeedTemplate, verbose_name="associated template", related_name="%(app_label)s_%(class)s_template")
-    files = models.ManyToManyField(File, through="FileInFeed", verbose_name="files related to this feed", null=True, related_name="%(app_label)s_%(class)s_files")
+    files = models.ManyToManyField(File, through="FileInFeed", verbose_name="files related to this feed",
+                                   related_name="%(app_label)s_%(class)s_files")
 
 #    @property
 #    def podcasts(self):
@@ -445,6 +455,7 @@ class Feed(models.Model):
 #            return self.files.filter(function__name__iexact='feedart')[0]
 #        except IndexError:
 #            return None
+    artwork = models.URLField("artwork url", verify_exists=True, null=True)
 
     def __unicode__(self):
         return smart_unicode(self.name) or ''
@@ -455,18 +466,33 @@ class Feed(models.Model):
         # ordering = ('title',)
 
 
-def create_guid():
-    return 'OPMS-file:' + str(uuid.uuid4())
-
 class FileInFeed(models.Model):
+    def create_guid():
+        return 'OPMS-file:' + str(uuid.uuid4())
+
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
     created_on = models.DateTimeField(auto_now_add=True)
     replaced_by = models.ForeignKey("FileInFeed", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(auto_now=True)
-    guid = models.CharField("file GUID", max_length=100, default=create_guid) # Used to identify a file uniquely dependant on the feed it is placed in (tracking)
+    deleted_on = models.DateTimeField(null=True)
+    guid = models.CharField("file GUID", max_length=200, default=create_guid) # Used to identify a file uniquely
+    # dependant on the feed it is placed in (tracking)
     file = models.ForeignKey(File, verbose_name="file", related_name="%(app_label)s_%(class)s_file")
     feed = models.ForeignKey(Feed, verbose_name="feed", related_name="%(app_label)s_%(class)s_feed")
 
     def __unicode__(self):
         return smart_unicode(self.file.name + ' in ' + self.feed.name)
+
+
+class OxitemsMapping(models.Model):
+    """
+    This maps the OxItems feed name (Rg07Channels.name) to a corresponding Feed. This mapping isn't completely clean
+    because OxItems is based around feeds (and typically "name+audio/video/document" format),
+    whereas FFM has the idea of Collections, with a feed created to map a Collection to a specific type of
+    FeedTemplate, which are Marko's idea for relating filetypes from a collection to a specific destination.
+
+    However, we need this name to allow us to relate some of the stats data more easily back to Collections,
+    and as a form of lookup in other as-yet-undefined use cases.
+    """
+    feed = models.ForeignKey(Feed)
+    feed_name = models.CharField("short name", max_length=255)

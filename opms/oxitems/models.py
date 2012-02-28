@@ -12,10 +12,20 @@
 from django.db import models
 from django.utils.encoding import smart_str, smart_unicode
 from datetime import date
-#from opms.ffm.models import *
+from opms.ffm.models import Collection, Feed
 
 
 ## These are local temporary linking tables designed to make syncing easier
+class SyncChannelsWithCollection(models.Model):
+    channel = models.ForeignKey("Rg07Channels")
+    collection = models.ForeignKey(Collection)
+
+class SyncChannelsWithFeed(models.Model):
+    channel = models.ForeignKey("Rg07Channels")
+    feed = models.ForeignKey(Feed)
+
+
+
 #class ImportFeedChannel(models.Model):
 #    """
 #    If a feed has been linked to this channel, then attempt to update that feed
