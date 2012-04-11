@@ -1,9 +1,8 @@
 from django.db import models
 from django.utils.encoding import smart_str, smart_unicode
 from datetime import date, datetime
-from opms.ffm.models import *
 from opms.core.models import Person, Unit
-from opms.oxitems.models import Rg07Channels, Rg07Items
+#from opms.oxitems.models import Rg07Channels, Rg07Items
 from django.contrib.auth.models import User
 import uuid
 
