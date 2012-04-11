@@ -9,12 +9,12 @@ urlpatterns = patterns('stats.views',
     # Pages in Stats
     (r'^report/summary/feeds/partial-guid/(?P<partial_guid>.+)', 'feed_detail'),
     (r'^report/summary/feeds/$', 'summary_feeds'),
-    # Temp hack CC pages for PR
-    (r'^report/summary/feeds-cc/partial-guid/(?P<partial_guid>.+)', 'feed_detail_cc'),
-    (r'^report/summary/feeds-cc/$', 'summary_feeds_cc'),
+#    # Temp hack CC pages for PR
+#    (r'^report/summary/feeds-cc/partial-guid/(?P<partial_guid>.+)', 'feed_detail_cc'),
+#    (r'^report/summary/feeds-cc/$', 'summary_feeds_cc'),
 
-    (r'^report/summary/items/(?P<guid>.+)$', 'item_detail'),
-    (r'^report/summary/items/$', 'summary_items'),
+#    (r'^report/summary/items/(?P<guid>.+)$', 'item_detail'),
+#    (r'^report/summary/items/$', 'summary_items'),
     (r'^report/summary/$', 'summary_index'),
 
     (r'report/authors/$', 'summary_authors'),
