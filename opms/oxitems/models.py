@@ -16,12 +16,14 @@ from opms.ffm.models import Collection, Feed
 
 
 ## These are local temporary linking tables designed to make syncing easier
-class SyncChannelsWithCollection(models.Model):
-    channel = models.ForeignKey("Rg07Channels")
-    collection = models.ForeignKey(Collection)
+# Do we need to link these? the Feed and Channel should be 1 to 1, but you can derive this link from Feed->Collection
+#class SyncChannelsWithCollection(models.Model):
+#    channel = models.ForeignKey("Rg07Channels")
+#    collection = models.ForeignKey(Collection)
 
 class SyncChannelsWithFeed(models.Model):
     channel = models.ForeignKey("Rg07Channels")
+    channel_updated = models.DateTimeField()
     feed = models.ForeignKey(Feed)
 
 
@@ -81,13 +83,13 @@ class Rg07Channels(models.Model):
     # value="1" > Include in podcasts.ox.ac.uk but not in iTunes U
     # value="2" > Include in iTunes U but not in podcasts.ox.ac.uk
     # value="3" > Include in podcasts.ox.ac.uk and also request inclusion in iTunes
-    channel_updated = models.CharField(max_length=32) # Date as text.
+    channel_updated = models.CharField(max_length=32) # Date as text. Appears to be more recent than modified
     deleted = models.BooleanField()
     deleter = models.CharField(max_length=11) # SSO username
     description = models.TextField() # e.g. u'Exciting and rare materials to be found in the vast Bodleian Library Collections'
     id = models.IntegerField(primary_key=True)
     link = models.CharField(max_length=256) # Related link - u'http://www.ouls.ox.ac.uk/bodley'
-    modified = models.DateTimeField()
+    modified = models.DateTimeField() # Can't determine purpose of this in relation to channel_updated
     modifier = models.CharField(max_length=11) # SSO username
     name = models.CharField(max_length=128) # feedname, e.g. u'bodlib/bodleian_gems-video'
     oxpoints_units = models.TextField() # comma separated values of oxpoint names. Mostly blank
