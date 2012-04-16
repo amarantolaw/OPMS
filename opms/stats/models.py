@@ -366,6 +366,10 @@ class TrackGUID(models.Model):
     # Eventually there will be a link here to a File record from the FFM module
     # file = models.ForeignKey(ffm_models.File, null=True)
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
+    # The following are optional fields of OxItems data imported in a basic fashion
+    name = models.CharField(max_length=255, null=True, blank=True) # Rg07Items.item_title
+    deleted = models.BooleanField(default=False) # Rg07Items.deleted
+
 
     def __unicode__(self):
         return smart_unicode(self.guid)
