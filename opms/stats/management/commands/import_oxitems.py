@@ -66,7 +66,7 @@ class Command(NoArgsCommand):
                 row.save(using='default')
                 divisor = int(total_count / 20)
                 if counter == 0 or (counter % divisor) == 0: # Aim for reports every 5% complete
-                    percentage = int(counter / total_count) * 100
+                    percentage = int((counter / total_count) * 100)
                     print "Copied %s (%s%%) of %s items" % (counter, percentage, total_count)
             print "Items copy finished"
         else:
@@ -74,7 +74,7 @@ class Command(NoArgsCommand):
 
         # Get list of Oxitems data to scan through
         oxitems = list(Rg07Items.objects.order_by('item_guid','-modified'))
-
+        print "OxItems Import beginning scan of Track records"
         for track in TrackGUID.objects.all():
             for item in oxitems:
                 if track.guid == item.item_guid:
