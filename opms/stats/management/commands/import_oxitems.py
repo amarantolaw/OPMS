@@ -66,7 +66,7 @@ class Command(NoArgsCommand):
                 row.save(using='default')
                 divisor = int(total_count / 20)
                 if counter == 0 or (counter % divisor) == 0: # Aim for reports every 5% complete
-                    percentage = int((counter / total_count) * 100)
+                    percentage = int((float(counter) / total_count) * 100)
                     print "Copied %s (%s%%) of %s items" % (counter, percentage, total_count)
             print "Items copy finished"
         else:
