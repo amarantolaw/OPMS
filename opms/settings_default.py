@@ -91,7 +91,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.media",
     "django.core.context_processors.static",
     # "django.core.context_processors.tz", - New in 1.4 Dev
-    "django.contrib.messages.context_processors.messages"
+    "django.contrib.messages.context_processors.messages",
+    # Needed for sitetree app
+    "django.core.context_processors.request"
 )
 #print "set:15"
 
@@ -136,6 +138,7 @@ INSTALLED_APPS = (
     'ffm',
     'oxitems', # This is to temporarily link OPMS with the OxItems database whilst it is definitive
     'django_extensions',
+    'sitetree',
 )
 #print "set:20"
 

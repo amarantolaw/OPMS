@@ -1,4 +1,4 @@
-{% load static %}
+{% load static sitetree %}
 {% get_static_prefix as STATIC_PREFIX %}
 <!DOCTYPE html>
 <html lang="en-gb" >
@@ -82,6 +82,16 @@
 {% block content %}
         <h1>Oxford Podcast Management System (OPMS)</h1>
 
+        <!-- sitetree_menu -->
+        {% sitetree_menu %}
+        <!-- sitetree_breadcrumbs -->
+        {% sitetree_breadcrumbs %}
+        <!-- sitetree_tree -->
+        {% sitetree_tree %}
+        <!-- sitetree_page_title -->
+        {% sitetree_page_title %}
+        <!-- sitetree_url -->
+        {% sitetree_url %}
 {#    UPLOADIFY CODE - REJECTED BECAUSE IT DOESN'T WORK WITH WEBAUTH #}
 {#        <h2>File Upload Form</h2>#}
 {#        <div id='upload'>#}
