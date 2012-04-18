@@ -205,7 +205,7 @@ class Collection(models.Model):
     publish_stop = models.DateField("stop publishing by date", null=True)
     type = models.CharField("type",max_length=10,choices=TYPE_CHOICES,default="manual")
     tags = models.ManyToManyField(Tag, through="CollectionTag", related_name="%(app_label)s_%(class)s_tags")
-    people = models.ManyToManyField(Person, through="CollectionRole", verbose_name="associated people",
+    people = models.ManyToManyField(CorePerson, through="CollectionRole", verbose_name="associated people",
                                     related_name="%(app_label)s_%(class)s_people")
     links = models.ManyToManyField(Link, through="CollectionLink", verbose_name="associated links",
                                    related_name="%(app_label)s_%(class)s_links")
@@ -241,7 +241,7 @@ class CollectionRole(models.Model):
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(null=True)
     role = models.CharField("role of Person", max_length=20, choices=EBU_ROLES, db_index=True)
-    person = models.ForeignKey(Person, verbose_name="associated person", related_name="%(app_label)s_%(class)s_person")
+    person = models.ForeignKey(CorePerson, verbose_name="associated person", related_name="%(app_label)s_%(class)s_person")
     collection = models.ForeignKey(Collection, verbose_name="associated collection", related_name="%(app_label)s_%(class)s_collection")
 
     def get_role_display(self):
