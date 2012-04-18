@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.encoding import smart_unicode
 from datetime import datetime
-from opms.core.models import Person
+from opms.core.models import Person as CorePerson
 from django.contrib.auth.models import User
 import uuid
 
@@ -127,7 +127,7 @@ class ItemRole(models.Model):
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(null=True)
     role = models.CharField("role of Person", max_length=20, choices=EBU_ROLES, db_index=True)
-    person = models.ForeignKey(core.Person, verbose_name="associated person", related_name="%(app_label)s_%(class)s_person")
+    person = models.ForeignKey(CorePerson, verbose_name="associated person", related_name="%(app_label)s_%(class)s_person")
     item = models.ForeignKey("Item", verbose_name="associated item", related_name="%(app_label)s_%(class)s_item")
 
     def get_role_display(self):
@@ -165,7 +165,7 @@ class Item(models.Model):
     licence = models.ForeignKey(Licence, verbose_name="licence", default=1,
         related_name="%(app_label)s_%(class)s_licence")
     tags = models.ManyToManyField(Tag, through="ItemTag", related_name="%(app_label)s_%(class)s_tags")
-    people = models.ManyToManyField(core.Person, through="ItemRole", verbose_name="associated people",
+    people = models.ManyToManyField(CorePerson, through="ItemRole", verbose_name="associated people",
         related_name="%(app_label)s_%(class)s_people")
     links = models.ManyToManyField(Link, through="ItemLink", verbose_name="associated links",
         related_name="%(app_label)s_%(class)s_links")
