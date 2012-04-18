@@ -122,45 +122,6 @@ class Link(models.Model):
     url = models.URLField("link url including http: etc", default='http://www.ox.ac.uk/')
 
 
-class Item(models.Model):
-    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
-    created_on = models.DateTimeField(auto_now_add=True)
-    name = models.CharField("name", max_length=100, default="")
-    description = models.TextField("description", default="")
-    replaced_by = models.ForeignKey("Item", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
-    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
-    deleted_on = models.DateTimeField(null=True)
-    publish_start = models.DateTimeField("publishing start date", default=datetime.now)
-    publish_stop = models.DateTimeField("publishing end date", null=True)
-    recording_date = models.DateField("date of recording", null=True)
-    licence_confirmed = models.BooleanField("licence confirmed?", default=False)
-    licence = models.ForeignKey(Licence, verbose_name="licence", default=1,
-                                related_name="%(app_label)s_%(class)s_licence")
-    tags = models.ManyToManyField(Tag, through="ItemTag", related_name="%(app_label)s_%(class)s_tags")
-    people = models.ManyToManyField("Person", through="ItemRole", verbose_name="associated people",
-                                    related_name="%(app_label)s_%(class)s_people")
-    links = models.ManyToManyField(Link, through="ItemLink", verbose_name="associated links",
-                                   related_name="%(app_label)s_%(class)s_links")
-    collections = models.ManyToManyField("Collection", through="Association", verbose_name="associated collections",
-                                         related_name="%(app_label)s_%(class)s_collections")
-
-#    def create_guid():
-#        return 'OPMS-item:' + str(uuid.uuid4())
-#    guid = models.CharField("GUID String", max_length=100, default=create_guid)
-
-#    @property
-#    def artwork(self):
-#        # use models.ImageField() in the future
-#        return self.file_set.filter(function__name__iexact='itemart')
-
-    def __unicode__(self):
-        return smart_unicode(self.name)
-
-    class Meta:
-        verbose_name = 'Podcast item'
-        verbose_name_plural = 'Podcast items'
-
-
 class ItemTag(models.Model):
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
     created_on = models.DateTimeField(auto_now_add=True)
@@ -202,6 +163,45 @@ class ItemLink(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.link.name + ' is associated with ' + self.item.name)
+
+
+class Item(models.Model):
+    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
+    created_on = models.DateTimeField(auto_now_add=True)
+    name = models.CharField("name", max_length=100, default="")
+    description = models.TextField("description", default="")
+    replaced_by = models.ForeignKey("Item", null=True, related_name="%(app_label)s_%(class)s_replaced_by")
+    deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
+    deleted_on = models.DateTimeField(null=True)
+    publish_start = models.DateTimeField("publishing start date", default=datetime.now)
+    publish_stop = models.DateTimeField("publishing end date", null=True)
+    recording_date = models.DateField("date of recording", null=True)
+    licence_confirmed = models.BooleanField("licence confirmed?", default=False)
+    licence = models.ForeignKey(Licence, verbose_name="licence", default=1,
+        related_name="%(app_label)s_%(class)s_licence")
+    tags = models.ManyToManyField(Tag, through="ItemTag", related_name="%(app_label)s_%(class)s_tags")
+    people = models.ManyToManyField("Person", through="ItemRole", verbose_name="associated people",
+        related_name="%(app_label)s_%(class)s_people")
+    links = models.ManyToManyField(Link, through="ItemLink", verbose_name="associated links",
+        related_name="%(app_label)s_%(class)s_links")
+    collections = models.ManyToManyField("Collection", through="Association", verbose_name="associated collections",
+        related_name="%(app_label)s_%(class)s_collections")
+
+    #    def create_guid():
+    #        return 'OPMS-item:' + str(uuid.uuid4())
+    #    guid = models.CharField("GUID String", max_length=100, default=create_guid)
+
+    #    @property
+    #    def artwork(self):
+    #        # use models.ImageField() in the future
+    #        return self.file_set.filter(function__name__iexact='itemart')
+
+    def __unicode__(self):
+        return smart_unicode(self.name)
+
+    class Meta:
+        verbose_name = 'Podcast item'
+        verbose_name_plural = 'Podcast items'
 
 
 class Collection(models.Model):
