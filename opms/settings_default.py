@@ -56,7 +56,7 @@ STATIC_URL = '/static/'
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/static/admin/'
+#ADMIN_MEDIA_PREFIX = '/static/admin/' # Removed in Django 1.4 upgrade
 #print "set:11"
 
 # Many projects will also have static assets that aren't tied to a particular app; you can give
