@@ -8,7 +8,7 @@
     <link rel="shortcut icon" href="{{ STATIC_PREFIX }}images/favicon.ico" />
     <meta name="author" content="University of Oxford" />
 
-    <title>{% block title %}Welcome{% endblock %} :: The OPMS</title>
+    <title>{% sitetree_page_title from "opmstree" %} :: The OPMS</title>
 
     <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/basic.css" media="all" />
     <link rel="stylesheet" href="{{ STATIC_PREFIX }}print.css" media="print" />
@@ -78,18 +78,19 @@
 {% endblock %}
 
     <div id="content" >
-        <div id="breadcrumb"><strong>You are at:</strong> <a href="/">Home</a> {% block breadcrumb %}{% endblock %}</div>
+        <div id="breadcrumb"><strong>You are at:</strong> <a href="/">Home</a>
+            {% block breadcrumb %}<!-- sitetree_breadcrumbs -->
+            {% sitetree_breadcrumbs from "opmstree" %}
+            {% endblock %}</div>
 {% block content %}
         <h1>Oxford Podcast Management System (OPMS)</h1>
 
         <!-- sitetree_menu -->
         {% sitetree_menu from "opmstree" include "trunk" %}
-        <!-- sitetree_breadcrumbs -->
-        {% sitetree_breadcrumbs from "opmstree" %}
+
         <!-- sitetree_tree -->
         {% sitetree_tree from "opmstree" %}
-        <!-- sitetree_page_title -->
-        {% sitetree_page_title from "opmstree" %}
+
 {#    UPLOADIFY CODE - REJECTED BECAUSE IT DOESN'T WORK WITH WEBAUTH #}
 {#        <h2>File Upload Form</h2>#}
 {#        <div id='upload'>#}
