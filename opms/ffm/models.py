@@ -130,7 +130,7 @@ class ItemTag(models.Model):
     deleted_on = models.DateTimeField(null=True)
     ordering = models.SmallIntegerField("manual ordering", default=1)
     tag = models.ForeignKey(Tag, verbose_name="associated tag", related_name="%(app_label)s_%(class)s_tag")
-    item = models.ForeignKey(Item, verbose_name="associated item", related_name="%(app_label)s_%(class)s_item")
+    item = models.ForeignKey("Item", verbose_name="associated item", related_name="%(app_label)s_%(class)s_item")
 
     def __unicode__(self):
         return smart_unicode(self.tag.name + ' is associated with ' + self.item.name)
@@ -142,8 +142,8 @@ class ItemRole(models.Model):
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(null=True)
     role = models.CharField("role of Person", max_length=20, choices=EBU_ROLES, db_index=True)
-    person = models.ForeignKey("Person", verbose_name="associated person", related_name="%(app_label)s_%(class)s_person")
-    item = models.ForeignKey(Item, verbose_name="associated item", related_name="%(app_label)s_%(class)s_item")
+    person = models.ForeignKey(Person, verbose_name="associated person", related_name="%(app_label)s_%(class)s_person")
+    item = models.ForeignKey("Item", verbose_name="associated item", related_name="%(app_label)s_%(class)s_item")
 
     def get_role_display(self):
         return EBU_ROLES.get(self.role, 'unknown')
@@ -159,7 +159,7 @@ class ItemLink(models.Model):
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(null=True)
     link = models.ForeignKey(Link, verbose_name="associated link", related_name="%(app_label)s_%(class)s_link")
-    item = models.ForeignKey(Item, verbose_name="associated item", related_name="%(app_label)s_%(class)s_item")
+    item = models.ForeignKey("Item", verbose_name="associated item", related_name="%(app_label)s_%(class)s_item")
 
     def __unicode__(self):
         return smart_unicode(self.link.name + ' is associated with ' + self.item.name)
@@ -180,7 +180,7 @@ class Item(models.Model):
     licence = models.ForeignKey(Licence, verbose_name="licence", default=1,
         related_name="%(app_label)s_%(class)s_licence")
     tags = models.ManyToManyField(Tag, through="ItemTag", related_name="%(app_label)s_%(class)s_tags")
-    people = models.ManyToManyField("Person", through="ItemRole", verbose_name="associated people",
+    people = models.ManyToManyField(Person, through="ItemRole", verbose_name="associated people",
         related_name="%(app_label)s_%(class)s_people")
     links = models.ManyToManyField(Link, through="ItemLink", verbose_name="associated links",
         related_name="%(app_label)s_%(class)s_links")
