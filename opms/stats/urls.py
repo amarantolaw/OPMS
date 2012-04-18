@@ -21,7 +21,7 @@ urlpatterns = patterns('stats.views',
     (r'report/authors/$', 'summary_authors'),
 
     # TODO: THIS NEEDS PULLING INTO ANOTHER APP!
-    url(r'^monitors/url-scans/url-(?P<url_id>\d{1,5})$', 'urlmonitoring_url'', name="url-scans-url"),
+    url(r'^monitors/url-scans/url-(?P<url_id>\d{1,5})$', 'urlmonitoring_url', name="url-scans-url"),
     url(r'^monitors/url-scans/task-(?P<task_id>\d{1,5})$', 'urlmonitoring_task', name="url-scans-task"),
     url(r'^monitors/url-scans/$', 'summary_urlmonitoring', name="url-scans-summary"),
 
