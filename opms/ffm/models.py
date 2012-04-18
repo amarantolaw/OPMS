@@ -1,8 +1,7 @@
 from django.db import models
-from django.utils.encoding import smart_str, smart_unicode
-from datetime import date, datetime
+from django.utils.encoding import smart_unicode
+from datetime import datetime
 from opms.core.models import Person
-#from opms.oxitems.models import Rg07Channels, Rg07Items
 from django.contrib.auth.models import User
 import uuid
 
@@ -10,7 +9,6 @@ import uuid
 # python manage.py schemamigration ffm --auto
 # python manage.py migrate ffm
 # NB: Can't convert existing fields to foreignkeys in one step. Need to do two migrations. http://south.aeracode.org/ticket/498
-
 
 # Common fields
 #    created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
@@ -52,19 +50,6 @@ EBU_ROLES = [
     (u'25.21', u'Commentator'),
     (u'25.22', u'Dubber'),
     ]
-
-
-#class TagGroup(models.Model):
-#    # Groups of Tags. How to create collection types
-#    created_by = models.ForeignKey(User, null=True)
-#    created_on = models.DateTimeField(auto_now_add=True)
-#    name = models.CharField("name", max_length=100, default='')
-#    description = models.TextField("description", default='')
-#    last_modified_by = models.ForeignKey(User, null=True)
-#    last_modified_on = models.DateTimeField(auto_now=True)
-#
-#    def __unicode__(self):
-#        return smart_unicode(self.name)
 
 class Tag(models.Model):
     TAG_GROUP_CHOICES = [
@@ -142,7 +127,7 @@ class ItemRole(models.Model):
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(null=True)
     role = models.CharField("role of Person", max_length=20, choices=EBU_ROLES, db_index=True)
-    person = models.ForeignKey(Person, verbose_name="associated person", related_name="%(app_label)s_%(class)s_person")
+    person = models.ForeignKey(opms.core.models.Person, verbose_name="associated person", related_name="%(app_label)s_%(class)s_person")
     item = models.ForeignKey("Item", verbose_name="associated item", related_name="%(app_label)s_%(class)s_item")
 
     def get_role_display(self):
@@ -180,7 +165,7 @@ class Item(models.Model):
     licence = models.ForeignKey(Licence, verbose_name="licence", default=1,
         related_name="%(app_label)s_%(class)s_licence")
     tags = models.ManyToManyField(Tag, through="ItemTag", related_name="%(app_label)s_%(class)s_tags")
-    people = models.ManyToManyField(Person, through="ItemRole", verbose_name="associated people",
+    people = models.ManyToManyField(opms.core.models.Person, through="ItemRole", verbose_name="associated people",
         related_name="%(app_label)s_%(class)s_people")
     links = models.ManyToManyField(Link, through="ItemLink", verbose_name="associated links",
         related_name="%(app_label)s_%(class)s_links")
@@ -220,7 +205,7 @@ class Collection(models.Model):
     publish_stop = models.DateField("stop publishing by date", null=True)
     type = models.CharField("type",max_length=10,choices=TYPE_CHOICES,default="manual")
     tags = models.ManyToManyField(Tag, through="CollectionTag", related_name="%(app_label)s_%(class)s_tags")
-    people = models.ManyToManyField("Person", through="CollectionRole", verbose_name="associated people",
+    people = models.ManyToManyField(Person, through="CollectionRole", verbose_name="associated people",
                                     related_name="%(app_label)s_%(class)s_people")
     links = models.ManyToManyField(Link, through="CollectionLink", verbose_name="associated links",
                                    related_name="%(app_label)s_%(class)s_links")
@@ -256,7 +241,7 @@ class CollectionRole(models.Model):
     deleted_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_deleted_by")
     deleted_on = models.DateTimeField(null=True)
     role = models.CharField("role of Person", max_length=20, choices=EBU_ROLES, db_index=True)
-    person = models.ForeignKey("Person", verbose_name="associated person", related_name="%(app_label)s_%(class)s_person")
+    person = models.ForeignKey(Person, verbose_name="associated person", related_name="%(app_label)s_%(class)s_person")
     collection = models.ForeignKey(Collection, verbose_name="associated collection", related_name="%(app_label)s_%(class)s_collection")
 
     def get_role_display(self):
@@ -466,7 +451,7 @@ class Feed(models.Model):
 
 
 class FileInFeed(models.Model):
-    def create_guid():
+    def create_guid(self):
         return 'OPMS-file:' + str(uuid.uuid4())
 
     created_by = models.ForeignKey(User, null=True, related_name="%(app_label)s_%(class)s_created_by")
