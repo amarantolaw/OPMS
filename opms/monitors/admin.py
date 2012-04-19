@@ -14,4 +14,4 @@ class URLMonitorURLAdmin(admin.ModelAdmin):
     list_display = ('url', 'active')
     list_filter = ('active')
 
-admin.site.register(URLMonitorURL, URLMonitorTargetAdmin)
+admin.site.register(URLMonitorURL, URLMonitorURLAdmin)
