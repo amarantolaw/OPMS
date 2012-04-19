@@ -1,4 +1,4 @@
-from opms.monitors.models import *
+from opms.monitors.models import URLMonitorTarget, URLMonitorTask
 from django.contrib import admin
 
 class URLMonitorTargetAdmin(admin.ModelAdmin):
