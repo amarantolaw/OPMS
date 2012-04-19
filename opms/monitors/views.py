@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response
 from django.http import Http404, HttpResponse
-from opms.monitors.models import URLMonitorTarget, URLMonitorTask, URLMonitorScan
+from opms.monitors.models import URLMonitorURL, URLMonitorScan
 import pylab
 import numpy as np
 import matplotlib
@@ -24,7 +24,7 @@ def summary_urlmonitoring(request):
     # List the URLS and the number of scans for that URL
     summary_listing = []
 
-    urls = URLMonitorTarget.objects.all().order_by('-active', 'url')
+    urls = URLMonitorURL.objects.all().order_by('-active', 'url')
     # TODO: Take out the hard coded HTML from here and put that in the template where it belongs!
     for url in urls:
         if url.active:
