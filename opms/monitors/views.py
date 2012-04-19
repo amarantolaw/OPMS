@@ -1,5 +1,6 @@
-from django.shortcuts import render_to_response
 from django.http import Http404, HttpResponse
+from django.views.decorators.http import require_safe
+from django.shortcuts import render_to_response
 from opms.monitors.models import URLMonitorURL, URLMonitorScan
 import pylab
 import numpy as np
@@ -11,6 +12,7 @@ from matplotlib.figure import Figure
 
 
 # Default Monitors module homepage
+@require_safe()
 def index(request):
     # return HttpResponse("Hello World. You're at the OPMS:Monitors Homepage.")
     return render_to_response('monitors/base.html', {})
