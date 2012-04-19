@@ -7,7 +7,7 @@ urlpatterns = patterns('monitors.views',
     # Pages in url-scans
     url(r'^url-scans/url-(?P<url_id>\d{1,5})$', urlmonitoring_url, name="url-scans-url"),
     url(r'^url-scans/task-(?P<task_id>\d{1,5})$', urlmonitoring_task, name="url-scans-task"),
-    url(r'^url-scans/$', summary_urlmonitoring, name="url-scans-summary"),
+    url(r'^url-scans/$', urlmonitoring_summary, name="url-scans-summary"),
 
     # Default page (aka, Monitors home)
     (r'^$', 'index'),
