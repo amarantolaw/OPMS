@@ -13,14 +13,6 @@ from datetime import date
 
 #The following models are used in testing a series of urls (Targets) on a periodic basis (Tasks) and
 #recording some simple metrics on the results.
-class URLMonitorTarget(models.Model):
-    url = models.URLField()
-    active = models.BooleanField(default=True)
-
-    def __unicode__(self):
-        return smart_unicode(self.url)
-
-
 class URLMonitorTask(models.Model):
     comment = models.CharField(max_length=200, default="No Comment Set")
     completed = models.BooleanField(default=False)
@@ -33,6 +25,14 @@ class URLMonitorTask(models.Model):
             return smart_unicode(self.comment + " has completed")
         else:
             return smart_unicode(self.comment + " has not yet run")
+
+
+class URLMonitorTarget(models.Model):
+    url = models.URLField()
+    active = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return smart_unicode(self.url)
 
 
 class URLMonitorScan(models.Model):
