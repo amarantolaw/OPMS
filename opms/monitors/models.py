@@ -27,7 +27,7 @@ class URLMonitorTask(models.Model):
             return smart_unicode(self.comment + " has not yet run")
 
 
-class URLMonitorTarget(models.Model):
+class URLMonitorURL(models.Model):
     url = models.URLField()
     active = models.BooleanField(default=True)
 
@@ -37,7 +37,7 @@ class URLMonitorTarget(models.Model):
 
 class URLMonitorScan(models.Model):
     task = models.ForeignKey(URLMonitorTask)
-    url = models.ForeignKey(URLMonitorTarget)
+    url = models.ForeignKey(URLMonitorURL)
     iteration = models.SmallIntegerField()
     status_code = models.SmallIntegerField(null=True)
     ttfb = models.FloatField(null=True)
