@@ -16,7 +16,7 @@ urlpatterns = patterns('',
     (r'^analytics/', include('opms.stats.urls')),
 
     # Monitors module urls
-    #(r'^monitoring/', include('opms.monitors.urls')),
+    (r'^monitoring/', include('opms.monitors.urls')),
     
     # FFM module urls
     #(r'^ffm/', include('opms.ffm.urls')),
