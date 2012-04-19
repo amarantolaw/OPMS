@@ -132,13 +132,16 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
+    # Third party apps used by OPMS...
     'debug_toolbar',
     'south',
+    'django_extensions',
+    'sitetree',
+    # These are the OPMS apps...
+    'core',
     'stats',
     'ffm',
     'oxitems', # This is to temporarily link OPMS with the OxItems database whilst it is definitive
-    'django_extensions',
-    'sitetree',
 )
 #print "set:20"
 

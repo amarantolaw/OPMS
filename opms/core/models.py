@@ -59,6 +59,14 @@ class Person(models.Model):
     objects = models.Manager() # Default manager
 
 
+class PersonAlias(models.Model):
+    """
+    A way of matching open text field names to a person record
+    """
+    person = models.ForeignKey(Person)
+    alias = models.CharField(max_length=255)
+
+
 class Unit(models.Model):
     full_name = models.CharField("unit name", max_length=250)
     oucs_unitcode = models.CharField("oucs unit code", max_length=50)
