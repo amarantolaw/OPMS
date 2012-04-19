@@ -1,4 +1,4 @@
-- model: stats.ituscanlog
+- model: monitors.ituscanlog
   pk: 1
   fields:
     starting_url: null
