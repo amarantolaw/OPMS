@@ -1,12 +1,6 @@
 from opms.monitors.models import URLMonitorTarget, URLMonitorTask
 from django.contrib import admin
 
-class URLMonitorTargetAdmin(admin.ModelAdmin):
-    list_display = ('url', 'active')
-    list_filter = ('active')
-    
-admin.site.register(URLMonitorTarget, URLMonitorTargetAdmin)
-
 
 class URLMonitorTaskAdmin(admin.ModelAdmin):
     list_display = ('comment', 'completed')
@@ -14,3 +8,10 @@ class URLMonitorTaskAdmin(admin.ModelAdmin):
 
 admin.site.register(URLMonitorTask, URLMonitorTaskAdmin)
 
+
+
+class URLMonitorTargetAdmin(admin.ModelAdmin):
+    list_display = ('url', 'active')
+    list_filter = ('active')
+
+admin.site.register(URLMonitorTarget, URLMonitorTargetAdmin)
