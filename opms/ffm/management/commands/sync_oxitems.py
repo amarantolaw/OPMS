@@ -364,7 +364,7 @@ class Command(NoArgsCommand):
             feed_destination = FeedDestination()
             feed_destination.feed = feed_obj
             feed_destination.destination = dest
-            if dest.id == 3: # iTunes U from fixtures/db
+            if dest.id == 3: # iTunes U from temp-fixtures/db
                 feed_destination.guid = itunesu_guid # This is largely ignored and unused...
             if oxitems_deleted == True: # NB: whilst hacking out the slug duplicates by ignoring deleted items, this is untested...
                 feed_destination.withhold = 1000 # TODO: Need to determine some workflow values and descriptions for withhold
