@@ -3,9 +3,8 @@
 # Last Edited: 08-12-2011
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
-from opms.stats.models import *
-from opms.stats.utils import itunes as itunes
-import datetime, sys, urllib2, time
+from monitors.utils import itunes as itunes
+import datetime, sys
 
 
 class Command(BaseCommand):
@@ -91,7 +90,7 @@ class Command(BaseCommand):
     def _get_or_create_institution(self, id):
         return None
 
-    def _get_or_create_series(self, series_???):
+    def _get_or_create_series(self, series):
 #        series_dict = {}
 #        series_dict['name'] =
 #        series_dict['itu_id'] =
