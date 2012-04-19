@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response
 from django.http import Http404, HttpResponse
-from monitors.models import *
+from opms.monitors.models import *
 import pylab
 import numpy as np
 import matplotlib
