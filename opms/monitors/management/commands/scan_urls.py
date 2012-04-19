@@ -3,7 +3,7 @@
 # Last Edited: 03-11-2011
 from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
-from opms.stats.models import *
+from opms.monitors.models import *
 import datetime, sys, urllib2, time
 
 
@@ -69,7 +69,7 @@ class Command(LabelCommand):
 
 
     def scan_url(self, url):
-        USER_AGENT = 'OPMS/1.0 (Ubuntu 10.04; Virtual Server) Django/1.3.1'
+        USER_AGENT = 'OPMS/1.0 (Ubuntu 10.04; Virtual Server) Django/1.4.0'
         request = urllib2.Request(url)
         request.add_header('User-Agent', USER_AGENT)
         opener = urllib2.build_opener()
