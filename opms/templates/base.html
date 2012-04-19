@@ -18,48 +18,6 @@
     <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/layout.css" media="screen,projection" />
 
     {% block head %}
-    <link rel="stylesheet" href="{{ STATIC_PREFIX }}uploadify/uploadify.css" />
-    <script src="{{ STATIC_PREFIX }}scripts/jquery-1.6.4.min.js"></script>
-    <script src="{{ STATIC_PREFIX }}uploadify/swfobject.js"></script>
-    <script src="{{ STATIC_PREFIX }}uploadify/jquery.uploadify.v2.1.4.js"></script>
-    <script>
-    $(document).ready(function() {
-        $('#file_upload').uploadify({
-            'uploader'  : '{{ STATIC_PREFIX }}uploadify/uploadify.swf',
-            'script'    : '/upload/',
-            'cancelImg' : '{{ STATIC_PREFIX }}uploadify/cancel.png',
-            'auto'      : false,
-            'multi'     : true,
-//            'fileExt'   : '*.mp3;*.ogg;*.flac',
-            'fileDesc'  : 'Media Files for the Podcasting Team',
-            'queueID'   : 'file_upload_queue',
-            'displayData' : 'percentage',
-            'removeCompleted': false,
-            'scriptData': {'description':'No description has been given'},
-            'sizeLimit' : 838860800, // 800Mb limit per file
-            'queueSizeLimit' : 20,
-//            'onError'   : function (event,ID,fileObj,errorObj) {
-//                alert(errorObj.type + ' Error: ' + errorObj.info);
-//            },
-            'onAllComplete' : function(event,data) {
-                alert(data.filesUploaded + ' files uploaded successfully!\nThere were ' + data.errors + ' errors.');
-            }
-        });
-    });
-    function prepareUpload() {
-        // Need to remove "&" from strings as jQuery/uploadify throws NPObject errors otherwise.
-        // Suspect < and > also cause problems (and certainly do if converted to &lt; &gt;
-        value = ($('#file_description').val()).replace(/</g,'%3C').replace(/>/g,'%3E').replace(/&/g,'%26');
-        $('#file_upload').uploadifySettings('scriptData',{'description':value});
-//        alert('value=' + value);
-        if (value.length < 10) {
-            alert('Please enter some descriptive text before starting the upload');
-        }
-        else {
-            $('#file_upload').uploadifyUpload();
-        }
-    }
-    </script>
     {% endblock %}
 
 </head>
@@ -68,6 +26,8 @@
 {% block navbar %}
 <nav id="mainnav">
     <h2>Main sections</h2>
+    <!-- sitetree_menu -->
+    {% sitetree_menu from "opmstree" include "trunk" %}
     <ul class="level-1">
         <li><span class="youarehere">Home</span></li>
         <li><a href="/admin/">Admin</a></li>
@@ -84,35 +44,10 @@
             {% endblock %}</div>
 {% block content %}
         <h1>Oxford Podcast Management System (OPMS)</h1>
-
-        <!-- sitetree_menu -->
-        {% sitetree_menu from "opmstree" include "trunk" %}
-
         <!-- sitetree_tree -->
+        <h2>Site Navigation Tree</h2>
         {% sitetree_tree from "opmstree" %}
 
-{#    UPLOADIFY CODE - REJECTED BECAUSE IT DOESN'T WORK WITH WEBAUTH #}
-{#        <h2>File Upload Form</h2>#}
-{#        <div id='upload'>#}
-{#            <p>This short form will allow you to send files directly to the Podcasting Team, and will alert#}
-{#                them on each file uploaded. To use:</p>#}
-{#            <ol>#}
-{#                <li>Click on Select Files.</li>#}
-{#                <li>Select up to 20 files, with no one file larger than 800Mb.</li>#}
-{#                <li>Enter some text describing those files.</li>#}
-{#                <li>Click "<a href="javascript:prepareUpload();">Start Upload</a>" ...and then sit back and watch as your files are uploaded.</li>#}
-{#                <li>Wait for the final pop up alert to confirm file transfer status.</li>#}
-{#            </ol>#}
-{##}
-{#            <p><input id="file_upload" type="file" name="Filedata" /></p>#}
-{#            <p>Please enter some descriptive text for the files you are about to upload:<br />#}
-{#                <textarea id="file_description" cols="60" rows="6"></textarea></p>#}
-{#            <p>Upload Queue:#}
-{#                <div id='file_upload_queue'></div>#}
-{#            </p>#}
-{#            <p><strong><a href="javascript:prepareUpload();">Start Upload</a></strong> :#}
-{#                <a href="javascript:jQuery('#file_upload').uploadifyClearQueue()">Cancel All Uploads</a></p>#}
-{#        </div>#}
 {% endblock %}
     <!-- div.content closes -->
     </div>
