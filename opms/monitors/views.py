@@ -1,6 +1,6 @@
 from django.http import Http404, HttpResponse
 from django.views.decorators.http import require_safe
-from django.template import Context, loader
+from django.template import Context, loader, RequestContext
 from django.shortcuts import render_to_response
 from opms.monitors.models import URLMonitorURL, URLMonitorScan
 import pylab
@@ -16,7 +16,8 @@ from matplotlib.figure import Figure
 #@require_safe(request)
 def index(request):
     t = loader.get_template('monitors/base.html')
-    return HttpResponse(t.render(Context()))
+    return render_to_response('monitors/base.html', {}, context_instance=RequestContext(request))
+    return HttpResponse(t.render())
     # return HttpResponse("Hello World. You're at the OPMS:Monitors Homepage.")
 #    return render_to_response('monitors/base.html', {})
 
