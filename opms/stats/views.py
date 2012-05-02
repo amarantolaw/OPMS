@@ -15,7 +15,7 @@ from matplotlib.figure import Figure
 # Default Stats module homepage
 def index(request):
     # return HttpResponse("Hello World. You're at the OPMS:Stats Homepage.")
-    return render_to_response('stats/base.html', {})
+    return render_to_response('stats/base.html', {}, context_instance=RequestContext(request))
 
 
 #####
@@ -25,7 +25,7 @@ def summary_index(request):
     "Show the Apple 'Summary' User Action results"
     # return HttpResponse("Summary Report")
     summary_data = Summary.merged.all()
-    return render_to_response('stats/reports/summary.html', {'summary_data': summary_data,})
+    return render_to_response('stats/reports/summary.html', {'summary_data': summary_data,}, context_instance=RequestContext(request))
 
 
 #####
@@ -33,7 +33,7 @@ def summary_index(request):
 #####
 def summary_feeds(request):
     listing = TrackCount.merged.psuedo_feeds()
-    return render_to_response('stats/reports/feeds.html',{'listing':listing})
+    return render_to_response('stats/reports/feeds.html',{'listing':listing}, context_instance=RequestContext(request))
 
 
 def feed_detail(request, partial_guid):
@@ -131,7 +131,7 @@ def feed_detail(request, partial_guid):
 
     return render_to_response('stats/reports/feed.html',{
         'listing':listing, 'ref':partial_guid, 'summary':summary
-        })
+        }, context_instance=RequestContext(request))
 
 #####
 # CONTRIBUTORS Subviews  -- DOES NOT WORK. REPLACE!!!
