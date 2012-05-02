@@ -15,11 +15,10 @@ from matplotlib.figure import Figure
 # Default Monitors module homepage
 #@require_safe(request)
 def index(request):
-    t = loader.get_template('monitors/base.html')
-    return render_to_response('monitors/base.html', {}, context_instance=RequestContext(request))
-    return HttpResponse(t.render())
+#    t = loader.get_template('monitors/base.html')
+#    return HttpResponse(t.render())
     # return HttpResponse("Hello World. You're at the OPMS:Monitors Homepage.")
-#    return render_to_response('monitors/base.html', {})
+    return render_to_response('monitors/base.html', {}, context_instance=RequestContext(request))
 
 ######
 # URL Monitoring Subviews
@@ -43,20 +42,20 @@ def urlmonitoring_summary(request):
                 '<strong>[INACTIVE]</strong> <a href="./url-' + str(url.id) + '">' + str(url.url) + '</a> (' +\
                 str(url.urlmonitorscan_set.count()) + ')'
             )
-    return render_to_response('monitors/url_summary.html', {'summary_listing': summary_listing,})
+    return render_to_response('monitors/url_summary.html', {'summary_listing': summary_listing,}, context_instance=RequestContext(request))
 
 
 def urlmonitoring_task(request, task_id):
     "Show the results for a url monitoring of a specific task"
     scan_data = URLMonitorScan.objects.filter(task__id__exact=task_id).select_related().order_by('-url__url', 'iteration')
-    return render_to_response('monitors/url_summary.html', {'scan_data': scan_data,})
+    return render_to_response('monitors/url_summary.html', {'scan_data': scan_data,}, context_instance=RequestContext(request))
 
 
 def urlmonitoring_url(request, url_id):
     "Show the results for a url monitoring of specific url"
     # Limit to the last 7 days' worth of scans (10 scans * 4 times an hour * 24 hours * 7 days)
     scan_data = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')[:6720]
-    return render_to_response('monitors/url_summary.html', {'scan_data': scan_data,'url_id':url_id})
+    return render_to_response('monitors/url_summary.html', {'scan_data': scan_data,'url_id':url_id}, context_instance=RequestContext(request))
 
 
 
