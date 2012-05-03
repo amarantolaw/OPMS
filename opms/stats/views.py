@@ -1,5 +1,6 @@
 from django.shortcuts import render_to_response
 from django.http import Http404, HttpResponse
+from django.template import RequestContext
 from django.db.models import Sum
 from stats.models import *
 import ffm.models as ffm_models
