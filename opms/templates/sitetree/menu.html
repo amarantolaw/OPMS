@@ -1,7 +1,7 @@
 {% load sitetree %}
                 <ul class="nav">{% for item in sitetree_items %}
                     {% if item.has_children %}<li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#" >{{ item.title_resolved }} <b class="caret"></b></a>
+                        <a class="dropdown-toggle" data-toggle="dropdown" data-target="#" href="{% sitetree_url for item %}" >{{ item.title_resolved }} <b class="caret"></b></a>
 {% sitetree_children of item for menu template "sitetree/menu-dropdown.html" %}
                     {% else %}<li>
                         <a {% if item.is_current or item.in_current_branch %}class="{{ item.is_current|yesno:"active," }}{{ item.in_current_branch|yesno:" active," }}"{% endif %} href="{% sitetree_url for item %}" {% if item.hint %}title="{{ item.hint }}"{% endif %}>{{ item.title_resolved }}</a>
@@ -10,4 +10,4 @@
 
 {#{{ item.is_current|yesno:" active," }}{{ item.in_current_branch|yesno:" active," }}#}
 {#{% if item.hint %}title="{{ item.hint }}"{% endif %}#}
-{#{% sitetree_url for item %}#}
+{##}
