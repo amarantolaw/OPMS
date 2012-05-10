@@ -7,7 +7,7 @@ urlpatterns = patterns('stats.views',
     url(r'^apple/graph/summary-feeds.png', graph_apple_summary_feeds),
     url(r'^apple/graph/feed_by_week/(?P<feed>.+).png', graph_apple_feed_weeks),
     # Pages in Stats
-    url(r'^apple/feeds/partial-guid/(?P<partial_guid>.+)', feed_detail),
+    url(r'^apple/feeds/partial-guid/(?P<partial_guid>.+)', feed_detail, name="apple-feed-byguid"),
     url(r'^apple/feeds/$', summary_feeds),
 
     url(r'^apple/summary/$', summary_index),
