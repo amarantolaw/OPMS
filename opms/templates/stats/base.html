@@ -1,30 +1,14 @@
 {% extends "base.html" %}
-{% load stats_tags%}
-{% block title %}Statistics{% endblock %}
+{% load stats_tags sitetree%}
 
-{% block navbar %}
-<div id="mainnav">
-    <h2>Main sections</h2>
-    <ul class="level-1">
-        <li><a href="/">Home</a></li>
-        <li><a href="/admin/">Admin</a></li>
-        <li><a href="/ffm/">Files &amp; Feeds</a></li>
-        <li><span class="youarehere">Statistics</span></li>
-    </ul>
-</div>
-<div id="mainnav2">
-    {% submenu %}
-</div>
+{% block sidebar %}
+    {% sitetree_menu from "opmstree" include "top-analytics" template "sitetree/navlist.html" %}
 {% endblock %}
 
-{% block breadcrumb %}&gt; Statistics{% endblock %}
-
 {% block content %}
-    <h1>Statistics and Feedback for Oxford Podcasts</h1>
-    <h2>Apple Stats</h2>
-    <ul>
-        <li><a href="/stats/report/summary/">Summary</a></li>
-        <li><a href="/stats/report/summary/feeds/">Feeds</a></li>
-    </ul>
-
+    <div class="hero-unit">
+        <h1>Analytics</h1>
+        <p>This area holds our analytics apps</p>
+        <p><a class="btn btn-primary btn-large">Learn more &raquo;</a></p>
+    </div>
 {% endblock %}
