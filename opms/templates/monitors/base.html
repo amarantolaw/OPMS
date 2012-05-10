@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 
+{% block sidebar %}
+    {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
 {% block content %}
-    <h1>Monitoring Tools</h1>
-    <p>Content to go here, eventually.</p>
+    <div class="hero-unit">
+        <h1>Monitoring Apps</h1>
+        <p>This area holds our monitoring apps</p>
+        <p><a class="btn btn-primary btn-large">Learn more &raquo;</a></p>
+    </div>
 {% endblock %}
