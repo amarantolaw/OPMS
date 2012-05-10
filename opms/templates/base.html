@@ -11,10 +11,6 @@
 
     <link href="{{ STATIC_PREFIX }}css/bootstrap.css" rel="stylesheet">
     <style type="text/css">
-        body {
-            padding-top: 60px;
-            padding-bottom: 40px;
-        }
         .sidebar-nav {
             padding: 9px 0;
         }
@@ -31,6 +27,22 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{{ STATIC_PREFIX }}ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{{ STATIC_PREFIX }}ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="{{ STATIC_PREFIX }}ico/apple-touch-icon-57-precomposed.png">
+
+    <!-- Javascript ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-transition.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-alert.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-modal.js"></script>#}
+    <script src="{{ STATIC_PREFIX }}js/bootstrap-collapse.js"></script>
+    <script src="{{ STATIC_PREFIX }}js/bootstrap-dropdown.js"></script>
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-scrollspy.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-tab.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-tooltip.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-popover.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-button.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-carousel.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-typeahead.js"></script>#}
 
     {% block head %}
     {% endblock %}
@@ -96,24 +108,5 @@
     </footer>
 
 </div><!--/.fluid-container-->
-
-<!-- Javascript ================================================== -->
-<!-- Placed at the end of the document so the pages load faster -->
-<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
-{#<script src="{{ STATIC_PREFIX }}js/bootstrap-transition.js"></script>#}
-{#<script src="{{ STATIC_PREFIX }}js/bootstrap-alert.js"></script>#}
-{#<script src="{{ STATIC_PREFIX }}js/bootstrap-modal.js"></script>#}
-<script src="{{ STATIC_PREFIX }}js/bootstrap-collapse.js"></script>
-<script src="{{ STATIC_PREFIX }}js/bootstrap-dropdown.js"></script>
-{#<script src="{{ STATIC_PREFIX }}js/bootstrap-scrollspy.js"></script>#}
-{#<script src="{{ STATIC_PREFIX }}js/bootstrap-tab.js"></script>#}
-{#<script src="{{ STATIC_PREFIX }}js/bootstrap-tooltip.js"></script>#}
-{#<script src="{{ STATIC_PREFIX }}js/bootstrap-popover.js"></script>#}
-{#<script src="{{ STATIC_PREFIX }}js/bootstrap-button.js"></script>#}
-{#<script src="{{ STATIC_PREFIX }}js/bootstrap-carousel.js"></script>#}
-{#<script src="{{ STATIC_PREFIX }}js/bootstrap-typeahead.js"></script>#}
-{% block scripts %}
-{% endblock %}
-
 </body>
 </html>
