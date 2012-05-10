@@ -68,6 +68,7 @@
             </div><!--/.well -->
         </div><!--/span-->
         <div class="span10">
+            {% sitetree_breadcrumbs from "opmstree" template "sitetree/breadcrumbs.html"%}
             {% block content %}
             <div class="hero-unit">
                 <h1>Hello, world!</h1>

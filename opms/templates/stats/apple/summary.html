@@ -39,13 +39,15 @@ $(document).ready(function()
 
 {% if summary_data %}
 <h3>Data visualisation</h3>
-<p><img src="/stats/graph/apple/summary-total.png" /><br />
-    <a href="/stats/graph/apple/summary-total.png?dpi=300">[Print Version]</a> <a href="/stats/graph/apple/summary-total.png?dpi=600">[High Resolution]</a></p>
+<p><img src="../graph/summary-total.png" /><br />
+    <a href="../graph/summary-total.png?dpi=300">[Print Version]</a> <a href="../graph/summary-total.png?dpi=600">[High Resolution]</a></p>
 
+
+<h3>Data table <a href="#" class="codeShowB">[?]</a></h3>
 <div class="sectionB">
     <h3>Understanding summary data</h3>
     <p>The Summary worksheet lists aggregate values for the individual worksheet user actions. The
-    following table describes what occurs for the user actions returned in the Summary sheet:</p>
+        following table describes what occurs for the user actions returned in the Summary sheet:</p>
 
     <table border = "0" cellspacing="0" cellpadding="5">
         <tr>
@@ -55,12 +57,12 @@ $(document).ready(function()
         <tr>
             <td scope="row"><strong>Browse</strong></td>
             <td>A user views a page in our <a class="content_text" href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/Glossary/chapter_998_section_1.html#//apple_ref/doc/uid/iTUPSM-CH3-SW9">site</a>.
-            It’s analogous to browsing a page in a web browser.</td>
+                It’s analogous to browsing a page in a web browser.</td>
         </tr>
         <tr>
             <td scope="row"><strong>DownloadPreview / DownloadRedirectedPreview</strong></td>
             <td>A user clicks the Play button or double-clicks an <a class="content_text" href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/Glossary/chapter_998_section_1.html#//apple_ref/doc/uid/iTUPSM-CH3-SW12">item</a>
-            in the iTunes desktop.</td>
+                in the iTunes desktop.</td>
         </tr>
         <tr>
             <td scope="row"><strong>DownloadPreviewiOS</strong></td>
@@ -73,8 +75,8 @@ $(document).ready(function()
         <tr>
             <td scope="row"><strong>DownloadTracks / DownloadRedirectedTracks</strong></td>
             <td>A user clicks the Get All button to download all items in a <a class="content_text" href="http://deimos.apple.com/rsrc/doc/UsingiTunesUPublicSiteManager/Glossary/chapter_998_section_1.html#//apple_ref/doc/uid/iTUPSM-CH3-SW10">collection page</a>
-            in the iTunes desktop. This action appears multiple times in the report; once for each item
-            the user downloads.</td>
+                in the iTunes desktop. This action appears multiple times in the report; once for each item
+                the user downloads.</td>
         </tr>
         <tr>
             <td scope="row"><strong>DownloadiOS</strong></td>
@@ -87,12 +89,12 @@ $(document).ready(function()
         <tr>
             <td scope="row"><strong>SubscriptionEnclosure / SubscriptionRedirectedEnclosure</strong></td>
             <td>The podcast reader downloads a new item in the collection. If the podcast reader detects
-            new content in the collection, it downloads the content.</td>
+                new content in the collection, it downloads the content.</td>
         </tr>
         <tr>
             <td scope="row"><strong>SubscriptionFeed</strong></td>
             <td>The podcast reader automatically checks for new content in the collection. Podcast
-            readers automatically check for new content at regular intervals.</td>
+                readers automatically check for new content at regular intervals.</td>
         </tr>
         <!-- We don't use these...
         <tr>
@@ -109,10 +111,10 @@ $(document).ready(function()
         <tr>
             <td scope="row"><strong>Total Track Downloads</strong></td>
             <td>The Total Track Downloads value is a combination of items downloaded for a
-            collection subscription (SubscriptionEnclosure / SubscriptionRedirectedEnclosure), items downloaded
-            from an iPhone, iPad, or iPod (DownloadiOS), and items downloaded when a user clicks Free
-            (DownloadTrack / DownloadRedirectedTrack) or Get All (DownloadTracks / DownloadRedirectedTracks).
-            The Total Track Downloads value does not include preview data.</td>
+                collection subscription (SubscriptionEnclosure / SubscriptionRedirectedEnclosure), items downloaded
+                from an iPhone, iPad, or iPod (DownloadiOS), and items downloaded when a user clicks Free
+                (DownloadTrack / DownloadRedirectedTrack) or Get All (DownloadTracks / DownloadRedirectedTracks).
+                The Total Track Downloads value does not include preview data.</td>
         </tr>
     </table>
     <!-- Have not seen any evidence of this attribute...
@@ -124,8 +126,6 @@ $(document).ready(function()
     </ul>
     -->
 </div>
-
-<h3>Data table <a href="#" class="codeShowB">[?]</a></h3>
 <table id="summaryTable" class="tablesorter">
     <thead>
         <tr>
