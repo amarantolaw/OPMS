@@ -7,33 +7,13 @@
     <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection" />
 {% endblock %}
 
-{% block title %}Summary Feed Data from Apple iTU Reporting{% endblock %}
-
-{% block navbar %}
-<div id="mainnav">
-    <h2>Main sections</h2>
-    <ul class="level-1">
-        <li><a href="/">Home</a></li>
-        <li><a href="/admin/">Admin</a></li>
-        <li><a href="/ffm/">Files &amp; Feeds</a></li>
-        <li><a href="/stats/" class="currentsection">Statistics</a></li>
-    </ul>
-</div>
-<div id="mainnav2">
-    {% submenu 2 %}
-</div>
-{% endblock %}
-
-{% block breadcrumb %}&gt; <a href="/stats/">Statistics</a> &gt; Apple Feeds{% endblock %}
-
-
 {% block content %}
 <h1>Summary of downloads for all time per partial-guid (psudeo feed)</h1>
 
 {% if listing %}
 <h3>Data visualisation</h3>
-<p><img src="/stats/graph/apple/summary-feeds.png" /><br />
-    <a href="/stats/graph/apple/summary-feeds.png?dpi=300">[Print Version]</a> <a href="/stats/graph/apple/summary-feeds.png?dpi=600">[High Resolution]</a></p>
+<p><img src="../graph/summary-feeds.png" /><br />
+    <a href="../graph/summary-feeds.png?dpi=300">[Print Version]</a> <a href="../graph/summary-feeds.png?dpi=600">[High Resolution]</a></p>
 
 <script>
 $(document).ready(function()
@@ -71,6 +51,4 @@ $(document).ready(function()
 {% else %}
 <p>Data is missing</p>
 {% endif %}
-
-
 {% endblock %}
