@@ -2,11 +2,6 @@
 {% load static %}
 {% get_static_prefix as STATIC_PREFIX %}
 
-{% block scripts %}
-    <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
-    <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
-{% endblock %}
-
 {% block content %}
 <h2>URL Reporting</h2>
 {%  if summary_listing %}
@@ -37,8 +32,8 @@ $(document).ready(function()
 <table id="summaryTable" class="tablesorter">
     <thead>
         <tr>
-            <th>Task Comment</th>
-            <th>URL</th>
+            <th>Task &amp; Comment</th>
+{#            <th>URL</th>#}
             <th>Iteration</th>
             <th>Time of Request</th>
             <th>Status Code</th>
@@ -50,16 +45,20 @@ $(document).ready(function()
     {% for row in scan_data %}
         <tr>
             <td><a href="./task-{{ row.task.id }}">{{ row.task.id }}</a>:{{ row.task.comment }}</td>
-            <td><a href="./url-{{ row.url.id }}">{{ row.url.url }}</a></td>
+{#            <td><a href="./url-{{ row.url.id }}">{{ row.url.url }}</a></td>#}
             <td>{{ row.iteration }}</td>
             <td>{{ row.time_of_request|date:"Y-m-d H:i:s" }}</td>
             <td class="{% if row.status_code == 200 %}positive{% else %}negative{% endif %}">{{ row.status_code }}</td>
-            <td class="{% if row.ttfb < 0.5 %}positive{% else %}negative{% endif %}">{{ row.ttfb }}</td>
-            <td class="{% if row.ttlb < 0.5 %}positive{% else %}negative{% endif %}">{{ row.ttlb }}</td>
+            <td class="{% if row.ttfb < 0.5 %}positive{% else %}negative{% endif %}">{{ row.ttfb|floatformat:4 }}</td>
+            <td class="{% if row.ttlb < 0.5 %}positive{% else %}negative{% endif %}">{{ row.ttlb|floatformat:4 }}</td>
         </tr>
     {% endfor %}
     </tbody>
 </table>
 {% endif %}
+{% endblock %}
 
+{% block scripts %}
+    <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
 {% endblock %}
