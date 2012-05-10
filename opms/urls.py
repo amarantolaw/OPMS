@@ -22,5 +22,5 @@ urlpatterns = patterns('',
     #(r'^ffm/', include('opms.ffm.urls')),
     
     # Root homepage
-    url(r'^$', TemplateView.as_view(template_name="base2.html")),
+    url(r'^$', TemplateView.as_view(template_name="base.html")),
 )
