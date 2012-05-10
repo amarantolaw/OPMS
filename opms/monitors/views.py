@@ -48,7 +48,7 @@ def urlmonitoring_summary(request):
 def urlmonitoring_task(request, task_id):
     "Show the results for a url monitoring of a specific task"
     scan_data = URLMonitorScan.objects.filter(task__id__exact=task_id).select_related().order_by('-url__url', 'iteration')
-    return render_to_response('monitors/url_summary.html', {'scan_data': scan_data,}, context_instance=RequestContext(request))
+    return render_to_response('monitors/url_summary.html', {'scan_data': scan_data,'task_id':task_id}, context_instance=RequestContext(request))
 
 
 def urlmonitoring_url(request, url_id):
