@@ -29,7 +29,7 @@ def urlmonitoring_summary(request):
     # List the URLS and the number of scans for that URL
     summary_listing = []
 
-    urls = URLMonitorURL.objects.all().order_by('-active', 'url')
+    urls = URLMonitorURL.objects.all().order_by('-active', 'url')[:6720]
     # TODO: Take out the hard coded HTML from here and put that in the template where it belongs!
     for url in urls:
         if url.active:
