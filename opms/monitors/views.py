@@ -29,7 +29,7 @@ def urlmonitoring_summary(request):
     # List the URLS and the number of scans for that URL
     summary_listing = []
 
-    urls = URLMonitorURL.objects.all().order_by('-active', 'url')[:6720]
+    urls = URLMonitorURL.objects.all().order_by('-active', 'url')
     # TODO: Take out the hard coded HTML from here and put that in the template where it belongs!
     for url in urls:
         if url.active:
@@ -53,8 +53,8 @@ def urlmonitoring_task(request, task_id):
 
 def urlmonitoring_url(request, url_id):
     "Show the results for a url monitoring of specific url"
-    # Limit to the last 7 days' worth of scans (10 scans * 4 times an hour * 24 hours * 7 days)
-    scan_data = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')[:6720]
+    # Limit to the last 3 days' worth of scans (10 scans * 4 times an hour * 24 hours * 3 days)
+    scan_data = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')[:2880]
     return render_to_response('monitors/url_summary.html', {'scan_data': scan_data,'url_id':url_id}, context_instance=RequestContext(request))
 
 
@@ -80,8 +80,8 @@ def graph_urlmonitoring_url(request, url_id = 0):
     ax1 = fig.add_subplot(1,1,1)
     #    ax2 = ax1.twinx()
 
-    # Limit to the last 7 days' worth of scans (10 scans * 4 times an hour * 24 hours * 7 days)
-    s = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')[:6720]
+    # Limit to the last 3 days' worth of scans (10 scans * 4 times an hour * 24 hours * 3 days)
+    s = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')[:2880]
     x = []
     x_dates = []
     ttfb = []

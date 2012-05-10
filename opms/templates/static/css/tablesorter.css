@@ -36,3 +36,16 @@ table.tablesorter thead tr .headerSortDown {
 table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
 background-color: #8dbdd8;
 }
+
+/* Bonus attributes used in the templates */
+table.tablesorter tbody td.positive {
+    color: #0f0;
+}
+
+table.tablesorter tbody td.negative {
+    color: #f00;
+}
+
+table.tablesorter tbody td.highlight-total {
+    background-color: #ddd;
+}
