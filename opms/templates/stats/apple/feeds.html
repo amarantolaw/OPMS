@@ -1,0 +1,54 @@
+{% extends "stats/base.html" %}
+{% load static stats_tags %}
+{% get_static_prefix as STATIC_PREFIX %}
+{% block head %}
+    <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection" />
+{% endblock %}
+
+{% block content %}
+<h1>Summary of downloads for all time per partial-guid (psudeo feed)</h1>
+
+{% if listing %}
+<h3>Data visualisation</h3>
+<p><img src="../graph/summary-feeds.png" /><br />
+    <a href="../graph/summary-feeds.png?dpi=300">[Print Version]</a> <a href="../graph/summary-feeds.png?dpi=600">[High Resolution]</a></p>
+
+<script>
+$(document).ready(function()
+    {
+        $("#summaryTable").tablesorter( {sortList: [[0,1]]} );
+    }
+);
+</script>
+
+<h3>Data table</h3>
+<table id="summaryTable" class="tablesorter">
+    <thead>
+        <tr>
+            <th>Cumulative Count</th>
+            <th>Psudeo Feed</th>
+            <th>First Data</th>
+            <th>Last Data</th>
+            <th>Items in Feed</th>
+            <th>Avg. Dl/Item</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in listing %}
+        <tr>
+            <td>{{ row.count }}</td>
+            <td><a href="partial-guid/{{ row.feed }}">{{ row.feed }}</a></td>
+            <td>{{ row.min_date|date:"Y-m-d" }}</td>
+            <td>{{ row.max_date|date:"Y-m-d" }}</td>
+            <td>{{ row.item_count }}</td>
+            <td>{{ row.item_avg }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Data is missing</p>
+{% endif %}
+{% endblock %}

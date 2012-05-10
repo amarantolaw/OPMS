@@ -1,0 +1,858 @@
+- model: ffm.tag
+  pk: 1
+  fields:
+    name: 100
+    description: Business
+    group: 4
+    parent: null
+- model: ffm.tag
+  pk: 2
+  fields:
+    name: 100100
+    description: Economics
+    group: 4
+    parent: 1
+- model: ffm.tag
+  pk: 3
+  fields:
+    name: 100101
+    description: Finance
+    group: 4
+    parent: 1
+- model: ffm.tag
+  pk: 4
+  fields:
+    name: 100102
+    description: Hospitality
+    group: 4
+    parent: 1
+- model: ffm.tag
+  pk: 5
+  fields:
+    name: 100103
+    description: Management
+    group: 4
+    parent: 1
+- model: ffm.tag
+  pk: 6
+  fields:
+    name: 100104
+    description: Marketing
+    group: 4
+    parent: 1
+- model: ffm.tag
+  pk: 7
+  fields:
+    name: 100105
+    description: Personal Finance
+    group: 4
+    parent: 1
+- model: ffm.tag
+  pk: 8
+  fields:
+    name: 100106
+    description: Real Estate
+    group: 4
+    parent: 1
+- model: ffm.tag
+  pk: 9
+  fields:
+    name: 101
+    description: Engineering
+    group: 4
+    parent: null
+- model: ffm.tag
+  pk: 10
+  fields:
+    name: 101100
+    description: Chemical & Petroleum
+    group: 4
+    parent: 9
+- model: ffm.tag
+  pk: 11
+  fields:
+    name: 101101
+    description: Civil
+    group: 4
+    parent: 9
+- model: ffm.tag
+  pk: 12
+  fields:
+    name: 101102
+    description: Computer Science
+    group: 4
+    parent: 9
+- model: ffm.tag
+  pk: 13
+  fields:
+    name: 101103
+    description: Electrical
+    group: 4
+    parent: 9
+- model: ffm.tag
+  pk: 14
+  fields:
+    name: 101104
+    description: Environmental
+    group: 4
+    parent: 9
+- model: ffm.tag
+  pk: 15
+  fields:
+    name: 101105
+    description: Mechanical
+    group: 4
+    parent: 9
+- model: ffm.tag
+  pk: 16
+  fields:
+    name: 102
+    description: Fine Arts
+    group: 4
+    parent: null
+- model: ffm.tag
+  pk: 17
+  fields:
+    name: 102100
+    description: Architecture
+    group: 4
+    parent: 16
+- model: ffm.tag
+  pk: 18
+  fields:
+    name: 102101
+    description: Art
+    group: 4
+    parent: 16
+- model: ffm.tag
+  pk: 19
+  fields:
+    name: 102102
+    description: Art History
+    group: 4
+    parent: 16
+- model: ffm.tag
+  pk: 20
+  fields:
+    name: 102103
+    description: Dance
+    group: 4
+    parent: 16
+- model: ffm.tag
+  pk: 21
+  fields:
+    name: 102104
+    description: Film
+    group: 4
+    parent: 16
+- model: ffm.tag
+  pk: 22
+  fields:
+    name: 102105
+    description: Graphic Design
+    group: 4
+    parent: 16
+- model: ffm.tag
+  pk: 23
+  fields:
+    name: 102106
+    description: Interior Design
+    group: 4
+    parent: 16
+- model: ffm.tag
+  pk: 24
+  fields:
+    name: 102107
+    description: Music
+    group: 4
+    parent: 16
+- model: ffm.tag
+  pk: 25
+  fields:
+    name: 102108
+    description: Theater
+    group: 4
+    parent: 16
+- model: ffm.tag
+  pk: 26
+  fields:
+    name: 103
+    description: Health & Medicine
+    group: 4
+    parent: null
+- model: ffm.tag
+  pk: 27
+  fields:
+    name: 103100
+    description: Anatomy & Physiology
+    group: 4
+    parent: 26
+- model: ffm.tag
+  pk: 28
+  fields:
+    name: 103101
+    description: Behavioral Science
+    group: 4
+    parent: 26
+- model: ffm.tag
+  pk: 29
+  fields:
+    name: 103102
+    description: Dentistry
+    group: 4
+    parent: 26
+- model: ffm.tag
+  pk: 30
+  fields:
+    name: 103103
+    description: Diet & Nutrition
+    group: 4
+    parent: 26
+- model: ffm.tag
+  pk: 31
+  fields:
+    name: 103104
+    description: Emergency
+    group: 4
+    parent: 26
+- model: ffm.tag
+  pk: 32
+  fields:
+    name: 103105
+    description: Genetics
+    group: 4
+    parent: 26
+- model: ffm.tag
+  pk: 33
+  fields:
+    name: 103106
+    description: Gerontology
+    group: 4
+    parent: 26
+- model: ffm.tag
+  pk: 34
+  fields:
+    name: 103107
+    description: Health & Exercise Science
+    group: 4
+    parent: 26
+- model: ffm.tag
+  pk: 35
+  fields:
+    name: 103108
+    description: Immunology
+    group: 4
+    parent: 26
+- model: ffm.tag
+  pk: 36
+  fields:
+    name: 103109
+    description: Neuroscience
+    group: 4
+    parent: 26
+- model: ffm.tag
+  pk: 37
+  fields:
+    name: 103110
+    description: Pharmacology & Toxicology
+    group: 4
+    parent: 26
+- model: ffm.tag
+  pk: 38
+  fields:
+    name: 103111
+    description: Psychiatry
+    group: 4
+    parent: 26
+- model: ffm.tag
+  pk: 39
+  fields:
+    name: 103112
+    description: Public Health
+    group: 4
+    parent: 26
+- model: ffm.tag
+  pk: 40
+  fields:
+    name: 103113
+    description: Radiology
+    group: 4
+    parent: 26
+- model: ffm.tag
+  pk: 41
+  fields:
+    name: 104
+    description: History
+    group: 4
+    parent: null
+- model: ffm.tag
+  pk: 42
+  fields:
+    name: 104100
+    description: Ancient
+    group: 4
+    parent: 41
+- model: ffm.tag
+  pk: 43
+  fields:
+    name: 104101
+    description: Medieval
+    group: 4
+    parent: 41
+- model: ffm.tag
+  pk: 44
+  fields:
+    name: 104102
+    description: Military
+    group: 4
+    parent: 41
+- model: ffm.tag
+  pk: 45
+  fields:
+    name: 104103
+    description: Modern
+    group: 4
+    parent: 41
+- model: ffm.tag
+  pk: 46
+  fields:
+    name: 104104
+    description: African
+    group: 4
+    parent: 41
+- model: ffm.tag
+  pk: 47
+  fields:
+    name: 104105
+    description: Asian
+    group: 4
+    parent: 41
+- model: ffm.tag
+  pk: 48
+  fields:
+    name: 104106
+    description: European
+    group: 4
+    parent: 41
+- model: ffm.tag
+  pk: 49
+  fields:
+    name: 104107
+    description: Middle Eastern
+    group: 4
+    parent: 41
+- model: ffm.tag
+  pk: 50
+  fields:
+    name: 104108
+    description: North American
+    group: 4
+    parent: 41
+- model: ffm.tag
+  pk: 51
+  fields:
+    name: 104109
+    description: South American
+    group: 4
+    parent: 41
+- model: ffm.tag
+  pk: 52
+  fields:
+    name: 105
+    description: Humanities
+    group: 4
+    parent: null
+- model: ffm.tag
+  pk: 53
+  fields:
+    name: 105100
+    description: Communications
+    group: 4
+    parent: 52
+- model: ffm.tag
+  pk: 54
+  fields:
+    name: 105101
+    description: Philosophy
+    group: 4
+    parent: 52
+- model: ffm.tag
+  pk: 55
+  fields:
+    name: 105102
+    description: Religion
+    group: 4
+    parent: 52
+- model: ffm.tag
+  pk: 56
+  fields:
+    name: 106
+    description: Language
+    group: 4
+    parent: null
+- model: ffm.tag
+  pk: 57
+  fields:
+    name: 106100
+    description: African
+    group: 4
+    parent: 56
+- model: ffm.tag
+  pk: 58
+  fields:
+    name: 106101
+    description: Ancient
+    group: 4
+    parent: 56
+- model: ffm.tag
+  pk: 59
+  fields:
+    name: 106102
+    description: Asian
+    group: 4
+    parent: 56
+- model: ffm.tag
+  pk: 60
+  fields:
+    name: 106103
+    description: Eastern European/Slavic
+    group: 4
+    parent: 56
+- model: ffm.tag
+  pk: 61
+  fields:
+    name: 106104
+    description: English
+    group: 4
+    parent: 56
+- model: ffm.tag
+  pk: 62
+  fields:
+    name: 106105
+    description: English Language Learners
+    group: 4
+    parent: 56
+- model: ffm.tag
+  pk: 63
+  fields:
+    name: 106106
+    description: French
+    group: 4
+    parent: 56
+- model: ffm.tag
+  pk: 64
+  fields:
+    name: 106107
+    description: German
+    group: 4
+    parent: 56
+- model: ffm.tag
+  pk: 65
+  fields:
+    name: 106108
+    description: Italian
+    group: 4
+    parent: 56
+- model: ffm.tag
+  pk: 66
+  fields:
+    name: 106109
+    description: Linguistics
+    group: 4
+    parent: 56
+- model: ffm.tag
+  pk: 67
+  fields:
+    name: 106110
+    description: Middle Eastern
+    group: 4
+    parent: 56
+- model: ffm.tag
+  pk: 68
+  fields:
+    name: 106111
+    description: Spanish & Portuguese
+    group: 4
+    parent: 56
+- model: ffm.tag
+  pk: 69
+  fields:
+    name: 106112
+    description: Speech Pathology
+    group: 4
+    parent: 56
+- model: ffm.tag
+  pk: 70
+  fields:
+    name: 107
+    description: Literature
+    group: 4
+    parent: null
+- model: ffm.tag
+  pk: 71
+  fields:
+    name: 107100
+    description: Anthologies
+    group: 4
+    parent: 70
+- model: ffm.tag
+  pk: 72
+  fields:
+    name: 107101
+    description: Biography
+    group: 4
+    parent: 70
+- model: ffm.tag
+  pk: 73
+  fields:
+    name: 107102
+    description: Classics
+    group: 4
+    parent: 70
+- model: ffm.tag
+  pk: 74
+  fields:
+    name: 107103
+    description: Criticism
+    group: 4
+    parent: 70
+- model: ffm.tag
+  pk: 75
+  fields:
+    name: 107104
+    description: Fiction
+    group: 4
+    parent: 70
+- model: ffm.tag
+  pk: 76
+  fields:
+    name: 107105
+    description: Poetry
+    group: 4
+    parent: 70
+- model: ffm.tag
+  pk: 77
+  fields:
+    name: 108
+    description: Mathematics
+    group: 4
+    parent: null
+- model: ffm.tag
+  pk: 78
+  fields:
+    name: 108100
+    description: Advanced Mathematics
+    group: 4
+    parent: 77
+- model: ffm.tag
+  pk: 79
+  fields:
+    name: 108101
+    description: Algebra
+    group: 4
+    parent: 77
+- model: ffm.tag
+  pk: 80
+  fields:
+    name: 108102
+    description: Arithmetic
+    group: 4
+    parent: 77
+- model: ffm.tag
+  pk: 81
+  fields:
+    name: 108103
+    description: Calculus
+    group: 4
+    parent: 77
+- model: ffm.tag
+  pk: 82
+  fields:
+    name: 108104
+    description: Geometry
+    group: 4
+    parent: 77
+- model: ffm.tag
+  pk: 83
+  fields:
+    name: 108105
+    description: Statistics
+    group: 4
+    parent: 77
+- model: ffm.tag
+  pk: 84
+  fields:
+    name: 109
+    description: Science
+    group: 4
+    parent: null
+- model: ffm.tag
+  pk: 85
+  fields:
+    name: 109100
+    description: Agricultural
+    group: 4
+    parent: 84
+- model: ffm.tag
+  pk: 86
+  fields:
+    name: 109101
+    description: Astronomy
+    group: 4
+    parent: null
+- model: ffm.tag
+  pk: 87
+  fields:
+    name: 109102
+    description: Atmospheric
+    group: 4
+    parent: 84
+- model: ffm.tag
+  pk: 88
+  fields:
+    name: 109103
+    description: Biology
+    group: 4
+    parent: 84
+- model: ffm.tag
+  pk: 89
+  fields:
+    name: 109104
+    description: Chemistry
+    group: 4
+    parent: 84
+- model: ffm.tag
+  pk: 90
+  fields:
+    name: 109105
+    description: Ecology
+    group: 4
+    parent: 84
+- model: ffm.tag
+  pk: 91
+  fields:
+    name: 109106
+    description: Geography
+    group: 4
+    parent: 84
+- model: ffm.tag
+  pk: 92
+  fields:
+    name: 109107
+    description: Geology
+    group: 4
+    parent: 84
+- model: ffm.tag
+  pk: 93
+  fields:
+    name: 109108
+    description: Physics
+    group: 4
+    parent: 84
+- model: ffm.tag
+  pk: 94
+  fields:
+    name: 110
+    description: Social Science
+    group: 4
+    parent: null
+- model: ffm.tag
+  pk: 95
+  fields:
+    name: 110100
+    description: Law
+    group: 4
+    parent: 94
+- model: ffm.tag
+  pk: 96
+  fields:
+    name: 110101
+    description: Political Science
+    group: 4
+    parent: 94
+- model: ffm.tag
+  pk: 97
+  fields:
+    name: 110102
+    description: Public Administration
+    group: 4
+    parent: 94
+- model: ffm.tag
+  pk: 98
+  fields:
+    name: 110103
+    description: Psychology
+    group: 4
+    parent: 94
+- model: ffm.tag
+  pk: 99
+  fields:
+    name: 110104
+    description: Social Welfare
+    group: 4
+    parent: 94
+- model: ffm.tag
+  pk: 100
+  fields:
+    name: 110105
+    description: Sociology
+    group: 4
+    parent: 94
+- model: ffm.tag
+  pk: 101
+  fields:
+    name: 111
+    description: Society
+    group: 4
+    parent: null
+- model: ffm.tag
+  pk: 102
+  fields:
+    name: 111100
+    description: African-American Studies
+    group: 4
+    parent: 101
+- model: ffm.tag
+  pk: 103
+  fields:
+    name: 111101
+    description: Asian Studies
+    group: 4
+    parent: 101
+- model: ffm.tag
+  pk: 104
+  fields:
+    name: 111102
+    description: European & Russian Studies
+    group: 4
+    parent: 101
+- model: ffm.tag
+  pk: 105
+  fields:
+    name: 111103
+    description: Indigenous Studies
+    group: 4
+    parent: 101
+- model: ffm.tag
+  pk: 106
+  fields:
+    name: 111104
+    description: Latin & Caribbean Studies
+    group: 4
+    parent: 101
+- model: ffm.tag
+  pk: 107
+  fields:
+    name: 111105
+    description: Middle Eastern Studies
+    group: 4
+    parent: 101
+- model: ffm.tag
+  pk: 108
+  fields:
+    name: 111106
+    description: "Women's Studies"
+    group: 4
+    parent: 101
+- model: ffm.tag
+  pk: 109
+  fields:
+    name: 112
+    description: Teaching & Education
+    group: 4
+    parent: null
+- model: ffm.tag
+  pk: 110
+  fields:
+    name: 112100
+    description: Curriculum & Teaching
+    group: 4
+    parent: 109
+- model: ffm.tag
+  pk: 111
+  fields:
+    name: 112101
+    description: Educational Leadership
+    group: 4
+    parent: 109
+- model: ffm.tag
+  pk: 112
+  fields:
+    name: 112102
+    description: Family & Childcare
+    group: 4
+    parent: 109
+- model: ffm.tag
+  pk: 113
+  fields:
+    name: 112103
+    description: Learning Resources
+    group: 4
+    parent: 109
+- model: ffm.tag
+  pk: 114
+  fields:
+    name: 112104
+    description: Psychology & Research
+    group: 4
+    parent: 109
+- model: ffm.tag
+  pk: 115
+  fields:
+    name: 112105
+    description: Special Education
+    group: 4
+    parent: 109
+
+- model: ffm.filetype
+  pk: 1
+  fields:
+    name: Unknown
+    description: Unknown file type and function
+
+- model: ffm.licence
+  pk: 1
+  fields:
+    name: University of Oxford Personal Use
+    description: Licence only for personal use. Default licence for University of Oxford Podcasts
+    url: null
+- model: ffm.licence
+  pk: 2
+  fields:
+    name: Creative Commons licence (BY-NC-SA E and W)
+    description: Creative Commons licence (BY-NC-SA E and W)
+    url: http://creativecommons.org/licenses/by-nc-sa/2.0/uk/
+- model: ffm.licence
+  pk: 3
+  fields:
+    name: Creative Commons licence (BY-NC-ND E and W)
+    description: Creative Commons licence (BY-NC-SA E and W)
+    url: http://creativecommons.org/licenses/by-nc-nd/3.0/
+
+- model: ffm.feedtemplate
+  pk: 1
+  fields:
+    name: RSS
+    description: Generic mRSS output of an entire collection
+- model: ffm.feedtemplate
+  pk: 2
+  fields:
+    name: POAU
+    description: The primary podcasts.ox.ac.uk portal website. RSS based with extra namespace extensions
+- model: ffm.feedtemplate
+  pk: 3
+  fields:
+    name: iTunes U
+    description: The iTunes U Oxford portal. RSS based with extra namespace extensions
+- model: ffm.feedtemplate
+  pk: 4
+  fields:
+    name: mobileOxford
+    description: The Mobile Oxford Webportal. RSS based with extra namespace extensions
+
+- model: ffm.link
+  pk: 1
+  fields:
+    name: Oxford University Homepage
+    description: The primary university website
+    url: http://www.ox.ac.uk/

@@ -1,123 +1,113 @@
-{% load static %}
-{% get_static_prefix as STATIC_PREFIX %}
 <!DOCTYPE html>
-<html lang="en-gb" >
+<html lang="en">
+{% load static sitetree %}
+{% get_static_prefix as STATIC_PREFIX %}
 <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="{{ STATIC_PREFIX }}images/favicon.ico" />
-    <link rel="shortcut icon" href="{{ STATIC_PREFIX }}images/favicon.ico" />
-    <meta name="author" content="University of Oxford" />
+    <meta charset="utf-8">
+    <title>{% sitetree_page_title from "opmstree" %} :: The OPMS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-    <title>{% block title %}Welcome{% endblock %} :: The OPMS</title>
+    <link href="{{ STATIC_PREFIX }}css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+        .sidebar-nav {
+            padding: 9px 0;
+        }
+    </style>
+    <link href="{{ STATIC_PREFIX }}css/bootstrap-responsive.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/basic.css" media="all" />
-    <link rel="stylesheet" href="{{ STATIC_PREFIX }}print.css" media="print" />
-    <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/oxService.css" media="screen,projection" />
-    <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/mainnav.css" media="screen,projection" />
-    <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/lookandfeel.css" media="screen,projection" />
-    <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/layout.css" media="screen,projection" />
+    <!-- The HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="{{ STATIC_PREFIX }}ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ STATIC_PREFIX }}ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{{ STATIC_PREFIX }}ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{{ STATIC_PREFIX }}ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="{{ STATIC_PREFIX }}ico/apple-touch-icon-57-precomposed.png">
+
+    <!-- Javascript ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-transition.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-alert.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-modal.js"></script>#}
+    <script src="{{ STATIC_PREFIX }}js/bootstrap-collapse.js"></script>
+    <script src="{{ STATIC_PREFIX }}js/bootstrap-dropdown.js"></script>
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-scrollspy.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-tab.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-tooltip.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-popover.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-button.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-carousel.js"></script>#}
+    {#<script src="{{ STATIC_PREFIX }}js/bootstrap-typeahead.js"></script>#}
 
     {% block head %}
-    <link rel="stylesheet" href="{{ STATIC_PREFIX }}uploadify/uploadify.css" />
-    <script src="{{ STATIC_PREFIX }}scripts/jquery-1.6.4.min.js"></script>
-    <script src="{{ STATIC_PREFIX }}uploadify/swfobject.js"></script>
-    <script src="{{ STATIC_PREFIX }}uploadify/jquery.uploadify.v2.1.4.js"></script>
-    <script>
-    $(document).ready(function() {
-        $('#file_upload').uploadify({
-            'uploader'  : '{{ STATIC_PREFIX }}uploadify/uploadify.swf',
-            'script'    : '/upload/',
-            'cancelImg' : '{{ STATIC_PREFIX }}uploadify/cancel.png',
-            'auto'      : false,
-            'multi'     : true,
-//            'fileExt'   : '*.mp3;*.ogg;*.flac',
-            'fileDesc'  : 'Media Files for the Podcasting Team',
-            'queueID'   : 'file_upload_queue',
-            'displayData' : 'percentage',
-            'removeCompleted': false,
-            'scriptData': {'description':'No description has been given'},
-            'sizeLimit' : 838860800, // 800Mb limit per file
-            'queueSizeLimit' : 20,
-//            'onError'   : function (event,ID,fileObj,errorObj) {
-//                alert(errorObj.type + ' Error: ' + errorObj.info);
-//            },
-            'onAllComplete' : function(event,data) {
-                alert(data.filesUploaded + ' files uploaded successfully!\nThere were ' + data.errors + ' errors.');
-            }
-        });
-    });
-    function prepareUpload() {
-        // Need to remove "&" from strings as jQuery/uploadify throws NPObject errors otherwise.
-        // Suspect < and > also cause problems (and certainly do if converted to &lt; &gt;
-        value = ($('#file_description').val()).replace(/</g,'%3C').replace(/>/g,'%3E').replace(/&/g,'%26');
-        $('#file_upload').uploadifySettings('scriptData',{'description':value});
-//        alert('value=' + value);
-        if (value.length < 10) {
-            alert('Please enter some descriptive text before starting the upload');
-        }
-        else {
-            $('#file_upload').uploadifyUpload();
-        }
-    }
-    </script>
     {% endblock %}
-
 </head>
 
 <body>
-{% block navbar %}
-<nav id="mainnav">
-    <h2>Main sections</h2>
-    <ul class="level-1">
-        <li><span class="youarehere">Home</span></li>
-        <li><a href="/admin/">Admin</a></li>
-        <li><a href="/ffm/">Files &amp; Feeds</a></li>
-        <li><a href="/stats/">Statistics</a></li>
-    </ul>
-</nav>
-{% endblock %}
-
-    <div id="content" >
-        <div id="breadcrumb"><strong>You are at:</strong> <a href="/">Home</a> {% block breadcrumb %}{% endblock %}</div>
-{% block content %}
-        <h1>Oxford Podcast Management System (OPMS)</h1>
-
-{#    UPLOADIFY CODE - REJECTED BECAUSE IT DOESN'T WORK WITH WEBAUTH #}
-{#        <h2>File Upload Form</h2>#}
-{#        <div id='upload'>#}
-{#            <p>This short form will allow you to send files directly to the Podcasting Team, and will alert#}
-{#                them on each file uploaded. To use:</p>#}
-{#            <ol>#}
-{#                <li>Click on Select Files.</li>#}
-{#                <li>Select up to 20 files, with no one file larger than 800Mb.</li>#}
-{#                <li>Enter some text describing those files.</li>#}
-{#                <li>Click "<a href="javascript:prepareUpload();">Start Upload</a>" ...and then sit back and watch as your files are uploaded.</li>#}
-{#                <li>Wait for the final pop up alert to confirm file transfer status.</li>#}
-{#            </ol>#}
-{##}
-{#            <p><input id="file_upload" type="file" name="Filedata" /></p>#}
-{#            <p>Please enter some descriptive text for the files you are about to upload:<br />#}
-{#                <textarea id="file_description" cols="60" rows="6"></textarea></p>#}
-{#            <p>Upload Queue:#}
-{#                <div id='file_upload_queue'></div>#}
-{#            </p>#}
-{#            <p><strong><a href="javascript:prepareUpload();">Start Upload</a></strong> :#}
-{#                <a href="javascript:jQuery('#file_upload').uploadifyClearQueue()">Cancel All Uploads</a></p>#}
-{#        </div>#}
-{% endblock %}
-    <!-- div.content closes -->
+<div class="navbar">
+    <div class="navbar-inner">
+        <div class="container-fluid">
+            <a class="brand" href="/">OPMS</a>
+            {% sitetree_menu from "opmstree" include "trunk" template "sitetree/navbar.html" %}
+        </div>
     </div>
+</div>
 
-    <footer id="footer" >
-        <div id="site-info"  >
-            <h2   class="nonvis-exposition">Site Information</h2>
-			<dl>
-				<dt class="nonvis-exposition">Institution</dt><dd id="institution"><a id="oxcrest"  href="http://www.ox.ac.uk/">University of Oxford</a></dd>
-				<dt class="nonvis-exposition">Service</dt><dd id="serviceName" >OPMS - Oxford Podcast Management System</dd>
-			</dl>
-		<!-- div#site-info closes -->
-		</div>
-	<!-- div#footer closes -->
-	</footer>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span2">
+            <div class="well sidebar-nav">
+                {% block sidebar %}
+                {% sitetree_menu from "opmstree" include "trunk" template "sitetree/navlist.html" %}
+                {% endblock %}
+            </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span10">
+            {% sitetree_breadcrumbs from "opmstree" template "sitetree/breadcrumbs.html"%}
+            {% block content %}
+            <div class="hero-unit">
+                <h1>Hello, world!</h1>
+                <p>Some form of highlighted content, or snazzy graph wants to be appearing up here...</p>
+                <p><a class="btn btn-primary btn-large">Learn more &raquo;</a></p>
+            </div>
+            <div class="row-fluid">
+                <div class="span4">
+                    <h2>Analytics</h2>
+                    <p>Basic dashboard like stats for this module. Donec id elit non mi porta gravida at eget metus.
+                        Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa
+                        justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+                    <p><a class="btn" href="#">View details &raquo;</a></p>
+                </div><!--/span-->
+                <div class="span4">
+                    <h2>Monitoring</h2>
+                    <p>Basic dashboard like stats for this module. Donec id elit non mi porta gravida at eget metus.
+                        Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa
+                        justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+                    <p><a class="btn" href="#">View details &raquo;</a></p>
+                </div><!--/span-->
+                <div class="span4">
+                    <h2>Files and Feeds</h2>
+                    <p>Basic dashboard like stats for this module. Donec id elit non mi porta gravida at eget metus.
+                        Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa
+                        justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+                    <p><a class="btn" href="#">View details &raquo;</a></p>
+                </div><!--/span-->
+            </div><!--/row-->
+            {% endblock %}
+        </div><!--/span-->
+    </div><!--/row-->
+
+    <hr>
+
+    <footer>
+        <p>&copy; <a href="http://www.oucs.ox.ac.uk/">Oxford University Computing Services</a> 2012</p>
+    </footer>
+
+</div><!--/.fluid-container-->
 </body>
 </html>

@@ -5,6 +5,7 @@ from optparse import make_option
 from django.core.management.base import NoArgsCommand, CommandError
 from opms.ffm.models import *
 from opms.oxitems.models import *
+from opms.core.models import *
 import sys, re, csv, urllib
 from datetime import datetime
 from dateutil import parser
@@ -38,9 +39,9 @@ class Command(NoArgsCommand):
         if verbosity > 1:
             self.debug = True
 
-        print "Import started at " + str(datetime.utcnow()) + "\n"
 
         # Create an error log
+        print "Import started at " + str(datetime.utcnow()) + "\n"
         self._errorlog_start('sync_oxitems.log')
 
         # Reset statistics
@@ -51,7 +52,7 @@ class Command(NoArgsCommand):
         self.import_stats['file_created'] = 0
         self.import_stats['file_count'] = 0
         self.import_stats['feed_created'] = 0
-        self.import_stats['feedgroup_created'] = 0
+        self.import_stats['collection_created'] = 0
         self.import_stats['update_starttime'] = datetime.utcnow()
 
         self.no_sync = bool(options.get('no_sync', False))
@@ -63,7 +64,7 @@ class Command(NoArgsCommand):
             total_count = len(remote_channels)
             for counter, row in enumerate(remote_channels):
                 row.save(using='default')
-                if counter == 0 or (counter % 100) == 0:
+                if counter == 0 or (counter % 50) == 0:
                     print "Copied %s of %s channels" % (counter,total_count)
             print "Channels copy finished"
 
@@ -71,124 +72,248 @@ class Command(NoArgsCommand):
             total_count = len(remote_items)
             for counter, row in enumerate(remote_items):
                 row.save(using='default')
-                if counter == 0 or (counter % int(total_count / 10)) == 0: # Aim for reports every 10% complete
-                    # print "Copied %s of %s items" % (counter,total_count)
-                    percentage = int(counter / int(total_count / 10)) * 10
-                    print "Copied %s%% of items" % (percentage)
+                divisor = int(total_count / 20)
+                if counter == 0 or (counter % divisor) == 0: # Aim for reports every 5% complete
+                    percentage = int(counter / total_count) * 100
+                    print "Copied %s (%s%%) of %s items" % (counter, percentage, total_count)
             print "Items copy finished"
         else:
             print "Skipping Database Synchronisation"
 
-        # Create an up to date list of units from the OxPoints data (Command care of Alex D)
-        try:
-            self.oxpoints = dict(csv.reader(urllib.urlopen("http://data.ox.ac.uk/sparql/?query=select+*+where+%7B+%3Funit+^oxp%3AhasOUCSCode+%3Foucs+%7D&format=csv&common_prefixes=on")))
-        except:
-            self.oxpoints = {}
+#        # Create an up to date list of units from the OxPoints data (Command care of Alex D)
+#        try:
+#            self.oxpoints = dict(csv.reader(urllib.urlopen("http://data.ox.ac.uk/sparql/?query=select+*+where+%7B+%3Funit+^oxp%3AhasOUCSCode+%3Foucs+%7D&format=csv&common_prefixes=on")))
+#        except:
+#            self.oxpoints = {}
+#
+#        # Import OxItems.Channels
+#        # Work through them in groups (order by name) and in creation order first to most recent (order by modified)
+#        oxitems_channels = Rg07Channels.objects.all().order_by('name','modified')
+#        total_count = len(oxitems_channels)
+#        print "Processing OxItems Channel Data into OPMS (" + str(total_count) + " rows to do)"
+#
+#        previous_row = Rg07Channels()
+#        previous_collection = Collection()
+#        for counter, row in enumerate(oxitems_channels):
+#            self._debug("handle_noargs(): Processing channel " + str(counter+1) + " of " + str(total_count))
 
-        # Import OxItems.Channels
-        oxitems_channels = Rg07Channels.objects.all().order_by('modified') # filter(deleted=False); Work on basis that most recently edited come last - not quite so critical here?
-        total_count = len(oxitems_channels)
-        print "Processing OxItems Channel Data into OPMS (" + str(total_count) + " rows to do)"
-        for counter, row in enumerate(oxitems_channels):
-            self._debug("handle_noargs(): Processing channel " + str(counter+1) + " of " + str(total_count))
-            unit = row.oxpoints_units
-            if len(unit) < 1:
-                # Derive the unit from the guid if we can...
-                unit = str(row.channel_guid).split(':')[-1].split('/')[0].strip()
-            # Update or create ***FeedGroup***
-            if len(row.importfeedgroupchannel_set.all()) == 0:
-                # Does this need merging with an existing feedgroup? Compare with existing titles. Basic exact match first...
-                feed_group = {
-                    'title': row.title, 
-                    'description':row.description,
-                    'internal_comments':row.channel_emailaddress,
-                    'owning_unit':self._get_or_create_owning_unit(unit)
-                }
-                fg, created = FeedGroup.objects.get_or_create(title=row.title, defaults=feed_group)
-                if created:
-                    self._debug("New FeedGroup created, id: " + str(fg.id) + ". Title=" + fg.title)
-                    self.import_stats['feedgroup_created'] = self.import_stats.get('feedgroup_created') + 1
-                    fg.save()
-                else:
-                    self._debug("FeedGroup found for merger, id: " + str(fg.id) + ". Title=" + fg.title)
+            """
+            Rg07Channels data is not versioned in OxItems, but if a feed is deleted and recreated then there will
+            be two (or more) rows created for it.
 
-                # Make link to import
-                ifgc = ImportFeedGroupChannel()
-                ifgc.feedgroup = fg
-                ifgc.channel = row
-                ifgc.save()
-            else:
-                fg = row.importfeedgroupchannel_set.get(channel=row).feedgroup #NB: Channels N -> 1 FeedGroup relationship, even though it looks M2M
-                self._debug("FeedGroup found, id: " + str(fg.id) + ". Title=" + fg.title)
+            We ignore:
+            channel_categories as this is filtered on copy from live Oxitems DB
+            channel_cc in favour of item_cc, because iTU does
+            channel_emailaddress as there's nothing useful in there
+            channel_guid serves no purpose in the future
+            channel_licence, in favour of item_licence because the licence belongs to an item, not a feed
+            channel_not_used_1 - Guess why.
+            channel_not_used_2
+            channel_number_of_xxxx, as we can calculate that ourselves
+            channel_short_name as empty
+            channel_taxonomies - not used in Podcasting
+            channel_template - not used in Podcasting
+            oxpoints_units as it serves no clearly attributable purpose, and geolocation needs serious thought
+            modified - can't determine what this tells me compared to channel_updateds
+            modifier - as it is related to modified.
+            id - we get this as part of the object handle
 
-            # Update the information if this is not a deleted record
-            if not row.deleted:
-                fg.title = row.title
-                fg.description = row.description
-                fg.internal_comments = row.channel_emailaddress
-                fg.owning_unit = self._get_or_create_owning_unit(unit)
-                fg.save()
-            # Things to do after the FeedGroup is created/found, regardless of deleted state
-            self._get_or_create_link(fg, row.link)
-            self._set_jorum_tags(fg, row.channel_jorumopen_collection)
+            We will map:
+            channel_image = Ignore for now as we don't know where to store this
+            channel_jorumopen_collection = TagGroup and Tags
+            channel_sort_values = guidance for Association
+            channel_tpi = 0:Do not publish; 1:Only POAU; 2:Only iTU; 3:Both. Used to determine publish_status in Feed
+            channel_updated = Use for sync status in SyncChannelsWithFeed
+            deleted -> Collection.deleted_on + Feed.deleted_on
+            deleter -> Collection.deleted_by + Feed.deleted_by
+            description -> Feed.description
+            link = Link record
+            name -> Feed.title
+            title -> Collection.title
+            """
 
-            # Update or create ***Feed***
-            if len(row.importfeedchannel_set.all()) == 0: # Create Feed
-                feed = {
-                    'slug':row.name,
-                    'feed_group':fg,
-                    'last_updated':row.channel_updated
-                }
-                f, created = Feed.objects.get_or_create(slug=row.name, defaults=feed)
-                if created:
-                    f.save()
-                    self._debug("Feed created, id:" + str(f.id) + ". slug=" + f.slug)
-                    self.import_stats['feed_created'] = self.import_stats.get('feed_created') + 1
-                else:
-                    self._debug("Feed found for merger, id: " + str(f.id) + ". slug=" + f.slug)
 
-                # Make link to import
-                ifc = ImportFeedChannel()
-                ifc.feed = f
-                ifc.channel = row
-                ifc.save()
-            else:
-                f = row.importfeedchannel_set.get(channel=row).feed #NB: Channels N -> 1 Feed relationship, even though it looks M2M
-                self._debug("Feed found, id:" + str(f.id) + ". slug=" + row.name)
+            """
+            Rg07Items data has some versioning in OxItems
 
-            # NB: Slugs/name ARE NOT UNIQUE IN OXITEMS. So merge with existing, but only update if not deleted
-            if not row.deleted:
-                f.last_updated = row.channel_updated
-                f.feed_group = fg
-                f.save()
+            We ignore:
+            id = models.IntegerField(primary_key=True)
+            item_author = models.CharField(max_length=42) # 479 values, All appear to be full text names, presumably of the record's creator
+            item_duration = models.IntegerField() # Estimated time in seconds? This needs to be compared to an actual file analysis.
+            item_enclosure_length = models.TextField() # Large integer values. Size in bytes?
+            item_enclosure_type = models.TextField() # Attempt at mime type description. Again, may have some odd values in.
+            item_event_guid = models.TextField() # for events, can be IGNORED
+            item_image = models.CharField(max_length=256) # EMPTY
+            item_legal_comments = models.TextField() # Open text. 322 examples
+            item_link = models.CharField(max_length=256) # Link URL stuff, IGNORE.
+            item_not_used_2 = models.CharField(max_length=42) # EMPTY
+            item_not_used_3 = models.TextField() # EMPTY
+            item_not_used_4 = models.IntegerField() # EMPTY
+            item_not_used_5 = models.CharField(max_length=128) # NOT EMPTY, but apparently junk?
+            item_other_comments = models.TextField() # Open text. 10 examples
+            item_special_categories = models.TextField() # Looks like events categories... IGNORE, empty
+            item_transcripts_available = models.IntegerField() # 0,1 or 2. Relates to some outputting that's hardwired into the system
+            item_type = models.CharField(max_length=42) # 'html'... it's all html
+            modified = models.DateTimeField()
+            modifier = models.CharField(max_length=11)
 
-            # Things to do after the Feed is created
-            self._set_feed_destinations(f, row.channel_guid, row.channel_tpi, row.deleted)
-            self._get_or_create_feedartwork(f, row.channel_image)
-            self._parse_items(f, row)
 
-            self._debug("Parsed %s of %s Channels" % (counter+1,total_count))
-            self._debug("\n\nhandle_noargs(): =================================================================== \n\n")
-            
-
-        # Final stats output at end of file
-        #try:
-        #    self.import_stats['update_rate'] = float(self.import_stats.get('update_count')) /\
-        #        float((datetime.utcnow() - self.import_stats.get('update_starttime')).seconds)
-        #except ZeroDivisionError:
-        #    self.import_stats['update_rate'] = 0
-
-        print "\nUpdate finished at " + str(datetime.utcnow()) +\
-            "\nFeedGroups created: " + str(self.import_stats.get('feedgroup_created')) + "." +\
-            "\nFeeds created: " + str(self.import_stats.get('feed_created')) + "." +\
-        ""
-        #    "\nIP addresses parsed: " + str(self.import_stats.get('update_count')) +\
-        #    "\nImported at " + str(self.import_stats.get('update_rate'))[0:6] + " IP Addresses/sec\n"
-
-        # Write the error cache to disk
-        self._error_log_save()
-        self._errorlog_stop()
+            We will map:
+            deleted = models.BooleanField()
+            deleter = models.CharField(max_length=11)
+            item_cc = models.IntegerField() # Apple Category Code, again -1, 0, nnn or nnnnnn
+            item_channel = models.ForeignKey(Rg07Channels)
+            item_checked = models.IntegerField() # Publish to iTunes U. 0=No or 1=Yes. Possible extension of values for a workflow?
+            item_content = models.TextField() # Long text, with quite a bit of xHTML markup in it, intended for embedding somewhere.
+            item_enclosure_artists = models.TextField() # The messy madness that is the item's speakers/presenters
+            item_enclosure_href = models.TextField() # URL to the file. Make contain crap.
+            item_enclosure_release = models.TextField() # two options: '' or 'on'. ????
+            item_expires = models.CharField(max_length=32) # Datetime as a string e.g. u'2008-05-17T20:00:00+01:00'
+            item_guid = models.CharField(max_length=80) # Hopefully the critical GUID for a podcast.
+            item_jacs_codes = models.TextField() # csv JACS codes, e.g.: 'F800,C180,F810,F860'.
+            item_licence = models.IntegerField() # -1, 5 or 6...
+            # value="-1" > Licence only for personal use
+            # value="5" > Creative Commons licence (BY-NC-SA E and W)
+            # value="6" > Creative Commons licence (BY-NC-ND E and W)
+            item_published = models.CharField(max_length=32) # Datetime as text
+            item_recording_date = models.TextField() # yyyy-mm-dd in a text field
+            item_simple_categories = models.TextField() # csv fields: ,botanic gardens,gardening,medicine,health,botany,nitrogen,sugar,
+            item_startdate = models.CharField(max_length=32) # Datetime as text
+            item_summary = models.TextField() # long description of item, appears to get more use than item_content
+            item_title = models.TextField() # Title
+            item_updated = models.CharField(max_length=32) # Datetime as text
+            """
+#            # Skip any records that have sync links - BAD ASSUMPTION!!!! Channels get updated in Oxitems, not replaced like items do
+#            if len(row.syncchannelswithcollection_set.all()) > 0:
+#                # There should only be one collection linked with any one channel row
+#                collection = row.syncchannelswithcollection_set.get(channel=row).collection
+#                self._debug("Collection found, id: " + str(collection.id) + ". Name=" + collection.name)
+#                # Skip doing anything else with this row? Probably not, as we need to parse the items associated
+#            else:
+#                collection = Collection()
+#                collection.name = row.title
+#                collection.description = row.description
+#                if row.deleted:
+#                    collection.deleted_on = datetime.now()
+#    #                collection.deleted_by = row.deleter + function to convert to a Core.User record
+#                collection.save(force_insert=True)
+#                self._debug("New Collection created, id: " + str(collection.id) + ". Name=" + collection.name)
+#                self.import_stats['collection_created'] += 1
+#
+#                # Is this related to an existing collection (i.e. new version)?
+#                if previous_row.name == row.name:
+#                    # Yes, create a new version, so add a pointer from the previous collection to this one
+#                    self._replace_collection(previous_collection, collection) # TODO: Define this method
+#
+#                # Create SyncCollection link
+#                synccwc = SyncChannelsWithCollection()
+#                synccwc.collection = collection
+#                synccwc.channel = row
+#                synccwc.save(force_insert=True)
+#
+#                # Is there a link? And does it exist already?
+#                if len(str(row.link)) > 0:
+#                    self._get_or_create_link(collection, row.link) # TODO: Redefine this method
+#
+#                # Link related JorumTags
+#                if len(str(row.channel_jorumopen_collection))>0:
+#                    self._set_jorum_tags(collection, row.channel_jorumopen_collection) # TODO: Redefine this method
+#
+#
+#            # Get or create the feed related to this collection
+#                # There's only one feed being referenced by oxitems at a time...
+#                # A collection may already exist with this feed, and if it doesn't, then it needs creating
+#                # collections have feeds for each type of template/destination.
+#
+#                # Set feed artwork
+#
+#                # Parse the items related to these feeds...
+#                self._parse_items(feed, row) # TODO: Redefine this method
+#
+#            # Cleanup and set previous values...
+#            previous_row = row
+#            previous_collection = collection
         return None
+
+
+    def _replace_collection(self, old_collection, new_collection):
+        pass
+#        previous_collection.replaced_by = collection
+#        previous_collection.save(force_update=True)
+
+
+    def _get_licence(self, oxitems_licence_value):
+        if  oxitems_licence_value == 5:
+            return Licence.objects.get(pk=2) # CC BY-NC-SA Licence hardcoded from Fixtures
+        elif  oxitems_licence_value == 6:
+            return Licence.objects.get(pk=3) # CC BY-NC-ND Licence hardcoded from Fixtures
+        else:
+            return Licence.objects.get(pk=1) # Personal Licence hardcoded from Fixtures
+
+
+
+
+
+
+
+#            # Update or create ***Feed***
+#            if len(row.importfeedchannel_set.all()) == 0: # Create Feed
+#                feed = {
+#                    'slug':row.name,
+#                    'feed_group':fg,
+#                    'last_updated':row.channel_updated
+#                }
+#                f, created = Feed.objects.get_or_create(slug=row.name, defaults=feed)
+#                if created:
+#                    f.save()
+#                    self._debug("Feed created, id:" + str(f.id) + ". slug=" + f.slug)
+#                    self.import_stats['feed_created'] = self.import_stats.get('feed_created') + 1
+#                else:
+#                    self._debug("Feed found for merger, id: " + str(f.id) + ". slug=" + f.slug)
+#
+#                # Make link to import
+#                ifc = ImportFeedChannel()
+#                ifc.feed = f
+#                ifc.channel = row
+#                ifc.save()
+#            else:
+#                f = row.importfeedchannel_set.get(channel=row).feed #NB: Channels N -> 1 Feed relationship, even though it looks M2M
+#                self._debug("Feed found, id:" + str(f.id) + ". slug=" + row.name)
+#
+#            # NB: Slugs/name ARE NOT UNIQUE IN OXITEMS. So merge with existing, but only update if not deleted
+#            if not row.deleted:
+#                f.last_updated = row.channel_updated
+#                f.feed_group = fg
+#                f.save()
+#
+#            # Things to do after the Feed is created
+#            self._set_feed_destinations(f, row.channel_guid, row.channel_tpi, row.deleted)
+#            self._get_or_create_feedartwork(f, row.channel_image)
+#            self._parse_items(f, row)
+#
+#            self._debug("Parsed %s of %s Channels" % (counter+1,total_count))
+#            self._debug("\n\nhandle_noargs(): =================================================================== \n\n")
+
+
+#        # Final stats output at end of file
+#
+#        #try:
+#        #    self.import_stats['update_rate'] = float(self.import_stats.get('update_count')) /\
+#        #        float((datetime.utcnow() - self.import_stats.get('update_starttime')).seconds)
+#        #except ZeroDivisionError:
+#        #    self.import_stats['update_rate'] = 0
+#
+#        print "\nUpdate finished at " + str(datetime.utcnow()) +\
+#            "\nFeedGroups created: " + str(self.import_stats.get('feedgroup_created')) + "." +\
+#            "\nFeeds created: " + str(self.import_stats.get('feed_created')) + "." +\
+#        ""
+#        #    "\nIP addresses parsed: " + str(self.import_stats.get('update_count')) +\
+#        #    "\nImported at " + str(self.import_stats.get('update_rate'))[0:6] + " IP Addresses/sec\n"
+
+#        # Write the error cache to disk
+#        self._error_log_save()
+#        self._errorlog_stop()
+#        return None
 
 
     def _get_or_create_owning_unit(self, oucs_unit=''):
@@ -239,7 +364,7 @@ class Command(NoArgsCommand):
             feed_destination = FeedDestination()
             feed_destination.feed = feed_obj
             feed_destination.destination = dest
-            if dest.id == 3: # iTunes U from fixtures/db
+            if dest.id == 3: # iTunes U from temp-fixtures/db
                 feed_destination.guid = itunesu_guid # This is largely ignored and unused...
             if oxitems_deleted == True: # NB: whilst hacking out the slug duplicates by ignoring deleted items, this is untested...
                 feed_destination.withhold = 1000 # TODO: Need to determine some workflow values and descriptions for withhold
@@ -487,13 +612,6 @@ class Command(NoArgsCommand):
         return file_obj
 
 
-    def _get_licence(self, oxitems_licence):
-        if  oxitems_licence == 5:
-            return Licence.objects.get(pk=2) # CC BY-NC-SA Licence hardcoded from Fixtures
-        elif  oxitems_licence == 6:
-            return Licence.objects.get(pk=3) # CC BY-NC-ND Licence hardcoded from Fixtures
-        else:
-            return Licence.objects.get(pk=1) # Personal Licence hardcoded from Fixtures
 
 
     def _parse_people(self, oxitem_obj, item_obj):

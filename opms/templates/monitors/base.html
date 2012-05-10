@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-{% load stats_tags sitetree%}
+{% load static sitetree %}
 
 {% block sidebar %}
-    {% sitetree_menu from "opmstree" include "top-analytics" template "sitetree/navlist.html" %}
+    {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
 {% endblock %}
 
 {% block content %}
     <div class="hero-unit">
-        <h1>Analytics</h1>
-        <p>This area holds our analytics apps</p>
+        <h1>Monitoring Apps</h1>
+        <p>This area holds our monitoring apps</p>
         <p><a class="btn btn-primary btn-large">Learn more &raquo;</a></p>
     </div>
 {% endblock %}

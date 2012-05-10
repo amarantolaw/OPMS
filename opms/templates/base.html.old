@@ -1,0 +1,66 @@
+{% load static sitetree %}
+{% get_static_prefix as STATIC_PREFIX %}
+<!DOCTYPE html>
+<html lang="en-gb" >
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="{{ STATIC_PREFIX }}images/favicon.ico" />
+    <link rel="shortcut icon" href="{{ STATIC_PREFIX }}images/favicon.ico" />
+    <meta name="author" content="University of Oxford" />
+
+    <title>{% sitetree_page_title from "opmstree" %} :: The OPMS</title>
+
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/basic.css" media="all" />
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}print.css" media="print" />
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/oxService.css" media="screen,projection" />
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/mainnav.css" media="screen,projection" />
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/lookandfeel.css" media="screen,projection" />
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}styles/layout.css" media="screen,projection" />
+
+    {% block head %}
+    {% endblock %}
+</head>
+
+<body>
+{% block navbar %}
+<nav id="mainnav">
+    <h2>Main sections</h2>
+    <!-- sitetree_menu -->
+    {% sitetree_menu from "opmstree" include "trunk" %}
+{#    <ul class="level-1">#}
+{#        <li><span class="youarehere">Home</span></li>#}
+{#        <li><a href="/admin/">Admin</a></li>#}
+{#        <li><a href="/ffm/">Files &amp; Feeds</a></li>#}
+{#        <li><a href="/stats/">Statistics</a></li>#}
+{#    </ul>#}
+</nav>
+{% endblock %}
+
+    <div id="content" >
+        <div id="breadcrumb"><strong>You are at:</strong> <a href="/">Home</a>
+            {% block breadcrumb %}<!-- sitetree_breadcrumbs -->
+            {% sitetree_breadcrumbs from "opmstree" %}
+            {% endblock %}</div>
+{% block content %}
+        <h1>Oxford Podcast Management System (OPMS)</h1>
+        <!-- sitetree_tree -->
+        <h2>Site Navigation Tree</h2>
+        {% sitetree_tree from "opmstree" %}
+
+{% endblock %}
+    <!-- div.content closes -->
+    </div>
+
+    <footer id="footer" >
+        <div id="site-info"  >
+            <h2   class="nonvis-exposition">Site Information</h2>
+			<dl>
+				<dt class="nonvis-exposition">Institution</dt><dd id="institution"><a id="oxcrest"  href="http://www.ox.ac.uk/">University of Oxford</a></dd>
+				<dt class="nonvis-exposition">Service</dt><dd id="serviceName" >OPMS - Oxford Podcast Management System</dd>
+			</dl>
+		<!-- div#site-info closes -->
+		</div>
+	<!-- div#footer closes -->
+	</footer>
+</body>
+</html>

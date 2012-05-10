@@ -1,0 +1,76 @@
+{% extends "stats/base.html" %}
+{% load static stats_tags %}
+{% get_static_prefix as STATIC_PREFIX %}
+{% block head %}
+    <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection" />
+{% endblock %}
+
+{% block content %}
+<h1>Summary for {{ref}} (psudeo feed)</h1>
+
+{% if listing %}
+
+    {% if summary %}
+<h3>Summary</h3>
+<p>This feed has {{ summary.count }} items and in total they have been downloaded {{ summary.total }} times, making the average per item of {{ summary.avg }} downloads.<br />
+Most popular {{summary.max_term|default:"item"}} ({{ summary.max_name }}) had {{ summary.max_value }} downloads.</p>
+    {% endif %}
+
+<h3>Data visualisation</h3>
+
+<p><img src="../../../graph/feed_by_week/{{ref}}.png" /><br />
+    <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=300">[Print Version]</a> <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=600">[High Resolution]</a></p>
+
+<script>
+$(document).ready(function()
+    {
+        $("#summaryTable").tablesorter( {sortList: [[0,1]]} );
+    }
+);
+</script>
+
+<h3>Data table</h3>
+<p>Display with columns of: <a href="?orientation=0">Items</a> or <a href="?orientation=1">Weeks</a></p>
+<table id="summaryTable" class="tablesorter">
+    <thead>
+        {% for row in listing %}
+        {% if forloop.counter0 == 0 %}
+        <tr>
+            <th>{{ row.column_a|default:"Week Commencing" }}</th>
+            <th>{{ row.total|default:"Week Total" }}</th>
+            {% for item in row.data %}
+            <th>{{ item }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% endif %}
+        {% if forloop.counter0 == 1 %}
+        <tr>
+            <td>{{ row.column_a }}</td>
+            <td>{{ row.total }}</td>
+            {% for item in row.data %}
+            <td class="highlight-total">{{ item }}</td>
+            {% endfor %}
+        </tr>
+        {% endif %}
+        {% if forloop.counter0 > 1 %}
+        <tr>
+            <td>{{ row.column_a }}</td>
+            <td class="highlight-total">{{ row.total }}</td>
+            {% for item in row.data %}
+            <td>{{ item }}</td>
+            {% endfor %}
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Data is missing</p>
+{% endif %}
+
+
+{% endblock %}

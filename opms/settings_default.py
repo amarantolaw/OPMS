@@ -56,7 +56,7 @@ STATIC_URL = '/static/'
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/static/admin/'
+#ADMIN_MEDIA_PREFIX = '/static/admin/' # Removed in Django 1.4 upgrade
 #print "set:11"
 
 # Many projects will also have static assets that aren't tied to a particular app; you can give
@@ -90,8 +90,10 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
     "django.core.context_processors.static",
+    # Needed for sitetree app
+    "django.core.context_processors.request",
     # "django.core.context_processors.tz", - New in 1.4 Dev
-    "django.contrib.messages.context_processors.messages"
+    "django.contrib.messages.context_processors.messages",
 )
 #print "set:15"
 
@@ -130,12 +132,17 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
+    # Third party apps used by OPMS...
     'debug_toolbar',
     'south',
+    'django_extensions',
+    'sitetree',
+    # These are the OPMS apps...
+    'core',
     'stats',
+    'monitors',
     'ffm',
     'oxitems', # This is to temporarily link OPMS with the OxItems database whilst it is definitive
-    # 'django_extensions',
 )
 #print "set:20"
 

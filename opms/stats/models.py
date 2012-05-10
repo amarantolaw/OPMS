@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils.encoding import smart_str, smart_unicode
 from datetime import date
-from opms.ffm import models as ffm_models
 
 # Remember: this application is managed by Django South so when you change this file, do the following:
 # python manage.py schemamigration stats --auto
@@ -366,6 +365,10 @@ class TrackGUID(models.Model):
     # Eventually there will be a link here to a File record from the FFM module
     # file = models.ForeignKey(ffm_models.File, null=True)
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
+    # The following are optional fields of OxItems data imported in a basic fashion
+    name = models.CharField(max_length=255, null=True, blank=True) # Rg07Items.item_title
+    deleted = models.BooleanField(default=False) # Rg07Items.deleted
+
 
     def __unicode__(self):
         return smart_unicode(self.guid)
@@ -474,78 +477,6 @@ class PreviewCount(models.Model):
 
     def __unicode__(self):
         return '%s:%s' % (self.summary.week_ending,self.count)
-
-
-
-
-######
-# Apple iTunes Store analysis classes
-######
-
-# Log of items in the Top Collections Charts for iTunes U
-#class ITunesChartLog(models.Model):
-#    CHART_TYPE_CHOICES = (
-#        (u'itu-collection', u'Top iTunes U Collections'),
-#        (u'itu-downloads', u'Top iTunes U Downloads'),
-#        (u'ox-itu-downloads', u'Top iTunes U Downloads'),
-#    )
-#    date_created = models.DateTimeField(verbose_name="Date of observation", auto_now_add=True)
-#    chart_type = models.CharField(verbose_name="Name of Chart", max_length=100, choices=CHART_TYPE_CHOICES)
-#    index = models.IntegerField(verbose_name="Chart position")
-#    title = models.CharField(verbose_name="Item Name", max_length=200)
-#    artist = models.CharField(verbose_name="Artist Text", max_length=200)
-#    institution_label = models.CharField(verbose_name="Institution from URL", max_length=100)
-#    institution_id = models.IntegerField(verbose_name="Institution ID", blank=True)
-#    item_url = models.URLField(verbose_name="Item URL in iTunes", blank=True)
-#    artwork_url = models.URLField(verbose_name="Artwork URL in iTunes", blank=True)
-#
-#    def __unicode__(self):
-#        return str(date.strftime(self.date_created,"%Y-%m-%d")) + ": #" + str(self.index) + ")" + \
-#               str(self.title)
-
-
-######
-# URL Monitoring Task/Metrics
-######
-
-#The following models are used in testing a series of urls (Targets) on a periodic basis (Tasks) and
-#recording some simple metrics on the results.
-class URLMonitorTarget(models.Model):
-    url = models.URLField()
-    active = models.BooleanField(default=True)
-
-    def __unicode__(self):
-        return str(self.url)
-
-
-class URLMonitorTask(models.Model):
-    comment = models.CharField(max_length=200, default="No Comment Set")
-    completed = models.BooleanField(default=False)
-
-    def iterations(self): # Count the number of Scans related to this task
-        return self.urlmonitorscan_set.count()
-
-    def __unicode__(self):
-        if self.completed:
-            return str(self.comment) + " has completed"
-        else:
-            return str(self.comment) + " has not yet run"
-
-
-class URLMonitorScan(models.Model):
-    task = models.ForeignKey(URLMonitorTask)
-    url = models.ForeignKey(URLMonitorTarget)
-    iteration = models.SmallIntegerField()
-    status_code = models.SmallIntegerField(null=True)
-    ttfb = models.FloatField(null=True)
-    ttlb = models.FloatField(null=True)
-    time_of_request = models.DateTimeField(null=True)
-
-    def __unicode__(self):
-        return str(date.strftime(self.time_of_request,"%Y-%m-%d %H:%i:%s")) + ": "+ str(self.url.url) +\
-               " #" + str(self.iteration) + ": TTFB:" + str(self.ttfb)
-
-
 
 
 
@@ -713,102 +644,10 @@ class LogEntry(models.Model):
     # This needs to be optional, as there may 0-n tracking tags on this entry
     tracking = models.ManyToManyField(Tracking, verbose_name="tracking on this entry")
 
+    @property
+    def status_code_string(self):
+        return self.STATUS_CODE_CHOICES.get(self.status_code,'')
+
     def __unicode__(self):
         return '%s:%s' % (self.time_of_request,self.file_request)
 
-
-
-
-
-
-
-######
-# iTU Store analysis classes
-######
-
-class ItuGenre(models.Model):
-    name = models.CharField(max_length=255)
-    itu_id = models.IntegerField()
-    url = models.URLField()
-
-    def __unicode__(self):
-        return 'Genre: %s=%s' % (self.name,self.url)
-
-class ItuInstitution(models.Model):
-    name = models.CharField(max_length=255)
-    itu_id = models.IntegerField()
-    url = models.URLField()
-    # Institutional Stats - to be done as methods
-
-    def __unicode__(self):
-        return 'Institution: %s=%s' % (self.name,self.url)
-
-class ItuSeries(models.Model):
-    name = models.CharField(max_length=255)
-    itu_id = models.IntegerField(null=True) # Historical records don't have this :-(
-    img170 = models.URLField(null=True)
-    img75 = models.URLField(null=True)
-    url = models.URLField(null=True) # Historical records don't have this :-(
-    language = models.CharField(max_length=100, null=True) # Historical records don't have this
-    last_modified = models.DateField(null=True) # Historical records don't have this
-    genre = models.ForeignKey(ItuGenre, null=True) # Historical records don't have this)
-    institution = models.ForeignKey(ItuInstitution)
-    # Series Stats - to be done as methods
-    updated = models.DateTimeField(auto_now=True) # Update timestamp
-    missing = models.DateTimeField(null=True) # When did this series go missing?
-
-    def __unicode__(self):
-        return 'Series: %s=%s' % (self.name,self.url)
-
-
-class ItuItem(models.Model):
-    name = models.CharField(max_length=255) # Labelled as "songName" in plist
-    itu_id = models.IntegerField() # Labelled as "itemId" in plist
-    url = models.URLField()
-    genre = models.ForeignKey(ItuGenre)
-    institution = models.ForeignKey(ItuInstitution)
-    series = models.ForeignKey(ItuSeries)
-    # anonymous = models.BooleanField()
-    artist_name = models.CharField(max_length=255) # Length rather arbitary
-    # buy_params = models.URLField()
-    description = models.TextField()
-    duration = models.IntegerField()
-    explicit = models.IntegerField()
-    feed_url = models.URLField()
-    file_extension = models.CharField(max_length=20)
-    # is_episode = models.BooleanField()
-    kind = models.CharField(max_length=100)
-    long_description = models.TextField()
-    playlist_id = models.IntegerField()
-    playlist_name = models.CharField(max_length=255)
-    popularity = models.FloatField()
-    preview_length = models.IntegerField()
-    preview_url = models.URLField()
-    # price = models.FloatField()
-    # price_display = models.CharField()
-    rank = models.IntegerField()
-    release_date = models.DateTimeField()
-    # s = models.IntegerField()
-    updated = models.DateTimeField(auto_now=True) # Update timestamp
-    missing = models.DateTimeField(null=True) # When did this item go missing?
-
-    def __unicode__(self):
-        return 'Item: %s=%s' % (self.name, self.url)
-
-
-class ItuDownloadChart(models.Model):
-    date = models.DateTimeField() # Date of chart scan
-    position = models.SmallIntegerField()
-    item = models.ForeignKey(ItuItem)
-
-    def __unicode__(self):
-        return 'Download@%s: %s (%s)' % (self.position, self.item.name, self.item.itu_id)
-
-
-class ItuCollectionChart(models.Model):
-    date = models.DateTimeField() # Date of chart scan
-    position = models.SmallIntegerField()
-    series = models.ForeignKey(ItuSeries)
-
-    def __unicode__(self):
-        return 'Collection@%s: %s (%s)' % (self.position, self.series.name, self.series.itu_id)
