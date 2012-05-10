@@ -2,29 +2,10 @@
 {% load static stats_tags %}
 {% get_static_prefix as STATIC_PREFIX %}
 {% block head %}
-    <script src="{{ STATIC_PREFIX }}scripts/jquery-1.6.4.min.js"></script>
     <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
     <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection" />
 {% endblock %}
-
-{% block title %}Summary Data from Apple iTU Reporting{% endblock %}
-
-{% block navbar %}
-<div id="mainnav">
-    <h2>Main sections</h2>
-    <ul class="level-1">
-        <li><a href="/">Home</a></li>
-        <li><a href="/admin/">Admin</a></li>
-        <li><a href="/ffm/">Files &amp; Feeds</a></li>
-        <li><a href="/stats/" class="currentsection">Statistics</a></li>
-    </ul>
-</div>
-<div id="mainnav2">
-    {% submenu 1 %}
-</div>
-{% endblock %}
-
-{% block breadcrumb %}&gt; <a href="/stats/">Statistics</a> &gt; Apple Summary{% endblock %}
 
 {% block content %}
 <script>
@@ -38,7 +19,6 @@ $(document).ready(function()
     }
 );
 </script>
-
 
 <h1>Apple supplied Summary Data <a href="#" class="codeShowA">[?]</a></h1>
 <div class="sectionA">
