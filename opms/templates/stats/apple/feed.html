@@ -5,6 +5,7 @@
     <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
     <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
     <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection" />
+    <script src="{{ STATIC_PREFIX }}js/highcharts.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -20,8 +21,38 @@ Most popular {{summary.max_term|default:"item"}} ({{ summary.max_name }}) had {{
 
 <h3>Data visualisation</h3>
 
-<p><img src="../../../graph/feed_by_week/{{ref}}.png" /><br />
-    <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=300">[Print Version]</a> <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=600">[High Resolution]</a></p>
+<script>
+    var chart1; // globally available
+    $(document).ready(function() {
+        chart1 = new Highcharts.Chart({
+            chart: {
+                renderTo: 'hccontainer',
+                type: 'bar'
+            },
+            title: {
+                text: 'Fruit Consumption'
+            },
+            xAxis: {
+                categories: ['Apples', 'Bananas', 'Oranges']
+            },
+            yAxis: {
+                title: {
+                    text: 'Fruit eaten'
+                }
+            },
+            series: [{
+                name: 'Jane',
+                data: [1, 0, 4]
+            }, {
+                name: 'John',
+                data: [5, 7, 3]
+            }]
+        });
+    });
+</script>
+<div id="hccontainer" style="width: 100%; height: 400px"></div>
+{#<p><img src="../../../graph/feed_by_week/{{ref}}.png" /><br />#}
+{#    <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=300">[Print Version]</a> <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=600">[High Resolution]</a></p>#}
 
 <script>
 $(document).ready(function()
