@@ -11,6 +11,7 @@ import matplotlib.dates
 import matplotlib.ticker as ticker
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+from chartit import PivotDataPool, PivotChart, DataPool, Chart
 
 
 # Default Stats module homepage
@@ -45,10 +46,31 @@ def feed_detail(request, partial_guid):
     except ValueError:
         orientation = 0
 
+    # Create a Datapool object for Chartit
+    cdata = PivotDataPool(
+        series=[{
+            'options':{
+                'source': TrackCount.objects.all(),
+                'categories': 'summary__week_ending'
+            },
+            'terms':{
+                'feed_total':Sum('count')
+            }
+        }]
+    )
+    # Create a Chart object for Chartit
+    pivcht = PivotChart(
+        datasource = cdata,
+        series_options = [{
+            'options':{'type':'column'},
+            'terms':['feed_total']
+        }]
+    )
+
+
     i = TrackCount.merged.feed_items(partial_guid)
     w = TrackCount.merged.feed_weeks(partial_guid)
     c = TrackCount.merged.feed_counts(partial_guid, orientation)
-
 
     listing = []
     column_totals = {}
@@ -131,7 +153,7 @@ def feed_detail(request, partial_guid):
         summary['avg'] = summary.get('total')
 
     return render_to_response('stats/apple/feed.html',{
-        'listing':listing, 'ref':partial_guid, 'summary':summary
+        'listing':listing, 'ref':partial_guid, 'summary':summary, 'cht':pivcht
         }, context_instance=RequestContext(request))
 
 #####
