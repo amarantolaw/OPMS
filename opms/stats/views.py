@@ -67,7 +67,9 @@ def feed_detail(request, partial_guid):
             'terms':['feed_total']
         }],
         chart_options = {
-            'title':{'text':'This is a test chart'},
+            'title':{'text':'Number of downloads per week for whole feed'},
+            'xAxis':{'title':'Week Beginning'},
+            'yAxis':{'title':'Count'}
         }
     )
 
