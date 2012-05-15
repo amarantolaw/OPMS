@@ -75,8 +75,20 @@ def feed_detail(request, partial_guid):
         }],
         chart_options = {
             'title':{'text':'Number of downloads per week for whole feed'},
-            'xAxis':{'title':'Week Beginning'},
-            'yAxis':{'title':'Count'}
+            'xAxis':{
+                'title':'Week Beginning',
+                'labels':{
+                    'rotation': '90'
+                }
+            },
+            'yAxis':{
+                'title':'Count',
+                'stackLabels': {
+                    'enabled': True,
+                    'rotation': '90',
+                    'textAlign': 'right'
+                }
+            }
         }
     )
 
