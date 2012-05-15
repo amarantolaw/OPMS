@@ -21,41 +21,8 @@ Most popular {{summary.max_term|default:"item"}} ({{ summary.max_name }}) had {{
 
 <h3>Data visualisation</h3>
 
-{#<script>#}
-{#    var chart1; // globally available#}
-{#    $(document).ready(function() {#}
-{#        chart1 = new Highcharts.Chart({#}
-{#            chart: {#}
-{#                renderTo: 'hccontainer',#}
-{#                type: 'bar'#}
-{#            },#}
-{#            title: {#}
-{#                text: 'Fruit Consumption'#}
-{#            },#}
-{#            xAxis: {#}
-{#                categories: ['Apples', 'Bananas', 'Oranges']#}
-{#            },#}
-{#            yAxis: {#}
-{#                title: {#}
-{#                    text: 'Fruit eaten'#}
-{#                }#}
-{#            },#}
-{#            series: [{#}
-{#                name: 'Jane',#}
-{#                data: [1, 0, 4]#}
-{#            }, {#}
-{#                name: 'John',#}
-{#                data: [5, 7, 3]#}
-{#            }]#}
-{#        });#}
-{#    });#}
-{#</script>#}
 {{ cht|load_charts:"hcontainer" }}
-<div id="hcontainer" style="width: 100%; height: 400px">Chart to be rendered here</div>
-
-
-
-
+<div id="hcontainer" style="width: 100%; height: 50em">Chart to be rendered here</div>
 {#<p><img src="../../../graph/feed_by_week/{{ref}}.png" /><br />#}
 {#    <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=300">[Print Version]</a> <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=600">[High Resolution]</a></p>#}
 
