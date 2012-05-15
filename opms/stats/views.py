@@ -58,7 +58,7 @@ def feed_detail(request, partial_guid):
                 'legend_by': 'guid__guid'
             },
             'terms':{
-                'feed_total': 'count'
+                'feed_total': {'count'}
             }
         }]
     )
