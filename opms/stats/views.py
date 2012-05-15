@@ -80,8 +80,9 @@ def feed_detail(request, partial_guid):
                     'text':'Week Beginning'
                 },
                 'labels':{
-                    'rotation': '10',
+                    'rotation': '0',
                     'step': '4',
+                    'staggerLines':'2'
                 }
             },
             'yAxis':{
