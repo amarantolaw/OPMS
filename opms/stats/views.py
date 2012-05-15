@@ -166,7 +166,7 @@ def feed_detail(request, partial_guid):
         summary['avg'] = summary.get('total')
 
     return render_to_response('stats/apple/feed.html',{
-        'listing':listing, 'ref':partial_guid, 'summary':summary, 'cht':pivcht
+        'listing':listing, 'ref':partial_guid, 'summary':summary, 'cht':pivcht, 'chart_height':int(30+summary.get('count'))
         }, context_instance=RequestContext(request))
 
 #####
