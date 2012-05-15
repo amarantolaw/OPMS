@@ -51,11 +51,11 @@ def feed_detail(request, partial_guid):
         series=[{
             'options':{
                 'source': TrackCount.objects.filter(guid__guid__contains = partial_guid),
-                'categories': ['summary__week_ending']
+                'categories': ['summary__week_ending','guid'],
+                'legend_by': 'guid__guid'
             },
             'terms':{
-                'feed_total': Sum('count'),
-                'legend_by': Max('summary__week_ending')
+                'feed_total': Sum('count')
             }
         }]
     )
@@ -63,7 +63,7 @@ def feed_detail(request, partial_guid):
     pivcht = PivotChart(
         datasource = cdata,
         series_options = [{
-            'options':{'type':'column', 'stacking':False},
+            'options':{'type':'column', 'stacking':True},
             'terms':['feed_total']
         }],
         chart_options = {
