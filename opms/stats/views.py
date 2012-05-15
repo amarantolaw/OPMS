@@ -36,16 +36,17 @@ def summary_index(request):
     cdata = PivotDataPool(
         series=[{
             'options':{
-                'source': Summary.merged.all(),
+                'source': Summary.objects.all(),
                 'categories': [
                     'week_ending'
                 ],
             },
             'terms':{
                 'weekly_total': Sum('total_track_downloads'),
-                'cumulative_total': Sum('cumulative_total')
+                'cumulative_total': Sum('total_track_downloads')
             }
-        }]
+        }],
+        pareto_term = 'total_track_downloads'
     )
     # Create a Chart object for Chartit
     pivcht = PivotChart(
