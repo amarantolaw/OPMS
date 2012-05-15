@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load stats_tags sitetree%}
+
+{% block sidebar %}
+    {% sitetree_menu from "opmstree" include "top-analytics" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+    <div class="hero-unit">
+        <h1>Apple Data Analytics</h1>
+        <p>This area holds our Apple Data</p>
+        <p><a class="btn btn-primary btn-large">Learn more &raquo;</a></p>
+    </div>
+{% endblock %}

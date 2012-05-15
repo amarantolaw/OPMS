@@ -1,10 +1,11 @@
 {% extends "stats/base.html" %}
-{% load static stats_tags %}
+{% load static stats_tags chartit %}
 {% get_static_prefix as STATIC_PREFIX %}
 {% block head %}
     <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
     <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
     <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection" />
+    <script src="{{ STATIC_PREFIX }}js/highcharts.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -20,8 +21,11 @@ Most popular {{summary.max_term|default:"item"}} ({{ summary.max_name }}) had {{
 
 <h3>Data visualisation</h3>
 
-<p><img src="../../../graph/feed_by_week/{{ref}}.png" /><br />
-    <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=300">[Print Version]</a> <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=600">[High Resolution]</a></p>
+{{ cht|load_charts:"hcontainer" }}
+<div id="hcontainer" style="width: 100%; height: {{ chart_height }}em">Chart to be rendered here. Please be
+    patient as this can take some time on large feeds and slow computers.</div>
+{#<p><img src="../../../graph/feed_by_week/{{ref}}.png" /><br />#}
+{#    <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=300">[Print Version]</a> <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=600">[High Resolution]</a></p>#}
 
 <script>
 $(document).ready(function()

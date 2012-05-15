@@ -53,6 +53,7 @@ class SummaryManager(models.Manager):
         """)
         result_list = []
         previous_row = []
+        cumulative_total = 0
         week_number = -5  # Want to be able to calculate this from a preset start date...
         for row in cursor.fetchall():
             r = self.model(week_ending=row[0], browse=row[1], download_preview=row[2],
@@ -65,6 +66,9 @@ class SummaryManager(models.Manager):
                 r.total_track_downloads_change = int(row[10])-int(previous_row[10])
             except IndexError:
                 r.total_track_downloads_change = 0
+            # Add a cumulative count
+            cumulative_total += r.total_track_downloads
+            r.cumulative_total = cumulative_total
 
             result_list.append(r)
 

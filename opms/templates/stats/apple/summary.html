@@ -1,10 +1,11 @@
 {% extends "stats/base.html" %}
-{% load static stats_tags %}
+{% load static stats_tags chartit %}
 {% get_static_prefix as STATIC_PREFIX %}
 {% block head %}
     <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
     <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
     <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection" />
+    <script src="{{ STATIC_PREFIX }}js/highcharts.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -20,7 +21,8 @@ $(document).ready(function()
 );
 </script>
 
-<h1>Apple supplied Summary Data <a href="#" class="codeShowA">[?]</a></h1>
+<h1>Apple supplied Summary Data</h1>
+<p><a href="#" class="codeShowA"><span class="label label-info">Info</span> Help about Apple Statistics <i class="icon-info-sign"></i></a></p>
 <div class="sectionA">
     <h2>About Apple Statistics</h2>
     <p>Apple provides a weekly report covering a four-week period and contains multiple worksheets,
@@ -39,11 +41,16 @@ $(document).ready(function()
 
 {% if summary_data %}
 <h3>Data visualisation</h3>
-<p><img src="../graph/summary-total.png" /><br />
-    <a href="../graph/summary-total.png?dpi=300">[Print Version]</a> <a href="../graph/summary-total.png?dpi=600">[High Resolution]</a></p>
+{{ cht|load_charts:"hcontainer" }}
+<div id="hcontainer" style="width: 100%; height: 40em">Chart to be rendered here. Please be
+    patient as this can take some time on slow computers.</div>
+
+    {#<p><img src="../graph/summary-total.png" /><br />#}
+{#    <a href="../graph/summary-total.png?dpi=300">[Print Version]</a> <a href="../graph/summary-total.png?dpi=600">[High Resolution]</a></p>#}
 
 
-<h3>Data table <a href="#" class="codeShowB">[?]</a></h3>
+<h3>Data table</h3>
+<p><a href="#" class="codeShowB"><span class="label label-info">Info</span> Table headings explained <i class="icon-info-sign"></i></a></p>
 <div class="sectionB">
     <h3>Understanding summary data</h3>
     <p>The Summary worksheet lists aggregate values for the individual worksheet user actions. The
@@ -131,8 +138,9 @@ $(document).ready(function()
         <tr>
             <th>Week #</th>
             <th>Week Beginning</th>
-            <th>TOTAL</th>
+            <th>WEEKLY TOTAL</th>
             <th>Total +/-</th>
+            <th>Cumulative Total</th>
             <th>Preview</th>
             <th>Preview iOS</th>
             <th>Track</th>
@@ -152,6 +160,7 @@ $(document).ready(function()
             <td>{{ row.week_ending|date:"Y-m-d" }}</td>
             <td>{{ row.total_track_downloads }}</td>
             <td class="{% if row.total_track_downloads_change >= 0 %}positive{% else %}negative{% endif %}">{{ row.total_track_downloads_change }}</td>
+            <td>{{ row.cumulative_total }}</td>
             <td>{{ row.download_preview }}</td>
             <td>{{ row.download_preview_ios }}</td>
             <td>{{ row.download_track }}</td>

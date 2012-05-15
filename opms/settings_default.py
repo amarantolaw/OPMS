@@ -137,6 +137,7 @@ INSTALLED_APPS = (
     'south',
     'django_extensions',
     'sitetree',
+    'chartit',
     # These are the OPMS apps...
     'core',
     'stats',
