@@ -81,9 +81,8 @@ def feed_detail(request, partial_guid):
                 },
                 'labels':{
                     'rotation': '90',
-                    'textAlign': 'left',
-                    'verticalAlign': 'bottom',
-                    'y': '10'
+                    'textAlign': 'right',
+                    'step': '3'
                 }
             },
             'yAxis':{
