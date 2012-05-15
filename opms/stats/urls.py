@@ -11,7 +11,7 @@ urlpatterns = patterns('stats.views',
     url(r'^apple/feeds/$', summary_feeds),
 
     url(r'^apple/summary/$', summary_index),
-    url(r'^apple/$', index),
+    url(r'^apple/$', apple_index),
 
     #(r'report/authors/$', 'summary_authors'), # Consider this dead for now
 

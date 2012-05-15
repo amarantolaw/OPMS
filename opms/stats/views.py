@@ -19,6 +19,10 @@ def index(request):
     # return HttpResponse("Hello World. You're at the OPMS:Stats Homepage.")
     return render_to_response('stats/base.html', {}, context_instance=RequestContext(request))
 
+def apple_index(request):
+    # return HttpResponse("Hello World. You're at the OPMS:Stats Homepage.")
+    return render_to_response('stats/apple/base.html', {}, context_instance=RequestContext(request))
+
 
 #####
 # APPLE/iTU Subviews
@@ -27,7 +31,74 @@ def summary_index(request):
     "Show the Apple 'Summary' User Action results"
     # return HttpResponse("Summary Report")
     summary_data = Summary.merged.all()
-    return render_to_response('stats/apple/summary.html', {'summary_data': summary_data,}, context_instance=RequestContext(request))
+
+    # Create a Datapool object for Chartit
+    cdata = PivotDataPool(
+        series=[{
+            'options':{
+                'source': summary_data,
+                'categories': [
+                    'week_ending'
+                ],
+            },
+            'terms':{
+                'weekly_total': Sum('total_track_downloads'),
+                'cumulative_total': Sum('cumulative_total')
+            }
+        }]
+    )
+    # Create a Chart object for Chartit
+    pivcht = PivotChart(
+        datasource = cdata,
+        series_options = [{
+            'options':{
+                'type':'column',
+                'stacking':False
+            },
+            'terms':[
+                'weekly_total',
+                {
+                    'cumulative_total': {
+                        'type': 'line',
+                        'yAxis': 1
+                    }
+                }
+            ]
+        }],
+        chart_options = {
+            'title':{'text':'Number of downloads per week for iTunes U'},
+            'xAxis':{
+                'title': {
+                    'text':'Week Beginning'
+                },
+                'labels':{
+                    'rotation': '0',
+                    'step': '4',
+                    'staggerLines':'2'
+                }
+            },
+            'yAxis':[{
+                    'title': {
+                        'text':'Download Count',
+                        'rotation': '90'
+                    }
+                },
+                {
+                    'opposite':True,
+                    'title': {
+                        'text':'Cumulative Downloads',
+                        'rotation': '-90'
+                    }
+                }
+            ]
+        }
+    )
+
+    return render_to_response('stats/apple/summary.html', {
+            'summary_data': summary_data,
+            'cht':pivcht
+        }, context_instance=RequestContext(request)
+    )
 
 
 #####
@@ -35,7 +106,9 @@ def summary_index(request):
 #####
 def summary_feeds(request):
     listing = TrackCount.merged.psuedo_feeds()
-    return render_to_response('stats/apple/feeds.html',{'listing':listing}, context_instance=RequestContext(request))
+    return render_to_response('stats/apple/feeds.html',{
+            'listing':listing
+        }, context_instance=RequestContext(request))
 
 
 def feed_detail(request, partial_guid):
