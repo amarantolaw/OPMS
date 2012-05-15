@@ -55,7 +55,7 @@ def summary_index(request):
                 'cumulative_total': Sum('total_track_downloads')
             }
         }],
-        pareto_term = 'weekly_total'
+        pareto_term = 'cumulative_total'
     )
     # Create a Chart object for Chartit
     pivcht = PivotChart(
@@ -92,14 +92,16 @@ def summary_index(request):
                     'title': {
                         'text':'Download Count',
                         'rotation': '90'
-                    }
+                    },
+                    'min':0
                 },
                 {
                     'opposite':True,
                     'title': {
                         'text':'Cumulative Downloads',
                         'rotation': '-90'
-                    }
+                    },
+                    'min':0
                 }
             ]
         }
