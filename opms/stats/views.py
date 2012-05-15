@@ -50,7 +50,7 @@ def feed_detail(request, partial_guid):
     cdata = PivotDataPool(
         series=[{
             'options':{
-                'source': TrackCount.objects.filter(guid__guid__contains = partial_guid).order_by('guid','summary__week_ending')[:200],
+                'source': TrackCount.objects.filter(guid__guid__contains = partial_guid)[:200],
                 'categories': ['guid__guid','summary__week_ending'],
                 'legend_by': 'guid__guid'
             },
