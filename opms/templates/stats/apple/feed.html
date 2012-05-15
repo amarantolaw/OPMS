@@ -22,7 +22,8 @@ Most popular {{summary.max_term|default:"item"}} ({{ summary.max_name }}) had {{
 <h3>Data visualisation</h3>
 
 {{ cht|load_charts:"hcontainer" }}
-<div id="hcontainer" style="width: 100%; height: 50em">Chart to be rendered here</div>
+<div id="hcontainer" style="width: 100%; height: {% 30+summary.count %}em">Chart to be rendered here. Please be
+    patient as this can take some time on large feeds and slow computers.</div>
 {#<p><img src="../../../graph/feed_by_week/{{ref}}.png" /><br />#}
 {#    <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=300">[Print Version]</a> <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=600">[High Resolution]</a></p>#}
 
