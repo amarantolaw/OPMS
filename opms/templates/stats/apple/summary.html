@@ -138,8 +138,9 @@ $(document).ready(function()
         <tr>
             <th>Week #</th>
             <th>Week Beginning</th>
-            <th>TOTAL</th>
+            <th>WEEKLY TOTAL</th>
             <th>Total +/-</th>
+            <th>Cumulative Total</th>
             <th>Preview</th>
             <th>Preview iOS</th>
             <th>Track</th>
@@ -159,6 +160,7 @@ $(document).ready(function()
             <td>{{ row.week_ending|date:"Y-m-d" }}</td>
             <td>{{ row.total_track_downloads }}</td>
             <td class="{% if row.total_track_downloads_change >= 0 %}positive{% else %}negative{% endif %}">{{ row.total_track_downloads_change }}</td>
+            <td>{{ row.cumulative_total }}</td>
             <td>{{ row.download_preview }}</td>
             <td>{{ row.download_preview_ios }}</td>
             <td>{{ row.download_track }}</td>
