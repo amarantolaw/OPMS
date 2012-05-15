@@ -51,7 +51,7 @@ def feed_detail(request, partial_guid):
         series=[{
             'options':{
                 'source': TrackCount.objects.filter(guid__guid__contains = partial_guid),
-                'categories': ['summary__week_ending','guid'],
+                'categories': ['summary__week_ending','guid__guid'],
                 'legend_by': 'guid__guid'
             },
             'terms':{
