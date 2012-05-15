@@ -44,16 +44,6 @@ def summary_index(request):
             'terms':{
                 'weekly_total': Sum('total_track_downloads')
             }
-        },{
-            'options':{
-                'source': Summary.objects.all(),
-                'categories': [
-                    'week_ending'
-                ],
-                },
-            'terms':{
-                'cumulative_total': Sum('total_track_downloads')
-            }
         }]
     )
     # Create a Chart object for Chartit
@@ -67,12 +57,6 @@ def summary_index(request):
             },
             'terms':[
                 'weekly_total',
-                {
-                    'cumulative_total': {
-                        'type': 'line',
-                        'yAxis': 1
-                    }
-                }
             ]
         }],
         chart_options = {
@@ -88,21 +72,12 @@ def summary_index(request):
                 }
             },
             'yAxis':[{
-                    'title': {
-                        'text':'Download Count',
-                        'rotation': '90'
-                    },
-                    'min':0
+                'title': {
+                    'text':'Download Count',
+                    'rotation': '90'
                 },
-                {
-                    'opposite':True,
-                    'title': {
-                        'text':'Cumulative Downloads',
-                        'rotation': '-90'
-                    },
-                    'min':0
-                }
-            ]
+                'min':0
+            }]
         }
     )
 
