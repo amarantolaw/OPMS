@@ -46,7 +46,7 @@ def summary_index(request):
                 'cumulative_total': Sum('total_track_downloads')
             }
         }],
-        pareto_term = 'total_track_downloads'
+        pareto_term = 'cumulative_total'
     )
     # Create a Chart object for Chartit
     pivcht = PivotChart(
@@ -75,7 +75,7 @@ def summary_index(request):
                 'labels':{
                     'rotation': '0',
                     'step': '4',
-                    'staggerLines':'2'
+                    'staggerLines':'4'
                 }
             },
             'yAxis':[{
