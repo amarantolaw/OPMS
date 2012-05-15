@@ -36,7 +36,7 @@ def summary_index(request):
     cdata = PivotDataPool(
         series=[{
             'options':{
-                'source': summary_data,
+                'source': Summary.merged.all(),
                 'categories': [
                     'week_ending'
                 ],
