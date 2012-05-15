@@ -83,7 +83,6 @@ def feed_detail(request, partial_guid):
                     'rotation': '90',
                     'textAlign': 'left',
                     'verticalAlign': 'bottom',
-                    'y': '40'
                 }
             },
             'yAxis':{
