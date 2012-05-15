@@ -42,11 +42,20 @@ def summary_index(request):
                 ],
             },
             'terms':{
-                'weekly_total': Sum('total_track_downloads'),
+                'weekly_total': Sum('total_track_downloads')
+            }
+        },{
+            'options':{
+                'source': Summary.objects.all(),
+                'categories': [
+                    'week_ending'
+                ],
+                },
+            'terms':{
                 'cumulative_total': Sum('total_track_downloads')
             }
         }],
-        pareto_term = 'cumulative_total'
+        pareto_term = 'weekly_total'
     )
     # Create a Chart object for Chartit
     pivcht = PivotChart(
@@ -54,7 +63,8 @@ def summary_index(request):
         series_options = [{
             'options':{
                 'type':'column',
-                'stacking':False
+                'stacking':False,
+                'yAxis': 0
             },
             'terms':[
                 'weekly_total',
@@ -74,8 +84,8 @@ def summary_index(request):
                 },
                 'labels':{
                     'rotation': '0',
-                    'step': '4',
-                    'staggerLines':'4'
+                    'step': '8',
+                    'staggerLines':'2'
                 }
             },
             'yAxis':[{
