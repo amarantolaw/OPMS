@@ -46,60 +46,6 @@ def feed_detail(request, partial_guid):
     except ValueError:
         orientation = 0
 
-    # Create a Datapool object for Chartit
-    cdata = PivotDataPool(
-        series=[{
-            'options':{
-                'source': TrackCount.objects.filter(guid__guid__contains = partial_guid),
-                'categories': [
-                    'summary__week_ending'
-                ],
-                'legend_by': 'guid__guid'
-            },
-            'terms':{
-                'feed_total': Sum('count')
-            }
-        }]
-    )
-    # Create a Chart object for Chartit
-    pivcht = PivotChart(
-        datasource = cdata,
-        series_options = [{
-            'options':{
-                'type':'column',
-                'stacking':True,
-                'xAxis': 0,
-                'yAxis': 0
-            },
-            'terms':['feed_total']
-        }],
-        chart_options = {
-            'title':{'text':'Number of downloads per week for whole feed'},
-            'xAxis':{
-                'title': {
-                    'text':'Week Beginning'
-                },
-                'labels':{
-                    'rotation': '0',
-                    'step': '4',
-                    'staggerLines':'2'
-                }
-            },
-            'yAxis':{
-                'title': {
-                    'text':'Download Count',
-                    'rotation': '90'
-                },
-                'stackLabels': {
-                    'enabled': True,
-                    'rotation': '90',
-                    'textAlign': 'right'
-                }
-            }
-        }
-    )
-
-
     i = TrackCount.merged.feed_items(partial_guid)
     w = TrackCount.merged.feed_weeks(partial_guid)
     c = TrackCount.merged.feed_counts(partial_guid, orientation)
@@ -183,6 +129,59 @@ def feed_detail(request, partial_guid):
         summary['avg'] = summary.get('total') // summary.get('count')
     except ZeroDivisionError:
         summary['avg'] = summary.get('total')
+
+    # Create a Datapool object for Chartit
+    cdata = PivotDataPool(
+        series=[{
+            'options':{
+                'source': TrackCount.objects.filter(guid__guid__contains = partial_guid),
+                'categories': [
+                    'summary__week_ending'
+                ],
+                'legend_by': 'guid__guid'
+            },
+            'terms':{
+                'feed_total': Sum('count')
+            }
+        }]
+    )
+    # Create a Chart object for Chartit
+    pivcht = PivotChart(
+        datasource = cdata,
+        series_options = [{
+            'options':{
+                'type':'column',
+                'stacking':True,
+                'xAxis': 0,
+                'yAxis': 0
+            },
+            'terms':['feed_total']
+        }],
+        chart_options = {
+            'title':{'text':'Number of downloads per week for whole feed'},
+            'xAxis':{
+                'title': {
+                    'text':'Week Beginning'
+                },
+                'labels':{
+                    'rotation': '0',
+                    'step': '4',
+                    'staggerLines':'2'
+                }
+            },
+            'yAxis':{
+                'title': {
+                    'text':'Download Count',
+                    'rotation': '90'
+                },
+                'stackLabels': {
+                    'enabled': True,
+                    'rotation': '90',
+                    'textAlign': 'right'
+                }
+            }
+        }
+    )
 
     return render_to_response('stats/apple/feed.html',{
             'listing':listing,
@@ -324,127 +323,127 @@ def graph_apple_summary_totals(request):
     canvas.print_png(response)
     return response
 
-
-def graph_apple_summary_feeds(request):
-    "Generate the bar chart showing cumulative downloads for each feed. Allow for a high resolution version to be produced"
-    try:
-        resolution = int(request.GET.get('dpi', 100))
-    except ValueError:
-        resolution = 100
-    if resolution > 600:
-        resolution = 600
-    elif resolution < 100:
-        resolution = 100
-
-    fig = Figure(figsize=(9,5), dpi=resolution, facecolor='white', edgecolor='white')
-    ax1 = fig.add_subplot(1,1,1)
-
-    title = u"Cumulative downloads of all feeds"
-    ax1.set_title(title)
-
-    s = TrackCount.merged.psuedo_feeds()
-    x = matplotlib.numpy.arange(1,len(s))
-
-    bars = []
-    xvalues = []
-    cols = []
-    for counter, row in enumerate(s):
-        bars.append(int(row.get("count")))
-        if counter == 0 or (counter % 10) == 0:
-            xvalues.append(str(row.get("feed")))
-
-        colour_scale = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#000099', '#006666', '#000033']
-        #Create a colour scale
-        #if int(row.get("count")) > 10000000:
-        #    cols.append(colour_scale[0])
-        #el
-        if int(row.get("count")) > 1000000:
-            cols.append(colour_scale[0])
-        elif int(row.get("count")) > 100000:
-            cols.append(colour_scale[1])
-        elif int(row.get("count")) > 10000:
-            cols.append(colour_scale[2])
-        elif int(row.get("count")) > 1000:
-            cols.append(colour_scale[3])
-        elif int(row.get("count")) > 100:
-            cols.append(colour_scale[4])
-        elif int(row.get("count")) > 10:
-            cols.append(colour_scale[5])
-        else:
-            cols.append(colour_scale[6])
-
-    ind = matplotlib.numpy.arange(len(bars)) # the x locations for the groups
-
-    # cols = ['blue']*len(ind)
-    ax1.bar(ind, bars, color=cols, linewidth=0, edgecolor='w', log=True)
-
-    ax1.set_ylabel("Downloads", color='blue', size='small')
-    ax1.set_yscale('log')
-    for tl in ax1.get_yticklabels():
-        tl.set_color('b')
-
-    xticks = matplotlib.numpy.arange(1,len(bars),10)
-    ax1.set_xticks(xticks - 0.6)
-    ax1.set_xticklabels(xvalues, rotation=270, size=5, ha='center', va='top')
-    ax1.set_xlabel("Psudeo Feed")
-
-    canvas = FigureCanvas(fig)
-    response = HttpResponse(content_type='image/png')
-    canvas.print_png(response)
-    return response
-
-
-
-def graph_apple_feed_weeks(request, feed=''):
-    "Generate a chart plotting weeks vs downloads for a given feed. Allow for a high resolution version to be produced"
-    try:
-        resolution = int(request.GET.get('dpi', 100))
-    except ValueError:
-        resolution = 100
-    if resolution > 600:
-        resolution = 600
-    elif resolution < 100:
-        resolution = 100
-
-    fig = Figure(figsize=(9,5), dpi=resolution, facecolor='white', edgecolor='white')
-    ax1 = fig.add_subplot(1,1,1)
-    ax2 = ax1.twinx()
-
-    title = u"Downloads per week for '" + str(feed) + "'"
-    ax1.set_title(title)
-
-    s = TrackCount.merged.feed_week_counts(feed)
-    x = matplotlib.numpy.arange(1,len(s))
-
-    bars = []
-    lines = []
-    xvalues = []
-    for counter, row in enumerate(s):
-        bars.append(int(row.get("count")))
-        if counter == 0 or (counter % 4) == 0:
-            xvalues.append(str(row.get("week_ending")))
-        lines.append(int(row.get("item_count")))
-
-    ind = matplotlib.numpy.arange(len(bars)) # the x locations for the groups
-    cols = ['blue']*len(ind)
-    ax1.bar(ind, bars, color=cols, linewidth=0, edgecolor='w')
-    ax1.set_ylabel("Weekly Downloads", color='blue', size='small')
-    for tl in ax1.get_yticklabels():
-        tl.set_color('b')
-
-    ax2.plot(ind, lines, 'r-')
-    ax2.set_ylabel("Number of Items", color='red', size='small')
-    for tl in ax2.get_yticklabels():
-        tl.set_color('r')
-
-    xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
-    ax1.set_xticks(xticks - 0.6)
-    ax1.set_xticklabels(xvalues, rotation=270, size=5, ha='center', va='top')
-    ax1.set_xlabel("Week Commencing")
-
-
-
-    canvas = FigureCanvas(fig)
-    response = HttpResponse(content_type='image/png')
-    canvas.print_png(response)
-    return response
+# ============== REDUNDANT GRAPHS --- Have been replaced by HighCharts in template =====================
+#def graph_apple_summary_feeds(request):
+#    "Generate the bar chart showing cumulative downloads for each feed. Allow for a high resolution version to be produced"
+#    try:
+#        resolution = int(request.GET.get('dpi', 100))
+#    except ValueError:
+#        resolution = 100
+#    if resolution > 600:
+#        resolution = 600
+#    elif resolution < 100:
+#        resolution = 100
+#
+#    fig = Figure(figsize=(9,5), dpi=resolution, facecolor='white', edgecolor='white')
+#    ax1 = fig.add_subplot(1,1,1)
+#
+#    title = u"Cumulative downloads of all feeds"
+#    ax1.set_title(title)
+#
+#    s = TrackCount.merged.psuedo_feeds()
+#    x = matplotlib.numpy.arange(1,len(s))
+#
+#    bars = []
+#    xvalues = []
+#    cols = []
+#    for counter, row in enumerate(s):
+#        bars.append(int(row.get("count")))
+#        if counter == 0 or (counter % 10) == 0:
+#            xvalues.append(str(row.get("feed")))
+#
+#        colour_scale = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#000099', '#006666', '#000033']
+#        #Create a colour scale
+#        #if int(row.get("count")) > 10000000:
+#        #    cols.append(colour_scale[0])
+#        #el
+#        if int(row.get("count")) > 1000000:
+#            cols.append(colour_scale[0])
+#        elif int(row.get("count")) > 100000:
+#            cols.append(colour_scale[1])
+#        elif int(row.get("count")) > 10000:
+#            cols.append(colour_scale[2])
+#        elif int(row.get("count")) > 1000:
+#            cols.append(colour_scale[3])
+#        elif int(row.get("count")) > 100:
+#            cols.append(colour_scale[4])
+#        elif int(row.get("count")) > 10:
+#            cols.append(colour_scale[5])
+#        else:
+#            cols.append(colour_scale[6])
+#
+#    ind = matplotlib.numpy.arange(len(bars)) # the x locations for the groups
+#
+#    # cols = ['blue']*len(ind)
+#    ax1.bar(ind, bars, color=cols, linewidth=0, edgecolor='w', log=True)
+#
+#    ax1.set_ylabel("Downloads", color='blue', size='small')
+#    ax1.set_yscale('log')
+#    for tl in ax1.get_yticklabels():
+#        tl.set_color('b')
+#
+#    xticks = matplotlib.numpy.arange(1,len(bars),10)
+#    ax1.set_xticks(xticks - 0.6)
+#    ax1.set_xticklabels(xvalues, rotation=270, size=5, ha='center', va='top')
+#    ax1.set_xlabel("Psudeo Feed")
+#
+#    canvas = FigureCanvas(fig)
+#    response = HttpResponse(content_type='image/png')
+#    canvas.print_png(response)
+#    return response
+#
+#
+#
+#def graph_apple_feed_weeks(request, feed=''):
+#    "Generate a chart plotting weeks vs downloads for a given feed. Allow for a high resolution version to be produced"
+#    try:
+#        resolution = int(request.GET.get('dpi', 100))
+#    except ValueError:
+#        resolution = 100
+#    if resolution > 600:
+#        resolution = 600
+#    elif resolution < 100:
+#        resolution = 100
+#
+#    fig = Figure(figsize=(9,5), dpi=resolution, facecolor='white', edgecolor='white')
+#    ax1 = fig.add_subplot(1,1,1)
+#    ax2 = ax1.twinx()
+#
+#    title = u"Downloads per week for '" + str(feed) + "'"
+#    ax1.set_title(title)
+#
+#    s = TrackCount.merged.feed_week_counts(feed)
+#    x = matplotlib.numpy.arange(1,len(s))
+#
+#    bars = []
+#    lines = []
+#    xvalues = []
+#    for counter, row in enumerate(s):
+#        bars.append(int(row.get("count")))
+#        if counter == 0 or (counter % 4) == 0:
+#            xvalues.append(str(row.get("week_ending")))
+#        lines.append(int(row.get("item_count")))
+#
+#    ind = matplotlib.numpy.arange(len(bars)) # the x locations for the groups
+#    cols = ['blue']*len(ind)
+#    ax1.bar(ind, bars, color=cols, linewidth=0, edgecolor='w')
+#    ax1.set_ylabel("Weekly Downloads", color='blue', size='small')
+#    for tl in ax1.get_yticklabels():
+#        tl.set_color('b')
+#
+#    ax2.plot(ind, lines, 'r-')
+#    ax2.set_ylabel("Number of Items", color='red', size='small')
+#    for tl in ax2.get_yticklabels():
+#        tl.set_color('r')
+#
+#    xticks = matplotlib.numpy.arange(1,len(s),4) # Only show the date every four weeks
+#    ax1.set_xticks(xticks - 0.6)
+#    ax1.set_xticklabels(xvalues, rotation=270, size=5, ha='center', va='top')
+#    ax1.set_xlabel("Week Commencing")
+#
+#
+#
+#    canvas = FigureCanvas(fig)
+#    response = HttpResponse(content_type='image/png')
+#    canvas.print_png(response)
+#    return response
