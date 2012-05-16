@@ -141,6 +141,9 @@ class BrowsePath(models.Model):
     def __unicode__(self):
         return smart_unicode(self.path)
 
+    class Meta:
+        app_label = 'stats'
+
 
 # Browse Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific browse
 class BrowseHandle(models.Model):
@@ -150,6 +153,9 @@ class BrowseHandle(models.Model):
     def __unicode__(self):
         return str(self.handle)
 
+    class Meta:
+        app_label = 'stats'
+
 # GUIDs for Browses are optional
 class BrowseGUID(models.Model):
     guid = models.CharField("GUID", max_length=255, unique=True)
@@ -157,6 +163,9 @@ class BrowseGUID(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.guid)
+
+    class Meta:
+        app_label = 'stats'
 
 
 # This is a browse count record, which will have multiple handles, paths and guids/files associated with it
@@ -170,6 +179,9 @@ class BrowseCount(models.Model):
 
     def __unicode__(self):
         return '%s:%s' % (self.summary.week_beginning,self.count)
+
+    class Meta:
+        app_label = 'stats'
 
 
 
@@ -185,6 +197,9 @@ class PreviewPath(models.Model):
     def __unicode__(self):
         return smart_unicode(self.path)
 
+    class Meta:
+        app_label = 'stats'
+
 
 # Preview Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific preview
 class PreviewHandle(models.Model):
@@ -193,6 +208,9 @@ class PreviewHandle(models.Model):
 
     def __unicode__(self):
         return str(self.handle)
+
+    class Meta:
+        app_label = 'stats'
 
 
 # Preview GUIDs change from time to time due to OxItems changes, but we want to keep them related to a specific preview
@@ -204,6 +222,9 @@ class PreviewGUID(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.guid)
+
+    class Meta:
+        app_label = 'stats'
 
 
 # This is a preview count record, which will have multiple handles, paths and guids/files associated with it
@@ -217,5 +238,8 @@ class PreviewCount(models.Model):
 
     def __unicode__(self):
         return '%s:%s' % (self.summary.week_beginning,self.count)
+
+    class Meta:
+        app_label = 'stats'
 
 
