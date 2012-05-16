@@ -17,6 +17,9 @@ class Rdns(models.Model):
     def __unicode__(self):
         return self.resolved_name
 
+    class Meta:
+        app_label = 'stats'
+
 
 # Lookup table for Operating Systems and versions
 class OS(models.Model):
@@ -27,6 +30,9 @@ class OS(models.Model):
     def __unicode__(self):
         return self.name
 
+    class Meta:
+        app_label = 'stats'
+
 
 # Lookup table for User Agents and versions
 class UA(models.Model):
@@ -36,6 +42,9 @@ class UA(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    class Meta:
+        app_label = 'stats'
 
 
 # Lookup table for User Agent entries
@@ -48,6 +57,9 @@ class UserAgent(models.Model):
     def __unicode__(self):
         return self.full_string
 
+    class Meta:
+        app_label = 'stats'
+
 
 # Lookup table for Referer entries
 # awk -F\" '{print $4}' access.log-20110201 | sort | uniq -c | sort -fr > referer2.txt
@@ -56,6 +68,9 @@ class Referer(models.Model):
 
     def __unicode__(self):
         return self.full_string
+
+    class Meta:
+        app_label = 'stats'
 
 
 # Lookup table for request string entries
@@ -74,6 +89,9 @@ class FileRequest(models.Model):
 
     def __unicode__(self):
         return self.uri_string
+
+    class Meta:
+        app_label = 'stats'
 
 
 # NOT YET IMPLEMENTED
@@ -103,6 +121,9 @@ class Server(models.Model):
 
     def __unicode__(self):
         return '%s=%s' % (self.name,self.ip_address)
+
+    class Meta:
+        app_label = 'stats'
 
 
 # Log file request table. Each row is a request from a log file
@@ -171,4 +192,7 @@ class LogEntry(models.Model):
 
     def __unicode__(self):
         return '%s:%s' % (self.time_of_request,self.file_request)
+
+    class Meta:
+        app_label = 'stats'
 

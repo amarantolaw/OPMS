@@ -24,3 +24,6 @@ class AppleRawLogEntry(models.Model):
 
     def __unicode__(self):
         return '%s:%s:%s' % (self.timestamp,self.action_type, self.title)
+
+    class Meta:
+        app_label = 'stats'
