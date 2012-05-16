@@ -2,12 +2,12 @@
 # Author: Carl Marshall
 # Last Edited: 29-3-2011
 
-from optparse import make_option
+#from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
 
 from opms.stats.models import *
 from xlrd import open_workbook, biffh
-from datetime import time, datetime
+from datetime import datetime
 import sys, uuid
 
 class Command(LabelCommand):
@@ -47,19 +47,17 @@ class Command(LabelCommand):
             'Total Track Downloads':'total_track_downloads',
         }
         # Track caches
-        self.track_path_cache = list(TrackPath.objects.all())
-        self.track_handle_cache = list(TrackHandle.objects.all())
-        self.track_guid_cache = list(TrackGUID.objects.all())
+        self.track_path_cache = list(AppleTrackPath.objects.all())
+        self.track_handle_cache = list(AppleTrackHandle.objects.all())
+        self.track_guid_cache = list(AppleTrackGUID.objects.all())
         # Browse caches
-        self.browse_path_cache = list(BrowsePath.objects.all())
-        self.browse_handle_cache = list(BrowseHandle.objects.all())
-        self.browse_guid_cache = list(BrowseGUID.objects.all())
+        self.browse_path_cache = list(AppleBrowsePath.objects.all())
+        self.browse_handle_cache = list(AppleBrowseHandle.objects.all())
+        self.browse_guid_cache = list(AppleBrowseGUID.objects.all())
         # Preview caches
-        self.preview_path_cache = list(PreviewPath.objects.all())
-        self.preview_handle_cache = list(PreviewHandle.objects.all())
-        self.preview_guid_cache = list(PreviewGUID.objects.all())
-
-        return None
+        self.preview_path_cache = list(ApplePreviewPath.objects.all())
+        self.preview_handle_cache = list(ApplePreviewHandle.objects.all())
+        self.preview_guid_cache = list(ApplePreviewGUID.objects.all())
 
 
     def handle_label(self, filename, **options):
@@ -213,7 +211,6 @@ class Command(LabelCommand):
             summary_object.save()
 
             if summary_created:
-                self._parse_summary_cs(summaryCS[i], logfile_obj, summary_object)
                 print "Imported SUMMARY data for " + str(week.get('week_beginning'))
 
                 # Now work through the related week's worth of Tracks, Browses and Previews. These sheets might be missing in early files.
@@ -233,10 +230,9 @@ class Command(LabelCommand):
                         print err_msg
 
                         # Overwrite the week's worth of data... delete first, then insert newer data
-                        ClientSoftware.objects.filter(summary=summary_object).delete()
-                        TrackCount.objects.filter(summary=summary_object).delete()
-                        BrowseCount.objects.filter(summary=summary_object).delete()
-                        PreviewCount.objects.filter(summary=summary_object).delete()
+                        AppleWeeklyTrackCount.objects.filter(summary=summary_object).delete()
+                        AppleWeeklyBrowseCount.objects.filter(summary=summary_object).delete()
+                        AppleWeeklyPreviewCount.objects.filter(summary=summary_object).delete()
                         summary_object.delete()
 
                         # Create afresh... perhaps a little superfluous
@@ -246,7 +242,6 @@ class Command(LabelCommand):
                             defaults=week)
                         summary_object.save()
 
-                        self._parse_summary_cs(summaryCS[i], logfile_obj, summary_object)
                         print "Re-imported SUMMARY data for " + str(week.get('week_beginning'))
 
                         self._parse_related_sheets(summary_object, wb, week)
@@ -260,38 +255,6 @@ class Command(LabelCommand):
                         print err_msg
 
                     self._error_log_save()
-        return None
-
-
-    def _parse_summary_cs(self, summaryCS, logfile_obj, summary_object):
-        for k,v in summaryCS.items():
-            # Parse each key to create a related ClientSoftware object
-            cs_object = ClientSoftware()
-            cs_object.logfile = logfile_obj
-            cs_object.summary = summary_object
-            cs_object.version_major = 0
-            cs_object.version_minor = 0
-            cs_object.count = int(v)
-
-            strings = k.split('/')
-            if len(strings) > 1:
-                version = strings[1].split('.')
-                if len(version) > 1:
-                    # Most items will fall into this pattern Application/M.m/Platform
-                    if strings[2] == '?':
-                        cs_object.platform = str(strings[0])[:20] #iTunes-iPod, etc
-                    else:
-                        cs_object.platform = str(strings[2])[:20] #Macintosh, Windows
-                    cs_object.version_major = int(version[0])
-                    cs_object.version_minor = int(version[1])
-                else:
-                    # This is likely to be the ?/?/Platform
-                    cs_object.platform = str(strings[2])[:20] #Macintosh, Windows
-            else:
-                # Likely to be 'Not Listed'
-                cs_object.platform = 'Unknown'
-
-            cs_object.save()
         return None
 
 
@@ -328,7 +291,7 @@ class Command(LabelCommand):
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
             # Setup the basic count record
-            tc = TrackCount()
+            tc = AppleWeeklyTrackCount()
             tc.summary = summary_object
             tc.count = int(sheet.cell(row_id,1).value)
 
@@ -351,8 +314,8 @@ class Command(LabelCommand):
 
 
     def _trackpath(self, logfile_object, path):
-        "Get or Create the TrackPath information"
-        tp = TrackPath()
+        "Get or Create the AppleTrackPath information"
+        tp = AppleTrackPath()
         tp.path = path
         tp.logfile = logfile_object
 
@@ -362,7 +325,7 @@ class Command(LabelCommand):
                 # Check if the import path appears earlier than the stored path and update if needed
                 if item.logfile.last_updated > logfile_object.last_updated:
                     # Update the database
-                    tp = TrackPath.objects.get(id=item.id)
+                    tp = AppleTrackPath.objects.get(id=item.id)
                     tp.logfile = logfile_object
                     tp.save()
                     # Update the cache
@@ -377,8 +340,8 @@ class Command(LabelCommand):
 
 
     def _trackhandle(self, logfile_object, handle):
-        "Get or Create the TrackHandle information"
-        th = TrackHandle()
+        "Get or Create the AppleTrackHandle information"
+        th = AppleTrackHandle()
         th.handle = handle
         th.logfile = logfile_object
 
@@ -388,7 +351,7 @@ class Command(LabelCommand):
                 # Check if the import path appears earlier than the stored path and update if needed
                 if item.logfile.last_updated > logfile_object.last_updated:
                     # Update the database
-                    th = TrackHandle.objects.get(id=item.id)
+                    th = AppleTrackHandle.objects.get(id=item.id)
                     th.logfile = logfile_object
                     th.save()
                     # Update the cache
@@ -403,8 +366,8 @@ class Command(LabelCommand):
 
 
     def _trackguid(self, logfile_object, guid, trackcount_object):
-        "Get or Create the TrackGUID information"
-        tg = TrackGUID()
+        "Get or Create the AppleTrackGUID information"
+        tg = AppleTrackGUID()
         tg.logfile = logfile_object
 
         # If guid provided, search for and use.
@@ -418,7 +381,7 @@ class Command(LabelCommand):
                     # Check if the import path appears earlier than the stored path and update if needed
                     if item.logfile.last_updated > logfile_object.last_updated:
                         # Update the database
-                        tg = TrackGUID.objects.get(id=item.id)
+                        tg = AppleTrackGUID.objects.get(id=item.id)
                         tg.logfile = logfile_object
                         tg.save()
                         # Update the cache
@@ -427,8 +390,8 @@ class Command(LabelCommand):
 
         # Match on handle (trust Apple to make these unique), or then path
         try:
-            # Any existing TrackCount object should have a guid associated with it, thus, find one that has this handle, you've got it's guid
-            tc = TrackCount.objects.filter(handle=trackcount_object.handle.id)
+            # Any existing AppleWeeklyTrackCount object should have a guid associated with it, thus, find one that has this handle, you've got it's guid
+            tc = AppleWeeklyTrackCount.objects.filter(handle=trackcount_object.handle.id)
             if guid == '': # No guid, so use one found by a handle match
                 return tc[0].guid
 
@@ -440,7 +403,7 @@ class Command(LabelCommand):
         except IndexError:
             # First time this handle has been seen, so look for a path match
             try:
-                tc = TrackCount.objects.filter(path=trackcount_object.path.id)
+                tc = AppleWeeklyTrackCount.objects.filter(path=trackcount_object.path.id)
                 if guid == '': # No guid, so use one found by a handle match
                     return tc[0].guid
 
@@ -453,7 +416,7 @@ class Command(LabelCommand):
                 # No path match found, really must be new, so generate a GUID (UUID)
                 tg.guid = 'OPMS:' + str(uuid.uuid4())
                 tg.save()
-                self._errorlog("No TrackGUID found for " +str(trackcount_object.path)+ "(" + str(trackcount_object.handle) + "). " +\
+                self._errorlog("No AppleTrackGUID found for " +str(trackcount_object.path)+ "(" + str(trackcount_object.handle) + "). " +\
                   "Created: " + str(tg.guid))
 
         self.track_guid_cache.append(tg)
@@ -472,7 +435,7 @@ class Command(LabelCommand):
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
             # Setup the basic count record
-            bc = BrowseCount()
+            bc = AppleWeeklyBrowseCount()
             bc.summary = summary_object
             bc.count = int(sheet.cell(row_id,1).value)
 
@@ -494,8 +457,8 @@ class Command(LabelCommand):
 
 
     def _browsepath(self, logfile_object, path):
-        "Get or Create the BrowsePath information"
-        bp = BrowsePath()
+        "Get or Create the AppleBrowsePath information"
+        bp = AppleBrowsePath()
         bp.path = path
         bp.logfile = logfile_object
 
@@ -505,7 +468,7 @@ class Command(LabelCommand):
                 # Check if the import path appears earlier than the stored path and update if needed
                 if item.logfile.last_updated > logfile_object.last_updated:
                     # Update the database
-                    bp = BrowsePath.objects.get(id=item.id)
+                    bp = AppleBrowsePath.objects.get(id=item.id)
                     bp.logfile = logfile_object
                     bp.save()
                     # Update the cache
@@ -520,8 +483,8 @@ class Command(LabelCommand):
 
 
     def _browsehandle(self, logfile_object, handle):
-        "Get or Create the BrowseHandle information"
-        bh = BrowseHandle()
+        "Get or Create the AppleBrowseHandle information"
+        bh = AppleBrowseHandle()
         bh.handle = handle
         bh.logfile = logfile_object
 
@@ -531,7 +494,7 @@ class Command(LabelCommand):
                 # Check if the import path appears earlier than the stored path and update if needed
                 if item.logfile.last_updated > logfile_object.last_updated:
                     # Update the database
-                    bh = BrowseHandle.objects.get(id=item.id)
+                    bh = AppleBrowseHandle.objects.get(id=item.id)
                     bh.logfile = logfile_object
                     bh.save()
                     # Update the cache
@@ -546,8 +509,8 @@ class Command(LabelCommand):
 
 
     def _browseguid(self, logfile_object, guid, browsecount_object):
-        "Get or Create the BrowseGUID information"
-        bg = BrowseGUID()
+        "Get or Create the AppleBrowseGUID information"
+        bg = AppleBrowseGUID()
         bg.logfile = logfile_object
 
         # If guid provided, use. If not, find one. If none available, make one.
@@ -559,7 +522,7 @@ class Command(LabelCommand):
                     # Check if the import path appears earlier than the stored path and update if needed
                     if item.logfile.last_updated > logfile_object.last_updated:
                         # Update the database
-                        bg = BrowseGUID.objects.get(id=item.id)
+                        bg = AppleBrowseGUID.objects.get(id=item.id)
                         bg.logfile = logfile_object
                         bg.save()
                         # Update the cache
@@ -568,8 +531,8 @@ class Command(LabelCommand):
 
             # Match on handle (trust Apple to make these unique), or then path
             try:
-                # Any existing BrowseCount object should have a guid associated with it, thus, find one that has this handle, you've got it's guid
-                bc = BrowseCount.objects.filter(handle=browsecount_object.handle.id)
+                # Any existing AppleWeeklyBrowseCount object should have a guid associated with it, thus, find one that has this handle, you've got it's guid
+                bc = AppleWeeklyBrowseCount.objects.filter(handle=browsecount_object.handle.id)
                 if guid == '':
                     return bc[0].guid
 
@@ -581,7 +544,7 @@ class Command(LabelCommand):
             except IndexError:
                 # First time this handle has been seen, so look for a path match
                 try:
-                    bc = BrowseCount.objects.filter(path=browsecount_object.path.id)
+                    bc = AppleWeeklyBrowseCount.objects.filter(path=browsecount_object.path.id)
                     if guid == '':
                         return bc[0].guid
 
@@ -594,7 +557,7 @@ class Command(LabelCommand):
                     # No path match found, really must be new, so generate a GUID (UUID)
                     bg.guid = 'OPMS:' + str(uuid.uuid4())
                     bg.save()
-                    self._errorlog("No BrowseGUID found for " +str(browsecount_object.path)+ "(" + str(browsecount_object.handle) + "). " +\
+                    self._errorlog("No AppleBrowseGUID found for " +str(browsecount_object.path)+ "(" + str(browsecount_object.handle) + "). " +\
                       "Created: " + str(bg.guid))
 
         # Nothing found, so save and update the cache
@@ -615,7 +578,7 @@ class Command(LabelCommand):
         # Scan through all the rows, skipping the top row (headers).
         for row_id in range(1,sheet.nrows):
             # Setup the basic count record
-            pc = PreviewCount()
+            pc = AppleWeeklyPreviewCount()
             pc.summary = summary_object
             pc.count = int(sheet.cell(row_id,1).value)
 
@@ -637,8 +600,8 @@ class Command(LabelCommand):
 
 
     def _previewpath(self, logfile_object, path):
-        "Get or Create the PreviewPath information"
-        pp = PreviewPath()
+        "Get or Create the ApplePreviewPath information"
+        pp = ApplePreviewPath()
         pp.path = path
         pp.logfile = logfile_object
 
@@ -648,7 +611,7 @@ class Command(LabelCommand):
                 # Check if the import path appears earlier than the stored path and update if needed
                 if item.logfile.last_updated > logfile_object.last_updated:
                     # Update the database
-                    pp = PreviewPath.objects.get(id=item.id)
+                    pp = ApplePreviewPath.objects.get(id=item.id)
                     pp.logfile = logfile_object
                     pp.save()
                     # Update the cache
@@ -663,8 +626,8 @@ class Command(LabelCommand):
 
 
     def _previewhandle(self, logfile_object, handle):
-        "Get or Create the PreviewHandle information"
-        ph = PreviewHandle()
+        "Get or Create the ApplePreviewHandle information"
+        ph = ApplePreviewHandle()
         ph.handle = handle
         ph.logfile = logfile_object
 
@@ -674,7 +637,7 @@ class Command(LabelCommand):
                 # Check if the import path appears earlier than the stored path and update if needed
                 if item.logfile.last_updated > logfile_object.last_updated:
                     # Update the database
-                    ph = PreviewHandle.objects.get(id=item.id)
+                    ph = ApplePreviewHandle.objects.get(id=item.id)
                     ph.logfile = logfile_object
                     ph.save()
                     # Update the cache
@@ -689,8 +652,8 @@ class Command(LabelCommand):
 
 
     def _previewguid(self, logfile_object, guid, previewcount_object):
-        "Get or Create the PreviewGUID information"
-        pg = PreviewGUID()
+        "Get or Create the ApplePreviewGUID information"
+        pg = ApplePreviewGUID()
         pg.logfile = logfile_object
 
         # If guid provided, use. If not, find one. If none available, make one.
@@ -702,7 +665,7 @@ class Command(LabelCommand):
                     # Check if the import path appears earlier than the stored path and update if needed
                     if item.logfile.last_updated > logfile_object.last_updated:
                         # Update the database
-                        pg = PreviewGUID.objects.get(id=item.id)
+                        pg = ApplePreviewGUID.objects.get(id=item.id)
                         pg.logfile = logfile_object
                         pg.save()
                         # Update the cache
@@ -711,8 +674,8 @@ class Command(LabelCommand):
 
         # Match on handle (trust Apple to make these unique), or then path
         try:
-            # Any existing PreviewCount object should have a guid associated with it, thus, find one that has this handle, you've got it's guid
-            pc = PreviewCount.objects.filter(handle=previewcount_object.handle.id)
+            # Any existing AppleWeeklyPreviewCount object should have a guid associated with it, thus, find one that has this handle, you've got it's guid
+            pc = AppleWeeklyPreviewCount.objects.filter(handle=previewcount_object.handle.id)
             if guid == '':
                 return pc[0].guid
 
@@ -724,7 +687,7 @@ class Command(LabelCommand):
         except IndexError:
             # First time this handle has been seen, so look for a path match
             try:
-                pc = PreviewCount.objects.filter(path=previewcount_object.path.id)
+                pc = AppleWeeklyPreviewCount.objects.filter(path=previewcount_object.path.id)
                 if guid == '':
                     return pc[0].guid
 
@@ -737,7 +700,7 @@ class Command(LabelCommand):
                 # No path match found, really must be new, so generate a GUID (UUID)
                 pg.guid = 'OPMS:' + str(uuid.uuid4())
                 pg.save()
-                self._errorlog("No PreviewGUID found for " +str(previewcount_object.path)+ "(" + str(previewcount_object.handle) + "). " +\
+                self._errorlog("No ApplePreviewGUID found for " +str(previewcount_object.path)+ "(" + str(previewcount_object.handle) + "). " +\
                   "Created: " + str(pg.guid))
 
         # Nothing found, so save and update the cache

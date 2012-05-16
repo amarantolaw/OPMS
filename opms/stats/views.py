@@ -1,5 +1,4 @@
 from django.shortcuts import render_to_response
-from django.http import Http404, HttpResponse
 from django.template import RequestContext
 from django.db.models import Sum
 from stats.models import *
@@ -81,7 +80,7 @@ def summary_index(request):
 # FEEDS Subviews
 #####
 def summary_feeds(request):
-    listing = TrackCount.merged.psuedo_feeds()
+    listing = AppleWeeklyTrackCount.merged.psuedo_feeds()
     return render_to_response('stats/apple/feeds.html',{
             'listing':listing
         }, context_instance=RequestContext(request))
@@ -95,9 +94,9 @@ def feed_detail(request, partial_guid):
     except ValueError:
         orientation = 0
 
-    i = TrackCount.merged.feed_items(partial_guid)
-    w = TrackCount.merged.feed_weeks(partial_guid)
-    c = TrackCount.merged.feed_counts(partial_guid, orientation)
+    i = AppleWeeklyTrackCount.merged.feed_items(partial_guid)
+    w = AppleWeeklyTrackCount.merged.feed_weeks(partial_guid)
+    c = AppleWeeklyTrackCount.merged.feed_counts(partial_guid, orientation)
 
     listing = []
     column_totals = {}
@@ -183,7 +182,7 @@ def feed_detail(request, partial_guid):
     cdata = PivotDataPool(
         series=[{
             'options':{
-                'source': TrackCount.objects.filter(guid__guid__contains = partial_guid),
+                'source': AppleWeeklyTrackCount.objects.filter(guid__guid__contains = partial_guid),
                 'categories': [
                     'summary__week_ending'
                 ],

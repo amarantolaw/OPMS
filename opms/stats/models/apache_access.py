@@ -127,7 +127,7 @@ class Server(models.Model):
 
 
 # Log file request table. Each row is a request from a log file
-class LogEntry(models.Model):
+class ApacheLogEntry(models.Model):
     # Status codes from: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
     STATUS_CODE_CHOICES = (
         (100, u'100 Continue'),

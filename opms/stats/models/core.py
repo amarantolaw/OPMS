@@ -13,7 +13,7 @@ class LogFile(models.Model):
         (u'itu-psm', u'iTunes U PSM'),
         (u'itu-raw', u'iTunes U Raw Logfile'),
         )
-    service_name = models.CharField("service name associate with this log", max_length=20, choices=SERVICE_NAME_CHOICES)
+    service_name = models.CharField("service name associated with this log", max_length=20, choices=SERVICE_NAME_CHOICES)
     file_name = models.TextField("file name")
     file_path = models.TextField("path to file")
     last_updated = models.DateTimeField("last updated") # Acts as date of import

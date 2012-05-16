@@ -17,7 +17,7 @@ class AppleWeeklySummaryManager(models.Manager):
                    sum(subscription_enclosure) AS subscription_enclosure,
                    sum(subscription_feed) AS subscription_feed,
                    sum(total_track_downloads) AS total_track_downloads
-            FROM stats_summary
+            FROM stats_appleweeklysummary
             GROUP BY week_beginning
             ORDER BY week_beginning ASC
         """)
@@ -48,10 +48,10 @@ class AppleWeeklySummaryManager(models.Manager):
 
 
 
-class TrackManager(models.Manager):
+class AppleTrackManager(models.Manager):
 
     def psuedo_feeds(self):
-        from django.db import connection, transaction
+        from django.db import connection
         cursor = connection.cursor()
 
         cursor.execute('''
@@ -60,11 +60,11 @@ class TrackManager(models.Manager):
                    min(s.week_beginning) AS first_result,
                    max(s.week_beginning) AS last_result,
                    max(ic.item_count) AS item_count
-            FROM stats_trackcount AS tc,
-                 stats_trackguid AS tg,
-                 stats_summary AS s,
+            FROM stats_appletrackcount AS tc,
+                 stats_appletrackguid AS tg,
+                 stats_appleweeklysummary AS s,
                 (SELECT substring(tg.guid,52) AS psuedo_feed, count(tg.guid) AS item_count
-                 FROM stats_trackguid AS tg
+                 FROM stats_appletrackguid AS tg
                  WHERE substring(tg.guid,52) <> ''
                  GROUP BY substring(tg.guid,52)) AS ic
             WHERE tc.guid_id = tg.id
@@ -84,87 +84,16 @@ class TrackManager(models.Manager):
         return result_list
 
 
-
-    def psuedo_feeds_cc(self):
-        from django.db import connections, transaction
-
-        cursor = connections['oxitems'].cursor()
-        cursor.execute('''
-            SELECT DISTINCT i.item_guid, c.title, c.description
-            FROM rg0_7_items AS i,
-                 rg0_7_channels AS c
-            WHERE i.item_licence > 0
-              AND i.item_channel_id = c.id
-              AND i.deleted='f'
-            ''')
-        cc_guids = []
-        for row in cursor.fetchall():
-            cc_guids.append({'guid':row[0], 'title':row[1], 'description':row[2]})
-
-        # cc_guid_string = '"' + '", "'.join(map(str, cc_guids)) + '"'
-
-        cursor = connections['default'].cursor()
-        sql = '''CREATE TEMPORARY TABLE temp_cc_guids (guid varchar(80) PRIMARY KEY, title varchar(128), description text)'''
-        cursor.execute(sql)
-        transaction.commit_unless_managed()
-
-        for item in cc_guids:
-            cursor.execute("INSERT INTO temp_cc_guids (guid, title, description) VALUES (%s,%s,%s)",
-                [item.get('guid'), item.get('title'), item.get('description')])
-            transaction.commit_unless_managed()
-
-        sql = '''
-            SELECT sum(tc.count) AS count,
-                   max(tcc.title) AS title,
-                   min(s.week_beginning) AS first_result,
-                   max(s.week_beginning) AS last_result,
-                   max(ic.item_count) AS item_count,
-                   substring(tg.guid,52) AS psuedo_feed,
-                   max(tcc.description) AS description
-            FROM stats_trackcount AS tc,
-                 stats_trackguid AS tg,
-                 stats_summary AS s,
-                (SELECT substring(tg.guid,52) AS psuedo_feed, count(tg.guid) AS item_count
-                 FROM stats_trackguid AS tg,
-                      temp_cc_guids AS tcc
-                 WHERE substring(tg.guid,52) <> ''
-                   AND tg.guid = tcc.guid
-                 GROUP BY substring(tg.guid,52)) AS ic,
-                 temp_cc_guids AS tcc
-            WHERE tc.guid_id = tg.id
-              AND tc.summary_id = s.id
-              AND ic.psuedo_feed = substring(tg.guid,52)
-              AND substring(tg.guid,52) <> ''
-              AND tg.guid = tcc.guid
-            GROUP BY substring(tg.guid,52)
-            ORDER BY 1 DESC
-            '''
-        cursor.execute(sql)
-
-        result_list = []
-        for row in cursor.fetchall():
-            avg = int(row[0])/int(row[4])
-            t = {'count':row[0], 'feed':row[1], 'min_date':row[2],
-                 'max_date':row[3], 'item_count':row[4], 'item_avg':avg,
-                 'feed_name':row[5], 'feed_description':row[6]}
-            result_list.append(t)
-        return result_list
-
-
-
-
-
-
     def feed_weeks(self, partial_guid = ''):
-        from django.db import connection, transaction
+        from django.db import connection
         cursor = connection.cursor()
 
         # get the weeks that data exists for a given feed
         cursor.execute('''
             SELECT DISTINCT s.week_beginning
-              FROM stats_trackcount AS tc,
-                   stats_trackguid AS tg,
-                   stats_summary AS s
+              FROM stats_appletrackcount AS tc,
+                   stats_appletrackguid AS tg,
+                   stats_appleweeklysummary AS s
             WHERE tc.guid_id = tg.id
               AND tc.summary_id = s.id
               AND substring(tg.guid,52) = %s
@@ -178,13 +107,13 @@ class TrackManager(models.Manager):
 
 
     def feed_items(self, partial_guid = ''):
-        from django.db import connection, transaction
+        from django.db import connection
         cursor = connection.cursor()
 
         # get the items that data exists for a given feed - if a guid exists, it is because we have data for it
         cursor.execute('''
             SELECT DISTINCT tg.guid
-              FROM stats_trackguid AS tg
+              FROM stats_appletrackguid AS tg
             WHERE substring(tg.guid,52) = %s
             ORDER BY 1 ASC;
             ''', [partial_guid] )
@@ -196,16 +125,16 @@ class TrackManager(models.Manager):
 
 
     def feed_counts(self, partial_guid = '', order_by=0):
-        from django.db import connection, transaction
+        from django.db import connection
         cursor = connection.cursor()
 
         # get the count data for a given feed, such that it can be arranged against the above queries
         sql = '''
             SELECT s.week_beginning, max(tp.path), tg.guid, sum(tc.count)
-              FROM stats_trackcount AS tc,
-                   stats_trackpath AS tp,
-                   stats_trackguid AS tg,
-                   stats_summary AS s
+              FROM stats_appletrackcount AS tc,
+                   stats_appletrackpath AS tp,
+                   stats_appletrackguid AS tg,
+                   stats_appleweeklysummary AS s
             WHERE tc.path_id = tp.id
               AND tc.guid_id = tg.id
               AND tc.summary_id = s.id
@@ -227,7 +156,7 @@ class TrackManager(models.Manager):
 
 
     def feed_week_counts(self, partial_guid = ''):
-        from django.db import connection, transaction
+        from django.db import connection
         cursor = connection.cursor()
 
         # get the count data per week for a given feed
@@ -238,9 +167,9 @@ class TrackManager(models.Manager):
                        sum(tc.count) AS count,
                        max(s.week_beginning) AS week,
                        max(tg.guid) AS guid
-                FROM stats_trackcount AS tc,
-                     stats_trackguid AS tg,
-                     stats_summary AS s
+                FROM stats_appletrackcount AS tc,
+                     stats_appletrackguid AS tg,
+                     stats_appleweeklysummary AS s
                 WHERE tc.summary_id = s.id
                   AND tc.guid_id = tg.id
                   AND substring(tg.guid,52) = %s

@@ -1,6 +1,6 @@
 from django.db import models
 from core import LogFile
-from apple_managers import AppleWeeklySummaryManager, TrackManager
+from apple_managers import AppleWeeklySummaryManager, AppleTrackManager
 from django.utils.encoding import smart_unicode
 from datetime import date
 
@@ -10,7 +10,7 @@ from datetime import date
 
 
 # A Summary record based on a column of data from the Summary tab. Note there can be more than one for a given week (iTU + iTUPSM, or itu-raw + itu-psm)
-# aka: "AppleEntry", like LogEntry, but for Apple data.
+# aka: "AppleEntry", like ApacheLogEntry, but for Apple data.
 class AppleWeeklySummary(models.Model):
     SERVICE_NAME_CHOICES = (
         (u'itu', u'iTunes U v1'),
@@ -69,7 +69,7 @@ class AppleWeeklySummary(models.Model):
 ####
 
 # Track Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific track
-class TrackPath(models.Model):
+class AppleTrackPath(models.Model):
     path = models.TextField("path", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this path first found?
 
@@ -81,7 +81,7 @@ class TrackPath(models.Model):
 
 
 # Track Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific track
-class TrackHandle(models.Model):
+class AppleTrackHandle(models.Model):
     handle = models.BigIntegerField("handle", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this handle first found?
 
@@ -94,7 +94,7 @@ class TrackHandle(models.Model):
 
 # Track GUIDs change from time to time due to OxItems changes, but we want to keep them related to a specific track
 # NB: This data should eventually be migrated to the FFM app, as it comes from the rss source, and is copied into the stats data by Apple
-class TrackGUID(models.Model):
+class AppleTrackGUID(models.Model):
     guid = models.CharField("GUID", max_length=255, db_index=True, unique=True)
     # Eventually there will be a link here to a File record from the FFM module
     # file = models.ForeignKey(ffm_models.File, null=True)
@@ -112,15 +112,15 @@ class TrackGUID(models.Model):
 
 
 # This is a track count record, which will have multiple handles, paths and guids/files associated with it
-class TrackCount(models.Model):
+class AppleWeeklyTrackCount(models.Model):
     summary = models.ForeignKey(AppleWeeklySummary) # aka: AppleEntry
     count = models.IntegerField("count")
     # A count record has a handle, path and guid associated. GUIDs may have been created by OPMS
-    path = models.ForeignKey(TrackPath)
-    handle = models.ForeignKey(TrackHandle)
-    guid = models.ForeignKey(TrackGUID)
+    path = models.ForeignKey(AppleTrackPath)
+    handle = models.ForeignKey(AppleTrackHandle)
+    guid = models.ForeignKey(AppleTrackGUID)
 
-    merged = TrackManager() # Manager for merged data
+    merged = AppleTrackManager() # Manager for merged data
     objects = models.Manager() # Default manager
 
     def __unicode__(self):
@@ -134,7 +134,7 @@ class TrackCount(models.Model):
 # Apple Browse Records
 ####
 # Browse Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific browse
-class BrowsePath(models.Model):
+class AppleBrowsePath(models.Model):
     path = models.TextField("path", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this path first found?
 
@@ -146,7 +146,7 @@ class BrowsePath(models.Model):
 
 
 # Browse Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific browse
-class BrowseHandle(models.Model):
+class AppleBrowseHandle(models.Model):
     handle = models.BigIntegerField("handle", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this handle first found?
 
@@ -157,7 +157,7 @@ class BrowseHandle(models.Model):
         app_label = 'stats'
 
 # GUIDs for Browses are optional
-class BrowseGUID(models.Model):
+class AppleBrowseGUID(models.Model):
     guid = models.CharField("GUID", max_length=255, unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
 
@@ -169,13 +169,13 @@ class BrowseGUID(models.Model):
 
 
 # This is a browse count record, which will have multiple handles, paths and guids/files associated with it
-class BrowseCount(models.Model):
+class AppleWeeklyBrowseCount(models.Model):
     summary = models.ForeignKey(AppleWeeklySummary)
     count = models.IntegerField("count")
     # A count record has a handle and path associated, and may have a guid also
-    path = models.ForeignKey(BrowsePath)
-    handle = models.ForeignKey(BrowseHandle)
-    guid = models.ForeignKey(BrowseGUID, null=True)
+    path = models.ForeignKey(AppleBrowsePath)
+    handle = models.ForeignKey(AppleBrowseHandle)
+    guid = models.ForeignKey(AppleBrowseGUID, null=True)
 
     def __unicode__(self):
         return '%s:%s' % (self.summary.week_beginning,self.count)
@@ -190,7 +190,7 @@ class BrowseCount(models.Model):
 # Apple Preview Records
 ####
 # Preview Paths have changed as the system has evolved and migrated, but we want to keep them related to a specific preview
-class PreviewPath(models.Model):
+class ApplePreviewPath(models.Model):
     path = models.TextField("path", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this path first found?
 
@@ -202,7 +202,7 @@ class PreviewPath(models.Model):
 
 
 # Preview Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific preview
-class PreviewHandle(models.Model):
+class ApplePreviewHandle(models.Model):
     handle = models.BigIntegerField("handle", unique=True)
     logfile = models.ForeignKey(LogFile) # Where was this handle first found?
 
@@ -215,7 +215,7 @@ class PreviewHandle(models.Model):
 
 # Preview GUIDs change from time to time due to OxItems changes, but we want to keep them related to a specific preview
 # NB: This data should eventually be migrated to the FFM app, as it comes from the rss source, and is copied into the stats data by Apple
-class PreviewGUID(models.Model):
+class ApplePreviewGUID(models.Model):
     guid = models.CharField("GUID", max_length=255, db_index=True, unique=True)
     # Eventually there will be a link here to a File record from the FFM module
     logfile = models.ForeignKey(LogFile) # Where was this guid first found?
@@ -228,13 +228,13 @@ class PreviewGUID(models.Model):
 
 
 # This is a preview count record, which will have multiple handles, paths and guids/files associated with it
-class PreviewCount(models.Model):
+class AppleWeeklyPreviewCount(models.Model):
     summary = models.ForeignKey(AppleWeeklySummary)
     count = models.IntegerField("count")
     # A count record has a handle and path associated, and may have a guid also
-    path = models.ForeignKey(PreviewPath)
-    handle = models.ForeignKey(PreviewHandle)
-    guid = models.ForeignKey(PreviewGUID)
+    path = models.ForeignKey(ApplePreviewPath)
+    handle = models.ForeignKey(ApplePreviewHandle)
+    guid = models.ForeignKey(ApplePreviewGUID)
 
     def __unicode__(self):
         return '%s:%s' % (self.summary.week_beginning,self.count)
