@@ -60,7 +60,7 @@ class AppleTrackManager(models.Manager):
                    min(s.week_beginning) AS first_result,
                    max(s.week_beginning) AS last_result,
                    max(ic.item_count) AS item_count
-            FROM stats_appletrackcount AS tc,
+            FROM stats_appleweeklytrackcount AS tc,
                  stats_appletrackguid AS tg,
                  stats_appleweeklysummary AS s,
                 (SELECT substring(tg.guid,52) AS psuedo_feed, count(tg.guid) AS item_count
@@ -73,7 +73,7 @@ class AppleTrackManager(models.Manager):
               AND substring(tg.guid,52) <> ''
             GROUP BY substring(tg.guid,52)
             ORDER BY 1 DESC
-            ''')
+        ''')
 
         result_list = []
         for row in cursor.fetchall():
@@ -91,7 +91,7 @@ class AppleTrackManager(models.Manager):
         # get the weeks that data exists for a given feed
         cursor.execute('''
             SELECT DISTINCT s.week_beginning
-              FROM stats_appletrackcount AS tc,
+              FROM stats_appleweeklytrackcount AS tc,
                    stats_appletrackguid AS tg,
                    stats_appleweeklysummary AS s
             WHERE tc.guid_id = tg.id
@@ -131,7 +131,7 @@ class AppleTrackManager(models.Manager):
         # get the count data for a given feed, such that it can be arranged against the above queries
         sql = '''
             SELECT s.week_beginning, max(tp.path), tg.guid, sum(tc.count)
-              FROM stats_appletrackcount AS tc,
+              FROM stats_appleweeklytrackcount AS tc,
                    stats_appletrackpath AS tp,
                    stats_appletrackguid AS tg,
                    stats_appleweeklysummary AS s
@@ -167,7 +167,7 @@ class AppleTrackManager(models.Manager):
                        sum(tc.count) AS count,
                        max(s.week_beginning) AS week,
                        max(tg.guid) AS guid
-                FROM stats_appletrackcount AS tc,
+                FROM stats_appleweeklytrackcount AS tc,
                      stats_appletrackguid AS tg,
                      stats_appleweeklysummary AS s
                 WHERE tc.summary_id = s.id
