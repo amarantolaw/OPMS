@@ -191,11 +191,11 @@ class Command(LabelCommand):
                     _summaryCS_set(summary.cell(row_id,headings1).value,row_id)
 
             else:
-                # Should only happen at the start, and we're looking for week_ending dates, and then User Actions
+                # Should only happen at the start, and we're looking for week_beginning dates, and then User Actions
                 if summary.cell(row_id,week1).value == '':
                     section = summary.cell(row_id,headings2).value
                 else:
-                    _summaryUA_set('week_ending',row_id)
+                    _summaryUA_set('week_beginning',row_id)
 
             # Write the error cache to disk
             self._error_log_save()
@@ -206,21 +206,21 @@ class Command(LabelCommand):
             week = summaryUA[i]
 
             # This needs to account for different types of import file (public vs public_dz)
-            summary_object, summary_created = Summary.objects.get_or_create(
-                week_ending=week.get('week_ending'),
+            summary_object, summary_created = AppleWeeklySummary.objects.get_or_create(
+                week_ending=week.get('week_beginning'),
                 service_name=logfile_obj.service_name,
                 defaults=week)
             summary_object.save()
 
             if summary_created:
                 self._parse_summary_cs(summaryCS[i], logfile_obj, summary_object)
-                print "Imported SUMMARY data for " + str(week.get('week_ending'))
+                print "Imported SUMMARY data for " + str(week.get('week_beginning'))
 
                 # Now work through the related week's worth of Tracks, Browses and Previews. These sheets might be missing in early files.
                 self._parse_related_sheets(summary_object, wb, week)
 
             else:
-                print "NOTE: Data has previously been imported for " + str(logfile_obj.service_name) + "@" + str(week.get('week_ending'))
+                print "NOTE: Data has previously been imported for " + str(logfile_obj.service_name) + "@" + str(week.get('week_beginning'))
                 # Check the date of the excel file, and whether the total downloads match.
                 # Apple change their results from time to time and this is to detect it
                 if int(summary_object.total_track_downloads) != int(week.get('total_track_downloads')):
@@ -240,14 +240,14 @@ class Command(LabelCommand):
                         summary_object.delete()
 
                         # Create afresh... perhaps a little superfluous
-                        summary_object, summary_created = Summary.objects.get_or_create(
-                            week_ending=week.get('week_ending'),
+                        summary_object, summary_created = AppleWeeklySummary.objects.get_or_create(
+                            week_ending=week.get('week_beginning'),
                             service_name=logfile_obj.service_name,
                             defaults=week)
                         summary_object.save()
 
                         self._parse_summary_cs(summaryCS[i], logfile_obj, summary_object)
-                        print "Re-imported SUMMARY data for " + str(week.get('week_ending'))
+                        print "Re-imported SUMMARY data for " + str(week.get('week_beginning'))
 
                         self._parse_related_sheets(summary_object, wb, week)
 
@@ -297,21 +297,21 @@ class Command(LabelCommand):
 
     def _parse_related_sheets(self, summary_object, wb, week):
         try:
-            self._parse_tracks(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Tracks'))
+            self._parse_tracks(summary_object, wb.sheet_by_name(str(week.get('week_beginning')) + ' Tracks'))
         except biffh.XLRDError:
-            err_msg = "Sheet does not exist for " + str(week.get('week_ending')) + " Tracks"
+            err_msg = "Sheet does not exist for " + str(week.get('week_beginning')) + " Tracks"
             self._errorlog(err_msg)
             print err_msg
         try:
-            self._parse_browses(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Browse'))
+            self._parse_browses(summary_object, wb.sheet_by_name(str(week.get('week_beginning')) + ' Browse'))
         except biffh.XLRDError:
-            err_msg = "Sheet does not exist for " + str(week.get('week_ending')) + " Browse"
+            err_msg = "Sheet does not exist for " + str(week.get('week_beginning')) + " Browse"
             self._errorlog(err_msg)
             print err_msg
         try:
-            self._parse_previews(summary_object, wb.sheet_by_name(str(week.get('week_ending')) + ' Previews'))
+            self._parse_previews(summary_object, wb.sheet_by_name(str(week.get('week_beginning')) + ' Previews'))
         except biffh.XLRDError:
-            err_msg = "Sheet does not exist for " + str(week.get('week_ending')) + " Previews"
+            err_msg = "Sheet does not exist for " + str(week.get('week_beginning')) + " Previews"
             self._errorlog(err_msg)
             print err_msg
 
