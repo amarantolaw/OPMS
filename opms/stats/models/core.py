@@ -20,3 +20,6 @@ class LogFile(models.Model):
 
     def __unicode__(self):
         return self.file_name
+
+    class Meta:
+        app_label = 'stats'

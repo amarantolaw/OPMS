@@ -50,6 +50,8 @@ class AppleWeeklySummary(models.Model):
     def __unicode__(self):
         return str(date.strftime(self.week_beginning,"%Y-%m-%d")) + ": Total Downloads=" + str(self.total_track_downloads)
 
+    class Meta:
+        app_label = 'stats'
 
 
 # Removing this class as the data is basically a waste of space in hindsight.
@@ -74,6 +76,9 @@ class TrackPath(models.Model):
     def __unicode__(self):
         return smart_unicode(self.path)
 
+    class Meta:
+        app_label = 'stats'
+
 
 # Track Handles change from time to time due to tweaks in the system, but we want to keep them related to a specific track
 class TrackHandle(models.Model):
@@ -82,6 +87,9 @@ class TrackHandle(models.Model):
 
     def __unicode__(self):
         return str(self.handle)
+
+    class Meta:
+        app_label = 'stats'
 
 
 # Track GUIDs change from time to time due to OxItems changes, but we want to keep them related to a specific track
@@ -99,6 +107,9 @@ class TrackGUID(models.Model):
     def __unicode__(self):
         return smart_unicode(self.guid)
 
+    class Meta:
+        app_label = 'stats'
+
 
 # This is a track count record, which will have multiple handles, paths and guids/files associated with it
 class TrackCount(models.Model):
@@ -114,6 +125,9 @@ class TrackCount(models.Model):
 
     def __unicode__(self):
         return '%s:%s' % (self.summary.week_beginning,self.count)
+
+    class Meta:
+        app_label = 'stats'
 
 
 ####
