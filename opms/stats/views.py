@@ -322,7 +322,7 @@ def guid_detail(request, trackguid_id):
         'listing':listing,
         'summary':summary,
         'cht':pivcht,
-        'trackguid_id':guid.id, # Need this for the breadcrumb path via feeds
+        'trackguid_id':trackguid_id, # Need this for the breadcrumb path via feeds
         'ref':partial_guid, # Need this for the breadcrumb path via feeds
     }, context_instance=RequestContext(request))
 

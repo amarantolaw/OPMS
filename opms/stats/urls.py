@@ -9,7 +9,7 @@ urlpatterns = patterns('stats.views',
     # Pages in Stats
     url(r'^apple/feeds/partial-guid/(?P<partial_guid>.+)', feed_detail, name="apple-feed-byguid"),
     url(r'^apple/feeds/$', summary_feeds),
-    url(r'^apple/guid/(?P<trackguid_id>.+)', guid_detail, name="apple-guid-detail"),
+    url(r'^apple/guid/(?P<trackguid_id>\d+)', guid_detail, name="apple-guid-detail"),
 
     url(r'^apple/summary/$', summary_index),
     url(r'^apple/$', apple_index),
