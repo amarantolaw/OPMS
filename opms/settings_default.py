@@ -135,7 +135,7 @@ INSTALLED_APPS = (
     # Third party apps used by OPMS...
     'debug_toolbar',
     'south',
-    'django_extensions',
+    # 'django_extensions',
     'sitetree',
     'chartit',
     # These are the OPMS apps...
