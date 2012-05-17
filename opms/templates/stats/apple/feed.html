@@ -49,8 +49,12 @@ $(document).ready(function()
         <tr>
             <th>{{ row.column_a|default:"Week Commencing" }}</th>
             <th>{{ row.total|default:"Week Total" }}</th>
-            {% for item in row.data %}
-            <th>{{ item|slice:"23:52" }}</th> {# Due to table sorting, can't have links in the column headers! #}
+            {% for item in row.data %}{# Due to table sorting, can't have links in the column headers! #}
+                {% if orientation == 1 %}
+            <th>{{ item }}</th>
+                {% else %}
+            <th>{{ item|slice:"23:52" }}</th>
+                {% endif %}
             {% endfor %}
         </tr>
     </thead>
