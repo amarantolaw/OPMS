@@ -246,7 +246,7 @@ def guid_detail(request, trackguid_id):
     # TODO: This view needs some error checking to happen on the input value
     listing = AppleWeeklyTrackCount.objects.filter(guid__id__exact=trackguid_id).order_by("summary__week_beginning")
     guid = AppleTrackGUID.objects.get(id__exact=trackguid_id)
-    partial_guid = guid.guid[-52:] # Get the last 52 characters to make up the partial guid.
+    partial_guid = guid.guid[52:] # Get the part after 52 characters to make up the partial guid.
 
     # Generate summary data
     summary = {}
