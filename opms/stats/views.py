@@ -244,7 +244,7 @@ def feed_detail(request, partial_guid):
 
 def guid_detail(request, trackguid_id):
 
-    listing = AppleWeeklyTrackCount.objects.filter(guid__id__exact=track_guid_id).order_by("summary__week_beginning")
+    listing = AppleWeeklyTrackCount.objects.filter(guid__id__exact=trackguid_id).order_by("summary__week_beginning")
 
     # Generate summary data
     summary = {}
@@ -266,7 +266,7 @@ def guid_detail(request, trackguid_id):
     cdata = PivotDataPool(
         series=[{
             'options':{
-                'source': AppleWeeklyTrackCount.objects.filter(guid__id__exact=track_guid_id),
+                'source': AppleWeeklyTrackCount.objects.filter(guid__id__exact=trackguid_id),
                 'categories': [
                     'summary__week_beginning'
                 ],
