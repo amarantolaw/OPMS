@@ -50,6 +50,10 @@ class AppleWeeklySummary(models.Model):
     def __unicode__(self):
         return str(date.strftime(self.week_beginning,"%Y-%m-%d")) + ": Total Downloads=" + str(self.total_track_downloads)
 
+    @property
+    def service_name_string(self):
+        return self.SERVICE_NAME_CHOICES.get(self.service_name,'')
+
     class Meta:
         app_label = 'stats'
 

@@ -15,8 +15,8 @@
 
     {% if summary %}
 <h3>Summary</h3>
-<p>This item has {{ summary.count }} has been downloaded {{ summary.total }} times, making the average
-    {{ summary.avg }} downloads per week. The most popular week was the week beginning {{ summary.max_week|date:"Y-m-d" }}
+<p>This item has been downloaded {{ summary.total }} times, over {{ summary.count }} weeks, making the average
+    {{ summary.avg }} downloads per week. The latest peak was the week beginning {{ summary.max_week|date:"Y-m-d" }}
     with {{ summary.max_value }} downloads.
     {% endif %}
 
@@ -39,6 +39,7 @@ $(document).ready(function()
     <thead>
         <tr>
             <th>Week Commencing</th>
+            <th>Portal</th>
             <th>Week Total</th>
         </tr>
     </thead>
@@ -46,6 +47,7 @@ $(document).ready(function()
     {% for row in listing %}
         <tr>
             <td>{{ row.summary.week_beginning|date:"Y-m-d" }}</td>
+            <td>{{ row.summary.service_name_string }}</td>
             <td>{{ row.count }}</td>
         </tr>
     {% endfor %}
