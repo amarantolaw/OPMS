@@ -52,7 +52,10 @@ class AppleWeeklySummary(models.Model):
 
     @property
     def service_name_string(self):
-        return self.SERVICE_NAME_CHOICES.get(self.service_name,'')
+        for k,v in self.SERVICE_NAME_CHOICES:
+            if k == self.service_name:
+                return v
+        return ''
 
     class Meta:
         app_label = 'stats'
