@@ -94,7 +94,8 @@ def feed_detail(request, partial_guid):
     except ValueError:
         orientation = 1
 
-    i = AppleWeeklyTrackCount.merged.feed_items(partial_guid)
+#    i = AppleWeeklyTrackCount.merged.feed_items(partial_guid)
+    i = AppleWeeklyTrackCount.objects.filter(guid__guid__contains=partial_guid)
     w = AppleWeeklyTrackCount.merged.feed_weeks(partial_guid)
     c = AppleWeeklyTrackCount.merged.feed_counts(partial_guid, orientation)
 
@@ -103,16 +104,16 @@ def feed_detail(request, partial_guid):
     count = c.pop(0)
     if orientation == 0:
         for item in i:
-            column_totals[item] = 0
+            column_totals[item.guid.guid] = 0
 
         for week in w:
             row_data = []
             row_total = 0
             for item in i:
-                if count != None and count.get("week_beginning") == week and count.get("guid") == item:
+                if count != None and count.get("week_beginning") == week and count.get("guid") == item.guid.guid:
                     row_data.append(int(count.get("count")))
                     row_total += int(count.get("count"))
-                    column_totals[item] += int(count.get("count"))
+                    column_totals[item.guid.guid] += int(count.get("count"))
                     try:
                         count = c.pop(0)
                     except IndexError:
@@ -124,11 +125,11 @@ def feed_detail(request, partial_guid):
         # Put column headers and totals into listing array - values, then headings
         row_data = []
         for item in i:
-            row_data.append(column_totals.get(item))
+            row_data.append(column_totals.get(item.guid.guid))
         listing.insert(0,{'column_a':'Item Total', 'data':row_data, 'total':''})
         row_data = []
         for item in i:
-            row_data.append(str(item)[23:52])
+            row_data.append(str(item.guid.guid))
         listing.insert(0,{'column_a':'Week Commencing', 'data':row_data, 'total':'Week Total'})
     else:
         for week in w:
@@ -138,7 +139,7 @@ def feed_detail(request, partial_guid):
             row_data = []
             row_total = 0
             for week in w:
-                if count != None and count.get("week_beginning") == week and count.get("guid") == item:
+                if count != None and count.get("week_beginning") == week and count.get("guid") == item.guid.guid:
                     row_data.append(int(count.get("count")))
                     row_total += int(count.get("count"))
                     column_totals[week] += int(count.get("count"))
@@ -148,7 +149,7 @@ def feed_detail(request, partial_guid):
                         count = None
                 else:
                     row_data.append(None)
-            listing.append({'column_a':item, 'data':row_data, 'total':row_total})
+            listing.append({'column_a':[item.id,item.guid.guid], 'data':row_data, 'total':row_total})
 
         # Put column headers and totals into listing array - values, then headings
         row_data = []
@@ -241,9 +242,9 @@ def feed_detail(request, partial_guid):
         }, context_instance=RequestContext(request))
 
 
-def guid_detail(request, target_guid):
+def guid_detail(request, track_guid_id):
 
-    listing = AppleWeeklyTrackCount.objects.filter(guid__guid__exact=target_guid).order_by("summary__week_beginning")
+    listing = AppleWeeklyTrackCount.objects.filter(guid__id__exact=track_guid_id).order_by("summary__week_beginning")
 
     # Generate summary data
     summary = {}
@@ -265,7 +266,7 @@ def guid_detail(request, target_guid):
     cdata = PivotDataPool(
         series=[{
             'options':{
-                'source': AppleWeeklyTrackCount.objects.filter(guid__guid__exact=target_guid),
+                'source': AppleWeeklyTrackCount.objects.filter(guid__id__exact=track_guid_id),
                 'categories': [
                     'summary__week_beginning'
                 ],
@@ -316,7 +317,7 @@ def guid_detail(request, target_guid):
 
     return render_to_response('stats/apple/guid.html',{
         'listing':listing,
-        'ref':target_guid,
+        'ref':track_guid_id,
         'summary':summary,
         'cht':pivcht
     }, context_instance=RequestContext(request))
