@@ -75,6 +75,7 @@ $(document).ready(function()
                 {{ row.column_a }}
                 {% else %}
                 <a href="/analytics/apple/guid/{{ row.column_a|first }}">{{ row.column_a|last }}</a>
+                <!-- href="{% url apple-guid-detail row.column_a|first %}" -->
             {% endif %}</td>
             <td class="highlight-total">{{ row.total }}</td>
             {% for item in row.data %}
