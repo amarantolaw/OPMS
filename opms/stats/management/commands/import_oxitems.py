@@ -2,12 +2,12 @@
 # Author: Carl Marshall
 # Last Edited: 16-04-2012
 from optparse import make_option
-from django.core.management.base import NoArgsCommand, CommandError
-from opms.stats.models import TrackGUID
+from django.core.management.base import NoArgsCommand
+from opms.stats.models import AppleTrackGUID
 from opms.oxitems.models import Rg07Channels, Rg07Items
 import sys
 from datetime import datetime
-from django.utils.encoding import smart_str, smart_unicode
+from django.utils.encoding import smart_unicode
 
 class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
@@ -75,7 +75,7 @@ class Command(NoArgsCommand):
         # Get list of Oxitems data to scan through
         oxitems = list(Rg07Items.objects.order_by('item_guid','-modified'))
         print "OxItems Import beginning scan of Track records"
-        for track in TrackGUID.objects.all():
+        for track in AppleTrackGUID.objects.all():
             for item in oxitems:
                 if track.guid == item.item_guid:
                     self._debug(track.guid + ' - ' + item.item_title)

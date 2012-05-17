@@ -15,7 +15,7 @@ class Command(LabelCommand):
         make_option('--startline', action='store', dest='start_at_line',
             default=1, help='Optional start line to allow resumption of large log files. Default is 1.'),
         make_option('--cache-size', action='store', dest='cache_size',
-            default=100, help='Number of records to prefetch in the LogEntry lookup. Default is 100.'),
+            default=100, help='Number of records to prefetch in the ApacheLogEntry lookup. Default is 100.'),
         make_option('--log-service', action='store', dest='log_service',
             default='mpoau', help='What service has produced this log? Used to determine the apache format expression. Default is "mpoau".'),
         make_option('--single-import', action='store', dest='single_import',
@@ -199,9 +199,9 @@ class Command(LabelCommand):
                     self.import_stats['import_rate'] = 1
                 # Calculate how long till finished
                 try: 
-                    efs = int(\
-                    float(self.import_stats.get('line_count') - self.import_stats.get('line_counter')) /\
-                    float(self.import_stats.get('import_rate'))\
+                    efs = int(
+                        float(self.import_stats.get('line_count') - self.import_stats.get('line_counter')) /\
+                        float(self.import_stats.get('import_rate'))
                     )
                 except ZeroDivisionError:
                     efs = 1
@@ -323,7 +323,7 @@ class Command(LabelCommand):
 #    def _get_or_create_log_entry(self, time_of_request, server, remote_rdns, size_of_response,
 #                                 status_code, file_request, defaults = {}):
     def _get_or_create_log_entry(self, defaults = {}):
-        obj = LogEntry()
+        obj = ApacheLogEntry()
         # Set this manually, longhand because the for key,value loop causes errors
         obj.logfile = defaults.get('logfile')
         obj.time_of_request = defaults.get('time_of_request')
@@ -344,7 +344,7 @@ class Command(LabelCommand):
 #        # Trusting that items in the import log appear in chronological order
 #        if len(self.cache_log_entry) == 0 or len(self.cache_log_entry) > (self.cache_log_entry_size*2):
 #            time_limit = time_of_request+datetime.timedelta(minutes=10)
-#            self.cache_log_entry = list(LogEntry.objects.filter(\
+#            self.cache_log_entry = list(ApacheLogEntry.objects.filter(\
 #                time_of_request__gte=time_of_request, time_of_request__lte=time_limit, \
 #                server=server).order_by('time_of_request')[:self.cache_log_entry_size])
 
@@ -370,12 +370,12 @@ class Command(LabelCommand):
 #
 #        # Couldn't find it in the list, check the database incase another process has added it
 #        try:
-#            obj = LogEntry.objects.get(time_of_request = obj.time_of_request, server = obj.server,
+#            obj = ApacheLogEntry.objects.get(time_of_request = obj.time_of_request, server = obj.server,
 #                remote_rdns = obj.remote_rdns, size_of_response = obj.size_of_response,
 #                status_code = obj.status_code, file_request = obj.file_request)
-#        except LogEntry.DoesNotExist:
+#        except ApacheLogEntry.DoesNotExist:
 #            obj.save()
-#        except LogEntry.MultipleObjectsReturned:
+#        except ApacheLogEntry.MultipleObjectsReturned:
 #            self._errorlog("Funky shit just happened(!). MultipleObjectsReturned: " + str(obj) + "\n")
             
 #        self.cache_log_entry.append(obj)
@@ -385,7 +385,7 @@ class Command(LabelCommand):
 
     def _status_code_validation(self,status_code):
         "Check the supplied status code value against known good codes"
-        for item in LogEntry.STATUS_CODE_CHOICES:
+        for item in ApacheLogEntry.STATUS_CODE_CHOICES:
             if status_code == item[0]:
                 return status_code
         return 0
