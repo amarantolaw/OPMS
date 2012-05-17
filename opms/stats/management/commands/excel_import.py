@@ -92,10 +92,11 @@ class Command(LabelCommand):
                 # Start the parsing with the summary sheet
                 self._parse_summary(logfile_obj, wb)
 
+                self._errorlog_stop()
+
                 import_file_limit -= 1
 
         print "\nImport finished at " + str(datetime.utcnow())
-        self._errorlog_stop()
         return None
 
 
