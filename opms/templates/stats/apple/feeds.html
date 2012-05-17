@@ -35,7 +35,7 @@ $(document).ready(function()
         {% for row in listing %}
         <tr>
             <td>{{ row.count }}</td>
-            <td><a href="partial-guid/{{ row.feed }}">{{ row.feed }}</a></td>
+            <td><a href="{% url apple-feed-byguid row.feed %}">{{ row.feed }}</a></td>
             <td>{{ row.min_date|date:"Y-m-d" }}</td>
             <td>{{ row.max_date|date:"Y-m-d" }}</td>
             <td>{{ row.item_count }}</td>

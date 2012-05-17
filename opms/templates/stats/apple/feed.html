@@ -74,8 +74,7 @@ $(document).ready(function()
             <td>{% if orientation == 0 %}
                 {{ row.column_a }}
                 {% else %}
-                <a href="/analytics/apple/guid/{{ row.column_a|first }}">{{ row.column_a|last }}</a>
-                <!-- href="{% url apple-guid-detail row.column_a|first %}" -->
+                <a href="{% url apple-guid-detail row.column_a|first %}">{{ row.column_a|last }}</a>
             {% endif %}</td>
             <td class="highlight-total">{{ row.total }}</td>
             {% for item in row.data %}
