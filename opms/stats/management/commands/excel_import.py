@@ -64,7 +64,7 @@ class Command(LabelCommand):
         for root, dirs, files in os.walk(path):
             for file in files:
                 if file.lower()[-4:] == ".xls":
-                    file_list.append(os.path.join(root)+"/"+file) # Yes, unix specific hack
+                    file_list.append(os.path.abspath(os.path.join(root)+"/"+file)) # Yes, unix specific hack
         return file_list
 
 
@@ -79,22 +79,22 @@ class Command(LabelCommand):
             import_file_limit = 10
         print "%s files have been found for import. Processing %s of them now" % (len(found_files_list), import_file_limit)
         for filename in found_files_list:
-            # This only needs setting/getting the once per call of this function
-            logfile_obj, created = self._logfile(filename)
-            if created and import_file_limit > 0:
-                print "\n\nImporting from %s" % (filename)
-                # Create an error log per import file
-                self._errorlog_start(filename + '_import-error.log')
+            if import_file_limit > 0:
+                logfile_obj, created = self._logfile(filename)
+                if created:
+                    print "\n\nImporting from %s" % (filename)
+                    # Create an error log per import file
+                    self._errorlog_start(filename + '_import-error.log')
 
-                # Read the Worksheet
-                wb = open_workbook(filename)
+                    # Read the Worksheet
+                    wb = open_workbook(filename)
 
-                # Start the parsing with the summary sheet
-                self._parse_summary(logfile_obj, wb)
+                    # Start the parsing with the summary sheet
+                    self._parse_summary(logfile_obj, wb)
 
-                self._errorlog_stop()
+                    self._errorlog_stop()
 
-                import_file_limit -= 1
+                    import_file_limit -= 1
 
         print "\nImport finished at " + str(datetime.utcnow())
         return None
