@@ -157,7 +157,7 @@ $(document).ready(function()
     {% for row in summary_data %}
         <tr>
             <td>{{ row.week_number }}</td>
-            <td>{{ row.week_ending|date:"Y-m-d" }}</td>
+            <td>{{ row.week_beginning|date:"Y-m-d" }}</td>
             <td>{{ row.total_track_downloads }}</td>
             <td class="{% if row.total_track_downloads_change >= 0 %}positive{% else %}negative{% endif %}">{{ row.total_track_downloads_change }}</td>
             <td>{{ row.cumulative_total }}</td>

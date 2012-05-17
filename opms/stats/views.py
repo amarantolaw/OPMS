@@ -69,7 +69,7 @@ def summary_index(request):
         }
     )
 
-    return render_to_response('stats/apple/summary.html', {
+    return render_to_response('stats/apple/apple_summary.html', {
             'summary_data': summary_data,
             'cht':pivcht
         }, context_instance=RequestContext(request)
