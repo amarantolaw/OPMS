@@ -79,10 +79,10 @@ class Command(LabelCommand):
             import_file_limit = 10
         print "%s files have been found for import. Processing %s of them now" % (len(found_files_list), import_file_limit)
         for filename in found_files_list:
-            print "Importing from %s" % (filename)
             # This only needs setting/getting the once per call of this function
             logfile_obj, created = self._logfile(filename)
             if created and import_file_limit > 0:
+                print "\n\nImporting from %s" % (filename)
                 # Create an error log per import file
                 self._errorlog_start(filename + '_import-error.log')
 
