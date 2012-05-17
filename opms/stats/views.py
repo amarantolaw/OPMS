@@ -95,7 +95,7 @@ def feed_detail(request, partial_guid):
         orientation = 1
 
 #    i = AppleWeeklyTrackCount.merged.feed_items(partial_guid)
-    i = AppleTrackGUID.objects.filter(guid__contains=partial_guid).order_by("guid__guid")
+    i = AppleTrackGUID.objects.filter(guid__contains=partial_guid).order_by("guid")
     w = AppleWeeklyTrackCount.merged.feed_weeks(partial_guid)
     c = AppleWeeklyTrackCount.merged.feed_counts(partial_guid, orientation)
 
