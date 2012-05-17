@@ -242,7 +242,7 @@ def feed_detail(request, partial_guid):
         }, context_instance=RequestContext(request))
 
 
-def guid_detail(request, track_guid_id):
+def guid_detail(request, trackguid_id):
 
     listing = AppleWeeklyTrackCount.objects.filter(guid__id__exact=track_guid_id).order_by("summary__week_beginning")
 
@@ -317,7 +317,7 @@ def guid_detail(request, track_guid_id):
 
     return render_to_response('stats/apple/guid.html',{
         'listing':listing,
-        'ref':track_guid_id,
+        'trackguid_id':trackguid_id,
         'summary':summary,
         'cht':pivcht
     }, context_instance=RequestContext(request))
