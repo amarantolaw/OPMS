@@ -272,7 +272,7 @@ def guid_detail(request, trackguid_id):
                 'categories': [
                     'summary__week_beginning'
                 ],
-                'legend_by': 'summary__service_name'
+                'legend_by': 'summary__service_name_string'
             },
             'terms':{
                 'feed_total': Sum('count')
