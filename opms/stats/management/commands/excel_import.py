@@ -1,6 +1,6 @@
 # Import script for Apple iTunes U supplied Excel spreadsheets
 # Author: Carl Marshall
-# Last Edited: 29-3-2011
+# Last Edited: 17-5-2012
 
 #from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
@@ -8,11 +8,11 @@ from django.core.management.base import LabelCommand, CommandError
 from opms.stats.models import *
 from xlrd import open_workbook, biffh
 from datetime import datetime
-import sys, uuid
+import sys, uuid, os
 
 class Command(LabelCommand):
-    args = '<spreadsheet.xls>'
-    help = 'Imports the contents of the specified spreadsheet into the database'
+    args = '<path/to/spreadsheets/>'
+    help = 'Imports the contents of the specified directory of spreadsheets into the database'
     #option_list = LabelCommand.option_list + (
     #    make_option('--merge', action='store', dest='merge',
     #        default=False, help='Use this option to add this data to exisiting data, thus summing counts for records.'),
@@ -59,21 +59,40 @@ class Command(LabelCommand):
         self.preview_handle_cache = list(ApplePreviewHandle.objects.all())
         self.preview_guid_cache = list(ApplePreviewGUID.objects.all())
 
+    def _list_files(self, path):
+        file_list = []
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                if file.lower()[-4:] == ".xls":
+                    file_list.append(os.path.join(root)+"/"+file) # Yes, unix specific hack
+        return file_list
 
-    def handle_label(self, filename, **options):
+
+    def handle_label(self, path, **options):
         print "Import started at " + str(datetime.utcnow()) + "\n"
 
-        # Create an error log per import file
-        self._errorlog_start(filename + '_import-error.log')
+        # Scan directory for files, compare them to names in the existing LogFile list. Import the first X new files.
+        found_files_list = self._list_files(path)
+        found_files_list.sort() # Trust the naming conventions to put a sortable date on them
+        import_file_limit = len(found_files_list)
+        if import_file_limit > 10:
+            import_file_limit = 10
+        print "%s files have been found for import. Processing %s of them now",(len(found_files_list), import_file_limit)
+        for filename in found_files_list:
+            print filename
+            # This only needs setting/getting the once per call of this function
+            logfile_obj, created = self._logfile(file)
+            if created and import_file_limit > 0:
+                # Create an error log per import file
+                self._errorlog_start(filename + '_import-error.log')
 
-        # This only needs setting/getting the once per call of this function
-        logfile_obj = self._logfile(filename)
+                # Read the Worksheet
+                wb = open_workbook(filename)
 
-        # Read the Worksheet
-        wb = open_workbook(filename)
+                # Start the parsing with the summary sheet
+                self._parse_summary(logfile_obj, wb)
 
-        # Start the parsing with the summary sheet
-        self._parse_summary(logfile_obj, wb)
+                import_file_limit -= 1
 
         print "\nImport finished at " + str(datetime.utcnow())
         self._errorlog_stop()
@@ -85,7 +104,7 @@ class Command(LabelCommand):
         "Get or create a LogFile record for the given filename"
         logfile = {}
 
-        # Some basic checking
+        # Some basic checking - the file list function should make this redundant
         if filename.endswith('.xls') == False:
            raise CommandError("This is not a valid Excel 1998-2002 file. Must end in .xls\n\n")
 
@@ -126,7 +145,7 @@ class Command(LabelCommand):
 
         obj.save()
 
-        return obj
+        return obj, created
 
 
     # ===================================================== SUMMARY ================================

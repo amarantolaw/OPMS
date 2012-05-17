@@ -238,3 +238,5 @@ def feed_detail(request, partial_guid):
             'cht':pivcht,
             'chart_height':int(40+summary.get('count'))
         }, context_instance=RequestContext(request))
+
+
