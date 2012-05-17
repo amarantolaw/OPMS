@@ -1,5 +1,6 @@
 from django.db import models
 from apple_summary import *
+from datetime import date
 
 class AppleWeeklySummaryManager(models.Manager):
     def get_query_set(self):
