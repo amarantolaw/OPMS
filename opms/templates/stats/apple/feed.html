@@ -50,11 +50,7 @@ $(document).ready(function()
             <th>{{ row.column_a|default:"Week Commencing" }}</th>
             <th>{{ row.total|default:"Week Total" }}</th>
             {% for item in row.data %}
-                {% if orientation == 1 %}
-            <th>{{ item }}</th>
-                {% else %}
-            <th><a href="/analytics/apple/guid/{{ item }}">{{ item }}</a></th>
-                {% endif %}
+            <th>{{ item }}</th> {# Due to table sorting, can't have links in the column headers! #}
             {% endfor %}
         </tr>
     </thead>
@@ -71,7 +67,7 @@ $(document).ready(function()
         {% endif %}
         {% if forloop.counter0 > 1 %}
         <tr>
-            <td>{% if orientation == 1 %}
+            <td>{% if orientation == 0 %}
                 {{ row.column_a }}
                 {% else %}
                 <a href="/analytics/apple/guid/{{ row.column_a }}">{{ row.column_a }}</a>

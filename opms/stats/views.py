@@ -90,9 +90,9 @@ def feed_detail(request, partial_guid):
     # Construct pivot table of data.
     # Orientation 0 is items on x, time on y. Anything else is time on x, items on y.
     try:
-        orientation = int(request.GET.get('orientation', 0))
+        orientation = int(request.GET.get('orientation', 1))
     except ValueError:
-        orientation = 0
+        orientation = 1
 
     i = AppleWeeklyTrackCount.merged.feed_items(partial_guid)
     w = AppleWeeklyTrackCount.merged.feed_weeks(partial_guid)
@@ -128,7 +128,7 @@ def feed_detail(request, partial_guid):
         listing.insert(0,{'column_a':'Item Total', 'data':row_data, 'total':''})
         row_data = []
         for item in i:
-            row_data.append(str(item)) # Removed the truncating
+            row_data.append(str(item)[23:52])
         listing.insert(0,{'column_a':'Week Commencing', 'data':row_data, 'total':'Week Total'})
     else:
         for week in w:
