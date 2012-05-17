@@ -79,7 +79,7 @@ class Command(LabelCommand):
             import_file_limit = 10
         print "%s files have been found for import. Processing %s of them now" % (len(found_files_list), import_file_limit)
         for filename in found_files_list:
-            print filename
+            print "Importing from %s" % (filename)
             # This only needs setting/getting the once per call of this function
             logfile_obj, created = self._logfile(filename)
             if created and import_file_limit > 0:
@@ -224,7 +224,7 @@ class Command(LabelCommand):
 
             # This needs to account for different types of import file (public vs public_dz)
             summary_object, summary_created = AppleWeeklySummary.objects.get_or_create(
-                week_ending=week.get('week_beginning'),
+                week_beginning=week.get('week_beginning'),
                 service_name=logfile_obj.service_name,
                 defaults=week)
             summary_object.save()
@@ -256,7 +256,7 @@ class Command(LabelCommand):
 
                         # Create afresh... perhaps a little superfluous
                         summary_object, summary_created = AppleWeeklySummary.objects.get_or_create(
-                            week_ending=week.get('week_beginning'),
+                            week_beginning=week.get('week_beginning'),
                             service_name=logfile_obj.service_name,
                             defaults=week)
                         summary_object.save()
@@ -328,7 +328,7 @@ class Command(LabelCommand):
             tc.save()
             count += 1
 
-        print "Imported TRACK data for " + str(summary_object.week_ending) + " with " + str(count) + " rows added."
+        print "Imported TRACK data for " + str(summary_object.week_beginning) + " with " + str(count) + " rows added."
         return None
 
 
@@ -471,7 +471,7 @@ class Command(LabelCommand):
             bc.save()
             count += 1
 
-        print "Imported BROWSE data for " + str(summary_object.week_ending) + " with " + str(count) + " rows added."
+        print "Imported BROWSE data for " + str(summary_object.week_beginning) + " with " + str(count) + " rows added."
         return None
 
 
@@ -614,7 +614,7 @@ class Command(LabelCommand):
             pc.save()
             count += 1
 
-        print "Imported PREVIEW data for " + str(summary_object.week_ending) + " with " + str(count) + " rows added."
+        print "Imported PREVIEW data for " + str(summary_object.week_beginning) + " with " + str(count) + " rows added."
         return None
 
 
