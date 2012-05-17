@@ -26,7 +26,7 @@ class AppleWeeklySummaryManager(models.Manager):
         cumulative_total = 0
         week_number = -5  # Want to be able to calculate this from a preset start date...
         for row in cursor.fetchall():
-            r = self.model(week_ending=row[0], browse=row[1], download_preview=row[2],
+            r = self.model(week_beginning=row[0], browse=row[1], download_preview=row[2],
                 download_preview_ios=row[3], download_track=row[4], download_tracks=row[5],
                 download_ios=row[6], subscription=row[7], subscription_enclosure=row[8],
                 subscription_feed=row[9], total_track_downloads=row[10])

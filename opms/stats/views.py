@@ -184,7 +184,7 @@ def feed_detail(request, partial_guid):
             'options':{
                 'source': AppleWeeklyTrackCount.objects.filter(guid__guid__contains = partial_guid),
                 'categories': [
-                    'summary__week_ending'
+                    'summary__week_beginning'
                 ],
                 'legend_by': 'guid__guid'
             },
