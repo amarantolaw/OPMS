@@ -24,8 +24,6 @@ Most popular {{summary.max_term|default:"item"}} ({{ summary.max_name }}) had {{
 {{ cht|load_charts:"hcontainer" }}
 <div id="hcontainer" style="width: 100%; height: {{ chart_height }}em">Chart to be rendered here. Please be
     patient as this can take some time on large feeds and slow computers.</div>
-{#<p><img src="../../../graph/feed_by_week/{{ref}}.png" /><br />#}
-{#    <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=300">[Print Version]</a> <a href="../../../graph/feed_by_week/{{ref}}.png?dpi=600">[High Resolution]</a></p>#}
 
 <script>
 $(document).ready(function()
@@ -36,7 +34,14 @@ $(document).ready(function()
 </script>
 
 <h3>Data table</h3>
-<p>Display with columns of: <a href="?orientation=0">Items</a> or <a href="?orientation=1">Weeks</a></p>
+<p><span class="label label-info">Info</span> Switch display layout.
+    {% if orientation == 1 %}
+        <a href="?orientation=0">Change to columns of Items</a>
+    {% else %}
+        <a href="?orientation=1">Change to columns of Weeks</a>
+    {% endif %}
+    </p>
+
 <table id="summaryTable" class="tablesorter">
     <thead>
         {% for row in listing %}
@@ -45,7 +50,11 @@ $(document).ready(function()
             <th>{{ row.column_a|default:"Week Commencing" }}</th>
             <th>{{ row.total|default:"Week Total" }}</th>
             {% for item in row.data %}
+                {% if orientation == 1 %}
             <th>{{ item }}</th>
+                {% else %}
+            <th><a href="/analytics/apple/guid/{{ item }}">{{ item }}</a></th>
+                {% endif %}
             {% endfor %}
         </tr>
     </thead>
@@ -62,7 +71,11 @@ $(document).ready(function()
         {% endif %}
         {% if forloop.counter0 > 1 %}
         <tr>
-            <td>{{ row.column_a }}</td>
+            <td>{% if orientation == 1 %}
+                {{ row.column_a }}
+                {% else %}
+                <a href="/analytics/apple/guid/{{ row.column_a }}">{{ row.column_a }}</a>
+            {% endif %}</td>
             <td class="highlight-total">{{ row.total }}</td>
             {% for item in row.data %}
             <td>{{ item }}</td>

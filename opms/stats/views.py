@@ -128,7 +128,7 @@ def feed_detail(request, partial_guid):
         listing.insert(0,{'column_a':'Item Total', 'data':row_data, 'total':''})
         row_data = []
         for item in i:
-            row_data.append(str(item)[29:50])
+            row_data.append(str(item)) # Removed the truncating
         listing.insert(0,{'column_a':'Week Commencing', 'data':row_data, 'total':'Week Total'})
     else:
         for week in w:
@@ -236,7 +236,89 @@ def feed_detail(request, partial_guid):
             'ref':partial_guid,
             'summary':summary,
             'cht':pivcht,
-            'chart_height':int(40+summary.get('count'))
+            'chart_height':int(40+summary.get('count')),
+            'orientation':orientation
         }, context_instance=RequestContext(request))
+
+
+def guid_detail(request, target_guid):
+
+    listing = AppleWeeklyTrackCount.objects.filter(guid__guid__exact=target_guid).order_by("summary__week_beginning")
+
+    # Generate summary data
+    summary = {}
+    summary['count'] = len(listing)
+    summary['total'] = 0
+    summary['max_value']   = 0
+    summary['max_week'] = ""
+    for row in listing:
+        summary['total'] += int(row.count)
+        if int(row.count) > summary.get('max_value'):
+            summary['max_value'] = int(row.count)
+            summary['max_week'] = row.summary.week_beginning
+    try:
+        summary['avg'] = summary.get('total') // summary.get('count')
+    except ZeroDivisionError:
+        summary['avg'] = summary.get('total')
+
+    # Create a Datapool object for Chartit
+    cdata = PivotDataPool(
+        series=[{
+            'options':{
+                'source': AppleWeeklyTrackCount.objects.filter(guid__guid__exact=target_guid),
+                'categories': [
+                    'summary__week_beginning'
+                ],
+                'legend_by': 'guid__guid'
+            },
+            'terms':{
+                'feed_total': Sum('count')
+            }
+        }]
+    )
+    # Create a Chart object for Chartit
+    pivcht = PivotChart(
+        datasource = cdata,
+        series_options = [{
+            'options':{
+                'type':'column',
+                'stacking':True,
+                'xAxis': 0,
+                'yAxis': 0
+            },
+            'terms':['feed_total']
+        }],
+        chart_options = {
+            'title':{'text':'Number of downloads per week for this item'},
+            'xAxis':{
+                'title': {
+                    'text':'Week Beginning'
+                },
+                'labels':{
+                    'rotation': '0',
+                    'step': '4',
+                    'staggerLines':'2'
+                }
+            },
+            'yAxis':{
+                'title': {
+                    'text':'Download Count',
+                    'rotation': '90'
+                },
+                'stackLabels': {
+                    'enabled': True,
+                    'rotation': '90',
+                    'textAlign': 'right'
+                }
+            }
+        }
+    )
+
+    return render_to_response('stats/apple/guid.html',{
+        'listing':listing,
+        'ref':target_guid,
+        'summary':summary,
+        'cht':pivcht
+    }, context_instance=RequestContext(request))
 
 

@@ -1,0 +1,59 @@
+{% extends "stats/base.html" %}
+{% load static stats_tags chartit %}
+{% get_static_prefix as STATIC_PREFIX %}
+{% block head %}
+    <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection" />
+    <script src="{{ STATIC_PREFIX }}js/highcharts.js"></script>
+{% endblock %}
+
+{% block content %}
+<h1>Summary for {{ref}}</h1>
+
+{% if listing %}
+
+    {% if summary %}
+<h3>Summary</h3>
+<p>This item has {{ summary.count }} has been downloaded {{ summary.total }} times, making the average
+    {{ summary.avg }} downloads per week. The most popular week was the week beginning {{ summary.max_week|date:"Y-m-d" }}
+    with {{ summary.max_value }} downloads.
+    {% endif %}
+
+<h3>Data visualisation</h3>
+
+{{ cht|load_charts:"hcontainer" }}
+<div id="hcontainer" style="width: 100%; height: 40em">Chart to be rendered here. Please be
+    patient as this can take some time on slow computers.</div>
+
+<script>
+$(document).ready(function()
+    {
+        $("#summaryTable").tablesorter( {sortList: [[0,1]]} );
+    }
+);
+</script>
+
+<h3>Data table</h3>
+<table id="summaryTable" class="tablesorter">
+    <thead>
+        <tr>
+            <th>Week Commencing</th>
+            <th>Week Total</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for row in listing %}
+        <tr>
+            <td>{{ row.summary.week_beginning|date:"Y-m-d" }}</td>
+            <td>{{ row.count }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Data is missing</p>
+{% endif %}
+
+
+{% endblock %}
