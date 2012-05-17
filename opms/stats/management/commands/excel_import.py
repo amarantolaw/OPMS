@@ -77,7 +77,7 @@ class Command(LabelCommand):
         import_file_limit = len(found_files_list)
         if import_file_limit > 10:
             import_file_limit = 10
-        print "%s files have been found for import. Processing %s of them now" % (len(found_files_list), import_file_limit)
+        print "%s files have been found. Importing up to %s of them now." % (len(found_files_list), import_file_limit)
         for filename in found_files_list:
             if import_file_limit > 0:
                 logfile_obj, created = self._logfile(filename)
@@ -95,6 +95,8 @@ class Command(LabelCommand):
                     self._errorlog_stop()
 
                     import_file_limit -= 1
+                else:
+                    print "\n\n%s - has already been imported" % (filename)
 
         print "\nImport finished at " + str(datetime.utcnow())
         return None
