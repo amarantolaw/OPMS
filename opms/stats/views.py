@@ -95,7 +95,7 @@ def feed_detail(request, partial_guid):
         orientation = 1
 
 #    i = AppleWeeklyTrackCount.merged.feed_items(partial_guid)
-    i = AppleWeeklyTrackCount.objects.filter(guid__guid__contains=partial_guid)
+    i = AppleTrackGUID.objects.filter(guid__contains=partial_guid).order_by("guid__guid")
     w = AppleWeeklyTrackCount.merged.feed_weeks(partial_guid)
     c = AppleWeeklyTrackCount.merged.feed_counts(partial_guid, orientation)
 
@@ -104,16 +104,16 @@ def feed_detail(request, partial_guid):
     count = c.pop(0)
     if orientation == 0:
         for item in i:
-            column_totals[item.guid.guid] = 0
+            column_totals[item.guid] = 0
 
         for week in w:
             row_data = []
             row_total = 0
             for item in i:
-                if count != None and count.get("week_beginning") == week and count.get("guid") == item.guid.guid:
+                if count != None and count.get("week_beginning") == week and count.get("guid") == item.guid:
                     row_data.append(int(count.get("count")))
                     row_total += int(count.get("count"))
-                    column_totals[item.guid.guid] += int(count.get("count"))
+                    column_totals[item.guid] += int(count.get("count"))
                     try:
                         count = c.pop(0)
                     except IndexError:
@@ -125,11 +125,11 @@ def feed_detail(request, partial_guid):
         # Put column headers and totals into listing array - values, then headings
         row_data = []
         for item in i:
-            row_data.append(column_totals.get(item.guid.guid))
+            row_data.append(column_totals.get(item.guid))
         listing.insert(0,{'column_a':'Item Total', 'data':row_data, 'total':''})
         row_data = []
         for item in i:
-            row_data.append(str(item.guid.guid))
+            row_data.append(str(item.guid))
         listing.insert(0,{'column_a':'Week Commencing', 'data':row_data, 'total':'Week Total'})
     else:
         for week in w:
@@ -139,7 +139,7 @@ def feed_detail(request, partial_guid):
             row_data = []
             row_total = 0
             for week in w:
-                if count != None and count.get("week_beginning") == week and count.get("guid") == item.guid.guid:
+                if count != None and count.get("week_beginning") == week and count.get("guid") == item.guid:
                     row_data.append(int(count.get("count")))
                     row_total += int(count.get("count"))
                     column_totals[week] += int(count.get("count"))
@@ -149,7 +149,7 @@ def feed_detail(request, partial_guid):
                         count = None
                 else:
                     row_data.append(None)
-            listing.append({'column_a':[item.id,item.guid.guid], 'data':row_data, 'total':row_total})
+            listing.append({'column_a':[item.id,item.guid], 'data':row_data, 'total':row_total})
 
         # Put column headers and totals into listing array - values, then headings
         row_data = []
