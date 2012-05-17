@@ -318,11 +318,12 @@ def guid_detail(request, trackguid_id):
     )
 
     return render_to_response('stats/apple/guid.html',{
-        'listing':listing,
         'guid':guid,
-        'ref':partial_guid, # Need this for the breadcrumb path via feeds
+        'listing':listing,
         'summary':summary,
-        'cht':pivcht
+        'cht':pivcht,
+        'trackguid_id':guid.id, # Need this for the breadcrumb path via feeds
+        'ref':partial_guid, # Need this for the breadcrumb path via feeds
     }, context_instance=RequestContext(request))
 
 
