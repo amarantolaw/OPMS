@@ -102,7 +102,7 @@ def feed_detail(request, partial_guid):
     listing = []
     column_totals = {}
     count = c.pop(0)
-    if orientation == 0:
+    if orientation == 0: # Show items as columns, and weeks as rows
         for item in i:
             column_totals[item.guid] = 0
 
@@ -129,9 +129,9 @@ def feed_detail(request, partial_guid):
         listing.insert(0,{'column_a':'Item Total', 'data':row_data, 'total':''})
         row_data = []
         for item in i:
-            row_data.append(str(item.guid))
+            row_data.append(str(item.name))
         listing.insert(0,{'column_a':'Week Commencing', 'data':row_data, 'total':'Week Total'})
-    else:
+    else: # Show weeks as columns, and items as rows
         for week in w:
             column_totals[week] = 0
 
@@ -149,7 +149,7 @@ def feed_detail(request, partial_guid):
                         count = None
                 else:
                     row_data.append(None)
-            listing.append({'column_a':[item.id,item.guid], 'data':row_data, 'total':row_total})
+            listing.append({'column_a':[item.id,item.name], 'data':row_data, 'total':row_total})
 
         # Put column headers and totals into listing array - values, then headings
         row_data = []
