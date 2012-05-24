@@ -187,7 +187,7 @@ def feed_detail(request, partial_guid):
                 'categories': [
                     'summary__week_beginning'
                 ],
-                'legend_by': 'guid__guid'
+                'legend_by': 'guid__name'
             },
             'terms':{
                 'feed_total': Sum('count')

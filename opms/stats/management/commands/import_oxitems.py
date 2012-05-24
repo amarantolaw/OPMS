@@ -81,7 +81,7 @@ class Command(NoArgsCommand):
         and deleted values through to ATG.
         '''
         print "OxItems Import beginning scan of Track records"
-        for row in AppleTrackGUID.objects.all():
+        for counter, row in enumerate(AppleTrackGUID.objects.all()):
             oxitem = self._getOxitem(row.guid)
             if oxitem is not None:
                 self._debug(row.guid + ' - ' + oxitem.item_title)
@@ -90,6 +90,8 @@ class Command(NoArgsCommand):
                 row.save()
             else:
                 self._debug(row.guid + ' - *************** UNKNOWN GUID *************** ')
+            if counter == 0 or (counter % 50) == 0:
+                print "Scanned %s Track GUIDs" % (counter)
         print "OxItems import finished"
         return None
 
