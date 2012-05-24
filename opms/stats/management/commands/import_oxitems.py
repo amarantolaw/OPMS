@@ -13,7 +13,7 @@ class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
         make_option('--no-sync', action='store', dest='no_sync', default=False,
             help='Use this to skip the sync with OxItems live data'),
-        )
+    )
     help = 'Scan through OxItems database and import basic info into OPMS:Stats'
 
     def __init__(self):
@@ -85,8 +85,29 @@ class Command(NoArgsCommand):
             else:
                 self._debug(track.guid + ' - *************** UNKNOWN GUID *************** ')
         print "OxItems import finished"
+
+        self._parseTrackGuid()
         return None
 
+    def _parseTrackGuid(self):
+        '''
+        Scan through all the AppleTrackGuid records and try and find the latest/most recent version, copying the name
+        and deleted values through to ATG.
+        '''
+        for row in AppleTrackGUID.objects.all():
+            oxitem = self._getOxitem(row.guid)
+            if oxitem is not None:
+                print "Found %s has title '%s'" % (row.guid,oxitem.item_title)
+            else:
+                print "No title found for %s" % row.guid
+        return None
+
+    def _getOxitem(self, guidstring):
+        oxitems = Rg07Items.objects.filter(item_guid__exact=guidstring).order_by('-modified')
+        try:
+            return oxitems[0]
+        except IndexError:
+            return oxitem
 
     # DEBUG AND INTERNAL HELP METHODS ==============================================================
 
