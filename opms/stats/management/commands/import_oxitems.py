@@ -107,7 +107,7 @@ class Command(NoArgsCommand):
         try:
             return oxitems[0]
         except IndexError:
-            return oxitem
+            return None
 
     # DEBUG AND INTERNAL HELP METHODS ==============================================================
 
