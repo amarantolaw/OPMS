@@ -72,20 +72,6 @@ class Command(NoArgsCommand):
         else:
             print "Skipping Database Synchronisation"
 
-        # Get list of Oxitems data to scan through
-        oxitems = list(Rg07Items.objects.order_by('item_guid','-modified'))
-        print "OxItems Import beginning scan of Track records"
-        for track in AppleTrackGUID.objects.all():
-            for item in oxitems:
-                if track.guid == item.item_guid:
-                    self._debug(track.guid + ' - ' + item.item_title)
-                    track.name = item.item_title
-                    track.deleted = item.deleted
-                    track.save()
-            else:
-                self._debug(track.guid + ' - *************** UNKNOWN GUID *************** ')
-        print "OxItems import finished"
-
         self._parseTrackGuid()
         return None
 
@@ -94,12 +80,17 @@ class Command(NoArgsCommand):
         Scan through all the AppleTrackGuid records and try and find the latest/most recent version, copying the name
         and deleted values through to ATG.
         '''
+        print "OxItems Import beginning scan of Track records"
         for row in AppleTrackGUID.objects.all():
             oxitem = self._getOxitem(row.guid)
             if oxitem is not None:
-                print "Found %s has title '%s'" % (row.guid,oxitem.item_title)
+                self._debug(row.guid + ' - ' + oxitem.item_title)
+                row.name = oxitem.item_title
+                row.deleted = oxitem.deleted
+                row.save()
             else:
-                print "No title found for %s" % row.guid
+                self._debug(row.guid + ' - *************** UNKNOWN GUID *************** ')
+        print "OxItems import finished"
         return None
 
     def _getOxitem(self, guidstring):
