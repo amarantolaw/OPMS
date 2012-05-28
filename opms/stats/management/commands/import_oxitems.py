@@ -13,7 +13,7 @@ class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
         make_option('--no-sync', action='store', dest='no_sync', default=False,
             help='Use this to skip the sync with OxItems live data'),
-        )
+    )
     help = 'Scan through OxItems database and import basic info into OPMS:Stats'
 
     def __init__(self):
@@ -72,21 +72,35 @@ class Command(NoArgsCommand):
         else:
             print "Skipping Database Synchronisation"
 
-        # Get list of Oxitems data to scan through
-        oxitems = list(Rg07Items.objects.order_by('item_guid','-modified'))
+        self._parseTrackGuid()
+        return None
+
+    def _parseTrackGuid(self):
+        '''
+        Scan through all the AppleTrackGuid records and try and find the latest/most recent version, copying the name
+        and deleted values through to ATG.
+        '''
         print "OxItems Import beginning scan of Track records"
-        for track in AppleTrackGUID.objects.all():
-            for item in oxitems:
-                if track.guid == item.item_guid:
-                    self._debug(track.guid + ' - ' + item.item_title)
-                    track.name = item.item_title
-                    track.deleted = item.deleted
-                    track.save()
+        for counter, row in enumerate(AppleTrackGUID.objects.all()):
+            oxitem = self._getOxitem(row.guid)
+            if oxitem is not None:
+                self._debug(row.guid + ' - ' + oxitem.item_title)
+                row.name = oxitem.item_title
+                row.deleted = oxitem.deleted
+                row.save()
             else:
-                self._debug(track.guid + ' - *************** UNKNOWN GUID *************** ')
+                self._debug(row.guid + ' - *************** UNKNOWN GUID *************** ')
+            if counter == 0 or (counter % 50) == 0:
+                print "Scanned %s Track GUIDs" % (counter)
         print "OxItems import finished"
         return None
 
+    def _getOxitem(self, guidstring):
+        oxitems = Rg07Items.objects.filter(item_guid__exact=guidstring).order_by('-modified')
+        try:
+            return oxitems[0]
+        except IndexError:
+            return None
 
     # DEBUG AND INTERNAL HELP METHODS ==============================================================
 

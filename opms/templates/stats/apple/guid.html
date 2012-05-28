@@ -9,7 +9,9 @@
 {% endblock %}
 
 {% block content %}
-<h1>Item details for {{guid.guid}}</h1>
+<h1>Item details for {{guid.name}}</h1>
+<p>GUID: {{ guid.guid }}.
+    {% if guid.deleted %}<br /><span class="label label-info">Info</span> This item has been deleted.{% endif %}</p>
 
 {% if listing %}
 

@@ -24,11 +24,20 @@ Most popular {{summary.max_term|default:"item"}} ({{ summary.max_name }}) had {{
 {{ cht|load_charts:"hcontainer" }}
 <div id="hcontainer" style="width: 100%; height: {{ chart_height }}em">Chart to be rendered here. Please be
     patient as this can take some time on large feeds and slow computers.</div>
+{% if trackguidlist %}
+    <h4>Legend</h4>
+    <dl>
+    {% for row in trackguidlist %}
+        <dt>{{ row.guid }}</dt>
+        <dd>{{ row.name }}</dd>
+    {% endfor %}
+    </dl>
+{% endif %}
 
 <script>
 $(document).ready(function()
     {
-        $("#summaryTable").tablesorter( {sortList: [[0,1]]} );
+        $("#summaryTable").tablesorter( {sortList: [[1,0]]} );
     }
 );
 </script>
@@ -74,7 +83,7 @@ $(document).ready(function()
             <td>{% if orientation == 0 %}
                 {{ row.column_a }}
                 {% else %}
-                <a href="/analytics/apple/guid/{{ row.column_a|first }}">{{ row.column_a|last }}</a>
+                <a href="{% url apple-guid-detail row.column_a|first %}">{{ row.column_a|last }}</a>
             {% endif %}</td>
             <td class="highlight-total">{{ row.total }}</td>
             {% for item in row.data %}
