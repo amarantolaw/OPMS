@@ -45,10 +45,10 @@ $(document).ready(function()
     {
         $("#summaryTable").tablesorter( {sortList: [[1,0]]} );
         $("#show").click(function(){
-            $.each(_chartit_hco_array[0].series, function(j,s){s.show();})
+            $.each(_chartit_hco_array["series"], function(j,s){s.show();})
         })
         $("#hide").click(function(){
-            $.each(_chartit_hco_array[0].series, function(j,s){s.hide();})
+            $.each(_chartit_hco_array["series"], function(j,s){s.hide();})
         })
     }
 );
