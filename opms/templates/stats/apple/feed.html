@@ -24,10 +24,11 @@ Most popular {{summary.max_term|default:"item"}} ({{ summary.max_name }}) had {{
 {{ cht|load_charts:"hcontainer" }}
 <div id="hcontainer" style="width: 100%; height: {{ chart_height }}em">Chart to be rendered here. Please be
     patient as this can take some time on large feeds and slow computers.</div>
+<p><span class="label label-info">Info</span> You can hide or show specific items on the chart by clicking on the
+    legend above. You can quickly toggle all the chart data on or off with:</p>
 <div class="btn-group">
-    <span class="label label-info">Info</span> Quickly toggle the chart data on or off with:
-    <button class="btn" onclick="">Show All</button>
-    <button class="btn">Hide All</button>
+    <button id="show" class="btn">Show All</button>
+    <button id="hide" class="btn">Hide All</button>
 </div>
 {% if trackguidlist %}
     <h4>Legend</h4>
@@ -43,6 +44,12 @@ Most popular {{summary.max_term|default:"item"}} ({{ summary.max_name }}) had {{
 $(document).ready(function()
     {
         $("#summaryTable").tablesorter( {sortList: [[1,0]]} );
+        $("#show").click(function(){
+            $.each(_chartit_hco_array.series, function(j,s){s.show();})
+        })
+        $("#hide").click(function(){
+            $.each(_chartit_hco_array.series, function(j,s){s.hide();})
+        })
     }
 );
 </script>
