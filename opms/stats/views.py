@@ -179,23 +179,23 @@ def feed_detail(request, partial_guid):
     except ZeroDivisionError:
         summary['avg'] = summary.get('total')
 
-    # Create a Datapool object for Chartit
-    cdata = PivotDataPool(
-        series=[{
-            'options':{
-                'source': AppleWeeklyTrackCount.objects.filter(guid__guid__contains = partial_guid),
-                'categories': [
-                    'summary__week_beginning'
-                ],
-                'legend_by': 'guid__name'
-            },
-            'terms':{
-                'feed_total': Sum('count')
-            }
-        }]
-    )
-    # Create a Chart object for Chartit
     try:
+        # Create a Datapool object for Chartit
+        cdata = PivotDataPool(
+            series=[{
+                'options':{
+                    'source': AppleWeeklyTrackCount.objects.filter(guid__guid__contains = partial_guid),
+                    'categories': [
+                        'summary__week_beginning'
+                    ],
+                    'legend_by': 'guid__name'
+                },
+                'terms':{
+                    'feed_total': Sum('count')
+                }
+            }]
+        )
+        # Create a Chart object for Chartit
         pivcht = PivotChart(
             datasource = cdata,
             series_options = [{
