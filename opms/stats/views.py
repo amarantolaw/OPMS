@@ -232,14 +232,26 @@ def feed_detail(request, partial_guid):
         }
     )
 
-    return render_to_response('stats/apple/feed.html',{
+    try:
+        return render_to_response('stats/apple/feed.html',{
             'listing':listing,
             'ref':partial_guid,
             'summary':summary,
             'cht':pivcht,
             'chart_height':int(40+summary.get('count')),
-            'orientation':orientation
+            'orientation':orientation,
+            'trackguidlist': i,
         }, context_instance=RequestContext(request))
+    except UnicodeEncodeError:
+        return render_to_response('stats/apple/feed.html',{
+            'listing':listing,
+            'ref':partial_guid,
+            'summary':summary,
+            'cht':None,
+            'chart_height':int(40+summary.get('count')),
+            'orientation':orientation,
+            'trackguidlist': i,
+            }, context_instance=RequestContext(request))
 
 
 def guid_detail(request, trackguid_id):
