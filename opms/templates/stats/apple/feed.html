@@ -24,6 +24,10 @@ Most popular {{summary.max_term|default:"item"}} ({{ summary.max_name }}) had {{
 {{ cht|load_charts:"hcontainer" }}
 <div id="hcontainer" style="width: 100%; height: {{ chart_height }}em">Chart to be rendered here. Please be
     patient as this can take some time on large feeds and slow computers.</div>
+<div class="btn-group">
+    <button class="btn" onclick="">Show All</button>
+    <button class="btn">Hide All</button>
+</div>
 {% if trackguidlist %}
     <h4>Legend</h4>
     <dl>
