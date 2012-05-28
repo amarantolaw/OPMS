@@ -195,63 +195,55 @@ def feed_detail(request, partial_guid):
         }]
     )
     # Create a Chart object for Chartit
-    pivcht = PivotChart(
-        datasource = cdata,
-        series_options = [{
-            'options':{
-                'type':'column',
-                'stacking':True,
-                'xAxis': 0,
-                'yAxis': 0
-            },
-            'terms':['feed_total']
-        }],
-        chart_options = {
-            'title':{'text':'Number of downloads per week for whole feed'},
-            'xAxis':{
-                'title': {
-                    'text':'Week Beginning'
+    try:
+        pivcht = PivotChart(
+            datasource = cdata,
+            series_options = [{
+                'options':{
+                    'type':'column',
+                    'stacking':True,
+                    'xAxis': 0,
+                    'yAxis': 0
                 },
-                'labels':{
-                    'rotation': '0',
-                    'step': '4',
-                    'staggerLines':'2'
-                }
-            },
-            'yAxis':{
-                'title': {
-                    'text':'Download Count',
-                    'rotation': '90'
+                'terms':['feed_total']
+            }],
+            chart_options = {
+                'title':{'text':'Number of downloads per week for whole feed'},
+                'xAxis':{
+                    'title': {
+                        'text':'Week Beginning'
+                    },
+                    'labels':{
+                        'rotation': '0',
+                        'step': '4',
+                        'staggerLines':'2'
+                    }
                 },
-                'stackLabels': {
-                    'enabled': True,
-                    'rotation': '90',
-                    'textAlign': 'right'
+                'yAxis':{
+                    'title': {
+                        'text':'Download Count',
+                        'rotation': '90'
+                    },
+                    'stackLabels': {
+                        'enabled': True,
+                        'rotation': '90',
+                        'textAlign': 'right'
+                    }
                 }
             }
-        }
-    )
-
-    try:
-        return render_to_response('stats/apple/feed.html',{
-            'listing':listing,
-            'ref':partial_guid,
-            'summary':summary,
-            'cht':pivcht,
-            'chart_height':int(40+summary.get('count')),
-            'orientation':orientation,
-            'trackguidlist': i,
-        }, context_instance=RequestContext(request))
+        )
     except UnicodeEncodeError:
-        return render_to_response('stats/apple/feed.html',{
-            'listing':listing,
-            'ref':partial_guid,
-            'summary':summary,
-            'cht':None,
-            'chart_height':int(40+summary.get('count')),
-            'orientation':orientation,
-            'trackguidlist': i,
-            }, context_instance=RequestContext(request))
+        pivcht = None
+
+    return render_to_response('stats/apple/feed.html',{
+        'listing':listing,
+        'ref':partial_guid,
+        'summary':summary,
+        'cht':pivcht,
+        'chart_height':int(40+summary.get('count')),
+        'orientation':orientation,
+        'trackguidlist': i,
+    }, context_instance=RequestContext(request))
 
 
 def guid_detail(request, trackguid_id):
