@@ -19,11 +19,22 @@
 Most popular {{summary.max_term|default:"item"}} ({{ summary.max_name }}) had {{ summary.max_value }} downloads.</p>
     {% endif %}
 
+    {%  if pivcht %}
 <h3>Data visualisation</h3>
 
 {{ cht|load_charts:"hcontainer" }}
 <div id="hcontainer" style="width: 100%; height: {{ chart_height }}em">Chart to be rendered here. Please be
     patient as this can take some time on large feeds and slow computers.</div>
+    {% endif %}
+    {% if trackguidlist %}
+        <h4>Legend</h4>
+        <dl>
+        {% for row in trackguidlist %}
+            <dt>{{ row.guid }}</dt>
+            <dd>{{ row.name }}</dd>
+        {% endfor %}
+        </dl>
+    {% endif %}
 
 <script>
 $(document).ready(function()

@@ -181,6 +181,7 @@ def feed_detail(request, partial_guid):
 
     try:
         # Create a Datapool object for Chartit
+        # Chartit can't do unicode at present, so add a hack to do a separate legend when this fails
         cdata = PivotDataPool(
             series=[{
                 'options':{
@@ -195,45 +196,62 @@ def feed_detail(request, partial_guid):
                 }
             }]
         )
-        # Create a Chart object for Chartit
-        pivcht = PivotChart(
-            datasource = cdata,
-            series_options = [{
+        trackguidlist = None
+    except UnicodeEncodeError:
+        cdata = PivotDataPool(
+            series=[{
                 'options':{
-                    'type':'column',
-                    'stacking':True,
-                    'xAxis': 0,
-                    'yAxis': 0
+                    'source': AppleWeeklyTrackCount.objects.filter(guid__guid__contains = partial_guid),
+                    'categories': [
+                        'summary__week_beginning'
+                    ],
+                    'legend_by': 'guid__guid'
                 },
-                'terms':['feed_total']
-            }],
-            chart_options = {
-                'title':{'text':'Number of downloads per week for whole feed'},
-                'xAxis':{
-                    'title': {
-                        'text':'Week Beginning'
-                    },
-                    'labels':{
-                        'rotation': '0',
-                        'step': '4',
-                        'staggerLines':'2'
-                    }
+                'terms':{
+                    'feed_total': Sum('count')
+                }
+            }]
+        )
+        trackguidlist = i
+
+
+    # Create a Chart object for Chartit
+    pivcht = PivotChart(
+        datasource = cdata,
+        series_options = [{
+            'options':{
+                'type':'column',
+                'stacking':True,
+                'xAxis': 0,
+                'yAxis': 0
+            },
+            'terms':['feed_total']
+        }],
+        chart_options = {
+            'title':{'text':'Number of downloads per week for whole feed'},
+            'xAxis':{
+                'title': {
+                    'text':'Week Beginning'
                 },
-                'yAxis':{
-                    'title': {
-                        'text':'Download Count',
-                        'rotation': '90'
-                    },
-                    'stackLabels': {
-                        'enabled': True,
-                        'rotation': '90',
-                        'textAlign': 'right'
-                    }
+                'labels':{
+                    'rotation': '0',
+                    'step': '4',
+                    'staggerLines':'2'
+                }
+            },
+            'yAxis':{
+                'title': {
+                    'text':'Download Count',
+                    'rotation': '90'
+                },
+                'stackLabels': {
+                    'enabled': True,
+                    'rotation': '90',
+                    'textAlign': 'right'
                 }
             }
-        )
-    except UnicodeEncodeError:
-        pivcht = None
+        }
+    )
 
     return render_to_response('stats/apple/feed.html',{
         'listing':listing,
@@ -242,7 +260,7 @@ def feed_detail(request, partial_guid):
         'cht':pivcht,
         'chart_height':int(40+summary.get('count')),
         'orientation':orientation,
-        'trackguidlist': i,
+        'trackguidlist': trackguidlist,
     }, context_instance=RequestContext(request))
 
 
