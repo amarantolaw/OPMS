@@ -49,7 +49,7 @@ class Command(LabelCommand):
         print "Import started at %s\n" % (datetime.datetime.utcnow())
 
         # Some basic checking
-        if not filename.endswith('.tx'):
+        if not filename.endswith('.txt'):
            raise CommandError("This is not a text (.txt) log file.\n\n")
 
         # Create an error log per import file
