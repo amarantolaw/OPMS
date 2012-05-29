@@ -23,7 +23,7 @@ class Command(LabelCommand):
     
     def __init__(self):
         # Single GeoIP object for referencing
-        self.geoip = pygeoip.GeoIP(os.path.join(PROJECT_ROOT, "stats/geoip_data/GeoIP.dat",pygeoip.MMAP_CACHE))
+        self.geoip = pygeoip.GeoIP(os.path.join(PROJECT_ROOT, "stats/geoip_data/GeoIP.dat"),pygeoip.MMAP_CACHE)
         # Single UASparser instand for referencing
         self.uasp = UASparser(cache_dir=os.path.join(PROJECT_ROOT, "stats/ua_data/"))
         self.uasp_format = ""
