@@ -53,7 +53,7 @@ class UASparser:
     
     ini_url  = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini'
     ver_url  = 'http://user-agent-string.info/rpc/get_data.php?key=free&format=ini&ver=y'
-    ini_path = 'stats/ua_data/uas_20110211-01.ini.txt'
+    ini_path = 'stats/ua_data/uas_20120524-02.ini.txt'
     ver_path = 'stats/ua_data/version.txt'
     info_url = 'http://user-agent-string.info'
     os_img_url = 'http://user-agent-string.info/pub/img/os/%s'
