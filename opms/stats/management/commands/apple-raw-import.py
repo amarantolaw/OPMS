@@ -3,7 +3,7 @@
 # Last Edited: 29-5-2012
 from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
-from opms.stats.models import AppleRawLogEntry, UserAgent, Rdns
+from opms.stats.models import LogFile, AppleRawLogEntry, UserAgent, Rdns
 from opms.stats.uasparser import UASparser, UASException
 import datetime, sys, os, pygeoip, csv
 from IPy import IP
@@ -15,10 +15,8 @@ class Command(LabelCommand):
     option_list = LabelCommand.option_list + (
         make_option('--startline', action='store', dest='start_at_line',
             default=1, help='Optional start line to allow resumption of large log files. Default is 1.'),
-#        make_option('--cache-size', action='store', dest='cache_size',
-#            default=100, help='Number of records to prefetch in the ApacheLogEntry lookup. Default is 100.'),
-        make_option('--single-import', action='store', dest='single_import',
-            default=True, help='Speeds up import rate by disabling support for parallel imports.'),
+#        make_option('--single-import', action='store', dest='single_import',
+#            default=True, help='Speeds up import rate by disabling support for parallel imports.'),
     )
     
     def __init__(self):
@@ -26,7 +24,6 @@ class Command(LabelCommand):
         self.geoip = pygeoip.GeoIP(os.path.join(PROJECT_ROOT, "stats/geoip_data/GeoIP.dat"),pygeoip.MMAP_CACHE)
         # Single UASparser instand for referencing
         self.uasp = UASparser(cache_dir=os.path.join(PROJECT_ROOT, "stats/ua_data/"))
-        self.uasp_format = ""
         # datetime value for any rdns timeout problems
         self.rdns_timeout = 0
         # Toggle debug statements on/off
@@ -39,8 +36,8 @@ class Command(LabelCommand):
         # Cache objects to hold subtables in memory 
         self.cache_user_agent = list(UserAgent.objects.all())
         self.cache_rdns = list(Rdns.objects.all())
-        # Option flag to enable or disable the parallel import safety checks
-        self.single_import = True
+#        # Option flag to enable or disable the parallel import safety checks
+#        self.single_import = True
         
         super(Command, self).__init__()
 
@@ -63,39 +60,11 @@ class Command(LabelCommand):
         self.import_stats['import_starttime'] = datetime.datetime.utcnow()
         self.import_stats['import_startline'] = int(options.get('start_at_line', 1))
 
+        # This only needs setting/getting the once per call of this function
+        logfile_obj = self._logfile(filename, 'itu-raw')
 
-        datareader = csv.reader(open(filename), dialect='excel-tab')
-        tsvdata = []
-        for i,row in enumerate(datareader):
-            tsvdata.append(row)
-            self.import_stats['line_counter'] = i
-        self.import_stats['line_count'] = len(tsvdata)
-        for i in range(0,20):
-            print tsvdata[i]
-
-
-     
-#        # Test the log_service option is valid. Use the same list as LogFile.SERVICE_NAME_CHOICES
-#        log_service = str(options.get('log_service', 'mpoau'))
-#        # Add the remaining services here when we start testing with that data
-#        if log_service == 'mpoau':
-#            # Assume mpoau logfiles
-#            self.uasp_format = r'%Y-%m-%dT%H:%M:%S%z %v %A:%p %h %l %u \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"'
-#        else:
-#            raise CommandError("This service name is unknown:" + log_service +".\n\n")
-#
-#
-#        self.cache_log_entry_size = int(options.get('cache_size', 100))
-#        if options.get('single_import', False) != False:
-#            print "Processing file with parallel import safties disabled."
-#            self.single_import = True
-#
-#
-#        # This only needs setting/getting the once per call of this function
-#        logfile_obj = self._logfile(filename, log_service)
-#
-#        # Send the file off to be parsed
-#        self._parsefile(logfile_obj)
+        # Send the file off to be parsed
+        self._parsefile(logfile_obj)
 #
         # Final stats output at end of file
         try:
@@ -124,10 +93,10 @@ class Command(LabelCommand):
 
 
     def _logfile(self, filename, log_service):
-        "Get or create a LogFile record for the given filename"
+        """Get or create a LogFile record for the given filename"""
         
         # Simple hack for this method initially...
-        logfile = {}
+        logfile = dict()
         logfile['service_name'] = log_service
         try:
             logfile['file_name'] = filename[filename.rindex('/')+1:]
@@ -156,50 +125,33 @@ class Command(LabelCommand):
 
 
     def _parsefile(self, logfile_obj):
-        # Create a parser for this file
-        parser = apachelog.parser(self.uasp_format)
         filename = logfile_obj.file_path + logfile_obj.file_name
-        
-        # Attempt to determine the number of lines in the log
-        log = open(filename)
-        for line in log:
-            self.import_stats['line_count'] += 1
-        print str(self.import_stats.get('line_count')) + " lines to parse. Beginning at line " + str(self.import_stats.get('import_startline')) + "\n"
-        log.close()
 
-        log = open(filename)
-        
-        previous_line = ""
-        for line in log:
-            # Update stats
-            self.import_stats['line_counter'] += 1
-            if self.import_stats.get('line_counter') < self.import_stats.get('import_startline'):
-                # Skip through to the specified line number
-                previous_line = line
-                continue
-            
-#            # Test for duplicate log entries immediately preceding
-#            if line == previous_line:
-#                self._errorlog("##### DUPLICATE LINE DETECTED ##### \n" +\
-#                    "Line # :" + str(self.import_stats.get('line_counter')) + "\n" +\
-#                    "Line   : " + str(line) + "\n")
-#                self.import_stats['duplicatecount'] += 1
-#            else:
-#                # Parse and store the line
-#           Removing the Duplicate line detection as I can't rule out the 0.5-1% of duplicates as being invalid yet: CM 9-12-11
-            self._parseline(parser, line, logfile_obj)
+        datareader = csv.reader(open(filename), dialect='excel-tab')
+        tsvdata = []
+        for i,row in enumerate(datareader):
+            tsvdata.append(row)
+            self.import_stats['line_counter'] = i
+        self.import_stats['line_count'] = len(tsvdata)
+        # Reset line counter for parsing scan
+        self.import_stats['line_counter'] = self.import_stats.get('import_startline')
+
+        for i in range(self.import_stats.get('line_counter'),len(tsvdata)):
+#            print tsvdata[i]
+#            self._parseline(tsvdata[i], logfile_obj)
+            self.import_stats['line_counter'] = i
 
             # Print progress report every 500 lines.
             if (self.import_stats.get('line_counter') % 500) == 0:
                 # Calculate the average rate of import for the whole process
-                try: 
+                try:
                     self.import_stats['import_rate'] = \
                     float(self.import_stats.get('line_counter') - self.import_stats.get('import_startline')) /\
                     float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
                 except ZeroDivisionError:
                     self.import_stats['import_rate'] = 1
                 # Calculate how long till finished
-                try: 
+                try:
                     efs = int(
                         float(self.import_stats.get('line_count') - self.import_stats.get('line_counter')) /\
                         float(self.import_stats.get('import_rate'))
@@ -211,21 +163,25 @@ class Command(LabelCommand):
                 efmin = efs // 60
                 efsec = efs % 60
                 efstring = str(efhr) + "h " + str(efmin) + "m " + str(efsec) + "s."
-                
+
                 # Output the status
-                print str(datetime.datetime.utcnow()) + ": " +\
-                    str((float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100)[0:5] + "% completed. " +\
-                    "Parsed " + str(self.import_stats.get('line_counter')) + " lines. " +\
-                    "Duplicates: " + str(self.import_stats.get('duplicatecount')) + ". " +\
-                    "Rate: " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec. " +\
-                    "Est. finish in " + efstring
-                    
+#                print str(datetime.datetime.utcnow()) + ": " +\
+#                    str((float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100)[0:5] + "% completed. " +\
+#                    "Parsed " + str(self.import_stats.get('line_counter')) + " lines. " +\
+#                    "Duplicates: " + str(self.import_stats.get('duplicatecount')) + ". " +\
+#                    "Rate: " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec. " +\
+#                    "Est. finish in " + efstring
+
+                print "%s:%s%% completed. Parsed %s lines. Rate: %s lines/sec. Estimated finish in %s" % (
+                    datetime.datetime.utcnow(),
+                    str((float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100)[0:5],
+                    self.import_stats.get('line_counter'),
+                    str(self.import_stats.get('import_rate'))[0:6],
+                    efstring
+                )
+
                 # Write the error cache to disk
                 self._error_log_save()
-
-            # Update duplicate line string for next pass
-            previous_line = line
-            
         return None
 
 
