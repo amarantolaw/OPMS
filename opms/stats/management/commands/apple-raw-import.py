@@ -5,7 +5,7 @@ from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
 from opms.stats.models import LogFile, AppleRawLogEntry, UserAgent, Rdns
 from opms.stats.uasparser import UASparser, UASException
-import datetime, sys, os, pygeoip, csv
+import datetime, time, timedelta, sys, os, pygeoip, csv
 from IPy import IP
 from settings import PROJECT_ROOT
 
@@ -203,7 +203,7 @@ class Command(LabelCommand):
 #            "storefront" : int(entrydict.get("storefront",0)),
 #            "user_agent" : self._user_agent(entrydict.get("useragent","")),
 #            "ipaddress" : self._ip_to_domainname(entrydict.get("ip_address",None)),
-#            "timestamp" : entrydict.get("timestamp"),
+#            "timestamp" : self._parse_timestamp(entrydict.get("timestamp")),
 #            "user_id" : entrydict.get("user_id","")
 #        }
 
@@ -221,7 +221,7 @@ class Command(LabelCommand):
         arle.storefront = int(entrydict.get("storefront",0))
         arle.user_agent = self._user_agent(entrydict.get("useragent",""))
         arle.ipaddress = self._ip_to_domainname(entrydict.get("ip_address",None))
-        arle.timestamp = entrydict.get("timestamp")
+        arle.timestamp = self._parse_timestamp(entrydict.get("timestamp"))
         arle.user_id = entrydict.get("user_id","")
         arle.save(force_insert=True)
 
@@ -338,6 +338,20 @@ class Command(LabelCommand):
         self.cache_user_agent.insert(0,user_agent)
         
         return user_agent
+
+
+
+    def _parse_timestamp(self,initialstring):
+        """Adjust timestamp supplied to GMT"""
+        input_format = "%Y-%m-%d %H:%M:%S"
+        base_time = time.strptime(initialstring[:-9],input_format)
+        try:
+            offset = int(initialstring[-5:])
+            delta = timedelta(hours = offset / 100)
+            ts = base_time - delta
+        except:
+            ts = base_time
+        return "{0:%Y-%m-%d %H:%M:%S}".format(ts)
 
 
     # DEBUG AND INTERNAL HELP METHODS ==============================================================
