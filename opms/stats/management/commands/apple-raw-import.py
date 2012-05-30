@@ -43,7 +43,7 @@ class Command(LabelCommand):
 
 
     def handle_label(self, filename, **options):
-        print "Import started at %s\n" % (datetime.datetime.utcnow())
+        print "Import started at {0:%Y %b %d %H:%M:%S}\n".format(datetime.datetime.utcnow())
 
         # Some basic checking
         if not filename.endswith('.txt'):
@@ -75,13 +75,14 @@ class Command(LabelCommand):
             self.import_stats['import_rate'] = 0
 
         print """
-            Import finished at %s
-            %s Lines parsed over %s seconds
-            Giving a rate of %s lines/sec
-            """ % (datetime.datetime.utcnow(),
-                   self.import_stats.get('line_counter'),
-                   self.import_stats.get('import_duration'),
-                   str(self.import_stats.get('import_rate'))[0:6]
+            Import finished at {0:%Y %b %d %H:%M:%S}
+            {1:d} Lines parsed over {2:d} seconds
+            Giving a rate of {3:.3f} lines/sec
+            """.format(
+                datetime.datetime.utcnow(),
+                self.import_stats.get('line_counter'),
+                self.import_stats.get('import_duration'),
+                self.import_stats.get('import_rate')
             )
         
         # Write the error cache to disk
@@ -129,8 +130,17 @@ class Command(LabelCommand):
 
         datareader = csv.reader(open(filename), dialect='excel-tab')
         tsvdata = []
+        # The data structure changes over time, and new columns are added (and perhaps removed) so map each file to a dictionary
+        column_headers = []
         for i,row in enumerate(datareader):
-            tsvdata.append(row)
+            if i==0:
+                for col, title in enumerate(row):
+                    column_headers.append(title.lower())
+            else:
+                row_dict = dict()
+                for col, title in enumerate(column_headers):
+                    row_dict[title] = row[col]
+                tsvdata.append(row_dict)
             self.import_stats['line_counter'] = i
         self.import_stats['line_count'] = len(tsvdata)
         # Reset line counter for parsing scan
@@ -143,6 +153,7 @@ class Command(LabelCommand):
 
             # Print progress report every 500 lines.
             if (self.import_stats.get('line_counter') % 500) == 0:
+                print row_dict # TODO: Remove this debug line!
                 # Calculate the average rate of import for the whole process
                 try:
                     self.import_stats['import_rate'] = \
@@ -162,17 +173,10 @@ class Command(LabelCommand):
                 efs = efs % (60*60)
                 efmin = efs // 60
                 efsec = efs % 60
-                efstring = str(efhr) + "h " + str(efmin) + "m " + str(efsec) + "s."
+                efstring = "{d}h {d}m {d}s".format(efhr,efmin,efsec)
 
                 # Output the status
-#                print str(datetime.datetime.utcnow()) + ": " +\
-#                    str((float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100)[0:5] + "% completed. " +\
-#                    "Parsed " + str(self.import_stats.get('line_counter')) + " lines. " +\
-#                    "Duplicates: " + str(self.import_stats.get('duplicatecount')) + ". " +\
-#                    "Rate: " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec. " +\
-#                    "Est. finish in " + efstring
-
-                print "{0:%a %b %d %H:%M:%S %Y}:{1:%} completed. Parsed {2:d} lines. Rate: {3:.3f} lines/sec. Estimated finish in {4}".format(
+                print "{0:%Y %b %d %H:%M:%S} : {1:.1%} completed. Parsed {2:d} lines. Rate: {3:d} lines/sec. Estimated finish in {4}".format(
                     datetime.datetime.utcnow(),
                     (float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100,
                     self.import_stats.get('line_counter'),
@@ -186,93 +190,129 @@ class Command(LabelCommand):
 
 
 
-    def _parseline(self, parser_obj, line, logfile_obj):
-        # Parse the raw line into a dictionary of data
-        data = parser_obj.parse(line)
-        
-        #self._debug('============================')
-        #self._debug('Data: ' + str(data))
+    def _parseline(self, entrydict, logfile_obj):
+#        # Logfile this data was pulled from
+#        logfile = models.ForeignKey(LogFile)
+#        # Data from the logfile, a record per row
+#        artist_id = models.BigIntegerField()
+#        itunes_id = models.BigIntegerField()
+#        action_type = models.CharField(max_length=30)
+#        title = models.TextField()
+#        url = models.URLField()
+#        episode_id = models.BigIntegerField(blank=True, null=True)
+#        episode_title = models.TextField(blank=True, null=True)
+#        episode_type = models.CharField(max_length=20, blank=True, null=True)
+#        storefront = models.IntegerField()
+#        user_agent = models.ForeignKey(UserAgent, blank=True, null=True)
+#        ipaddress = models.ForeignKey(Rdns, blank=True, null=True)
+#        timestamp = models.DateTimeField()
+#        user_id = models.TextField(blank=True, null=True)
 
-        # Validate the data - Count the number of elements
-        if len(data) <> 11:
-            self._errorlog("#### TOO FEW ITEMS IN THIS ENTRY. Line: " + str(self.import_stats.get('line_counter')) + "\n"\
-            + "Data:" + str(data) + "\n")
-            return
-        
-        # Status code validation
-        status_code = self._status_code_validation(int(data.get('%>s')))
-        if status_code == 0:
-            self._errorlog("#### STATUS CODE 0 PROBLEM WITH THIS ENTRY. Line: " + str(self.import_stats.get('line_counter')) + "\n"\
-            + "Data:" + str(data) + "\n")
-            return
-        
-        # Get or create the foreign key elements, Logfile, Rdns, FileRequest, Referer, UserAgent
-        remote_rdns = self._ip_to_domainname(data.get('%h'))
-        
-        file_request = self._file_request(data.get('%r'))
-        if file_request == None:
-            self._errorlog("#### INVALID REQUEST STRING IN THIS ENTRY. Line: " + str(self.import_stats.get('line_counter')) + "\n"\
-            + "Data:" + str(data) + "\n")
-            return
-        
-        referer = self._referer(data.get('%{Referer}i'), status_code)
-        
-        user_agent = self._user_agent(data.get('%{User-Agent}i'))
-                        
-        # Pull apart the date time string
-        date_string, time_string = data.get('%Y-%m-%dT%H:%M:%S%z').split('T')
-        date_yyyy, date_mm, date_dd = date_string.split('-')
-        time_hh, time_mm, time_ss = time_string.split(':')
-        
-        # Pull apart the server and port
-        server_ip, server_port = data.get('%A:%p').split(':')
-        server = self._server(data.get('%v'), server_ip, server_port)
-        
-        # Size of response validation. Can be '-' when status not 200
-        size_of_response = data.get('%b')
-        if size_of_response.isdigit():
-            size_of_response = int(size_of_response)
-        else:
-            size_of_response = 0
-        
-        # Build the log entry dictionary
-        log_entry = {
-            'logfile': logfile_obj,
-            'time_of_request': datetime.datetime(
-                int(date_yyyy), 
-                int(date_mm), 
-                int(date_dd), 
-                int(time_hh), 
-                int(time_mm), 
-                int(time_ss[0:2]) # Cut off the +0000
-                ),
-            'server': server,
-            'remote_logname': str(data.get('%l'))[:200],
-            'remote_user': str(data.get('%u'))[:200],
-            'remote_rdns': remote_rdns,
-            'status_code': status_code,
-            'size_of_response': size_of_response,
-            'file_request': file_request,
-            'referer': referer,
-            'user_agent': user_agent,
-        }
-        
-        # self._debug('log_entry=' + str(log_entry))
-        
-        # Create if there isn't already a duplicate record in place
-#        obj, created = self._get_or_create_log_entry(
-#            time_of_request = log_entry.get('time_of_request'),
-#            server = log_entry.get('server'),
-#            remote_rdns = log_entry.get('remote_rdns'),
-#            size_of_response = log_entry.get('size_of_response'),
-#            status_code = log_entry.get('status_code'),
-#            file_request = log_entry.get('file_request'),
-#            defaults = log_entry)
-        obj, created = self._get_or_create_log_entry(defaults = log_entry)
+        arle = AppleRawLogEntry()
+        arle.logfile = logfile_obj
+        arle.artist_id = int(entrydict.get("artist_id",0))
+        arle.itunes_id = int(entrydict.get("itunes_id",0))
+        arle.action_type = self._action_type_validation(entrylist[2])
+        arle.title = entrylist[3]
+        arle.url = entrylist[4]
+        arle.episode_id = int(entrylist[5])
+        arle.episode_title = entrylist[6]
+        arle.episode_type = entrylist[7]
+        arle.storefront = int(entrylist[8])
+        arle.user_agent = self._user_agent(entrylist[9])
+        arle.ipaddress = entrylist[10]
+        arle.timestamp = entrylist[11]
+        arle.user_id = entrylist[12]
 
-        # Analyse obj.file_request.argument_string & obj.referer.full_string as part of another process
 
-        # self._debug('============================')
+
+
+    #        # Parse the raw line into a dictionary of data
+#        data = parser_obj.parse(line)
+#
+#        #self._debug('============================')
+#        #self._debug('Data: ' + str(data))
+#
+#        # Validate the data - Count the number of elements
+#        if len(data) <> 11:
+#            self._errorlog("#### TOO FEW ITEMS IN THIS ENTRY. Line: " + str(self.import_stats.get('line_counter')) + "\n"\
+#            + "Data:" + str(data) + "\n")
+#            return
+#
+#        # Status code validation
+#        status_code = self._status_code_validation(int(data.get('%>s')))
+#        if status_code == 0:
+#            self._errorlog("#### STATUS CODE 0 PROBLEM WITH THIS ENTRY. Line: " + str(self.import_stats.get('line_counter')) + "\n"\
+#            + "Data:" + str(data) + "\n")
+#            return
+#
+#        # Get or create the foreign key elements, Logfile, Rdns, FileRequest, Referer, UserAgent
+#        remote_rdns = self._ip_to_domainname(data.get('%h'))
+#
+#        file_request = self._file_request(data.get('%r'))
+#        if file_request == None:
+#            self._errorlog("#### INVALID REQUEST STRING IN THIS ENTRY. Line: " + str(self.import_stats.get('line_counter')) + "\n"\
+#            + "Data:" + str(data) + "\n")
+#            return
+#
+#        referer = self._referer(data.get('%{Referer}i'), status_code)
+#
+#        user_agent = self._user_agent(data.get('%{User-Agent}i'))
+#
+#        # Pull apart the date time string
+#        date_string, time_string = data.get('%Y-%m-%dT%H:%M:%S%z').split('T')
+#        date_yyyy, date_mm, date_dd = date_string.split('-')
+#        time_hh, time_mm, time_ss = time_string.split(':')
+#
+#        # Pull apart the server and port
+#        server_ip, server_port = data.get('%A:%p').split(':')
+#        server = self._server(data.get('%v'), server_ip, server_port)
+#
+#        # Size of response validation. Can be '-' when status not 200
+#        size_of_response = data.get('%b')
+#        if size_of_response.isdigit():
+#            size_of_response = int(size_of_response)
+#        else:
+#            size_of_response = 0
+#
+#        # Build the log entry dictionary
+#        log_entry = {
+#            'logfile': logfile_obj,
+#            'time_of_request': datetime.datetime(
+#                int(date_yyyy),
+#                int(date_mm),
+#                int(date_dd),
+#                int(time_hh),
+#                int(time_mm),
+#                int(time_ss[0:2]) # Cut off the +0000
+#                ),
+#            'server': server,
+#            'remote_logname': str(data.get('%l'))[:200],
+#            'remote_user': str(data.get('%u'))[:200],
+#            'remote_rdns': remote_rdns,
+#            'status_code': status_code,
+#            'size_of_response': size_of_response,
+#            'file_request': file_request,
+#            'referer': referer,
+#            'user_agent': user_agent,
+#        }
+#
+#        # self._debug('log_entry=' + str(log_entry))
+#
+#        # Create if there isn't already a duplicate record in place
+##        obj, created = self._get_or_create_log_entry(
+##            time_of_request = log_entry.get('time_of_request'),
+##            server = log_entry.get('server'),
+##            remote_rdns = log_entry.get('remote_rdns'),
+##            size_of_response = log_entry.get('size_of_response'),
+##            status_code = log_entry.get('status_code'),
+##            file_request = log_entry.get('file_request'),
+##            defaults = log_entry)
+#        obj, created = self._get_or_create_log_entry(defaults = log_entry)
+#
+#        # Analyse obj.file_request.argument_string & obj.referer.full_string as part of another process
+#
+#        # self._debug('============================')
         return None
 
 
@@ -338,6 +378,9 @@ class Command(LabelCommand):
 #        self.cache_log_entry.append(obj)
         return obj, True
 
+
+    def _action_type_validation(self, action_string):
+        return ''
 
 
     def _status_code_validation(self,status_code):
