@@ -153,7 +153,6 @@ class Command(LabelCommand):
 
             # Print progress report every 500 lines.
             if (self.import_stats.get('line_counter') % 500) == 0:
-                print row_dict # TODO: Remove this debug line!
                 # Calculate the average rate of import for the whole process
                 try:
                     self.import_stats['import_rate'] = \
@@ -191,336 +190,91 @@ class Command(LabelCommand):
 
 
     def _parseline(self, entrydict, logfile_obj):
-#        # Logfile this data was pulled from
-#        logfile = models.ForeignKey(LogFile)
-#        # Data from the logfile, a record per row
-#        artist_id = models.BigIntegerField()
-#        itunes_id = models.BigIntegerField()
-#        action_type = models.CharField(max_length=30)
-#        title = models.TextField()
-#        url = models.URLField()
-#        episode_id = models.BigIntegerField(blank=True, null=True)
-#        episode_title = models.TextField(blank=True, null=True)
-#        episode_type = models.CharField(max_length=20, blank=True, null=True)
-#        storefront = models.IntegerField()
-#        user_agent = models.ForeignKey(UserAgent, blank=True, null=True)
-#        ipaddress = models.ForeignKey(Rdns, blank=True, null=True)
-#        timestamp = models.DateTimeField()
-#        user_id = models.TextField(blank=True, null=True)
+#        # Build the log entry dictionary
+#        arle = {
+#            "logfile" : logfile_obj,
+#            "artist_id" : long(entrydict.get("artist_id")),
+#            "itunes_id" : long(entrydict.get("itunes_id")),
+#            "action_type" : self._action_type_validation(entrydict.get("action_type")),
+#            "title" : entrydict.get("title","Unknown"),
+#            "url" : entrydict.get("url",""),
+#            "episode_id" : long(entrydict.get("episode_id",0)),
+#            "episode_title" : entrydict.get("episode_title",None),
+#            "episode_type" : entrydict.get("episode_type",None),
+#            "storefront" : int(entrydict.get("storefront",0)),
+#            "user_agent" : self._user_agent(entrydict.get("useragent","")),
+#            "ipaddress" : self._ip_to_domainname(entrydict.get("ip_address",None)),
+#            "timestamp" : entrydict.get("timestamp"),
+#            "user_id" : entrydict.get("user_id","")
+#        }
 
+        # Build the log entry dictionary
         arle = AppleRawLogEntry()
         arle.logfile = logfile_obj
-        arle.artist_id = long(entrydict.get("artist_id",0))
-        arle.itunes_id = long(entrydict.get("itunes_id",0))
-        arle.action_type = self._action_type_validation(entrylist[2])
-        arle.title = entrylist[3]
-        arle.url = entrylist[4]
-        arle.episode_id = int(entrylist[5])
-        arle.episode_title = entrylist[6]
-        arle.episode_type = entrylist[7]
-        arle.storefront = int(entrylist[8])
-        arle.user_agent = self._user_agent(entrylist[9])
-        arle.ipaddress = entrylist[10]
-        arle.timestamp = entrylist[11]
-        arle.user_id = entrylist[12]
+        arle.artist_id = long(entrydict.get("artist_id"))
+        arle.itunes_id = long(entrydict.get("itunes_id"))
+        arle.action_type = self._action_type_validation(entrydict.get("action_type"))
+        arle.title = entrydict.get("title","Unknown")
+        arle.url = entrydict.get("url","")
+        arle.episode_id = long(entrydict.get("episode_id",0))
+        arle.episode_title = entrydict.get("episode_title",None)
+        arle.episode_type = entrydict.get("episode_type",None)
+        arle.storefront = int(entrydict.get("storefront",0))
+        arle.user_agent = self._user_agent(entrydict.get("useragent",""))
+        arle.ipaddress = self._ip_to_domainname(entrydict.get("ip_address",None))
+        arle.timestamp = entrydict.get("timestamp")
+        arle.user_id = entrydict.get("user_id","")
+        arle.save(force_insert=True)
 
-
-
-
-    #        # Parse the raw line into a dictionary of data
-#        data = parser_obj.parse(line)
-#
-#        #self._debug('============================')
-#        #self._debug('Data: ' + str(data))
-#
-#        # Validate the data - Count the number of elements
-#        if len(data) <> 11:
-#            self._errorlog("#### TOO FEW ITEMS IN THIS ENTRY. Line: " + str(self.import_stats.get('line_counter')) + "\n"\
-#            + "Data:" + str(data) + "\n")
-#            return
-#
-#        # Status code validation
-#        status_code = self._status_code_validation(int(data.get('%>s')))
-#        if status_code == 0:
-#            self._errorlog("#### STATUS CODE 0 PROBLEM WITH THIS ENTRY. Line: " + str(self.import_stats.get('line_counter')) + "\n"\
-#            + "Data:" + str(data) + "\n")
-#            return
-#
-#        # Get or create the foreign key elements, Logfile, Rdns, FileRequest, Referer, UserAgent
-#        remote_rdns = self._ip_to_domainname(data.get('%h'))
-#
-#        file_request = self._file_request(data.get('%r'))
-#        if file_request == None:
-#            self._errorlog("#### INVALID REQUEST STRING IN THIS ENTRY. Line: " + str(self.import_stats.get('line_counter')) + "\n"\
-#            + "Data:" + str(data) + "\n")
-#            return
-#
-#        referer = self._referer(data.get('%{Referer}i'), status_code)
-#
-#        user_agent = self._user_agent(data.get('%{User-Agent}i'))
-#
-#        # Pull apart the date time string
-#        date_string, time_string = data.get('%Y-%m-%dT%H:%M:%S%z').split('T')
-#        date_yyyy, date_mm, date_dd = date_string.split('-')
-#        time_hh, time_mm, time_ss = time_string.split(':')
-#
-#        # Pull apart the server and port
-#        server_ip, server_port = data.get('%A:%p').split(':')
-#        server = self._server(data.get('%v'), server_ip, server_port)
-#
-#        # Size of response validation. Can be '-' when status not 200
-#        size_of_response = data.get('%b')
-#        if size_of_response.isdigit():
-#            size_of_response = int(size_of_response)
-#        else:
-#            size_of_response = 0
-#
-#        # Build the log entry dictionary
-#        log_entry = {
-#            'logfile': logfile_obj,
-#            'time_of_request': datetime.datetime(
-#                int(date_yyyy),
-#                int(date_mm),
-#                int(date_dd),
-#                int(time_hh),
-#                int(time_mm),
-#                int(time_ss[0:2]) # Cut off the +0000
-#                ),
-#            'server': server,
-#            'remote_logname': str(data.get('%l'))[:200],
-#            'remote_user': str(data.get('%u'))[:200],
-#            'remote_rdns': remote_rdns,
-#            'status_code': status_code,
-#            'size_of_response': size_of_response,
-#            'file_request': file_request,
-#            'referer': referer,
-#            'user_agent': user_agent,
-#        }
-#
-#        # self._debug('log_entry=' + str(log_entry))
-#
-#        # Create if there isn't already a duplicate record in place
-##        obj, created = self._get_or_create_log_entry(
-##            time_of_request = log_entry.get('time_of_request'),
-##            server = log_entry.get('server'),
-##            remote_rdns = log_entry.get('remote_rdns'),
-##            size_of_response = log_entry.get('size_of_response'),
-##            status_code = log_entry.get('status_code'),
-##            file_request = log_entry.get('file_request'),
-##            defaults = log_entry)
-#        obj, created = self._get_or_create_log_entry(defaults = log_entry)
-#
-#        # Analyse obj.file_request.argument_string & obj.referer.full_string as part of another process
-#
-#        # self._debug('============================')
         return None
 
 
-
-#    def _get_or_create_log_entry(self, time_of_request, server, remote_rdns, size_of_response,
-#                                 status_code, file_request, defaults = {}):
-    def _get_or_create_log_entry(self, defaults = {}):
-        obj = ApacheLogEntry()
-        # Set this manually, longhand because the for key,value loop causes errors
-        obj.logfile = defaults.get('logfile')
-        obj.time_of_request = defaults.get('time_of_request')
-        obj.server = defaults.get('server')
-        obj.remote_logname = defaults.get('remote_logname')
-        obj.remote_user = defaults.get('remote_user')
-        obj.remote_rdns = defaults.get('remote_rdns')
-        obj.status_code = defaults.get('status_code')
-        obj.size_of_response = defaults.get('size_of_response')
-        obj.file_request = defaults.get('file_request')
-        obj.referer = defaults.get('referer')
-        obj.user_agent = defaults.get('user_agent')
-
-# Removing the need for a memory cache as we don't acknowledge duplicates and trust the log file is exactly as we want
-# CM 9-12-11
-        obj.save()
-
-#        # Trusting that items in the import log appear in chronological order
-#        if len(self.cache_log_entry) == 0 or len(self.cache_log_entry) > (self.cache_log_entry_size*2):
-#            time_limit = time_of_request+datetime.timedelta(minutes=10)
-#            self.cache_log_entry = list(ApacheLogEntry.objects.filter(\
-#                time_of_request__gte=time_of_request, time_of_request__lte=time_limit, \
-#                server=server).order_by('time_of_request')[:self.cache_log_entry_size])
-
-#        # Attempt to locate in memory cache
-#        for item in self.cache_log_entry:
-#            if item.time_of_request == obj.time_of_request and item.server == obj.server and \
-#                item.remote_rdns == obj.remote_rdns and item.size_of_response == obj.size_of_response and \
-#                item.status_code == obj.status_code and item.file_request == obj.file_request:
-#
-#                self._errorlog("##### DUPLICATE RECORD AT INSERTION DETECTED ##### \n" +\
-#                    "Database row id: " + str(item.id) + "\n" +\
-#                    "DB: " + str(item) + "\n" +\
-#                    "Logfile line number:" + str(self.import_stats.get('line_counter')) + "\n")
-#                self.import_stats['duplicatecount'] = self.import_stats.get('duplicatecount') + 1
-#
-#                return item, False
-        
-#        # Shortcut to escape if this is purely a single process import
-#        if self.single_import:
-#            obj.save()
-#            self.cache_log_entry.append(obj)
-#            return obj, True
-#
-#        # Couldn't find it in the list, check the database incase another process has added it
-#        try:
-#            obj = ApacheLogEntry.objects.get(time_of_request = obj.time_of_request, server = obj.server,
-#                remote_rdns = obj.remote_rdns, size_of_response = obj.size_of_response,
-#                status_code = obj.status_code, file_request = obj.file_request)
-#        except ApacheLogEntry.DoesNotExist:
-#            obj.save()
-#        except ApacheLogEntry.MultipleObjectsReturned:
-#            self._errorlog("Funky shit just happened(!). MultipleObjectsReturned: " + str(obj) + "\n")
-            
-#        self.cache_log_entry.append(obj)
-        return obj, True
-
-
     def _action_type_validation(self, action_string):
-        return ''
-
-
-    def _status_code_validation(self,status_code):
-        "Check the supplied status code value against known good codes"
-        for item in ApacheLogEntry.STATUS_CODE_CHOICES:
-            if status_code == item[0]:
-                return status_code
-        return 0
+        """Analyse the supplied action type string, and see if it's one we know about already. If it isn't, then
+        don't panic, and store it anyway. We just need to update the choices list based on what we see in the error
+        logs """
+        for item in AppleRawLogEntry.ACTION_TYPE_CHOICES:
+            if action_string == item[0]:
+                return action_string
+        self._errorlog(
+            "#### PROBLEM WITH THIS ENTRY. Unknown Action Type ({0}) Line: {1:d}\n".format(
+                action_string,
+                self.import_stats.get('line_counter')
+            )
+        )
+        return action_string
 
 
 
 
     def _ip_to_domainname(self, ipaddress):
-        "Returns the domain name for a given IP where known"
+        """Returns the domain name for a given IP where known"""
         # self._debug('_ip_to_domainname('+str(ipaddress)+') called')
-        # validate IP address
-        # try: 
-        adr = IP(ipaddress)
-        # PUT ERROR HANDLING IN HERE!
-        
-        rdns = Rdns()
-        rdns.ip_address = adr.strNormal(0)
-        rdns.resolved_name = 'Unknown'
-        rdns.last_updated = datetime.datetime.utcnow()
-        
-        # Attempt to locate in memory cache
-        for item in self.cache_rdns:
-            if item.ip_address == rdns.ip_address:
-                return item
-        
-        # Couldn't find it in the list, check the database incase another process has added it
-        try:
-            if self.single_import:
-                # Shortcut if parallel import disabled
-                raise Rdns.DoesNotExist
-                
-            rdns = Rdns.objects.get(ip_address = rdns.ip_address)
-        except Rdns.DoesNotExist:
-            # Go get the location for this address
+        # These are partial ipaddress of the format nnn.nnn.x.x so replace the x with 0 as a guess.
+        if ipaddress: # i.e. not None
+            adr = IP(ipaddress.replace('x','0'))
+
+            rdns = Rdns()
+            rdns.ip_address = adr.strNormal(0)
+            rdns.resolved_name = 'Partial'
+            rdns.last_updated = datetime.datetime.utcnow()
+
+            # Attempt to locate in memory cache
+            for item in self.cache_rdns:
+                if item.ip_address == rdns.ip_address:
+                    return item
+
+            # Couldn't find it in the list
             rdns.country_code = self.geoip.country_code_by_addr(rdns.ip_address)
             rdns.country_name = self.geoip.country_name_by_addr(rdns.ip_address)
             rdns.save()
-            
-        self.cache_rdns.insert(0,rdns)
-        
-        return rdns
-        
-        
 
-
-
-    def _file_request(self, request_string):
-        "Get or create a FileRequest object for a given request string"
-        # self._debug('_file_request(' + request_string + ')')
+            self.cache_rdns.insert(0,rdns)
         
-        # Example request strings
-        # GET /philfac/lockelectures/locke_album_cover.jpg HTTP/1.1
-        # GET / HTTP/1.0
-        # GET /robots.txt HTTP/1.0
-        # GET /astro/introduction/astronomy_intro-medium-audio.mp3?CAMEFROM=podcastsGET HTTP/1.1
-        # \xc5^)         <--- Example bad data in log from 2011
-        
-        fr = FileRequest()
-        
-        # Crude splitting... first on spaces, then on file/querystring
-        ts = request_string.split()
-        if len(ts) != 3:
-            # Something is wrong with this request string. Exit and stop processing this record
-            return None
-        
-        fs = ts[1].split('?')
-        
-        # Validate method: Either GET or POST or HEAD or corrupted
-        fr.method = ts[0]
-        if fr.method != "GET" and fr.method != "POST" and fr.method != "HEAD":
-            return None
-        
-        fr.uri_string = str(fs[0])
-        fr.protocol = str(ts[2])[:20]
-        
-        # Querystring is optional, so test for it first.
-        if len(fs)==2:
-            fr.argument_string = fs[1]
+            return rdns
         else:
-            fr.argument_string = ""
+            return None
         
-        # Attempt to locate in memory cache
-        for item in self.cache_file_request:
-            if item.method == fr.method and item.uri_string == fr.uri_string and \
-                item.argument_string == fr.argument_string and item.protocol == fr.protocol:
-                return item
-        
-        # Couldn't find it in the list, check the database incase another process has added it
-        try:
-            if self.single_import:
-                # Shortcut if parallel import disabled
-                raise FileRequest.DoesNotExist
-                
-            fr = FileRequest.objects.get(method = fr.method, uri_string = fr.uri_string,
-                argument_string = fr.argument_string, protocol = fr.protocol)
-        except FileRequest.DoesNotExist:
-            fr.save()
-            
-        self.cache_file_request.insert(0,fr)
-        
-        return fr
-
-
-
-
-
-    def _referer(self, referer_string, status_code):
-        "Get or create a Referer record for the given string"
-        ref = Referer()
-        ref.full_string = ""
-        
-        if status_code in (200,206,304):
-            ref.full_string = referer_string
-        
-        # Attempt to locate in memory cache
-        for item in self.cache_referer:
-            if item.full_string == ref.full_string:
-                return item
-                
-        # Couldn't find it in the list, check the database incase another process has added it
-        try:
-            if self.single_import:
-                # Shortcut if parallel import disabled
-                raise Referer.DoesNotExist
-                
-            ref = Referer.objects.get(full_string=ref.full_string)
-        except Referer.DoesNotExist:
-            ref.save()
-        
-        self.cache_referer.insert(0,ref)
-        
-        return ref
-        
-        
-
 
 
     def _user_agent(self, agent_string):
@@ -538,94 +292,53 @@ class Command(LabelCommand):
             if item.full_string == user_agent.full_string:
                 return item
                 
-        # Couldn't find it in the list, check the database incase another process has added it
+        # Parse the string to extract the easy bits
         try:
-            if self.single_import:
-                # Shortcut if parallel import disabled
-                raise UserAgent.DoesNotExist
-            
-            user_agent = UserAgent.objects.get(full_string=user_agent.full_string)
-        except UserAgent.DoesNotExist:
-            # Parse the string to extract the easy bits
-            try:
-                uas_dict = self.uasp.parse(user_agent.full_string)
-    
-                #Set the type string
-                user_agent.type = uas_dict.get('typ')[:50]
-                
-                # Deal with the OS record
-                os = {}
-                os['company'] = uas_dict.get('os_company')[:200]
-                os['family'] = uas_dict.get('os_family')[:100]
-                os['name'] = uas_dict.get('os_name')[:200]
-                
-                # Now get or create an OS record
-                user_agent.os, created = OS.objects.get_or_create(
-                    company = os.get('company'), 
-                    family = os.get('family'), 
-                    name = os.get('name'), 
-                    defaults = os)
-                if created:
-                    user_agent.os.save()
-                    
-                
-                # Deal with the UA record
-                ua = {}
-                ua['company'] = uas_dict.get('ua_company')[:200]
-                ua['family'] = uas_dict.get('ua_family')[:100]
-                ua['name'] = uas_dict.get('ua_name')[:200]
-                
-                # Now get or create an UA record
-                user_agent.ua, created = UA.objects.get_or_create(
-                    company = ua.get('company'), 
-                    family = ua.get('family'), 
-                    name = ua.get('name'), 
-                    defaults = ua)
-                if created:
-                    user_agent.ua.save()
-                    
-            except UASException:
-                self._errorlog('_user_agent() parsing FAILED. agent_string=' + str(agent_string) + "\n")
-            
-            #Not there, so write to database
-            user_agent.save()
+            uas_dict = self.uasp.parse(user_agent.full_string)
+
+            #Set the type string
+            user_agent.type = uas_dict.get('typ')[:50]
+
+            # Deal with the OS record
+            os = {}
+            os['company'] = uas_dict.get('os_company')[:200]
+            os['family'] = uas_dict.get('os_family')[:100]
+            os['name'] = uas_dict.get('os_name')[:200]
+
+            # Now get or create an OS record
+            user_agent.os, created = OS.objects.get_or_create(
+                company = os.get('company'),
+                family = os.get('family'),
+                name = os.get('name'),
+                defaults = os)
+            if created:
+                user_agent.os.save()
+
+            # Deal with the UA record
+            ua = {}
+            ua['company'] = uas_dict.get('ua_company')[:200]
+            ua['family'] = uas_dict.get('ua_family')[:100]
+            ua['name'] = uas_dict.get('ua_name')[:200]
+
+            # Now get or create an UA record
+            user_agent.ua, created = UA.objects.get_or_create(
+                company = ua.get('company'),
+                family = ua.get('family'),
+                name = ua.get('name'),
+                defaults = ua)
+            if created:
+                user_agent.ua.save()
+
+        except UASException:
+            self._errorlog('_user_agent() parsing FAILED. agent_string=' + str(agent_string) + "\n")
+
+        #Not there, so write to database
+        user_agent.save()
         
         # Update the cache
         self.cache_user_agent.insert(0,user_agent)
         
         return user_agent
-
-
-
-
-    def _server(self, server_name, server_ip, server_port):
-        "Store the server information"
-        server = Server()
-        server.name = server_name[:200]
-        server.ip_address = server_ip
-        server.port = int(server_port)
-
-        # Attempt to locate in memory cache
-        for item in self.cache_server:
-            if item.name == server.name and item.ip_address == server.ip_address and \
-                item.port == server.port:
-                return item
-
-        # Couldn't find it in the list, check the database incase another process has added it
-        try:
-            if self.single_import:
-                # Shortcut if parallel import disabled
-                raise Server.DoesNotExist
-            
-            server = Server.objects.get(name=server.name, ip_address=server.ip_address, port=server.port)
-        except Server.DoesNotExist:
-            #Not there, so write to database and to cache
-            server.save()
-        
-        self.cache_server.insert(0,server)
-
-        return server
-
 
 
     # DEBUG AND INTERNAL HELP METHODS ==============================================================
