@@ -343,7 +343,7 @@ class Command(LabelCommand):
 
 
     def _parse_timestamp(self,initialstring):
-        """Adjust timestamp supplied to GMT"""
+        """Adjust timestamp supplied to GMT and returns a datetime object"""
         input_format = "%Y-%m-%d %H:%M:%S"
         base_time = time.strptime(initialstring[:-9],input_format)
         try:
@@ -352,7 +352,8 @@ class Command(LabelCommand):
             ts = base_time - delta
         except:
             ts = base_time
-        return "{0:%Y-%m-%d %H:%M:%S}".format(ts)
+        dt = datetime.datetime.fromtimestamp(time.mktime(ts))
+        return dt #"{0:%Y-%m-%d %H:%M:%S}".format(ts)
 
 
     # DEBUG AND INTERNAL HELP METHODS ==============================================================
