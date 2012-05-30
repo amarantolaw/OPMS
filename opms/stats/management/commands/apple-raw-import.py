@@ -219,7 +219,7 @@ class Command(LabelCommand):
         arle.episode_id = long(entrydict.get("episode_id",0))
         arle.episode_title = entrydict.get("episode_title",None)
         arle.episode_type = entrydict.get("episode_type",None)
-        arle.storefront = int(entrydict.get("storefront",0))
+        arle.storefront = self._storefront(entrydict.get("storefront",0))
         arle.user_agent = self._user_agent(entrydict.get("useragent",""))
         arle.ipaddress = self._ip_to_domainname(entrydict.get("ip_address",None))
         arle.timestamp = self._parse_timestamp(entrydict.get("timestamp"))
@@ -274,7 +274,12 @@ class Command(LabelCommand):
             return rdns
         else:
             return None
-        
+
+    def _storefront(self,initial_value):
+        if initial_value.isdigit():
+            return int(initial_value)
+        else:
+            return 0
 
 
     def _user_agent(self, agent_string):
