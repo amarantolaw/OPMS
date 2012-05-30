@@ -251,7 +251,7 @@ class Command(LabelCommand):
         """Returns the domain name for a given IP where known"""
         # self._debug('_ip_to_domainname('+str(ipaddress)+') called')
         # These are partial ipaddress of the format nnn.nnn.x.x so replace the x with 0 as a guess.
-        if ipaddress: # i.e. not None
+        if ipaddress and len(ipaddress)>8: # i.e. not None
             adr = IP(ipaddress.replace('x','0'))
 
             rdns = Rdns()
