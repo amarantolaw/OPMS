@@ -147,8 +147,7 @@ class Command(LabelCommand):
         self.import_stats['line_counter'] = self.import_stats.get('import_startline')
 
         for i in range(self.import_stats.get('line_counter'),len(tsvdata)):
-#            print tsvdata[i]
-#            self._parseline(tsvdata[i], logfile_obj)
+            self._parseline(tsvdata[i], logfile_obj)
             self.import_stats['line_counter'] = i
 
             # Print progress report every 500 lines.
