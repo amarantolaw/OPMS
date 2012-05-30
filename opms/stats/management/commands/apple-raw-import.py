@@ -176,7 +176,7 @@ class Command(LabelCommand):
                 efstring = "{0:d}h {1:d}m {2:d}s".format(efhr,efmin,efsec)
 
                 # Output the status
-                print "{0:%Y %b %d %H:%M:%S} : {1:.1%} completed. Parsed {2:d} lines. Rate: {3:d} lines/sec. Estimated finish in {4}".format(
+                print "{0:%Y %b %d %H:%M:%S} : {1:.1%} completed. Parsed {2:d} lines. Rate: {3:.2f} lines/sec. Estimated finish in {4}".format(
                     datetime.datetime.utcnow(),
                     (float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100,
                     self.import_stats.get('line_counter'),
@@ -210,8 +210,8 @@ class Command(LabelCommand):
 
         arle = AppleRawLogEntry()
         arle.logfile = logfile_obj
-        arle.artist_id = int(entrydict.get("artist_id",0))
-        arle.itunes_id = int(entrydict.get("itunes_id",0))
+        arle.artist_id = long(entrydict.get("artist_id",0))
+        arle.itunes_id = long(entrydict.get("itunes_id",0))
         arle.action_type = self._action_type_validation(entrylist[2])
         arle.title = entrylist[3]
         arle.url = entrylist[4]
