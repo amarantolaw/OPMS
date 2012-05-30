@@ -173,7 +173,7 @@ class Command(LabelCommand):
                 efs = efs % (60*60)
                 efmin = efs // 60
                 efsec = efs % 60
-                efstring = "{d}h {d}m {d}s".format(efhr,efmin,efsec)
+                efstring = "{0:d}h {1:d}m {2:d}s".format(efhr,efmin,efsec)
 
                 # Output the status
                 print "{0:%Y %b %d %H:%M:%S} : {1:.1%} completed. Parsed {2:d} lines. Rate: {3:d} lines/sec. Estimated finish in {4}".format(
