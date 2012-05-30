@@ -207,7 +207,7 @@ class Command(LabelCommand):
 #            "timestamp" : self._parse_timestamp(entrydict.get("timestamp")),
 #            "user_id" : entrydict.get("user_id","")
 #        }
-
+        print(entrydict)
         # Build the log entry dictionary
         arle = AppleRawLogEntry()
         arle.logfile = logfile_obj
