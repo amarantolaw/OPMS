@@ -19,7 +19,7 @@ class AppleRawLogEntry(models.Model):
     itunes_id = models.BigIntegerField()
     action_type = models.CharField(max_length=30, choices=ACTION_TYPE_CHOICES)
     title = models.TextField()
-    url = models.URLField()
+    url = models.URLField(max_length=1000) # There are some really long urls in the data
     episode_id = models.BigIntegerField(blank=True, null=True)
     episode_title = models.TextField(blank=True, null=True)
     episode_type = models.CharField(max_length=20, blank=True, null=True)
