@@ -172,11 +172,11 @@ class Command(LabelCommand):
 #                    "Rate: " + str(self.import_stats.get('import_rate'))[0:6] + " lines/sec. " +\
 #                    "Est. finish in " + efstring
 
-                print "%s:%s%% completed. Parsed %s lines. Rate: %s lines/sec. Estimated finish in %s" % (
+                print "{0:%a %b %d %H:%M:%S %Y}:{1:%} completed. Parsed {2:d} lines. Rate: {3:.3f} lines/sec. Estimated finish in {4}".format(
                     datetime.datetime.utcnow(),
-                    str((float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100)[0:5],
+                    (float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100,
                     self.import_stats.get('line_counter'),
-                    str(self.import_stats.get('import_rate'))[0:6],
+                    self.import_stats.get('import_rate'),
                     efstring
                 )
 
