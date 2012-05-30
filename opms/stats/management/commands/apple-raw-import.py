@@ -43,7 +43,7 @@ class Command(LabelCommand):
 
 
     def handle_label(self, filename, **options):
-        print "Import started at {0:%Y %b %d %H:%M:%S}\n".format(datetime.datetime.utcnow())
+        print "Import started at {0:%Y-%m-%d %H:%M:%S}\n".format(datetime.datetime.utcnow())
 
         # Some basic checking
         if not filename.endswith('.txt'):
@@ -75,8 +75,8 @@ class Command(LabelCommand):
             self.import_stats['import_rate'] = 0
 
         print """
-            Import finished at {0:%Y %b %d %H:%M:%S}
-            {1:d} Lines parsed over {2:d} seconds
+            Import finished at {0:%Y-%m-%d %H:%M:%S}
+            {1:d} Lines parsed over {2:.1f} seconds
             Giving a rate of {3:.3f} lines/sec
             """.format(
                 datetime.datetime.utcnow(),
@@ -176,7 +176,7 @@ class Command(LabelCommand):
                 efstring = "{0:d}h {1:d}m {2:d}s".format(efhr,efmin,efsec)
 
                 # Output the status
-                print "{0:%Y %b %d %H:%M:%S} : {1:.1%} completed. Parsed {2:d} lines. Rate: {3:.2f} lines/sec. Estimated finish in {4}".format(
+                print "{0:%Y-%m-%d %H:%M:%S} : {1:.1%} completed. Parsed {2:d} lines. Rate: {3:.2f} lines/sec. Estimated finish in {4}".format(
                     datetime.datetime.utcnow(),
                     (float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100,
                     self.import_stats.get('line_counter'),
