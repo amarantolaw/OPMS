@@ -18,7 +18,7 @@ class AppleWeeklySummary(models.Model):
         (u'itu-raw', u'iTunes U PSM Raw Logs'), # This is a virtual summary produced from the more detailed log data
         )
     # Date from the column - typically from yyyy-mm-dd format
-    week_beginning = models.DateField("week ending", db_index=True)  # NB: This needs renaming to week_beginning
+    week_beginning = models.DateField("week beginning", db_index=True)
 
     # Logfile this data was pulled from
     logfile = models.ForeignKey(LogFile)
