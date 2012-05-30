@@ -177,7 +177,7 @@ class Command(LabelCommand):
                 # Output the status
                 print "{0:%Y-%m-%d %H:%M:%S} : {1:.1%} completed. Parsed {2:d} lines. Rate: {3:.2f} lines/sec. Estimated finish in {4}".format(
                     datetime.datetime.utcnow(),
-                    (float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')))*100,
+                    float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')),
                     self.import_stats.get('line_counter'),
                     self.import_stats.get('import_rate'),
                     efstring
