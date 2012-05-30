@@ -5,7 +5,8 @@ from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
 from opms.stats.models import LogFile, AppleRawLogEntry, UserAgent, Rdns
 from opms.stats.uasparser import UASparser, UASException
-import datetime, time, timedelta, sys, os, pygeoip, csv
+import datetime, sys, os, pygeoip, csv
+from datetime import timedelta, time
 from IPy import IP
 from settings import PROJECT_ROOT
 
