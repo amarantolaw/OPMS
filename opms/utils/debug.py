@@ -1,0 +1,49 @@
+import datetime, sys
+# DEBUG AND INTERNAL HELP METHODS ==============================================================
+# Eventually this should be all replaced by Django logging I presume...
+DEBUG = False
+ERROR_CACHE = ""
+ERROR_LOG = None
+
+def onscreen(error_str):
+    "Basic optional debug function. Print the string if enabled"
+    if DEBUG:
+        print 'DEBUG:{}\n'.format(error_str)
+    return None
+
+
+def errorlog(error_str):
+    "Write errors to a log file cache"
+    ERROR_CACHE += 'ERROR:{}\n'.format(error_str)
+    return None
+
+
+def errorlog_start(path_to_file):
+    try:
+        ERROR_LOG = open(path_to_file,'a')
+    except IOError:
+        sys.stderr.write("WARNING: Could not open existing error file. New file being created")
+        ERROR_LOG = open(path_to_file,'w')
+
+    errorlog("Log started at {0:%Y-%m-%d %H:%M:%S}\n".format(datetime.datetime.utcnow()))
+    sys.stderr.write("Writing errors to: {}".format(path_to_file))
+    return None
+
+def errorlog_save():
+    "Write errors to a log file"
+    if ERROR_LOG:
+        ERROR_LOG.write(ERROR_CACHE)
+        ERROR_CACHE = ""
+    else:
+        sys.stderr.write("WARNING!! No Error Log file has been created\n\n{}".format(ERROR_CACHE))
+    return None
+
+
+def errorlog_stop():
+    if ERROR_LOG:
+        errorlog("Log ended at {0:%Y-%m-%d %H:%M:%S}\n".format(datetime.datetime.utcnow()))
+        errorlog_save()
+        ERROR_LOG.close()
+    else:
+        sys.stderr.write("WARNING!! No Error Log file has been created")
+    return None

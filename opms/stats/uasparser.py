@@ -148,7 +148,7 @@ class UASparser:
                 info = test_rg[0]
                 break
 
-        # Get broser detail
+        # Get browser detail
         if id_browser:
             _index = ['ua_family','ua_url','ua_company','ua_company_url','ua_icon','ua_info_url']
             try:
@@ -183,16 +183,19 @@ class UASparser:
                 pass
         
         #Try to match an OS
-        os_id = None  
+        os_id = None
+        print data['os_reg'] # TODO: Remove me
         for index in data['os_reg']['order']:
             test = data['os_reg'][index]
             test_rg = toPythonReg(test[0]).findall(useragent)
             if test_rg:
                 os_id = int(test[1])
+                print "os_id=" + str(os_id) # TODO: Remove me
                 break
 
         # Get OS detail
-        if os_id and data['os'].has_key(os_id): 
+        if os_id and data['os'].has_key(os_id):
+            print data['os'][os_id] # TODO: Remove me
             for i in range(0,len(data['os'][os_id])):
                 if i<5:
                     ret[os_index[i]] = data['os'][os_id][i]

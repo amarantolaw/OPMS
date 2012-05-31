@@ -3,6 +3,7 @@
 # Last Edited: 29-5-2012
 from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
+from opms.utils import debug
 from opms.stats.models import LogFile, AppleRawLogEntry, UserAgent, UA, OS, Rdns
 from opms.stats.uasparser import UASparser, UASException
 import datetime, time, sys, os, pygeoip, csv
@@ -27,13 +28,8 @@ class Command(LabelCommand):
         self.uasp = UASparser(cache_dir=os.path.join(PROJECT_ROOT, "stats/ua_data/"))
         # datetime value for any rdns timeout problems
         self.rdns_timeout = 0
-        # Toggle debug statements on/off
-        self.debug = False
         # Record basic information about the import process for reporting
-        self.import_stats = {}
-        # Error logging file and string cache
-        self.error_log = ""
-        self.error_cache = ""
+        self.import_stats = dict()
         # Cache objects to hold subtables in memory 
         self.cache_user_agent = list(UserAgent.objects.all())
         self.cache_rdns = list(Rdns.objects.all())
@@ -44,6 +40,10 @@ class Command(LabelCommand):
 
 
     def handle_label(self, filename, **options):
+        verbosity = int(options.get('verbosity', 0))
+        if verbosity > 1:
+            debug.DEBUG = True
+
         print "Import started at {0:%Y-%m-%d %H:%M:%S}\n".format(datetime.datetime.utcnow())
 
         # Some basic checking
@@ -51,7 +51,7 @@ class Command(LabelCommand):
            raise CommandError("This is not a text (.txt) log file.\n\n")
 
         # Create an error log per import file
-        self._errorlog_start(filename + '_import-error.log')
+        debug.errorlog_start(filename + '_import-error.log')
 
         # Reset statistics
         self.import_stats['filename'] = filename
@@ -87,8 +87,7 @@ class Command(LabelCommand):
             )
         
         # Write the error cache to disk
-        self._error_log_save()
-        self._errorlog_stop()
+        debug.errorlog_stop()
             
         return None
 
@@ -184,7 +183,7 @@ class Command(LabelCommand):
                 )
 
                 # Write the error cache to disk
-                self._error_log_save()
+                debug.errorlog_save()
         return None
 
 
@@ -207,7 +206,8 @@ class Command(LabelCommand):
 #            "timestamp" : self._parse_timestamp(entrydict.get("timestamp")),
 #            "user_id" : entrydict.get("user_id","")
 #        }
-        print(entrydict) # TODO: Remove this debug string
+        debug.onscreen("_parseline():entrydict=" + str(entrydict))
+
         # Build the log entry dictionary
         arle = AppleRawLogEntry()
         arle.logfile = logfile_obj
@@ -236,7 +236,7 @@ class Command(LabelCommand):
         for item in AppleRawLogEntry.ACTION_TYPE_CHOICES:
             if action_string == item[0]:
                 return action_string
-        self._errorlog(
+        debug.errorlog(
             "#### PROBLEM WITH THIS ENTRY. Unknown Action Type ({0}) Line: {1:d}\n".format(
                 action_string,
                 self.import_stats.get('line_counter')
@@ -249,7 +249,7 @@ class Command(LabelCommand):
 
     def _ip_to_domainname(self, ipaddress):
         """Returns the domain name for a given IP where known"""
-        # self._debug('_ip_to_domainname('+str(ipaddress)+') called')
+        # debug.onscreen('_ip_to_domainname('+str(ipaddress)+') called')
         # These are partial ipaddress of the format nnn.nnn.x.x so replace the x with 0 as a guess.
         if ipaddress and len(ipaddress)>8: # i.e. not None
             adr = IP(ipaddress.replace('x','0'))
@@ -335,7 +335,7 @@ class Command(LabelCommand):
                 user_agent.ua.save()
 
         except UASException:
-            self._errorlog('_user_agent() parsing FAILED. agent_string=' + str(agent_string) + "\n")
+            debug.errorlog('_user_agent() parsing FAILED. agent_string=' + str(agent_string) + "\n")
 
         #Not there, so write to database
         user_agent.save()
@@ -359,44 +359,3 @@ class Command(LabelCommand):
             ts = base_time
         dt = datetime.datetime.fromtimestamp(time.mktime(ts))
         return dt #"{0:%Y-%m-%d %H:%M:%S}".format(ts)
-
-
-    # DEBUG AND INTERNAL HELP METHODS ==============================================================
-
-    def _debug(self,error_str):
-        "Basic optional debug function. Print the string if enabled"
-        if self.debug:
-            print 'DEBUG:' + str(error_str) + '\n'
-        return None
-            
-
-    def _errorlog(self,error_str):
-        "Write errors to a log file"
-        # sys.stderr.write('ERROR:' + str(error_str) + '\n')
-        #self.error_log.write('ERROR:' + str(error_str) + '\n')
-        self.error_cache += 'ERROR:' + str(error_str) + '\n'
-        return None
-
-
-    def _errorlog_start(self, path_to_file):
-        try:
-            self.error_log = open(path_to_file,'a') 
-        except IOError:
-            sys.stderr.write("WARNING: Could not open existing error file. New file being created")
-            self.error_log = open(path_to_file,'w')
-        
-        self.error_log.write("Log started at " + str(datetime.datetime.utcnow()) + "\n")
-        print "Writing errors to: " + path_to_file
-        return None
-
-    def _error_log_save(self):
-        "Write errors to a log file"
-        self.error_log.write(self.error_cache)
-        self.error_cache = ""
-        return None
-
-
-    def _errorlog_stop(self):
-        self.error_log.write("Log ended at " + str(datetime.datetime.utcnow()) + "\n")
-        self.error_log.close()
-        return None
