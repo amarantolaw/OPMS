@@ -8850,7 +8850,6 @@
 224[] = "Apple Inc."
 224[] = "http://www.apple.com/"
 224[] = "iphone.png"
-69[] = "Palm OS"
 69[] = "webOS"
 69[] = "webOS"
 69[] = "http://en.wikipedia.org/wiki/WebOS"
