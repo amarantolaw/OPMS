@@ -5,6 +5,16 @@ DEBUG = False
 ERROR_CACHE = ""
 ERROR_LOG = None
 
+def __init__():
+    global DEBUG
+    DEBUG = False
+    global ERROR_CACHE
+    ERROR_CACHE = ""
+    global ERROR_LOG
+    ERROR_LOG = None
+    return None
+
+
 def onscreen(error_str):
     "Basic optional debug function. Print the string if enabled"
     global DEBUG
@@ -13,7 +23,7 @@ def onscreen(error_str):
     return None
 
 
-def errorlog(error_str):
+def errorlog(error_str=""):
     "Write errors to a log file cache"
     global ERROR_CACHE
     ERROR_CACHE += 'ERROR:{}\n'.format(error_str)
