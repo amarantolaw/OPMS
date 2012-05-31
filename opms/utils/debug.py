@@ -7,18 +7,21 @@ ERROR_LOG = None
 
 def onscreen(error_str):
     "Basic optional debug function. Print the string if enabled"
+    global DEBUG
     if DEBUG:
-        print 'DEBUG:{}\n'.format(error_str)
+        sys.stderr.write('DEBUG:{}\n'.format(error_str))
     return None
 
 
 def errorlog(error_str):
     "Write errors to a log file cache"
+    global ERROR_CACHE
     ERROR_CACHE += 'ERROR:{}\n'.format(error_str)
     return None
 
 
 def errorlog_start(path_to_file):
+    global ERROR_LOG
     try:
         ERROR_LOG = open(path_to_file,'a')
     except IOError:
@@ -31,6 +34,7 @@ def errorlog_start(path_to_file):
 
 def errorlog_save():
     "Write errors to a log file"
+    global ERROR_CACHE, ERROR_LOG
     if ERROR_LOG:
         ERROR_LOG.write(ERROR_CACHE)
         ERROR_CACHE = ""
@@ -40,6 +44,7 @@ def errorlog_save():
 
 
 def errorlog_stop():
+    global ERROR_LOG
     if ERROR_LOG:
         errorlog("Log ended at {0:%Y-%m-%d %H:%M:%S}\n".format(datetime.datetime.utcnow()))
         errorlog_save()
