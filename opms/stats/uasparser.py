@@ -195,7 +195,10 @@ class UASparser:
 
         # Get OS detail
         if os_id and data['os'].has_key(os_id):
-            print data['os'][os_id] # TODO: Remove me
+            print "data['os'][os_id] = " + str(data['os'][os_id]) # TODO: Remove me
+            print "os_index = " + str(os_index) # TODO: Remove me
+            print "self.os_img_url = " + str(self.os_img_url) # TODO: Remove me
+            print "entire_url = " + str(entire_url) # TODO: Remove me
             for i in range(0,len(data['os'][os_id])):
                 if i<5:
                     ret[os_index[i]] = data['os'][os_id][i]
