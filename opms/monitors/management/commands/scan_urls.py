@@ -58,6 +58,9 @@ class Command(LabelCommand):
         out_str = str(count-1) + " scans performed (" + str(iterations) + " iterations of " + str(len(targets)) + " urls)"
         print out_str
         self._errorlog(out_str)
+        
+        t.completed = True
+        t.save()
 
         print "\nScan URLs finished at " + str(datetime.datetime.utcnow())
 
