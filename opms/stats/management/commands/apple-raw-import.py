@@ -4,7 +4,7 @@
 from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
 from opms.utils import debug
-from opms.stats.models import LogFile, AppleRawLogEntry, UserAgent, UA, OS, Rdns
+from opms.stats.models import LogFile, AppleRawLogEntry, AppleRawLogDailySummary, UserAgent, UA, OS, Rdns
 from opms.stats.uasparser import UASparser, UASException
 import datetime, time, sys, os, pygeoip, csv
 from datetime import timedelta
@@ -30,11 +30,13 @@ class Command(LabelCommand):
         self.rdns_timeout = 0
         # Record basic information about the import process for reporting
         self.import_stats = dict()
+        # Record summary counts of action types parsed through this file
+        self.summary = dict()
         # Cache objects to hold subtables in memory 
         self.cache_user_agent = list(UserAgent.objects.all())
         self.cache_rdns = list(Rdns.objects.all())
 #        # Option flag to enable or disable the parallel import safety checks
-#        self.single_import = True
+#        self.single_import = Trueim
         
         super(Command, self).__init__()
 
@@ -62,7 +64,12 @@ class Command(LabelCommand):
         self.import_stats['import_startline'] = int(options.get('start_at_line', 1))
 
         # This only needs setting/getting the once per call of this function
-        logfile_obj = self._logfile(filename, 'itu-raw')
+        logfile_obj, created = self._logfile(filename, 'itu-raw')
+#        if not created:
+#            err_string = "This file has already been imported: ({})".format(filename)
+#            debug.errorlog(err_string)
+#            debug.errorlog_stop()
+#            raise CommandError(err_string)
 
         # Send the file off to be parsed
         self._parsefile(logfile_obj)
@@ -121,7 +128,7 @@ class Command(LabelCommand):
         
         obj.save()
 
-        return obj
+        return obj, created
 
 
 
@@ -184,6 +191,15 @@ class Command(LabelCommand):
 
                 # Write the error cache to disk
                 debug.errorlog_save()
+
+        # Create a summary record for this day's data
+        debug.onscreen("Daily summary: " + str(self.summary))
+        print "Daily summary: \n" + str(self.summary)
+        ds, created = AppleRawLogDailySummary().objects.get_or_create(
+            date = self.summary.get("date", None),
+            defaults = self.summary
+        )
+        ds.save()
         return None
 
 
@@ -225,6 +241,25 @@ class Command(LabelCommand):
         arle.timestamp = self._parse_timestamp(entrydict.get("timestamp"))
         arle.user_id = entrydict.get("user_id","")
         arle.save(force_insert=True)
+
+        # Add to the daily summary dictionary
+        self.summary["date"] = "{0:%Y-%m-%d}".format(arle.timestamp)
+        if arle.action_type == "AutoDownload":
+            self.summary["auto_download"] = int(self.summary.get("auto_download",0) + 1)
+        elif arle.action_type == "Browse":
+            self.summary["browse"] = int(self.summary.get("browse",0) + 1)
+        elif arle.action_type == "Download":
+            self.summary["download"] = int(self.summary.get("download",0) + 1)
+        elif arle.action_type == "DownloadAll":
+            self.summary["download_all"] = int(self.summary.get("download_all",0) + 1)
+        elif arle.action_type == "Stream":
+            self.summary["stream"] = int(self.summary.get("stream",0) + 1)
+        elif arle.action_type == "Subscribe":
+            self.summary["subscribe"] = int(self.summary.get("subscribe",0) + 1)
+        elif arle.action_type == "SubscriptionEnclosure":
+            self.summary["subscription_enclosure"] = int(self.summary.get("subscription_enclosure",0) + 1)
+        else:
+            self.summary["unknown"] = int(self.summary.get("unknown",0) + 1)
 
         return None
 

@@ -39,7 +39,7 @@ def errorlog_start(path_to_file):
         ERROR_LOG = open(path_to_file,'w')
 
     errorlog("Log started at {0:%Y-%m-%d %H:%M:%S}\n".format(datetime.datetime.utcnow()))
-    sys.stderr.write("Writing errors to: {}".format(path_to_file))
+    sys.stderr.write("Writing errors to: {}\n\n".format(path_to_file))
     return None
 
 def errorlog_save():
