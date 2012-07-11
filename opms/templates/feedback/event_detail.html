@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ event.title }}</title>
+</head>
+<body>
+<h3>{{ event.title }}</h3>
+<div>
+    {{ event.date }}: {{ event.detail }} | <a href="edit/">Edit</a> | <a href="delete/">Delete</a>
+</div>
+<div style="text-align:right">
+    ID: {{ event.id }}<br/>
+    Category: <span style="color:{{ event.category.color }}">{{ event.category.description }}</span>
+</div>
+</body>
+</html>

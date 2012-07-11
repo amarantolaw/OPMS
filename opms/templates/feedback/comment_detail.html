@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+<h3>Comment from {{ comment.source }}</h3>
+<div>
+    "<i>{{ comment.detail }}</i>" -- {{ comment.date }}, {{ comment.time }} | <a href="edit/">Edit</a> | <a href="delete/">Delete</a>
+</div>
+<div style="text-align:right">
+    ID: {{ comment.id }}<br/>
+    Category: <span style="color:{{ comment.category.color }}">{{ comment.category.description }}</span>
+</div>
+</body>
+</html>

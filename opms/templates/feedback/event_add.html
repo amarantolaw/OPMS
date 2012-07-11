@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+{% if error != '' %}
+    <h1>ERROR: {{ error }}</h1>
+{% else %}
+    {% if added %}
+        {% if edit %}
+            Event updated. You can edit the event again using the form below, add a <a href="../..">new event</a> or you can <a href="../../..">return</a> to the home page.
+        {% else %}
+            Your event has been added to the database. You can add another event using the form below, or you can <a href="..">return</a> to the home page.
+        {% endif %}
+    {% else %}
+        {% if edit %}
+            Edit event {{ event.id }} using the form below:
+        {% else %}
+            Add a new event using the form below:
+        {% endif %}
+    {% endif %}
+    {% if edit %}
+        <form action="/CommentTimelineApp/event/{{ event.id }}/edit/" method="post">
+    {% else %}
+        <form action="/CommentTimelineApp/event/" method="post">
+    {% endif %}
+    {% csrf_token %}
+        <input type="hidden" name="add" value="1 /">
+    <p>
+        Title: <input type="text" name="title" value="{{ event.title }}" maxlength=20/>
+    </p>
+    <p>
+        Event:<br/>
+        <textarea type="text" name="detail">{{ event.detail }}</textarea>
+    </p>
+    <p>
+        Date:<select name="day">
+        {% for d in DAYS %}
+            {% if d == event.date.day %}
+                <option value="{{ d }}" selected="selected">{{ d }}</option>
+            {% else %}
+                <option value="{{ d }}">{{ d }}</option>
+            {% endif %}
+        {% endfor %}
+        </select>
+        <select name="month">
+        {% for m in MONTHS %}
+            {% if forloop.counter == event.date.month %}
+                <option value="{{ forloop.counter }}" selected="selected">{{ m }}</option>
+            {% else %}
+                <option value="{{ forloop.counter }}">{{ m }}</option>
+            {% endif %}
+        {% endfor %}
+        </select>
+        <select name="year">
+        {% for y in YEARS %}
+            {% if y == event.date.year %}
+                <option value="{{ y }}" selected="selected">{{ y }}</option>
+            {% else %}
+                <option value="{{ y }}">{{ y }}</option>
+            {% endif %}
+        {% endfor %}
+        </select>
+    </p>
+    <p>
+        Category:<select name="category_id">
+        {% for c in categories %}
+            {% if c.id == event.category.id %}
+                <option value="{{ c.id }}" selected="selected">{{ c.description }}</option>
+            {% else %}
+                <option value="{{ c.id }}">{{ c.description }}</option>
+            {% endif %}
+        {% endfor %}
+        </select>
+    </p>
+    <p>
+        <input type="submit" value="Submit" /> <input type="reset" value="Reset">
+    </p>
+{% endif %}
+</form>
+</body>
+</html>

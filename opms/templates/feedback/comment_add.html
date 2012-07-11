@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+{% if error != '' %}
+    <h1>ERROR: {{ error }}</h1>
+{% else %}
+    {% if added %}
+        {% if edit %}
+            Comment updated. You can edit the comment again using the form below, add a <a href="../..">new comment</a> or you can <a href="../../..">return</a> to the home page.
+        {% else %}
+            Your comment has been added to the database. You can add another comment using the form below, or you can <a href="..">return</a> to the home page.
+        {% endif %}
+    {% else %}
+        {% if edit %}
+            Edit comment {{ comment.id }} using the form below:
+        {% else %}
+            Add a new comment using the form below:
+        {% endif %}
+    {% endif %}
+    {% if edit %}
+        <form action="/monitoring/feedback/comment/{{ comment.id }}/edit/" method="post">
+    {% else %}
+        <form action="/monitoring/feedback/comment/" method="post">
+    {% endif %}
+    {% csrf_token %}
+        <input type="hidden" name="add" value="1 /">
+    <p>
+        Source: <input type="text" name="source" value="{{ comment.source }}"/>
+    </p>
+    <p>
+        Comment:<br/>
+        <textarea type="text" name="detail">{{ comment.detail }}</textarea>
+    </p>
+    <p>
+        Date:<select name="day">
+        {% for d in DAYS %}
+            {% if d == comment.date.day %}
+                <option value="{{ d }}" selected="selected">{{ d }}</option>
+            {% else %}
+                <option value="{{ d }}">{{ d }}</option>
+            {% endif %}
+        {% endfor %}
+        </select>
+        <select name="month">
+        {% for m in MONTHS %}
+            {% if forloop.counter == comment.date.month %}
+                <option value="{{ forloop.counter }}" selected="selected">{{ m }}</option>
+            {% else %}
+                <option value="{{ forloop.counter }}">{{ m }}</option>
+            {% endif %}
+        {% endfor %}
+        </select>
+        <select name="year">
+        {% for y in YEARS %}
+            {% if y == comment.date.year %}
+                <option value="{{ y }}" selected="selected">{{ y }}</option>
+            {% else %}
+                <option value="{{ y }}">{{ y }}</option>
+            {% endif %}
+        {% endfor %}
+        </select>
+        &nbsp;
+        <select name="hour">
+        {% for h in HOURS %}
+            {% if h == comment.time.hour %}
+                <option value="{{ h }}" selected="selected">{{ h }}</option>
+            {% else %}
+                <option value="{{ h }}">{{ h }}</option>
+            {% endif %}
+        {% endfor %}
+        </select>
+        <select name="minute">
+        {% for min in MINUTES %}
+            {% if min == comment.time.minute %}
+                <option value="{{ min }}" selected="selected">{{ min }}</option>
+            {% else %}
+                <option value="{{ min }}">{{ min }}</option>
+            {% endif %}
+        {% endfor %}
+        </select>
+        <select name="second">
+        {% for s in SECONDS %}
+            {% if s == comment.time.second %}
+                <option value="{{ s }}" selected="selected">{{ s }}</option>
+            {% else %}
+                <option value="{{ s }}">{{ s }}</option>
+            {% endif %}
+        {% endfor %}
+        </select>
+    </p>
+    <p>
+        Category:<select name="category_id">
+        {% for c in categories %}
+            {% if c.id == comment.category.id %}
+                <option value="{{ c.id }}" selected="selected">{{ c.description }}</option>
+            {% else %}
+                <option value="{{ c.id }}">{{ c.description }}</option>
+            {% endif %}
+        {% endfor %}
+        </select>
+    </p>
+    <p>
+        <input type="submit" value="Submit" /> <input type="reset" value="Reset">
+    </p>
+{% endif %}
+</form>
+</body>
+</html>
