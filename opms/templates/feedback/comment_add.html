@@ -1,9 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title></title>
-</head>
-<body>
+{% extends "base.html" %}
+{% load static sitetree %}
+
+{% block sidebar %}
+{% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+
 {% if error != '' %}
     <h1>ERROR: {{ error }}</h1>
 {% else %}
@@ -107,5 +110,4 @@
     </p>
 {% endif %}
 </form>
-</body>
-</html>
+{% endblock %}

@@ -47,7 +47,7 @@ def index(request):
         'categories_to_plot': categories_to_plot,
         'comments': Comment.objects.all(),
         'events': Event.objects.all()
-    })
+    }, context_instance=RequestContext(request))
 
 def comment_add(request,edit=False,comment=None):
     "Adds a new comment to the database. Optionally, it may replace the comment instead."

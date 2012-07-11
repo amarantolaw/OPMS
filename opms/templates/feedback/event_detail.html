@@ -1,9 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ event.title }}</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% load static sitetree %}
+
+{% block sidebar %}
+{% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+
 <h3>{{ event.title }}</h3>
 <div>
     {{ event.date }}: {{ event.detail }} | <a href="edit/">Edit</a> | <a href="delete/">Delete</a>
@@ -12,5 +15,4 @@
     ID: {{ event.id }}<br/>
     Category: <span style="color:{{ event.category.color }}">{{ event.category.description }}</span>
 </div>
-</body>
-</html>
+{% endblock %}

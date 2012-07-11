@@ -1,9 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title></title>
-</head>
-<body>
+{% extends "base.html" %}
+{% load static sitetree %}
+
+{% block sidebar %}
+{% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+
 {% if error != '' %}
     <h1>ERROR: {{ error }}</h1>
 {% else %}
@@ -21,9 +24,9 @@
         {% endif %}
     {% endif %}
     {% if edit %}
-        <form action="/CommentTimelineApp/event/{{ event.id }}/edit/" method="post">
+        <form action="/monitoring/feedback/event/{{ event.id }}/edit/" method="post">
     {% else %}
-        <form action="/CommentTimelineApp/event/" method="post">
+        <form action="/monitoring/feedback/event/" method="post">
     {% endif %}
     {% csrf_token %}
         <input type="hidden" name="add" value="1 /">
@@ -79,5 +82,4 @@
     </p>
 {% endif %}
 </form>
-</body>
-</html>
+{% endblock %}

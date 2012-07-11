@@ -1,7 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>CommentTimelineApp</title>
+{% extends "base.html" %}
+{% load static sitetree %}
+
+{% block sidebar %}
+{% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block head %}
     <style type="text/css">
         {% for c in categories_to_plot %}
             .on_category_{{ c.id|add:"-1" }} {
@@ -245,9 +249,21 @@
             onLoad();
         }
     </script>
-</head>
-<body onload="onLoad();" onresize="onResize();">
-<h1>OPMS Comment Timeline App</h1>
+{% endblock %}
+
+{% block content %}
+<script>
+    $(document).ready(function()
+            {
+                onLoad();
+            }
+    );
+    $(window).resize(function()
+            {
+                onResize();
+            }
+    );
+</script>
 <div style="text-align:right">
     <a href="comment/">New comment</a> | <a href="event/">New event</a>
 </div>
@@ -277,6 +293,4 @@
 {% endfor %}
 
 <div id="debug"></div>
-
-</body>
-</html>
+{% endblock %}
