@@ -7,5 +7,5 @@ First module deals with trying to collect impact data and present it in a format
 Initial work is on the Apple Excel Weekly report sheets. Next up is Apache log records for media server.
 
 = File and Feed Manager =
-System for holding metadata about Items, Files and Feeds known to the system. Initiall this data is imported
+System for holding metadata about Items, Files and Feeds known to the system. Initially this data is imported
 and synced from an existing legacy database.
