@@ -1,5 +1,6 @@
 from django.shortcuts import render_to_response, get_object_or_404
 from feedback.models import Metric, Traffic, Category, Comment, Event
+from stats.models import AppleWeeklySummary
 from django.db.models import Max, Min
 from django.template import RequestContext
 import datetime, time
@@ -14,10 +15,26 @@ SECONDS = range(0,60,1)
 def index(request):
     metrics_to_plot = Metric.objects.all()
     categories_to_plot = Category.objects.all()
+    traffic_to_plot = list(Traffic.objects.all())
 
-    #Find a list of all dates used by any metric within metrics_to_plot
-    start = Traffic.objects.all().aggregate(Min('date'))['date__min']
-    stop = Traffic.objects.all().aggregate(Max('date'))['date__max']
+    #Import Apple's download metric, but just for one-time use - don't save in db.
+    ttd_metric = Metric.objects.filter(description="Total track downloads")[0] #Force the metrics to be queried outside the for loops below: vital to save about 5s of CPU time.
+    browse_metric = Metric.objects.filter(description="Browse")[0]
+    for w in AppleWeeklySummary.merged.all():
+        for d in range(0,7,1):
+            traffic_to_plot.append(Traffic(date=w.week_beginning + datetime.timedelta(d), count=w.total_track_downloads, metric=ttd_metric))
+            traffic_to_plot.append(Traffic(date=w.week_beginning + datetime.timedelta(d), count=w.browse, metric=browse_metric))
+
+    start = traffic_to_plot[0].date
+    stop = start
+
+    for t in traffic_to_plot:
+        d = t.date
+        if d < start:
+            start = d
+        if d > stop:
+            stop = d
+
     x = start
     date_range = [start]
     while x != stop:
@@ -30,7 +47,7 @@ def index(request):
         metrics_textfile += str(d)
         for m in metrics_to_plot:
             t_exists = False    #Will become true IFF we have a traffic datum for this d and this m.
-            for t in Traffic.objects.all():
+            for t in traffic_to_plot:
                 if t.date == d:
                     if t.metric == m:
                         metrics_textfile += ',' + str(t.count)

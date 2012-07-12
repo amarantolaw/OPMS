@@ -9,12 +9,12 @@
 {% block head %}
     <style type="text/css">
         {% for c in categories_to_plot %}
-            .on_category_{{ c.id|add:"-1" }} {
+            .on_category_{{ c.id }} {
                 background:{{ c.color }};
             }
         {% endfor %}
         {% for m in metrics_to_plot %}
-            .on_metric_{{ m.id|add:"-1" }} {
+            .on_metric_{{ m.id }} {
                 background:{{ m.linecolor }};
             }
         {% endfor %}
@@ -58,13 +58,13 @@
             {% endif %}
         {% endfor %}
 
-        var metric_visibility = [];
+        var metric_visibility = {};
             {% for m in metrics_to_plot %}
-                metric_visibility[{{ m.id }} - 1] = {{ m.defaultvisibility|lower }};
+                metric_visibility['{{ m.id }}'] = {{ m.defaultvisibility|lower }};
             {% endfor %}
-        var category_visibility = [];
+        var category_visibility = {};
             {% for c in categories_to_plot %}
-                category_visibility[{{ c.id }} - 1] = {{ c.defaultvisibility|lower }};
+                category_visibility['{{ c.id }}'] = {{ c.defaultvisibility|lower }};
             {% endfor %}
 
         function onLoad() {
@@ -100,14 +100,13 @@
             {% for m in metrics_to_plot %}
                 var metric_plot_{{ m.id }} = Timeplot.createPlotInfo({
                     id: "plot{{ m.id }}",
-                    dataSource: new Timeplot.ColumnSource(eventSource,{{ m.id }}),
+                    dataSource: new Timeplot.ColumnSource(eventSource,{{ forloop.counter }}),
                     valueGeometry: valueGeometry,
                     timeGeometry: timeGeometry,
                     lineColor: "{{ m.linecolor }}",
                     fillColor: "{{ m.fillcolor }}",
                     showValues: {{ m.mouseover_timeplot }}
                 });
-                var number_of_metrics = {{ forloop.counter }};
             {% endfor %}
 
             {% for c in categories_to_plot %}
@@ -117,17 +116,16 @@
                     eventSource: eventSourceJSON{{ c.id }},
                     lineColor: "{{ c.color }}"
                 });
-                var number_of_categories = {{ forloop.counter }};
             {% endfor %}
 
             {% for m in metrics_to_plot %}
-                if (metric_visibility[{{ m.id|add:"-1" }}])
+                if (metric_visibility['{{ m.id }}'])
                 {
                     plotInfo.push(metric_plot_{{ m.id }});
                 }
             {% endfor %}
             {% for c in categories_to_plot %}
-                if (category_visibility[{{ c.id|add:"-1" }}])
+                if (category_visibility['{{ c.id }}'])
                 {
                     plotInfo.push(category_plot_{{ c.id }});
                 }
@@ -292,16 +290,16 @@
 <!-- Generate toggle buttons.-->
 {% for c in categories_to_plot %}
     {% if c.defaultvisibility %}
-        <input type="button" id="{{ c.id|add:"-1" }}" value="{{ c.description }}" class="on_category_{{ c.id|add:"-1" }}" onclick="toggle(this)" />
+        <input type="button" id="{{ c.id }}" value="{{ c.description }}" class="on_category_{{ c.id }}" onclick="toggle(this)" />
     {% else %}
-        <input type="button" id="{{ c.id|add:"-1" }}" value="{{ c.description }}" class="off_category" onclick="toggle(this)" />
+        <input type="button" id="{{ c.id }}" value="{{ c.description }}" class="off_category" onclick="toggle(this)" />
     {% endif %}
 {% endfor %}
 {% for m in metrics_to_plot %}
     {% if m.defaultvisibility %}
-        <input type="button" id="{{ m.id|add:"-1" }}" value="{{ m.description }}" class="on_metric_{{ m.id|add:"-1" }}" onclick="toggle(this)" />
+        <input type="button" id="{{ m.id }}" value="{{ m.description }}" class="on_metric_{{ m.id }}" onclick="toggle(this)" />
     {% else %}
-        <input type="button" id="{{ m.id|add:"-1" }}" value="{{ m.description }}" class="off_metric" onclick="toggle(this)" />
+        <input type="button" id="{{ m.id }}" value="{{ m.description }}" class="off_metric" onclick="toggle(this)" />
     {% endif %}
 {% endfor %}
 
