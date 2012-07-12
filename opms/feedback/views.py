@@ -18,13 +18,20 @@ def index(request):
     traffic_to_plot = list(Traffic.objects.all())
 
     try:
-        #Import Apple's download metric, but just for one-time use - don't save in db.
-        ttd_metric = Metric.objects.filter(description="Total track downloads")[0] #Force the metrics to be queried outside the for loops below: vital to save about 5s of CPU time.
-        browse_metric = Metric.objects.filter(description="Browse")[0]
+        #Import Apple weekly summary metrics, but just for one-time use - don't save in db.
+        appleweekly_metrics = []
+        for m in metrics_to_plot:
+            if m.source == 'appleweekly':
+                appleweekly_metrics.append(m)
+
         for w in AppleWeeklySummary.merged.all():
             for d in range(0,7,1):
-                traffic_to_plot.append(Traffic(date=w.week_beginning + datetime.timedelta(d), count=w.total_track_downloads, metric=ttd_metric))
-                traffic_to_plot.append(Traffic(date=w.week_beginning + datetime.timedelta(d), count=w.browse, metric=browse_metric))
+                print(appleweekly_metrics[0].description + appleweekly_metrics[1].description)
+                for m in appleweekly_metrics:
+                    print('m.description: ' + m.description)
+                    for field in AppleWeeklySummary._meta._fields():        #This grabs a list of field objects from the model specified as part of the stats app
+                        if field.verbose_name == m.description:             #Verbose name is specified as ("verbose_name") in stats/models/apple_summary.py
+                            traffic_to_plot.append(Traffic(date=w.week_beginning + datetime.timedelta(d), count=w.__dict__[field.name], metric=m))
     except:
         print('WARNING: Can\'t find any Apple summary data. Have you imported it?')
 

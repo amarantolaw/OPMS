@@ -3,11 +3,16 @@ import datetime
 
 class Metric(models.Model):
     "A measure of web traffic"
+    METRIC_SOURCES = (
+        ('feedback', 'Stored in feedback app'),
+        ('appleweekly', 'Apple weekly summary data')
+    )
     description = models.CharField(max_length=200)  #A description of the metric eg. 'Complete downloads'
     linecolor = models.CharField(max_length=7)      #The colour of the line when this metric is plotted on a chart
     fillcolor = models.CharField(max_length=7)      #The colour of the gradient under the said line
     mouseover = models.BooleanField()               #Whether rolling the mouse over a point will display the precise position of the point as an overlay
     defaultvisibility = models.BooleanField()       #Whether the metric is visible by default
+    source = models.CharField(max_length=20, choices=METRIC_SOURCES, default='feedback')
     def mouseover_timeplot(self):
         return str(self.mouseover).lower()
     def __unicode__(self):
