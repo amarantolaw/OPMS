@@ -17,29 +17,35 @@ def index(request):
     categories_to_plot = Category.objects.all()
     traffic_to_plot = list(Traffic.objects.all())
 
-    #Import Apple's download metric, but just for one-time use - don't save in db.
-    ttd_metric = Metric.objects.filter(description="Total track downloads")[0] #Force the metrics to be queried outside the for loops below: vital to save about 5s of CPU time.
-    browse_metric = Metric.objects.filter(description="Browse")[0]
-    for w in AppleWeeklySummary.merged.all():
-        for d in range(0,7,1):
-            traffic_to_plot.append(Traffic(date=w.week_beginning + datetime.timedelta(d), count=w.total_track_downloads, metric=ttd_metric))
-            traffic_to_plot.append(Traffic(date=w.week_beginning + datetime.timedelta(d), count=w.browse, metric=browse_metric))
+    try:
+        #Import Apple's download metric, but just for one-time use - don't save in db.
+        ttd_metric = Metric.objects.filter(description="Total track downloads")[0] #Force the metrics to be queried outside the for loops below: vital to save about 5s of CPU time.
+        browse_metric = Metric.objects.filter(description="Browse")[0]
+        for w in AppleWeeklySummary.merged.all():
+            for d in range(0,7,1):
+                traffic_to_plot.append(Traffic(date=w.week_beginning + datetime.timedelta(d), count=w.total_track_downloads, metric=ttd_metric))
+                traffic_to_plot.append(Traffic(date=w.week_beginning + datetime.timedelta(d), count=w.browse, metric=browse_metric))
+    except:
+        print('WARNING: Can\'t find any Apple summary data. Have you imported it?')
 
-    start = traffic_to_plot[0].date
-    stop = start
+    if traffic_to_plot:
+        start = traffic_to_plot[0].date
+        stop = start
+        for t in traffic_to_plot:
+            d = t.date
+            if d < start:
+                start = d
+            if d > stop:
+                stop = d
 
-    for t in traffic_to_plot:
-        d = t.date
-        if d < start:
-            start = d
-        if d > stop:
-            stop = d
-
-    x = start
-    date_range = [start]
-    while x != stop:
-        x += datetime.timedelta(days=1)
-        date_range.append(x)
+        x = start
+        date_range = [start]
+        while x != stop:
+            x += datetime.timedelta(days=1)
+            date_range.append(x)
+    else:
+        date_range = []
+        print('WARNING: No traffic to plot. Did you put any in the database?')
 
     #Timeplot is designed to take in CSV text files, so build a string containing one:
     metrics_textfile = ""
