@@ -63,9 +63,10 @@
             {% endfor %}
 
         function onLoad() {
+            var timeGeometry;
             if (change_time_range)
                 {
-                    var timeGeometry = new Timeplot.DefaultTimeGeometry({
+                    timeGeometry = new Timeplot.DefaultTimeGeometry({
                         gridColor: new Timeplot.Color("#000000"),
                         axisLabelsPlacement: "bottom",
                         min: min, //ISO 8601 dates: yyyy-mm-dd
@@ -75,7 +76,7 @@
                 }
             else
                 {
-                    var timeGeometry = new Timeplot.DefaultTimeGeometry({
+                    timeGeometry = new Timeplot.DefaultTimeGeometry({
                         gridColor: new Timeplot.Color("#000000"),
                         axisLabelsPlacement: "bottom",
                         min: "", //ISO 8601 dates: yyyy-mm-dd
@@ -137,8 +138,8 @@
                     {% if comm.category == category_to_plot %}
                         {
                             'start':"{{ comm.datetime_timeplotxml }}",
-                            'title':"Comment from {{ comm.source }}",
-                            'description':"\"{{ comm.detail }}\" <br/><a href=\"comment/{{ comm.id }}\">View detail</a> | <a href=\"comment/{{ comm.id }}/edit/\">Edit</a> | <a href=\"comment/{{ comm.id }}/delete/\">Delete</a>"
+                            'title':"Comment from {{ comm.source|escapejs }}",
+                            'description':"\"{{ comm.detail|escapejs }}\" <br/><a href=\"comment/{{ comm.id }}\">View detail</a> | <a href=\"comment/{{ comm.id }}/edit/\">Edit</a> | <a href=\"comment/{{ comm.id }}/delete/\">Delete</a>"
                         },
                     {% endif %}
                 {% endfor %}
@@ -146,8 +147,8 @@
                     {% if event.category == category_to_plot %}
                         {
                             'start':"{{ event.datetime_timeplotxml }}",
-                            'title':"{{ event.title }}",
-                            'description':"{{ event.detail }}<br/><a href=\"event/{{ event.id }}\">View detail</a> | <a href=\"event/{{ event.id }}/edit/\">Edit</a> | <a href=\"event/{{ event.id }}/delete/\">Delete</a>"
+                            'title':"{{ event.title|escapejs }}",
+                            'description':"{{ event.detail|escapejs }}<br/><a href=\"event/{{ event.id }}\">View detail</a> | <a href=\"event/{{ event.id }}/edit/\">Edit</a> | <a href=\"event/{{ event.id }}/delete/\">Delete</a>"
                         },
                     {% endif %}
                 {% endfor %}
