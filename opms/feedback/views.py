@@ -29,12 +29,14 @@ def index(request):
             if m.source == 'appleweekly':
                 appleweekly_metrics.append(m)
 
+        append = traffic_to_plot.append #Avoid re-calling the .append function in the middle of all those loops.
         for w in AppleWeeklySummary.merged.all():
             for d in range(0,7,1):
+                dat = w.week_beginning + datetime.timedelta(d)
                 for m in appleweekly_metrics:
                     for field in AppleWeeklySummary._meta._fields():        #This grabs a list of field objects from the model specified as part of the stats app
                         if field.verbose_name == m.description:             #Verbose name is specified as ("verbose_name") in stats/models/apple_summary.py
-                            traffic_to_plot.append(Traffic(date=w.week_beginning + datetime.timedelta(d), count=w.__dict__[field.name], metric=m))
+                            append(Traffic(date=dat, count=w.__dict__[field.name], metric=m))
     except:
         print('WARNING: Can\'t find any Apple summary data. Have you imported it?')
 
