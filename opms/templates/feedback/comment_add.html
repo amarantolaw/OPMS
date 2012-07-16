@@ -6,29 +6,17 @@
 {% endblock %}
 
 {% block content %}
-    <div class="row-fluid">
 {% if error != '' %}
-    <h1>ERROR: {{ error }}</h1></div>
+    <h1>ERROR: {{ error }}</h1>
 {% else %}
+    <div class="row-fluid">
     {% if added %}
-        {% if edit %}
-            Comment updated. You can edit the comment again using the form below, add a <a href="../..">new comment</a> or you can <a href="../../..">return</a> to the home page.
-        {% else %}
-            Your comment has been added to the database. You can add another comment using the form below, or you can <a href="..">return</a> to the home page.
-        {% endif %}
+        Your comment has been added to the database. You can add another comment using the form below, or you can <a href="..">return</a> to the home page.
     {% else %}
-        {% if edit %}
-            Edit comment {{ comment.id }} using the form below:
-        {% else %}
-            Add a new comment using the form below:
-        {% endif %}
+        Add a new comment using the form below:
     {% endif %}
     </div>
-    {% if edit %}
-        <form action="/monitoring/feedback/comment/{{ comment.id }}/edit/" method="post">
-    {% else %}
-        <form action="/monitoring/feedback/comment/" method="post">
-    {% endif %}
+    <form action="/monitoring/feedback/comment/" method="post">
     {% csrf_token %}
         <input type="hidden" name="add" value="1 /">
     <div class="row-fluid">

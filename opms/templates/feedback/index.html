@@ -142,7 +142,7 @@
                         {
                             'start':"{{ comm.datetime_timeplotxml }}",
                             'title':"Comment from {{ comm.source|escapejs }}",
-                            'description':"\"{{ comm.detail|escapejs }}\" <br/><a href=\"comment/{{ comm.id }}\">View detail</a> | <a href=\"comment/{{ comm.id }}/edit/\">Edit</a> | <a href=\"comment/{{ comm.id }}/delete/\">Delete</a>"
+                            'description':"\"{{ comm.detail|escapejs }}\" <br/><a href=\"comment/{{ comm.id }}\">View detail</a>"
                         },
                     {% endif %}
                 {% endfor %}
@@ -151,7 +151,7 @@
                         {
                             'start':"{{ event.datetime_timeplotxml }}",
                             'title':"{{ event.title|escapejs }}",
-                            'description':"{{ event.detail|escapejs }}<br/><a href=\"event/{{ event.id }}\">View detail</a> | <a href=\"event/{{ event.id }}/edit/\">Edit</a> | <a href=\"event/{{ event.id }}/delete/\">Delete</a>"
+                            'description':"{{ event.detail|escapejs }}<br/><a href=\"event/{{ event.id }}\">View detail</a>"
                         },
                     {% endif %}
                 {% endfor %}
@@ -314,7 +314,6 @@
         <th>Title</th>
         <th>Detail</th>
         <th>Category</th>
-        <th>Action</th>
     </tr>
     </thead>
     <tbody>
@@ -325,7 +324,6 @@
         <td>{{ e.title }}</td>
         <td>{{ e.detail }}</td>
         <td>{{ e.category.description }}</td>
-        <td><a href="event/{{ e.id }}/edit/">Edit</a> | <a href="event/{{ e.id }}/delete/">Delete</a></td>
     </tr>
     {% endfor %}
     </tbody>
@@ -341,7 +339,6 @@
         <th>Source</th>
         <th>Detail</th>
         <th>Category</th>
-        <th>Action</th>
     </tr>
     </thead>
     <tbody>
@@ -353,7 +350,6 @@
         <td>{{ c.source }}</td>
         <td>"{{ c.detail }}"</td>
         <td>{{ c.category.description }}</td>
-        <td><a href="comment/{{ c.id }}/edit/">Edit</a> | <a href="comment/{{ c.id }}/delete/">Delete</a></td>
     </tr>
     {% endfor %}
     </tbody>

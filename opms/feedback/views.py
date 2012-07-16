@@ -84,14 +84,11 @@ def index(request):
         'events': Event.objects.all()
     }, context_instance=RequestContext(request))
 
-def comment_add(request,edit=False,comment=None):
+def comment_add(request,comment=None):
     "Adds a new comment to the database. Optionally, it may replace the comment instead."
     categories = Category.objects.all()
     error = ''
-    if edit:
-        default_comment = comment
-    else:
-        default_comment = Comment(date=datetime.date.today(), time=datetime.datetime.now().time, source='', detail='', category=Category.objects.filter(pk=1)[0])
+    default_comment = Comment(date=datetime.date.today(), time=datetime.datetime.now().time, source='', detail='', category=Category.objects.filter(pk=1)[0])
 
     try:
         added = bool(request.POST['add'])
@@ -125,11 +122,7 @@ def comment_add(request,edit=False,comment=None):
 
         if error == '':
             try:
-                if edit == True:
-                    new_comment = comment
-                    new_comment.date,new_comment.time,new_comment.source,new_comment.detail,new_comment.category = new_date,new_time,new_source,new_detail,new_category
-                else:
-                    new_comment = Comment(date=new_date, time=new_time, source=new_source, detail=new_detail, category=new_category)
+                new_comment = Comment(date=new_date, time=new_time, source=new_source, detail=new_detail, category=new_category)
                 new_comment.save()
                 default_comment = new_comment
             except:
@@ -145,7 +138,6 @@ def comment_add(request,edit=False,comment=None):
             'SECONDS': SECONDS,
             'error': error,
             'added': added,
-            'edit': edit,
             'comment': default_comment},
         context_instance=RequestContext(request))
 
@@ -153,44 +145,29 @@ def comment_detail(request, comment_id):
     comment = get_object_or_404(Comment, pk=int(comment_id)) #Find the appropriate comment object from comment_id.
     return render_to_response('feedback/comment_detail.html', {'comment': comment}, context_instance=RequestContext(request))
 
-def comment_edit(request, comment_id):
-    comment = get_object_or_404(Comment, pk=int(comment_id)) #Find the appropriate comment object from comment_id.
-    return comment_add(request,True,comment)
-
-def comment_delete(request, comment_id):
-    error = ''
-    comment = get_object_or_404(Comment, pk=int(comment_id)) #Find the appropriate comment object from comment_id.
-    try:
-        comment.delete()
-    except:
-        error += 'Could not delete comment.'
-    return render_to_response('feedback/comment_delete.html', {'error': error}, context_instance=RequestContext(request))
-
-def event_add(request,edit=False,event=None):
+def event_add(request,event=None):
     "Adds a new event to the database. Optionally, it may replace the event instead."
     categories = Category.objects.all()
     error = ''
-    if edit:
-        default_event = event
-    else:
+
+    try:
+        widget = bool(request.POST['widget'])
+    except:
+        widget = False
+    if widget == True:
+        url = request.POST['url']
+        detail = request.POST['description']
+        title = request.POST['title']
         try:
-            widget = bool(request.POST['widget'])
+            timestamp = request.POST['timestamp']
+            datetimestamp = parse(timestamp)
         except:
-            widget = False
-        if widget == True:
-            url = request.POST['url']
-            detail = request.POST['description']
-            title = request.POST['title']
-            try:
-                timestamp = request.POST['timestamp']
-                datetimestamp = parse(timestamp)
-            except:
-                datetimestamp = datetime.datetime.now()
-                print('WARNING: Widget returned datetime we couldn\'t process. Defaulting to today.')
-            print('Autocompleting form from widget... ' + url + timestamp + title)
-            default_event = Event(date=datetimestamp.date(), title=title, detail=detail, category=Category.objects.filter(description='Found on the internet')[0])
-        else:
-            default_event = Event(date=datetime.date.today(), title='', detail='', category=Category.objects.filter(pk=1)[0])
+            datetimestamp = datetime.datetime.now()
+            print('WARNING: Widget returned datetime we couldn\'t process. Defaulting to today.')
+        print('Autocompleting form from widget... ' + url + timestamp + title)
+        default_event = Event(date=datetimestamp.date(), title=title, detail=detail, category=Category.objects.filter(description='Found on the internet')[0])
+    else:
+        default_event = Event(date=datetime.date.today(), title='', detail='', category=Category.objects.filter(pk=1)[0])
 
     try:
         added = bool(request.POST['add'])
@@ -222,16 +199,12 @@ def event_add(request,edit=False,event=None):
             error += ' Category invalid or nonexistent.'
 
         if error == '':
-#            try:
-                if edit == True:
-                    new_event = event
-                    new_event.date,new_event.title,new_event.detail,new_event.category = new_date,new_title,new_detail,new_category
-                else:
-                    new_event = Event(date=new_date, title=new_title, detail=new_detail, category=new_category)
+            try:
+                new_event = Event(date=new_date, title=new_title, detail=new_detail, category=new_category)
                 new_event.save()
                 default_event = new_event
-#            except:
-#                error += ' Failed to act on the database.'
+            except:
+                error += ' Failed to act on the database.'
 
     return render_to_response('feedback/event_add.html',
             {'categories': categories,
@@ -240,26 +213,12 @@ def event_add(request,edit=False,event=None):
              'YEARS': YEARS,
              'error': error,
              'added': added,
-             'edit': edit,
              'event': default_event},
         context_instance=RequestContext(request))
 
 def event_detail(request, event_id):
     event = get_object_or_404(Event, pk=int(event_id)) #Find the appropriate event object from event_id.
     return render_to_response('feedback/event_detail.html', {'event': event}, context_instance=RequestContext(request))
-
-def event_edit(request, event_id):
-    event = get_object_or_404(Event, pk=int(event_id)) #Find the appropriate event object from event_id.
-    return event_add(request,True,event)
-
-def event_delete(request, event_id):
-    error = ''
-    event = get_object_or_404(Event, pk=int(event_id)) #Find the appropriate event object from event_id.
-    try:
-        event.delete()
-    except:
-        error += 'Could not delete event.'
-    return render_to_response('feedback/event_delete.html', {'error': error}, context_instance=RequestContext(request))
 
 def email(request):
     output = ''

@@ -6,29 +6,17 @@
 {% endblock %}
 
 {% block content %}
-    <div class="row-fluid">
 {% if error != '' %}
-    <h1>ERROR: {{ error }}</h1></div>
+    <h1>ERROR: {{ error }}</h1>
 {% else %}
+    <div class="row-fluid">
     {% if added %}
-        {% if edit %}
-            Event updated. You can edit the event again using the form below, add a <a href="../..">new event</a> or you can <a href="../../..">return</a> to the home page.
-        {% else %}
-            Your event has been added to the database. You can add another event using the form below, or you can <a href="..">return</a> to the home page.
-        {% endif %}
+        Your event has been added to the database. You can add another event using the form below, or you can <a href="..">return</a> to the home page.
     {% else %}
-        {% if edit %}
-            Edit event {{ event.id }} using the form below:
-        {% else %}
-            Add a new event using the form below:
-        {% endif %}
+        Add a new event using the form below:
     {% endif %}
     </div>
-    {% if edit %}
-        <form action="/monitoring/feedback/event/{{ event.id }}/edit/" method="post">
-    {% else %}
-        <form action="/monitoring/feedback/event/" method="post">
-    {% endif %}
+    <form action="/monitoring/feedback/event/" method="post">
     {% csrf_token %}
         <input type="hidden" name="add" value="1 /">
     <div class="row-fluid">
