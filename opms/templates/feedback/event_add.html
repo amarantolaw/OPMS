@@ -6,9 +6,9 @@
 {% endblock %}
 
 {% block content %}
-
+    <div class="row-fluid">
 {% if error != '' %}
-    <h1>ERROR: {{ error }}</h1>
+    <h1>ERROR: {{ error }}</h1></div>
 {% else %}
     {% if added %}
         {% if edit %}
@@ -23,6 +23,7 @@
             Add a new event using the form below:
         {% endif %}
     {% endif %}
+    </div>
     {% if edit %}
         <form action="/monitoring/feedback/event/{{ event.id }}/edit/" method="post">
     {% else %}
@@ -30,18 +31,18 @@
     {% endif %}
     {% csrf_token %}
         <input type="hidden" name="add" value="1 /">
-    <p>
-        Title: <input type="text" name="title" value="{{ event.title }}" maxlength=20/>
-    </p>
-    <p>
-        Event:<br/>
-        <textarea type="text" name="detail">{{ event.detail }}</textarea>
-    </p>
-    <p>
-        Date: <input type="text" value="{{ event.date.day }}/{{ event.date.month }}/{{ event.date.year }}" data-date-format="dd/mm/yyyy" id="dp" name="date" class="input-small"/>
-    </p>
-    <p>
-        Category:<select name="category_id">
+    <div class="row-fluid">
+        <div class="span1">Title:</div><div class="span2"><input type="text" name="title" value="{{ event.title }}" maxlength=20/></div>
+    </div>
+    <div class="row-fluid">
+        <div class="span1">Event:</div><div class="span2">
+        <textarea type="text" name="detail">{{ event.detail }}</textarea></div>
+    </div>
+    <div class="row-fluid">
+        <div class="span1">Date:</div><div class="span2"><input type="text" value="{{ event.date.day }}/{{ event.date.month }}/{{ event.date.year }}" data-date-format="dd/mm/yyyy" id="dp" name="date" class="input-small"/></div>
+    </div>
+    <div class="row-fluid">
+        <div class="span1">Category:</div><div class="span2"><select name="category_id">
         {% for c in categories %}
             {% if c.id == event.category.id %}
                 <option value="{{ c.id }}" selected="selected">{{ c.description }}</option>
@@ -50,10 +51,11 @@
             {% endif %}
         {% endfor %}
         </select>
-    </p>
-    <p>
-        <input type="submit" value="Submit" /> <input type="reset" value="Reset">
-    </p>
+        </div>
+    </div>
+    <div class="row-fluid">
+        <div class="span1"></div><div class="span2"><input type="submit" value="Submit" /> <input type="reset" value="Reset"></div>
+    </div>
 {% endif %}
 </form>
 <script>
