@@ -3,7 +3,12 @@ from feedback.models import Metric, Traffic, Category, Comment, Event
 from stats.models import AppleWeeklySummary
 from django.db.models import Max, Min
 from django.template import RequestContext
+import settings
 import datetime, time
+from dateutil.parser import parse
+import imaplib
+from email import message_from_string
+from email.parser import Parser
 
 DAYS = range(1,32,1)
 MONTHS = ('January','February','March','April','May','June','July','August','September','October','November','December')
@@ -166,7 +171,24 @@ def event_add(request,edit=False,event=None):
     if edit:
         default_event = event
     else:
-        default_event = Event(date=datetime.date.today(), title='', detail='', category=Category.objects.filter(pk=1)[0])
+        try:
+            widget = bool(request.POST['widget'])
+        except:
+            widget = False
+        if widget == True:
+            url = request.POST['url']
+            detail = request.POST['description']
+            title = request.POST['title']
+            try:
+                timestamp = request.POST['timestamp']
+                datetimestamp = parse(timestamp)
+            except:
+                datetimestamp = datetime.datetime.now()
+                print('WARNING: Widget returned datetime we couldn\'t process. Defaulting to today.')
+            print('Autocompleting form from widget... ' + url + timestamp + title)
+            default_event = Event(date=datetimestamp.date(), title=title, detail=detail, category=Category.objects.filter(description='Found on the internet')[0])
+        else:
+            default_event = Event(date=datetime.date.today(), title='', detail='', category=Category.objects.filter(pk=1)[0])
 
     try:
         added = bool(request.POST['add'])
@@ -236,3 +258,31 @@ def event_delete(request, event_id):
     except:
         error += 'Could not delete event.'
     return render_to_response('feedback/event_delete.html', {'error': error}, context_instance=RequestContext(request))
+
+def email(request):
+    output = ''
+    error = ''
+    try:
+        host = settings.EMAIL_HOST
+        imap = settings.EMAIL_IMAP
+        eddress = settings.EMAIL_HOST_USER
+        password = settings.EMAIL_HOST_PASSWORD
+        port = settings.EMAIL_PORT
+        prefix = settings.EMAIL_SUBJECT_PREFIX
+    except:
+        error += 'ERROR: You haven\'t configured e-mail in settings.py.'
+    if error == '':
+        mail = imaplib.IMAP4_SSL(imap)
+        mail.login(eddress, password)
+        mail.select("inbox")
+        result, data = mail.uid('search', None, "ALL")
+        uids = data[0].split()
+        emails = []
+        for u in uids:
+            result, data = mail.uid('fetch', u, '(RFC822)')
+            raw_email = data[0][1]
+            email_message = message_from_string(raw_email)
+            for part in email_message.walk():
+                if part.get_content_type() == 'text/plain':
+                    output += 'PART: ' + str(part.get_payload()) + '\n'
+    return render_to_response('feedback/email.html', {'error': error, 'output': output}, context_instance=RequestContext(request))

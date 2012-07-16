@@ -11,4 +11,5 @@ urlpatterns = patterns('feedback.views',
     url(r'^event/(?P<event_id>\d+)/$', 'event_detail', name="event-detail"),
     url(r'^event/(?P<event_id>\d+)/edit/$', 'event_edit', name="event-edit"),
     url(r'^event/(?P<event_id>\d+)/delete/$', 'event_delete', name="event-delete"),
+    url(r'^email/$', 'email'),
 )
