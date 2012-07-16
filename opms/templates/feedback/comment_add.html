@@ -38,61 +38,10 @@
         <textarea type="text" name="detail">{{ comment.detail }}</textarea>
     </p>
     <p>
-        Date:<select name="day">
-        {% for d in DAYS %}
-            {% if d == comment.date.day %}
-                <option value="{{ d }}" selected="selected">{{ d }}</option>
-            {% else %}
-                <option value="{{ d }}">{{ d }}</option>
-            {% endif %}
-        {% endfor %}
-        </select>
-        <select name="month">
-        {% for m in MONTHS %}
-            {% if forloop.counter == comment.date.month %}
-                <option value="{{ forloop.counter }}" selected="selected">{{ m }}</option>
-            {% else %}
-                <option value="{{ forloop.counter }}">{{ m }}</option>
-            {% endif %}
-        {% endfor %}
-        </select>
-        <select name="year">
-        {% for y in YEARS %}
-            {% if y == comment.date.year %}
-                <option value="{{ y }}" selected="selected">{{ y }}</option>
-            {% else %}
-                <option value="{{ y }}">{{ y }}</option>
-            {% endif %}
-        {% endfor %}
-        </select>
-        &nbsp;
-        <select name="hour">
-        {% for h in HOURS %}
-            {% if h == comment.time.hour %}
-                <option value="{{ h }}" selected="selected">{{ h }}</option>
-            {% else %}
-                <option value="{{ h }}">{{ h }}</option>
-            {% endif %}
-        {% endfor %}
-        </select>
-        <select name="minute">
-        {% for min in MINUTES %}
-            {% if min == comment.time.minute %}
-                <option value="{{ min }}" selected="selected">{{ min }}</option>
-            {% else %}
-                <option value="{{ min }}">{{ min }}</option>
-            {% endif %}
-        {% endfor %}
-        </select>
-        <select name="second">
-        {% for s in SECONDS %}
-            {% if s == comment.time.second %}
-                <option value="{{ s }}" selected="selected">{{ s }}</option>
-            {% else %}
-                <option value="{{ s }}">{{ s }}</option>
-            {% endif %}
-        {% endfor %}
-        </select>
+        Date: <input type="text" value="{{ comment.date.day }}/{{ comment.date.month }}/{{ comment.date.year }}" data-date-format="dd/mm/yyyy" id="dp" class="input-small" name="date"/>
+    </p>
+    <p>
+        Time: <input placeholder="{{ comment.time.hour }}:{{ comment.time.minute }}:{{ comment.time.second }}" class="timepicker input-small" type="text" name="time"/>
     </p>
     <p>
         Category:<select name="category_id">
@@ -110,4 +59,15 @@
     </p>
 {% endif %}
 </form>
+<script>
+    $(document).ready(function() {
+            $('#dp').datepicker();
+            $('.timepicker').timepicker({
+            defaultTime: '{{ comment.time.hour }}:{{ comment.time.minute }}:{{ comment.time.second }}',
+            template: 'dropdown',
+            showSeconds: true,
+            showMeridian: false
+                 });
+    });
+</script>
 {% endblock %}

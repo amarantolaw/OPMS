@@ -97,8 +97,8 @@ def comment_add(request,edit=False,comment=None):
         added = False
     if added == True:
         try:
-            new_date = datetime.date(int(request.POST['year']), int(request.POST['month']), int(request.POST['day']))
-            new_time = datetime.time(int(request.POST['hour']), int(request.POST['minute']), int(request.POST['second']))
+            new_date = parse(request.POST['date'], dayfirst=True)
+            new_time = parse(request.POST['time'])
         except:
             error += ' Datetime invalid or not specified.'
 
@@ -196,7 +196,7 @@ def event_add(request,edit=False,event=None):
         added = False
     if added == True:
         try:
-            new_date = datetime.date(int(request.POST['year']), int(request.POST['month']), int(request.POST['day']))
+            new_date = parse(request.POST['date'], dayfirst=True)
         except:
             error += ' Date invalid or not specified.'
 

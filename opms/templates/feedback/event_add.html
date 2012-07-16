@@ -38,33 +38,7 @@
         <textarea type="text" name="detail">{{ event.detail }}</textarea>
     </p>
     <p>
-        Date:<select name="day">
-        {% for d in DAYS %}
-            {% if d == event.date.day %}
-                <option value="{{ d }}" selected="selected">{{ d }}</option>
-            {% else %}
-                <option value="{{ d }}">{{ d }}</option>
-            {% endif %}
-        {% endfor %}
-        </select>
-        <select name="month">
-        {% for m in MONTHS %}
-            {% if forloop.counter == event.date.month %}
-                <option value="{{ forloop.counter }}" selected="selected">{{ m }}</option>
-            {% else %}
-                <option value="{{ forloop.counter }}">{{ m }}</option>
-            {% endif %}
-        {% endfor %}
-        </select>
-        <select name="year">
-        {% for y in YEARS %}
-            {% if y == event.date.year %}
-                <option value="{{ y }}" selected="selected">{{ y }}</option>
-            {% else %}
-                <option value="{{ y }}">{{ y }}</option>
-            {% endif %}
-        {% endfor %}
-        </select>
+        Date: <input type="text" value="{{ event.date.day }}/{{ event.date.month }}/{{ event.date.year }}" data-date-format="dd/mm/yyyy" id="dp" name="date" class="input-small"/>
     </p>
     <p>
         Category:<select name="category_id">
@@ -82,4 +56,7 @@
     </p>
 {% endif %}
 </form>
+<script>
+    $('#dp').datepicker()
+</script>
 {% endblock %}
