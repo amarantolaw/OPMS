@@ -73,10 +73,10 @@ def index(request, error='', message=''):
         'metrics_to_plot': metrics_to_plot,
         'metrics_textfile': metrics_textfile,
         'categories_to_plot': categories_to_plot,
-        'comments': Comment.objects.all(),
+        'comments': Comment.objects.filter(moderated=True),
         'error': error,
         'message': message,
-        'events': Event.objects.all()
+        'events': Event.objects.filter(moderated=True)
     }, context_instance=RequestContext(request))
 
 def comment_add(request,comment=None, error='', message=''):
