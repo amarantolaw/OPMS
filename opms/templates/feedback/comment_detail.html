@@ -6,13 +6,19 @@
 {% endblock %}
 
 {% block content %}
-
+{% if error != '' %}
+<div class="alert alert-error">ERROR: {{ error }}</div>
+{% else %}
+{% if message != '' %}
+    <div class="alert alert-success">{{ message }}</div>
+{% endif %}
 <h3>Comment from {{ comment.source }}</h3>
 <div>
-    "<i>{{ comment.detail }}</i>" -- {{ comment.date }}, {{ comment.time }} | <a href="edit/">Edit</a> | <a href="delete/">Delete</a>
+    "<i>{{ comment.detail }}</i>" -- {{ comment.date }}, {{ comment.time }}
 </div>
 <div style="text-align:right">
     ID: {{ comment.id }}<br/>
     Category: <span style="color:{{ comment.category.color }}">{{ comment.category.description }}</span>
 </div>
+{% endif %}
 {% endblock %}

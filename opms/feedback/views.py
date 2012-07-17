@@ -10,14 +10,7 @@ import imaplib
 from email import message_from_string
 from email.parser import Parser
 
-DAYS = range(1,32,1)
-MONTHS = ('January','February','March','April','May','June','July','August','September','October','November','December')
-YEARS = range(2000,datetime.date.today().year + 1,1)
-HOURS = range(0,24,1)
-MINUTES = range(0,60,1)
-SECONDS = range(0,60,1)
-
-def index(request):
+def index(request, error='', message=''):
     metrics_to_plot = Metric.objects.all()
     categories_to_plot = Category.objects.all()
     traffic_to_plot = list(Traffic.objects.all())
@@ -81,13 +74,14 @@ def index(request):
         'metrics_textfile': metrics_textfile,
         'categories_to_plot': categories_to_plot,
         'comments': Comment.objects.all(),
+        'error': error,
+        'message': message,
         'events': Event.objects.all()
     }, context_instance=RequestContext(request))
 
-def comment_add(request,comment=None):
+def comment_add(request,comment=None, error='', message=''):
     "Adds a new comment to the database. Optionally, it may replace the comment instead."
     categories = Category.objects.all()
-    error = ''
     default_comment = Comment(date=datetime.date.today(), time=datetime.datetime.now().time, source='', detail='', category=Category.objects.filter(pk=1)[0])
 
     try:
@@ -124,31 +118,43 @@ def comment_add(request,comment=None):
             try:
                 new_comment = Comment(date=new_date, time=new_time, source=new_source, detail=new_detail, category=new_category)
                 new_comment.save()
+                message += 'Your comment was added to the database.'
                 default_comment = new_comment
             except:
                 error += ' Failed to act on the database.'
+    try:
+        action = request.POST['action']
+    except:
+        action = 'add'
 
-    return render_to_response('feedback/comment_add.html',
+    if action == 'saveandaddanother' or action == 'add':
+        return render_to_response('feedback/comment_add.html',
             {'categories': categories,
-            'DAYS': DAYS,
-            'MONTHS': MONTHS,
-            'YEARS': YEARS,
-            'HOURS': HOURS,
-            'MINUTES': MINUTES,
-            'SECONDS': SECONDS,
             'error': error,
+            'message': message,
             'added': added,
             'comment': default_comment},
-        context_instance=RequestContext(request))
+            context_instance=RequestContext(request))
+    elif action == 'save':
+        return index(request, error=error, message=message)
+    else:
+        error += 'Invalid submit action requested.'
+        return render_to_response('feedback/comment_add.html',
+                {'categories': categories,
+                 'error': error,
+                 'comment': comment,
+                 'added': added,
+                 'message': message,
+                 'comment': default_comment},
+            context_instance=RequestContext(request))
 
-def comment_detail(request, comment_id):
+def comment_detail(request, comment_id, error='', message=''):
     comment = get_object_or_404(Comment, pk=int(comment_id)) #Find the appropriate comment object from comment_id.
-    return render_to_response('feedback/comment_detail.html', {'comment': comment}, context_instance=RequestContext(request))
+    return render_to_response('feedback/comment_detail.html', {'comment': comment, 'error': error, 'message': message}, context_instance=RequestContext(request))
 
-def event_add(request,event=None):
+def event_add(request,event=None, error='', message=''):
     "Adds a new event to the database. Optionally, it may replace the event instead."
     categories = Category.objects.all()
-    error = ''
 
     try:
         widget = bool(request.POST['widget'])
@@ -164,7 +170,7 @@ def event_add(request,event=None):
         except:
             datetimestamp = datetime.datetime.now()
             print('WARNING: Widget returned datetime we couldn\'t process. Defaulting to today.')
-        print('Autocompleting form from widget... ' + url + timestamp + title)
+        print('Autocompleting form from widget... ' + url + str(timestamp) + title)
         default_event = Event(date=datetimestamp.date(), title=title, detail=detail, category=Category.objects.filter(description='Found on the internet')[0])
     else:
         default_event = Event(date=datetime.date.today(), title='', detail='', category=Category.objects.filter(pk=1)[0])
@@ -202,27 +208,41 @@ def event_add(request,event=None):
             try:
                 new_event = Event(date=new_date, title=new_title, detail=new_detail, category=new_category)
                 new_event.save()
+                message += 'Your event was added to the database.'
                 default_event = new_event
             except:
-                error += ' Failed to act on the database.'
+                error += 'Failed to act on the database.'
+    try:
+        action = request.POST['action']
+    except:
+        action = 'add'
 
-    return render_to_response('feedback/event_add.html',
+    if action == 'saveandaddanother' or action == 'add':
+        return render_to_response('feedback/event_add.html',
             {'categories': categories,
-             'DAYS': DAYS,
-             'MONTHS': MONTHS,
-             'YEARS': YEARS,
              'error': error,
              'added': added,
+             'message': message,
              'event': default_event},
-        context_instance=RequestContext(request))
+            context_instance=RequestContext(request))
+    elif action == 'save':
+        return index(request, error=error, message=message)
+    else:
+        error += 'Invalid submit action requested.'
+        return render_to_response('feedback/event_add.html',
+                {'categories': categories,
+                 'error': error,
+                 'added': added,
+                 'message': message,
+                 'event': default_event},
+            context_instance=RequestContext(request))
 
-def event_detail(request, event_id):
+def event_detail(request, event_id, error='', message=''):
     event = get_object_or_404(Event, pk=int(event_id)) #Find the appropriate event object from event_id.
-    return render_to_response('feedback/event_detail.html', {'event': event}, context_instance=RequestContext(request))
+    return render_to_response('feedback/event_detail.html', {'event': event, 'error': error, 'message': message}, context_instance=RequestContext(request))
 
-def email(request):
+def email(request, error='', message=''):
     output = ''
-    error = ''
     try:
         host = settings.EMAIL_HOST
         imap = settings.EMAIL_IMAP
@@ -246,4 +266,4 @@ def email(request):
             for part in email_message.walk():
                 if part.get_content_type() == 'text/plain':
                     output += 'PART: ' + str(part.get_payload()) + '\n'
-    return render_to_response('feedback/email.html', {'error': error, 'output': output}, context_instance=RequestContext(request))
+    return render_to_response('feedback/email.html', {'error': error, 'message': message, 'output': output}, context_instance=RequestContext(request))

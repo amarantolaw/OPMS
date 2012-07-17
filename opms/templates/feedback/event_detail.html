@@ -6,13 +6,19 @@
 {% endblock %}
 
 {% block content %}
-
+{% if error != '' %}
+<div class="alert alert-error">ERROR: {{ error }}</div>
+{% else %}
+{% if message != '' %}
+    <div class="alert alert-success">{{ message }}</div>
+{% endif %}
 <h3>{{ event.title }}</h3>
 <div>
-    {{ event.date }}: {{ event.detail }} | <a href="edit/">Edit</a> | <a href="delete/">Delete</a>
+    {{ event.date }}: {{ event.detail }}
 </div>
 <div style="text-align:right">
     ID: {{ event.id }}<br/>
     Category: <span style="color:{{ event.category.color }}">{{ event.category.description }}</span>
 </div>
+{% endif %}
 {% endblock %}

@@ -275,8 +275,14 @@
             }
     );
 </script>
+{% if error != '' %}
+    <div class="alert alert-error">ERROR: {{ error }}</div>
+{% else %}
+    {% if message != '' %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endif %}
 <div style="text-align:right">
-    <a href="comment/">New comment</a> | <a href="event/">New event</a>
+    <a href="{% url comment-add %}">New comment</a> | <a href="{% url event-add %}">New event</a>
 </div>
 <div id="timeplot-parent">
     <div id="my-timeplot" style="height: 150px;"></div>
@@ -303,8 +309,6 @@
     {% endif %}
 {% endfor %}
 
-<div id="debug"></div>
-
 <h2>Events</h2>
 <table id="eventsTable" class="tablesorter">
     <thead>
@@ -319,7 +323,7 @@
     <tbody>
     {% for e in events %}
     <tr>
-        <td><a href="event/{{ e.id }}/">{{ e.id }}</a></td>
+        <td><a href="{% url event-detail event_id=e.id %}">{{ e.id }}</a></td>
         <td>{{ e.date }}</td>
         <td>{{ e.title }}</td>
         <td>{{ e.detail }}</td>
@@ -344,7 +348,7 @@
     <tbody>
     {% for c in comments %}
     <tr>
-        <td><a href="comment/{{ c.id }}/">{{ c.id }}</a></td>
+        <td><a href="{% url comment-detail comment_id=c.id %}">{{ c.id }}</a></td>
         <td>{{ c.date }}</td>
         <td>{{ c.time }}</td>
         <td>{{ c.source }}</td>
@@ -354,4 +358,5 @@
     {% endfor %}
     </tbody>
 </table>
+{% endif %}
 {% endblock %}
