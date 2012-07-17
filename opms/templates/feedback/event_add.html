@@ -15,7 +15,7 @@
     <div class="row-fluid">
         Add a new event using the form below:
     </div>
-    <form action="{% url event-add %}" method="post">
+    <form action="{% url event-add %}" method="post" onsubmit="storeCookie()">
     {% csrf_token %}
         <input type="hidden" name="add" value="1 /">
     <div class="row-fluid">
@@ -43,6 +43,9 @@
     <div class="row-fluid">
         <div class="span2">Your e-mail address:</div><div class="span2"><input type="text" name="user_email" value="{{ event.user_email }}" maxlength=75 /></div>
     </div>
+    <div class="row-fluid">
+        <div class="span2">Remember me:</div><div class="span2"><input type="checkbox" name="remember" value="remember" /></div>
+    </div>
     <input type="hidden" name="action" id="action" />
     <div class="row-fluid">
         <div class="span2"></div><div class="span4"><input type="submit" value="Save" name="save" /> <input type="submit" value="Save and add another" name="saveandaddanother"/> <input type="reset" value="Reset"></div>
@@ -54,6 +57,18 @@
         $('#dp').datepicker();
         // When a submit button is clicked, put its name into the action hidden field
         $(":submit").click(function () { $("#action").val(this.name); });
+        if ($.cookie('opms_feedback_user_email') != null){ //If the cookie exists, put it in the user_email box and check the 'remember' box.
+            $("input[name='user_email']").val($.cookie('opms_feedback_user_email'));
+            $("input[name='remember']").prop("checked",true);
+        };
     });
+    function storeCookie() {
+        if ($("input[name='remember']").prop("checked")){
+            $.cookie('opms_feedback_user_email', $("input[name='user_email']").val(), { expires: 28, path: '/' }); //If the box is checked, store the cookie.
+        }
+        else {
+            $.cookie('opms_feedback_user_email', null, { expires: 28, path: '/' }); //If not, delete the cookie.
+        }
+    }
 </script>
 {% endblock %}
