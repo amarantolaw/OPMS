@@ -18,7 +18,12 @@
 </div>
 <div style="text-align:right">
     ID: {{ comment.id }}<br/>
-    Category: <span style="color:{{ comment.category.color }}">{{ comment.category.description }}</span>
-</div>
+    Category: <span style="color:{{ comment.category.color }}">{{ comment.category.description }}</span><br/>
+    Uploaded by {{ comment.user_email }}, {{ comment.dt_uploaded }}<br/>
+    {% if comment.moderated %}
+        Moderated by {{ comment.moderator }}, {{ comment.dt_moderated }}</div>
+    {% else %}
+        </div><div class="alert alert-info" style="text-align: center">This event has yet to be checked by one of our moderators.</div>
+    {% endif %}
 {% endif %}
 {% endblock %}

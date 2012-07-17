@@ -82,7 +82,7 @@ def index(request, error='', message=''):
 def comment_add(request,comment=None, error='', message=''):
     "Adds a new comment to the database. Optionally, it may replace the comment instead."
     categories = Category.objects.all()
-    default_comment = Comment(date=datetime.date.today(), time=datetime.datetime.now().time, source='', detail='', category=Category.objects.filter(description='Default')[0])
+    default_comment = Comment(date=datetime.date.today(), time=datetime.datetime.now().time, source='', detail='', category=Category.objects.filter(description='Default')[0], user_email='')
 
     try:
         added = bool(request.POST['add'])
@@ -119,9 +119,16 @@ def comment_add(request,comment=None, error='', message=''):
         except:
             error += ' Category invalid or nonexistent.'
 
+        try:
+            new_user_email = request.POST['user_email']
+            if new_user_email == '':
+                error += ' You haven\'t provided your e-mail address.'
+        except:
+            error += ' No user e-mail address provided.'
+
         if error == '':
             try:
-                new_comment = Comment(date=new_date, time=new_time, source=new_source, detail=new_detail, category=new_category)
+                new_comment = Comment(date=new_date, time=new_time, source=new_source, detail=new_detail, category=new_category, user_email=new_user_email)
                 new_comment.full_clean()
                 try:
                     new_comment.save()
@@ -175,9 +182,9 @@ def event_add(request,event=None, error='', message=''):
             datetimestamp = datetime.datetime.now()
             print('WARNING: Widget returned datetime we couldn\'t process. Defaulting to today.')
         print('Autocompleting form from widget... ' + url + str(timestamp) + title)
-        default_event = Event(date=datetimestamp.date(), title=title, detail=detail, category=Category.objects.filter(description='Found on the internet')[0])
+        default_event = Event(date=datetimestamp.date(), title=title, detail=detail, category=Category.objects.filter(description='Found on the internet')[0], user_email='')
     else:
-        default_event = Event(date=datetime.date.today(), title='', detail='', category=Category.objects.filter(description='Default')[0])
+        default_event = Event(date=datetime.date.today(), title='', detail='', category=Category.objects.filter(description='Default')[0], user_email='')
 
     try:
         added = bool(request.POST['add'])
@@ -213,9 +220,16 @@ def event_add(request,event=None, error='', message=''):
         except:
             error += ' Category invalid or nonexistent.'
 
+        try:
+            new_user_email = request.POST['user_email']
+            if new_user_email == '':
+                error += ' You haven\'t provided your e-mail address.'
+        except:
+            error += ' No user e-mail address provided.'
+
         if error == '':
             try:
-                new_event = Event(date=new_date, title=new_title, detail=new_detail, category=new_category)
+                new_event = Event(date=new_date, title=new_title, detail=new_detail, category=new_category, user_email=new_user_email)
                 new_event.full_clean()
                 try:
                     new_event.save()

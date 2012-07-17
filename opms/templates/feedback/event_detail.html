@@ -18,7 +18,12 @@
 </div>
 <div style="text-align:right">
     ID: {{ event.id }}<br/>
-    Category: <span style="color:{{ event.category.color }}">{{ event.category.description }}</span>
-</div>
+    Category: <span style="color:{{ event.category.color }}">{{ event.category.description }}</span><br/>
+    Uploaded by {{ event.user_email }}, {{ event.dt_uploaded }}<br/>
+{% if event.moderated %}
+    Moderated by {{ event.moderator }}, {{ event.dt_moderated }}</div>
+{% else %}
+    </div><div class="alert alert-info" style="text-align: center">This event has yet to be checked by one of our moderators.</div>
+{% endif %}
 {% endif %}
 {% endblock %}
