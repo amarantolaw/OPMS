@@ -88,6 +88,11 @@ def comment_add(request,comment=None, error='', message=''):
         added = bool(request.POST['add'])
     except:
         added = False
+    try:
+        action = request.POST['action']
+    except:
+        action = 'add'
+
     if added == True:
         try:
             new_date = parse(request.POST['date'], dayfirst=True)
@@ -117,17 +122,17 @@ def comment_add(request,comment=None, error='', message=''):
         if error == '':
             try:
                 new_comment = Comment(date=new_date, time=new_time, source=new_source, detail=new_detail, category=new_category)
-                new_comment.save()
-                message += 'Your comment was added to the database.'
-                default_comment = new_comment
+                new_comment.full_clean()
+                try:
+                    new_comment.save()
+                    message += 'Your comment was added to the database.'
+                    default_comment = new_comment
+                except:
+                    error += ' Failed to act on the database.'
             except:
-                error += ' Failed to act on the database.'
-    try:
-        action = request.POST['action']
-    except:
-        action = 'add'
+                error += 'Your comment failed validation checks. Perhaps it is a duplicate of another one already in the database?'
 
-    if action == 'saveandaddanother' or action == 'add':
+    if action == 'saveandaddanother' or action == 'add' or error != '':
         return render_to_response('feedback/comment_add.html',
             {'categories': categories,
             'error': error,
@@ -142,7 +147,6 @@ def comment_add(request,comment=None, error='', message=''):
         return render_to_response('feedback/comment_add.html',
                 {'categories': categories,
                  'error': error,
-                 'comment': comment,
                  'added': added,
                  'message': message,
                  'comment': default_comment},
@@ -179,6 +183,11 @@ def event_add(request,event=None, error='', message=''):
         added = bool(request.POST['add'])
     except:
         added = False
+    try:
+        action = request.POST['action']
+    except:
+        action = 'add'
+
     if added == True:
         try:
             new_date = parse(request.POST['date'], dayfirst=True)
@@ -207,17 +216,17 @@ def event_add(request,event=None, error='', message=''):
         if error == '':
             try:
                 new_event = Event(date=new_date, title=new_title, detail=new_detail, category=new_category)
-                new_event.save()
-                message += 'Your event was added to the database.'
-                default_event = new_event
+                new_event.full_clean()
+                try:
+                    new_event.save()
+                    message += 'Your event was added to the database.'
+                    default_event = new_event
+                except:
+                    error += 'Failed to act on the database.'
             except:
-                error += 'Failed to act on the database.'
-    try:
-        action = request.POST['action']
-    except:
-        action = 'add'
+                error += 'Your event failed validation checks. Perhaps it is a duplicate of another one already in the database?'
 
-    if action == 'saveandaddanother' or action == 'add':
+    if action == 'saveandaddanother' or action == 'add' or error != '':
         return render_to_response('feedback/event_add.html',
             {'categories': categories,
              'error': error,
