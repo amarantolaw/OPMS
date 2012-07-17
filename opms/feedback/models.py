@@ -52,13 +52,13 @@ class Comment(models.Model):
 
 class Event(models.Model):
     "An event which occurred on a certain day"
-    date = models.DateField()                   #The date on which the event occurred
-    def date_timeplot(self):                    #Date in yyyy-mm-dd format so that timeplot can eat it. Code is here since str() can't be used in templates.
+    date = models.DateField()                                       #The date on which the event occurred
+    def date_timeplot(self):                                        #Date in yyyy-mm-dd format so that timeplot can eat it. Code is here since str() can't be used in templates.
         return str(self.date)
     def datetime_timeplotxml(self):
         return self.date.strftime("%b %d %Y") + " " + "00:00:00" + " GMT"
-    title = models.CharField(max_length=50)     #The title of the event. Needs to be short enough to look pretty.
-    detail = models.TextField(unique=True)      #Potentially useful details about the event
-    category = models.ForeignKey(Category)      #Categories may include Comments as well as Events
+    title = models.CharField(max_length=50,unique_for_date="date")  #The title of the event. Needs to be short enough to look pretty.
+    detail = models.TextField()                                     #Potentially useful details about the event
+    category = models.ForeignKey(Category)                          #Categories may include Comments as well as Events
     def __unicode__(self):
         return self.title
