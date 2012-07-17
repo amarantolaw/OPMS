@@ -19,8 +19,14 @@ class MetricAdmin(admin.ModelAdmin):
 class CategoryAdmin(admin.ModelAdmin):
     inlines = [CommentInline, EventInline]
 
+class CommentAdmin(admin.ModelAdmin):
+    pass
+
+class EventAdmin(admin.ModelAdmin):
+    pass
+
 admin.site.register(Metric, MetricAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Traffic)
-admin.site.register(Comment)
-admin.site.register(Event)
+admin.site.register(Comment, CommentAdmin)
+admin.site.register(Event, EventAdmin)

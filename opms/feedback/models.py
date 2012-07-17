@@ -23,6 +23,8 @@ class Category(models.Model):
     description = models.CharField(max_length=200, unique=True)     #A description of the category eg. 'Comments made by e-mail' or 'iTunes store upgrades'
     color = models.CharField(max_length=7)                          #The colour of the line on the chart representing events and/or comments in this category
     defaultvisibility = models.BooleanField()                       #Whether the metric is visible by default
+    class Meta:
+        verbose_name_plural = "categories"
     def __unicode__(self):
         return self.description
 
@@ -33,6 +35,8 @@ class Traffic(models.Model):
         return str(self.date)
     count = models.PositiveIntegerField()                           #The number of occurrences of this metric of traffic on that day
     metric = models.ForeignKey(Metric)                              #The ID of the metric used to measure traffic
+    class Meta:
+        verbose_name_plural = "traffic"
     def __unicode__(self):
         return '\"' + self.metric.description + '\" = ' + str(self.count) + ' on ' + str(self.date)
 
