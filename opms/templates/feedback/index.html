@@ -54,7 +54,7 @@
 
         {% for category_to_plot in categories_to_plot %}
             {% if category_to_plot %}
-                var eventSourceJSON{{ forloop.counter }} = new Timeplot.DefaultEventSource();
+                var eventSourceJSON{{ category_to_plot.id }} = new Timeplot.DefaultEventSource();
             {% endif %}
         {% endfor %}
 
@@ -135,7 +135,7 @@
             eventSource.loadText(text, ",", ".");
 
             {% for category_to_plot in categories_to_plot %}
-                var data{{ forloop.counter }} = {
+                var data{{ category_to_plot.id }} = {
                 'events': [
                 {% for comm in comments %}
                     {% if comm.category == category_to_plot %}
@@ -157,7 +157,7 @@
                 {% endfor %}
                     ]
                 };
-                eventSourceJSON{{ forloop.counter }}.loadJSON(data{{ forloop.counter }}, ".");
+                eventSourceJSON{{ category_to_plot.id }}.loadJSON(data{{ category_to_plot.id }}, ".");
             {% endfor %}
 
             min = timeGeometry._earliestDate;
