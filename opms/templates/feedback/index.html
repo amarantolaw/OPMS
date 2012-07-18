@@ -211,20 +211,20 @@
         function toggle(el){
             //Set global variables appropriately when someone clicks on a toggle button
             switch(el.className) {
-                case "on_category_" + el.id :
-                    el.className = "off_category";
+                case "btn on_category_" + el.id :
+                    el.className = "btn off_category";
                     category_visibility[el.id] = false;
                     break;
-                case "on_metric_" + el.id :
-                    el.className = "off_metric";
+                case "btn on_metric_" + el.id :
+                    el.className = "btn off_metric";
                     metric_visibility[el.id] = false;
                     break;
-                case "off_category":
-                    el.className = "on_category_" + el.id;
+                case "btn off_category":
+                    el.className = "btn on_category_" + el.id;
                     category_visibility[el.id] = true;
                     break;
-                case "off_metric":
-                    el.className = "on_metric_" + el.id;
+                case "btn off_metric":
+                    el.className = "btn on_metric_" + el.id;
                     metric_visibility[el.id] = true;
                     break;
                 default:
