@@ -3,6 +3,7 @@ from feedback.models import Metric, Traffic, Category, Comment, Event
 from stats.models import AppleWeeklySummary
 from django.db.models import Max, Min
 from django.template import RequestContext
+from django.core.exceptions import ValidationError
 import settings
 import datetime, time
 from dateutil.parser import parse
@@ -82,6 +83,7 @@ def index(request, error='', message=''):
 def comment_add(request,comment=None, error='', message=''):
     "Adds a new comment to the database. Optionally, it may replace the comment instead."
     categories = Category.objects.all()
+    error_fields=[]
     default_comment = Comment(date=datetime.date.today(), time=datetime.datetime.now().time, source='', detail='', category=Category.objects.filter(description='Default')[0], user_email='')
 
     try:
@@ -133,16 +135,20 @@ def comment_add(request,comment=None, error='', message=''):
                 try:
                     new_comment.save()
                     message += 'Your comment was added to the database.'
-                    default_comment = new_comment
                 except:
-                    error += ' Failed to act on the database.'
-            except:
-                error += 'Your comment failed validation checks. Perhaps it is a duplicate of another one already in the database?'
+                    error += 'Failed to access the database.'
+            except ValidationError as ve:
+                for k in ve.message_dict.keys():
+                    error_fields.append(k)
+                    for m in ve.message_dict[k]:
+                        error += m + ' '
+                default_comment = new_comment
 
     if action == 'saveandaddanother' or action == 'add' or error != '':
         return render_to_response('feedback/comment_add.html',
             {'categories': categories,
             'error': error,
+            'error_fields': error_fields,
             'message': message,
             'added': added,
             'comment': default_comment},
@@ -154,6 +160,7 @@ def comment_add(request,comment=None, error='', message=''):
         return render_to_response('feedback/comment_add.html',
                 {'categories': categories,
                  'error': error,
+                 'error_fields': error_fields,
                  'added': added,
                  'message': message,
                  'comment': default_comment},
@@ -166,6 +173,7 @@ def comment_detail(request, comment_id, error='', message=''):
 def event_add(request,event=None, error='', message=''):
     "Adds a new event to the database. Optionally, it may replace the event instead."
     categories = Category.objects.all()
+    error_fields=[]
 
     try:
         widget = bool(request.POST['widget'])
@@ -228,17 +236,20 @@ def event_add(request,event=None, error='', message=''):
             error += ' No user e-mail address provided.'
 
         if error == '':
+            new_event = Event(date=new_date, title=new_title, detail=new_detail, category=new_category, user_email=new_user_email)
             try:
-                new_event = Event(date=new_date, title=new_title, detail=new_detail, category=new_category, user_email=new_user_email)
                 new_event.full_clean()
                 try:
                     new_event.save()
                     message += 'Your event was added to the database.'
-                    default_event = new_event
                 except:
-                    error += 'Failed to act on the database.'
-            except:
-                error += 'Your event failed validation checks. Perhaps it is a duplicate of another one already in the database?'
+                    error += 'Failed to access the database.'
+            except ValidationError as ve:
+                for k in ve.message_dict.keys():
+                    error_fields.append(k)
+                    for m in ve.message_dict[k]:
+                        error += m + ' '
+                default_event = new_event
 
     if action == 'saveandaddanother' or action == 'add' or error != '':
         return render_to_response('feedback/event_add.html',
@@ -246,6 +257,7 @@ def event_add(request,event=None, error='', message=''):
              'error': error,
              'added': added,
              'message': message,
+             'error_fields': error_fields,
              'event': default_event},
             context_instance=RequestContext(request))
     elif action == 'save':
@@ -257,6 +269,7 @@ def event_add(request,event=None, error='', message=''):
                  'error': error,
                  'added': added,
                  'message': message,
+                 'error_fields': error_fields,
                  'event': default_event},
             context_instance=RequestContext(request))
 

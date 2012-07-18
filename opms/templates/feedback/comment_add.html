@@ -12,47 +12,68 @@
         {% if message != '' %}
             <div class="alert alert-success">{{ message }}</div>
         {% endif %}
-    <div class="row-fluid">
-        Add a new comment using the form below:
-    </div>
-    <form action="{% url comment-add %}" method="post">
-    {% csrf_token %}
-        <input type="hidden" name="add" value="1 /">
-    <div class="row-fluid">
-        <div class="span2">Source:</div><div class="span2"><input type="text" name="source" value="{{ comment.source }}"/></div>
-    </div>
-    <div class="row-fluid">
-        <div class="span2">Comment:</div><div class="span2"><textarea name="detail">{{ comment.detail }}</textarea></div>
-    </div>
-    <div class="row-fluid">
-        <div class="span2">Date:</div><div class="span2"><input type="text" value="{{ comment.date.day }}/{{ comment.date.month }}/{{ comment.date.year }}" data-date-format="dd/mm/yyyy" id="dp" class="input-small" name="date"/></div>
-    </div>
-    <div class="row-fluid">
-        <div class="span2">Time:</div><div class="span2"><input placeholder="{{ comment.time.hour }}:{{ comment.time.minute }}:{{ comment.time.second }}" class="timepicker input-small" type="text" name="time"/></div>
-    </div>
-    <div class="row-fluid">
-        <div class="span2">Category:</div><div class="span2"><select name="category_id">
-        {% for c in categories %}
-            {% if c.id == comment.category.id %}
-                <option value="{{ c.id }}" selected="selected">{{ c.description }}</option>
-            {% else %}
-                <option value="{{ c.id }}">{{ c.description }}</option>
-            {% endif %}
-        {% endfor %}
-        </select></div>
-    </div>
-    <div class="row-fluid">
-        <div class="span2">Your e-mail address:</div><div class="span2"><input type="text" name="user_email" value="{{ event.user_email }}" maxlength=75 /></div>
-    </div>
-    <div class="row-fluid">
-        <div class="span2">Remember me:</div><div class="span2"><input type="checkbox" name="remember" value="remember" /></div>
-    </div>
-    <input type="hidden" name="action" id="action" />
-    <div class="row-fluid">
-        <div class="span2"></div><div class="span4"><input type="submit" value="Save" name="save" /> <input type="submit" value="Save and add another" name="saveandaddanother"/> <input type="reset" value="Reset"></div>
-    </div>
-{% endif %}
-</form>
+    {% endif %}
+
+    <form action="{% url comment-add %}" method="post" onsubmit="storeCookie()" class="form-horizontal">
+        <fieldset>
+            {% csrf_token %}
+            <legend>Add a new comment using the form below:</legend>
+            <input type="hidden" name="add" value="1 /">
+            <div class="control-group{% if 'source' in error_fields %} error{% endif %}">
+                <label class="control-label" for="source">Source</label>
+                <div class="controls">
+                    <input type="text" name="source" value="{{ comment.title }}" maxlength=20 id="source" class="input-xlarge" />
+                </div>
+            </div>
+            <div class="control-group{% if 'detail' in error_fields %} error{% endif %}">
+                <label class="control-label" for="detail">Comment</label>
+                <div class="controls">
+                    <textarea name="detail" id="detail">{{ comment.detail }}</textarea>
+                </div>
+            </div>
+            <div class="control-group{% if 'date' in error_fields %} error{% endif %}">
+                <label class="control-label" for="dp">Date</label>
+                <div class="controls">
+                    <input type="text" name="date" value="{{ comment.date.day }}/{{ comment.date.month }}/{{ comment.date.year }}" data-date-format="dd/mm/yyyy" id="dp" class="input-small" />
+                </div>
+            </div>
+            <div class="control-group{% if 'time' in error_fields %} error{% endif %}">
+                <label class="control-label" for="tp">Time</label>
+                <div class="controls">
+                    <input type="text" name="time" value="{{ comment.time.hour }}:{{ comment.time.minute }}:{{ comment.time.second }}" data-date-format="dd/mm/yyyy" id="tp" class="timepicker input-small" />
+                </div>
+            </div>
+            <div class="control-group{% if 'category' in error_fields %} error{% endif %}">
+                <label class="control-label" for="category">Category</label>
+                <div class="controls">
+                    <select name="category_id" id="category">
+                        {% for c in categories %}
+                            {% if c.id == comment.category.id %}
+                                <option value="{{ c.id }}" selected="selected">{{ c.description }}</option>
+                            {% else %}
+                                <option value="{{ c.id }}">{{ c.description }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group{% if 'user_email' in error_fields %} error{% endif %}">
+                <label class="control-label" for="user_email">Your e-mail address</label>
+                <div class="controls">
+                    <input type="text" name="user_email" value="{{ comment.user_email }}" maxlength=20 id="user_email" class="input-medium" maxlength=75 />
+                </div>
+                <label class="control-label" for="remember">Remember me</label>
+                <div class="controls">
+                    <input type="checkbox" name="remember" value="remember" id="remember"/>
+                </div>
+            </div>
+            <input type="hidden" name="action" id="action" />
+            <div class="form-actions">
+                <input type="submit" value="Save" name="save" class="btn btn-primary"/> <input type="submit" value="Save and add another" name="saveandaddanother" class="btn btn-primary"/> <input type="reset" value="Reset"class="btn btn-info"></div>
+            </div>
+        </fieldset>
+    </form>
+
 <script>
     $(document).ready(function() {
             $('#dp').datepicker();
