@@ -28,8 +28,8 @@ def index(request, error='', message=''):
             for d in range(0,7,1):
                 dat = w.week_beginning + datetime.timedelta(d)
                 for m in appleweekly_metrics:
-                    for field in AppleWeeklySummary._meta._fields():        #This grabs a list of field objects from the model specified as part of the stats app
-                        if field.verbose_name == m.description:             #Verbose name is specified as ("verbose_name") in stats/models/apple_summary.py
+                    for field in AppleWeeklySummary._meta._fields():             #This grabs a list of field objects from the model specified as part of the stats app
+                        if field.verbose_name == m.appleweeklyfield:             #Verbose name is specified as ("verbose_name") in stats/models/apple_summary.py
                             append(Traffic(date=dat, count=w.__dict__[field.name], metric=m))
     except:
         print('WARNING: Can\'t find any Apple summary data. Have you imported it?')

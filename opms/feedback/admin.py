@@ -2,9 +2,14 @@ from django.contrib import admin
 from django.conf import settings
 from django.contrib.auth.models import User
 from feedback.models import Traffic, Comment, Event, Metric, Category
-from django.forms.widgets import Select
+from django import forms
 from django.utils.encoding import force_unicode
 import datetime
+from stats.models import AppleWeeklySummary
+
+APPLEWEEKLY_FIELDS = [(None,'N/A')]
+for field in AppleWeeklySummary._meta._fields():
+    APPLEWEEKLY_FIELDS.append((field.verbose_name,field.verbose_name))
 
 def moderate(modeladmin, request, queryset):
     queryset.update(moderated=True)
@@ -30,8 +35,16 @@ class EventInline(admin.StackedInline):
     model = Event
     extra = 1
 
+class MetricForm(forms.ModelForm):
+    class Meta:
+        model = Metric
+        widgets = {
+            'appleweeklyfield': forms.Select(choices=APPLEWEEKLY_FIELDS),
+            }
+
 class MetricAdmin(admin.ModelAdmin):
     inlines = [TrafficInline]
+    form = MetricForm
 
 class CategoryAdmin(admin.ModelAdmin):
     inlines = [CommentInline, EventInline]

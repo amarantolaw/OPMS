@@ -14,6 +14,9 @@ class Metric(models.Model):
     mouseover = models.BooleanField()                               #Whether rolling the mouse over a point will display the precise position of the point as an overlay
     defaultvisibility = models.BooleanField()                       #Whether the metric is visible by default
     source = models.CharField(max_length=20, choices=METRIC_SOURCES, default='feedback')
+
+    appleweeklyfield = models.CharField(max_length=200, default=None, blank=True, null=True)
+
     def mouseover_timeplot(self):
         return str(self.mouseover).lower()
     def __unicode__(self):
