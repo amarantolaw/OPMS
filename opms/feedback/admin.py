@@ -1,15 +1,29 @@
 from django.contrib import admin
+from django.contrib.auth.models import User
 from feedback.models import Traffic, Comment, Event, Metric, Category
+import datetime
+
+def moderate(modeladmin, request, queryset):
+    queryset.update(moderated=True)
+    queryset.update(dt_moderated=datetime.datetime.now())
+    queryset.update(moderator=request.user)
+moderate.short_description = "Approve feedback"
+
+def unmoderate(modeladmin, request, queryset):
+    queryset.update(moderated=False)
+    queryset.update(dt_moderated=None)
+    queryset.update(moderator=None)
+unmoderate.short_description = "Reject feedback"
 
 class TrafficInline(admin.TabularInline):
     model = Traffic
     extra = 1
 
-class CommentInline(admin.TabularInline):
+class CommentInline(admin.StackedInline):
     model = Comment
     extra = 1
 
-class EventInline(admin.TabularInline):
+class EventInline(admin.StackedInline):
     model = Event
     extra = 1
 
@@ -20,10 +34,14 @@ class CategoryAdmin(admin.ModelAdmin):
     inlines = [CommentInline, EventInline]
 
 class CommentAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['detail','moderated','source','date','time','category','user_email','dt_uploaded']
+    ordering = ['dt_uploaded']
+    actions = [moderate,unmoderate]
 
 class EventAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['title','moderated','detail','date','category','user_email','dt_uploaded']
+    ordering = ['dt_uploaded']
+    actions = [moderate,unmoderate]
 
 admin.site.register(Metric, MetricAdmin)
 admin.site.register(Category, CategoryAdmin)

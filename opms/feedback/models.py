@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 import datetime
 
 class Metric(models.Model):
@@ -42,37 +43,37 @@ class Traffic(models.Model):
 
 class Comment(models.Model):
     "A comment made about the website on a certain day"
-    date = models.DateField()                                       #The day when the comment was made
-    def date_timeplot(self):                                        #Date in yyyy-mm-dd format so that timeplot can eat it. Code is here since str() can't be used in templates.
+    date = models.DateField()                                                           #The day when the comment was made
+    def date_timeplot(self):                                                            #Date in yyyy-mm-dd format so that timeplot can eat it. Code is here since str() can't be used in templates.
         return str(self.date)
     def datetime_timeplotxml(self):
         return self.date.strftime("%b %d %Y") + " " + self.time.strftime("%H:%M:%S") + " GMT"
-    time = models.TimeField()                                       #The time at which the comment was made
-    source = models.CharField(max_length=200)                       #The source of the comment (DELIBERATELY VAGUE FOR THE MOMENT!)
-    detail = models.TextField(unique=True)                          #The text of the comment
-    category = models.ForeignKey(Category)                          #Categories may include Events as well as Comments
-    moderated = models.BooleanField(default=False)                  #Has this comment been moderated yet?
-    user_email = models.EmailField()                                #The e-mail address of the person uploading the comment - unlikely to be the e-mail address of the person who made the comment in the first place.
-    dt_uploaded = models.DateTimeField(auto_now_add=True)           #The datetime at which the comment was originally uploaded.
-    dt_moderated = models.DateTimeField(blank=True,null=True)       #The datetime at which the comment was moderated. Should be blank if the comment has yet to be moderated.
-    moderator = models.CharField(blank=True,max_length=75,null=True)#The django admin username who moderated the comment.
+    time = models.TimeField()                                                           #The time at which the comment was made
+    source = models.CharField(max_length=200)                                           #The source of the comment (DELIBERATELY VAGUE FOR THE MOMENT!)
+    detail = models.TextField(unique=True)                                              #The text of the comment
+    category = models.ForeignKey(Category)                                              #Categories may include Events as well as Comments
+    moderated = models.BooleanField("Approved",default=False)                           #Has this comment been moderated yet?
+    user_email = models.EmailField()                                                    #The e-mail address of the person uploading the comment - unlikely to be the e-mail address of the person who made the comment in the first place.
+    dt_uploaded = models.DateTimeField("Datetime uploaded",auto_now_add=True)           #The datetime at which the comment was originally uploaded.
+    dt_moderated = models.DateTimeField("Datetime approved",blank=True,null=True)       #The datetime at which the comment was moderated. Should be blank if the comment has yet to be moderated.
+    moderator = models.ForeignKey(User,blank=True,null=True)                            #The django admin user who moderated the comment.
     def __unicode__(self):
         return self.detail
 
 class Event(models.Model):
     "An event which occurred on a certain day"
-    date = models.DateField()                                       #The date on which the event occurred
-    def date_timeplot(self):                                        #Date in yyyy-mm-dd format so that timeplot can eat it. Code is here since str() can't be used in templates.
+    date = models.DateField()                                                           #The date on which the event occurred
+    def date_timeplot(self):                                                            #Date in yyyy-mm-dd format so that timeplot can eat it. Code is here since str() can't be used in templates.
         return str(self.date)
     def datetime_timeplotxml(self):
         return self.date.strftime("%b %d %Y") + " " + "00:00:00" + " GMT"
-    title = models.CharField(max_length=50,unique_for_date="date")  #The title of the event. Needs to be short enough to look pretty.
-    detail = models.TextField()                                     #Potentially useful details about the event
-    category = models.ForeignKey(Category)                          #Categories may include Comments as well as Events
-    moderated = models.BooleanField(default=False)                  #Has this event been moderated yet?
-    user_email = models.EmailField()                                #The e-mail address of the person uploading the event.
-    dt_uploaded = models.DateTimeField(auto_now_add=True)           #The datetime at which the event was originally uploaded.
-    dt_moderated = models.DateTimeField(blank=True,null=True)       #The datetime at which the event was moderated. Should be blank if the event has yet to be moderated.
-    moderator = models.CharField(blank=True,max_length=75,null=True)#The django admin username who moderated the event.
+    title = models.CharField(max_length=50,unique_for_date="date")                      #The title of the event. Needs to be short enough to look pretty.
+    detail = models.TextField()                                                         #Potentially useful details about the event
+    category = models.ForeignKey(Category)                                              #Categories may include Comments as well as Events
+    moderated = models.BooleanField("Approved",default=False)                           #Has this event been moderated yet?
+    user_email = models.EmailField()                                                    #The e-mail address of the person uploading the event.
+    dt_uploaded = models.DateTimeField("Datetime uploaded",auto_now_add=True)           #The datetime at which the event was originally uploaded.
+    dt_moderated = models.DateTimeField("Datetime approved",blank=True,null=True)       #The datetime at which the event was moderated. Should be blank if the event has yet to be moderated.
+    moderator = models.ForeignKey(User,blank=True,null=True)                            #The django admin user who moderated the event.
     def __unicode__(self):
         return self.title
