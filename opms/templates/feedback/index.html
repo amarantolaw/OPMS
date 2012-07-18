@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block head %}
-    <style type="text/css">
+    <style type="text/css" xmlns="http://www.w3.org/1999/html">
         {% for c in categories_to_plot %}
             .on_category_{{ c.id }} {
                 background:{{ c.color }};
@@ -288,24 +288,24 @@
     <div id="my-timeplot" style="height: 150px;"></div>
 </div>
 
-<input type="button" id="panleft" value="<" onclick="setTimeRange(panleft_min,panleft_max)"/>
-<input type="button" id="zoomin" value="+" onclick="setTimeRange(zoomin_min,zoomin_max)"/>
-<input type="button" id="zoomout" value="-" onclick="setTimeRange(zoomout_min,zoomout_max)"/>
-<input type="button" id="panright" value=">" onclick="setTimeRange(panright_min,panright_max)"/>
+<a class="btn" id="panleft" onclick="setTimeRange(panleft_min,panleft_max)"><i class="icon-chevron-left"></i> </a></input>
+<a class="btn" id="zoomin" onclick="setTimeRange(zoomin_min,zoomin_max)"><i class="icon-zoom-in"></i> </a>
+<a class="btn" id="zoomout" onclick="setTimeRange(zoomout_min,zoomout_max)"><i class="icon-zoom-out"></i> </a>
+<a class="btn" id="panright" onclick="setTimeRange(panright_min,panright_max)"><i class="icon-chevron-right"></i> </a>
 
 <!-- Generate toggle buttons.-->
 {% for c in categories_to_plot %}
     {% if c.defaultvisibility %}
-        <input type="button" id="{{ c.id }}" value="{{ c.description }}" class="on_category_{{ c.id }}" onclick="toggle(this)" />
+        <input type="button" id="{{ c.id }}" value="{{ c.description }}" class="btn on_category_{{ c.id }}" onclick="toggle(this)" />
     {% else %}
-        <input type="button" id="{{ c.id }}" value="{{ c.description }}" class="off_category" onclick="toggle(this)" />
+        <input type="button" id="{{ c.id }}" value="{{ c.description }}" class="btn off_category" onclick="toggle(this)" />
     {% endif %}
 {% endfor %}
 {% for m in metrics_to_plot %}
     {% if m.defaultvisibility %}
-        <input type="button" id="{{ m.id }}" value="{{ m.description }}" class="on_metric_{{ m.id }}" onclick="toggle(this)" />
+        <input type="button" id="{{ m.id }}" value="{{ m.description }}" class="btn on_metric_{{ m.id }}" onclick="toggle(this)" />
     {% else %}
-        <input type="button" id="{{ m.id }}" value="{{ m.description }}" class="off_metric" onclick="toggle(this)" />
+        <input type="button" id="{{ m.id }}" value="{{ m.description }}" class="btn off_metric" onclick="toggle(this)" />
     {% endif %}
 {% endfor %}
 
