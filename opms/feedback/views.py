@@ -53,14 +53,16 @@ def index(request, error='', message=''):
 
     #Timeplot is designed to take in CSV text files, so build one as a string for each metric:
     metric_textfiles = {}
-    for m in metrics_to_plot: #TODO: Investigate whether we can improve efficiency in these loops (this is the bottleneck).
-        metric_textfile = ""
+    for m in metrics_to_plot:
+        metric_textfile_strlist = []
+        append = metric_textfile_strlist.append
         for d in date_range:
+            sd = str(d)
             for t in traffic_to_plot:
                 if t.date == d:
                     if t.metric == m:
-                        metric_textfile += str(d) + ',' + str(t.count) + '\\n'
-        metric_textfiles[m.id] = metric_textfile
+                        append('%s%s%s' % (sd,',',str(t.count)))
+        metric_textfiles[m.id] = '\\n'.join(metric_textfile_strlist)
 
     #NOTE: We do not need to handle the temporal range of comments and events since this is done automatically by Timeplot.
 
