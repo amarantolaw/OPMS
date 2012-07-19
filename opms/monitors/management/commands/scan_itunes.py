@@ -9,8 +9,8 @@ import datetime, sys
 
 class Command(BaseCommand):
     help = 'Scan iTunes U Service (1:Institutional collection <default>; 2:Top Collections; 3:Top Downloads)'
-    args = "<url>"
-    label = "url"
+    args = "<institution>"
+    label = "institution"
     option_list = BaseCommand.option_list + (
         make_option('--mode', action='store', dest='mode',
             default=1, help='Specify the type of scan to be done (1,2,3)'),
@@ -25,10 +25,15 @@ class Command(BaseCommand):
 
         super(Command, self).__init__()
 
-    def handle(self, url = None,**options):
+    def handle(self, institution = "Oxford University",**options):
         # Some basic error checking
-        if url is None:
-            raise CommandError("Please specify the url to scan.")
+        if institution is None:
+            raise CommandError("Please specify the institution to scan.")
+        try:
+            url = itunes.INSTITUTIONAL_URLS[institution]
+        except:
+            raise CommandError(institution + "is not a recognised institution. Recognised institutions are:\n" + "\n".join(itunes.INSTITUTIONAL_URLS.keys()))
+
         try:
             mode = int(options.get("mode",1))
         except ValueError:

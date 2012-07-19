@@ -1,6 +1,8 @@
+from __future__ import print_function
 import urllib2, plistlib
 from xml.parsers import expat
 from lxml import etree
+
 #from BeautifulSoup import BeautifulSoup
 
 # First, Apple-store-front is sensitive to use of comma to separate values
@@ -14,6 +16,19 @@ from lxml import etree
 # 9 = Mostly HTML, iPad display version, content hard to view
 # 13 = XHTML page, but much much shorter than the rest. Suggest it simulates iOS 5 styling. TBD
 # [12,1,2]
+
+INSTITUTIONAL_URLS = {
+'Oxford University': 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=381699182',
+'Open University': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=380206132",
+'UCL': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=390402969",
+'Cambridge': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=380451095",
+'Warwick': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=407474356",
+'Nottingham': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=396415869",
+'UC Berkeley': 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=354813951',
+'MIT': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=341593265",
+'Yale': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=341649956",
+'Stanford': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=384228265",
+    }
 
 def get_page(url, APPLE_STORE_LANGUAGE = 1):
     USER_AGENT = 'iTunes/10.5.1 (Macintosh; Intel Mac OS X 10.6.8) AppleWebKit/534.51.22'
@@ -44,11 +59,11 @@ def get_page(url, APPLE_STORE_LANGUAGE = 1):
                 #print "g_p:4.1"
                 if action.get('kind') == 'Goto':
                     url = action.get('url')
-                    print 'URL Redirection, please goto: %s' % url
+                    print('URL Redirection, please goto: %s' % url)
                     return get_page(url)
                 else:
-                    print 'Unrecognised action: %s' % action.get('kind')
-                    print plist
+                    print('Unrecognised action: %s' % action.get('kind'))
+                    print(plist)
                     return None
                 #print "g_p:4.2"
             except AttributeError:
@@ -62,16 +77,16 @@ def get_page(url, APPLE_STORE_LANGUAGE = 1):
                 #print "g_p:5.2"
                 explanation = plist.get('dialog').get('explanation')
                 #print "g_p:5.3"
-                print "ERROR: This url returned the following messages:"
-                print "%s\n%s" % (message, explanation)
+                print("ERROR: This url returned the following messages:")
+                print("%s\n%s" % (message, explanation))
                 return None
             except AttributeError: # If not allow next function to address decoding it
                 #print "g_p:5.4"
                 return data
             #print "g_p:3.4"
         except expat.ExpatError: # Plist barfed on something...
-            print "ExpatError: What sort of plist is this?"
-            print data
+            print("ExpatError: What sort of plist is this?")
+            print(data)
             return None
     return data
 
@@ -81,7 +96,7 @@ def write_page(url, language = 1, filename=''):
         filename = url.replace('http://','').replace('/','_') + '-Lang_' + str(language) + '.xml'
     f = open('./' + filename, 'w')
     f.write(get_page(url, language))
-    print 'Output written to ./' + filename
+    print('Output written to ./' + filename)
     return None
 
 # Get Collection info
@@ -212,11 +227,12 @@ def get_institution_collections(url):
         #print item.text.lower().strip()
         if not item.text.lower().strip().startswith('category'):
             collection.append(get_collection_info(item.get('url')))
-            #print "GETTING DATA!!"
+            print("-", end="")
     items = root.xpath('.//itms:VBoxView/itms:VBoxView/itms:VBoxView/itms:HBoxView/itms:VBoxView/itms:GotoURL/itms:PictureButtonView[@alt="next page"]/../@url',namespaces={'itms':'http://www.apple.com/itms/'}) # Looking for the follow on page links...
     if len(items) == 1:
         next_page_url = items[0]
-        # print 'Next URL is: %s' % next_page_url
+        print(">")
+#        print 'Next URL is: %s' % next_page_url
         collection = collection + get_institution_collections(next_page_url)
     return collection
 
@@ -278,13 +294,13 @@ def get_collection_statistics(url):
     except IndexError:
         pass
     # print stats
-    print "Feed duration: %s seconds across %s (non-zero) items (Max:%s sec ; Min:%s sec) %s Items in total. " % (
+    print("Feed duration: %s seconds across %s (non-zero) items (Max:%s sec ; Min:%s sec) %s Items in total. " % (
         stats['total_duration_in_seconds'],
         len(stats['list_of_nonzero_durations']),
         stats['longest_duration_in_seconds'],
         stats['shortest_duration_in_seconds'],
         stats['total_number_of_items']
-    )
+    ))
     return stats
 
 def get_overall_statistics(url):
@@ -304,9 +320,9 @@ def get_overall_statistics(url):
     stats['item_counts_by_genre'] = {}
     stats['total_number_of_explicit_items'] = 0
     stats['mean_average_duration_of_items'] = 0
-    print 'Analysing %s series' % len(tc)
+    print('Analysing %s series' % len(tc))
     for i, series in enumerate(tc):
-        print "Analysing: %s) %s" % (i, series.get('series_name'))
+        print("Analysing: %s) %s" % (i, series.get('series_name')))
         collection_stats = get_collection_statistics(series.get('series_url'))
         stats['total_duration_in_seconds'] += int(collection_stats.get('total_duration_in_seconds',0))
         stats['list_of_durations'] += collection_stats.get('list_of_durations',[])
@@ -332,25 +348,25 @@ def get_overall_statistics(url):
     stats['mean_average_duration_of_items'] = int(stats['total_duration_in_seconds'] / len(stats['list_of_nonzero_durations']))
     hours = int(stats['total_duration_in_seconds']/60/60)
     minutes = int((stats['total_duration_in_seconds'] - (hours*60*60))/60)
-    print "There were %s items across %s feeds" % (stats['total_number_of_items'], len(tc))
-    print "Total duration is %s Hours and %s Minutes" % (hours, minutes)
-    print "Average duration for an item is %s seconds" % stats['mean_average_duration_of_items']
-    print "Durations ranged from %s to %s throughout the collection" % (stats['longest_duration_in_seconds'], stats['shortest_duration_in_seconds'])
+    print("There were %s items across %s feeds" % (stats['total_number_of_items'], len(tc)))
+    print("Total duration is %s Hours and %s Minutes" % (hours, minutes))
+    print("Average duration for an item is %s seconds" % stats['mean_average_duration_of_items'])
+    print("Durations ranged from %s to %s throughout the collection" % (stats['longest_duration_in_seconds'], stats['shortest_duration_in_seconds']))
     perc = float(
         float(len(stats['list_of_durations'])-len(stats['list_of_nonzero_durations'])) /
         len(stats['list_of_durations'])
     ) * 100
-    print "%s%% of the collection have a zero duration" % str(perc)[:4]
-    print "Breakdown of collection by Genre:"
-    print stats.get('item_counts_by_genre',{})
+    print("%s%% of the collection have a zero duration" % str(perc)[:4])
+    print("Breakdown of collection by Genre:")
+    print(stats.get('item_counts_by_genre',{}))
     #for k,v in stats.get('item_counts_by_genre',{}):
     #    print "%s : %s" % (k,v)
-    print "Breakdown of collection by File Extension:"
-    print stats.get('item_counts_by_fileExtension',{})
+    print("Breakdown of collection by File Extension:")
+    print(stats.get('item_counts_by_fileExtension',{}))
     #for k,v in stats.get('item_counts_by_fileExtension',{}):
     #    print "%s : %s" % (k,v)
-    print "Breakdown of collection by Kind:"
-    print stats.get('item_counts_by_kind',{})
+    print("Breakdown of collection by Kind:")
+    print(stats.get('item_counts_by_kind',{}))
     #for k,v in stats.get('item_counts_by_kind',{}):
     #    print "%s : %s" % (k,v)
     # print stats
@@ -491,7 +507,7 @@ def get_overall_statistics(url):
 
 # Test what all the STORE LANGUAGE values do for us...
 def test_responses(url):
-    print "test_responses(%s) called" % url
+    print("test_responses(%s) called" % url)
     USER_AGENT = 'iTunes/10.5.1 (Macintosh; Intel Mac OS X 10.6.8) AppleWebKit/534.51.22'
     APPLE_STORE_FRONT = '143444'
     APPLE_TZ = '0'
@@ -516,35 +532,35 @@ def test_responses(url):
                 try:
                     action = plist.get('action')
                     if action.get('kind') == 'Goto':
-                        print "1.1"
+                        print("1.1")
                         url = action.get('url')
                         output = 'URL Redirection, please goto: %s ' % url
                         output += str(test_responses(url))
-                        print "1.2"
+                        print("1.2")
                         return None
                     else:
-                        print "2.1"
+                        print("2.1")
                         output = 'Unrecognised action: %s \n' % action.get('kind')
                         output += repr(plist)
-                        print "2.2"
+                        print("2.2")
                 except AttributeError:
-                    print "3.1"
+                    print("3.1")
                     output = "AttributeError: What sort of plist is this?\n" + str(data)
-                    print "3.2"
+                    print("3.2")
             except expat.ExpatError:
                 # Plist barfed on something...
-                print "4.1"
+                print("4.1")
                 output = "ExpatError: What sort of plist is this?\n" + str(data)
-                print "4.2"
+                print("4.2")
         else:
             # Assume HTML and send that back out...
-            print "5.1"
+            print("5.1")
             output = str(data)
-            print "5.2"
+            print("5.2")
         filename = url.replace('http://','').replace('/','_') + '-Lang_' + str(i) + '.xml'
         f = open('./' + filename, 'w')
         f.write(output)
-        print 'Output written to ./' + filename
+        print('Output written to ./' + filename)
     return None
 
 #urls = [
