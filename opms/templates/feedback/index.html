@@ -60,6 +60,35 @@
                 category_visibility['{{ c.id }}'] = {{ c.defaultvisibility|lower }};
             {% endfor %}
 
+        {# Load data - for efficiency we don't want to reload this every time we refresh.  #}
+        {% for metricid, metrictext in metric_textfiles.items %}
+            var text{{ metricid }} = "{{ metrictext }}";
+        {% endfor %}
+        {% for category_to_plot in categories_to_plot %}
+            var data{{ category_to_plot.id }} = {
+                'events': [
+                    {% for comm in comments %}
+                        {% if comm.category == category_to_plot %}
+                            {
+                                'start':"{{ comm.datetime_timeplotxml }}",
+                                'title':"Comment from {{ comm.source|escapejs }}",
+                                'description':"\"{{ comm.detail|escapejs }}\" <br/><a href=\"comment/{{ comm.id }}\">View detail</a>"
+                            },
+                        {% endif %}
+                    {% endfor %}
+                    {% for event in events %}
+                        {% if event.category == category_to_plot %}
+                            {
+                                'start':"{{ event.datetime_timeplotxml }}",
+                                'title':"{{ event.title|escapejs }}",
+                                'description':"{{ event.detail|escapejs }}<br/><a href=\"event/{{ event.id }}\">View detail</a>"
+                            },
+                        {% endif %}
+                    {% endfor %}
+                ]
+            };
+        {% endfor %}
+
         function onLoad() {
             var timeGeometry;
             {% for m in metrics_to_plot %}
@@ -132,36 +161,11 @@
                 }
             {% endfor %}
             timeplot = Timeplot.create(document.getElementById("my-timeplot"), plotInfo);
-            {% for metricid, metrictext in metric_textfiles.items %}
-                var text{{ metricid }} = "{{ metrictext }}";
-            {% endfor %}
             {% for m in metrics_to_plot %}
                 eventSourceMetric{{ m.id }}.loadText(text{{ m.id }}, ",", ".");
             {% endfor %}
 
             {% for category_to_plot in categories_to_plot %}
-                var data{{ category_to_plot.id }} = {
-                'events': [
-                {% for comm in comments %}
-                    {% if comm.category == category_to_plot %}
-                        {
-                            'start':"{{ comm.datetime_timeplotxml }}",
-                            'title':"Comment from {{ comm.source|escapejs }}",
-                            'description':"\"{{ comm.detail|escapejs }}\" <br/><a href=\"comment/{{ comm.id }}\">View detail</a>"
-                        },
-                    {% endif %}
-                {% endfor %}
-                {% for event in events %}
-                    {% if event.category == category_to_plot %}
-                        {
-                            'start':"{{ event.datetime_timeplotxml }}",
-                            'title':"{{ event.title|escapejs }}",
-                            'description':"{{ event.detail|escapejs }}<br/><a href=\"event/{{ event.id }}\">View detail</a>"
-                        },
-                    {% endif %}
-                {% endfor %}
-                    ]
-                };
                 eventSourceJSON{{ category_to_plot.id }}.loadJSON(data{{ category_to_plot.id }}, ".");
             {% endfor %}
 
