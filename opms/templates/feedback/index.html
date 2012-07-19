@@ -62,7 +62,9 @@
 
         function onLoad() {
             var timeGeometry;
-            var eventSource = new Timeplot.DefaultEventSource();
+            {% for m in metrics_to_plot %}
+                var eventSourceMetric{{ m.id }} = new Timeplot.DefaultEventSource();
+            {% endfor %}
             {% for category_to_plot in categories_to_plot %}
                 {% if category_to_plot %}
                     var eventSourceJSON{{ category_to_plot.id }} = new Timeplot.DefaultEventSource();
@@ -99,7 +101,7 @@
             {% for m in metrics_to_plot %}
                 var metric_plot_{{ m.id }} = Timeplot.createPlotInfo({
                     id: "plot{{ m.id }}",
-                    dataSource: new Timeplot.ColumnSource(eventSource,{{ forloop.counter }}),
+                    dataSource: new Timeplot.ColumnSource(eventSourceMetric{{ m.id }},1),
                     valueGeometry: valueGeometry,
                     timeGeometry: timeGeometry,
                     lineColor: "{{ m.linecolor }}",
@@ -130,8 +132,12 @@
                 }
             {% endfor %}
             timeplot = Timeplot.create(document.getElementById("my-timeplot"), plotInfo);
-            var text = "{{ metrics_textfile }}";
-            eventSource.loadText(text, ",", ".");
+            {% for metricid, metrictext in metric_textfiles.items %}
+                var text{{ metricid }} = "{{ metrictext }}";
+            {% endfor %}
+            {% for m in metrics_to_plot %}
+                eventSourceMetric{{ m.id }}.loadText(text{{ m.id }}, ",", ".");
+            {% endfor %}
 
             {% for category_to_plot in categories_to_plot %}
                 var data{{ category_to_plot.id }} = {

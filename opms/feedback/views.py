@@ -53,26 +53,22 @@ def index(request, error='', message=''):
         date_range = []
         print('WARNING: No traffic to plot. Did you put any in the database?')
 
-    #Timeplot is designed to take in CSV text files, so build a string containing one:
-    metrics_textfile = ""
-    for d in date_range:
-        metrics_textfile += str(d)
-        for m in metrics_to_plot:
-            t_exists = False    #Will become true IFF we have a traffic datum for this d and this m.
+    #Timeplot is designed to take in CSV text files, so build one as a string for each metric:
+    metric_textfiles = {}
+    for m in metrics_to_plot:
+        metric_textfile = ""
+        for d in date_range:
             for t in traffic_to_plot:
                 if t.date == d:
                     if t.metric == m:
-                        metrics_textfile += ',' + str(t.count)
-                        t_exists = True
-            if t_exists == False:
-                metrics_textfile += ',0' #Replace missing values with '0' for the sake of the chart.
-        metrics_textfile += '\\n'
+                        metric_textfile += str(d) + ',' + str(t.count) + '\\n'
+        metric_textfiles[m.id] = metric_textfile
 
     #NOTE: We do not need to handle the temporal range of comments and events since this is done automatically by Timeplot.
 
     return render_to_response('feedback/index.html', {
         'metrics_to_plot': metrics_to_plot,
-        'metrics_textfile': metrics_textfile,
+        'metric_textfiles': metric_textfiles,
         'categories_to_plot': categories_to_plot,
         'comments': Comment.objects.filter(moderated=True),
         'error': error,
