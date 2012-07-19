@@ -25,12 +25,10 @@ def index(request, error='', message=''):
 
         append = traffic_to_plot.append #Avoid re-calling the .append function in the middle of all those loops.
         for w in AppleWeeklySummary.merged.all():
-            for d in range(0,7,1):
-                dat = w.week_beginning + datetime.timedelta(d)
-                for m in appleweekly_metrics:
-                    for field in AppleWeeklySummary._meta._fields():             #This grabs a list of field objects from the model specified as part of the stats app
-                        if field.verbose_name == m.appleweeklyfield:             #Verbose name is specified as ("verbose_name") in stats/models/apple_summary.py
-                            append(Traffic(date=dat, count=w.__dict__[field.name], metric=m))
+            for m in appleweekly_metrics:
+                for field in AppleWeeklySummary._meta._fields():             #This grabs a list of field objects from the model specified as part of the stats app
+                    if field.verbose_name == m.appleweeklyfield:             #Verbose name is specified as ("verbose_name") in stats/models/apple_summary.py
+                        append(Traffic(date=w.week_beginning, count=w.__dict__[field.name], metric=m))
     except:
         print('WARNING: Can\'t find any Apple summary data. Have you imported it?')
 
@@ -55,7 +53,7 @@ def index(request, error='', message=''):
 
     #Timeplot is designed to take in CSV text files, so build one as a string for each metric:
     metric_textfiles = {}
-    for m in metrics_to_plot:
+    for m in metrics_to_plot: #TODO: Investigate whether we can improve efficiency in these loops (this is the bottleneck).
         metric_textfile = ""
         for d in date_range:
             for t in traffic_to_plot:
