@@ -38,7 +38,6 @@
 
     <script>
         var timeplot;
-        var eventSource = new Timeplot.DefaultEventSource();
         var min = "";
         var max = "";
         var change_time_range = false;
@@ -52,12 +51,6 @@
         var panleft_max = "";
         var one_day = 1000*60*60*24; //in ms
 
-        {% for category_to_plot in categories_to_plot %}
-            {% if category_to_plot %}
-                var eventSourceJSON{{ category_to_plot.id }} = new Timeplot.DefaultEventSource();
-            {% endif %}
-        {% endfor %}
-
         var metric_visibility = {};
             {% for m in metrics_to_plot %}
                 metric_visibility['{{ m.id }}'] = {{ m.defaultvisibility|lower }};
@@ -69,6 +62,12 @@
 
         function onLoad() {
             var timeGeometry;
+            var eventSource = new Timeplot.DefaultEventSource();
+            {% for category_to_plot in categories_to_plot %}
+                {% if category_to_plot %}
+                    var eventSourceJSON{{ category_to_plot.id }} = new Timeplot.DefaultEventSource();
+                {% endif %}
+            {% endfor %}
             if (change_time_range)
                 {
                     timeGeometry = new Timeplot.DefaultTimeGeometry({
