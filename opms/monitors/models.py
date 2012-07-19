@@ -91,7 +91,17 @@ class ItuInstitution(models.Model):
     def __unicode__(self):
         return smart_unicode('Institution: %s=%s' % (self.name,self.url))
 
-class ItuSeries(models.Model):
+class ItuItem(models.Model):
+    institution = models.ForeignKey(ItuInstitution)
+    def __unicode__(self):
+        return smart_unicode('Item: %s' % (self.id))
+
+class ItuCollection(models.Model):
+    institution = models.ForeignKey(ItuInstitution)
+    def __unicode__(self):
+        return smart_unicode('Collection: %s' % (self.id))
+
+class ItuCollectionPeriodic(models.Model):
     name = models.CharField(max_length=255)
     itu_id = models.IntegerField(null=True) # Historical records don't have this :-(
     img170 = models.URLField(null=True)
@@ -112,19 +122,24 @@ class ItuSeries(models.Model):
     #    def updated(self):
     #        return self.scanlog.time
 
+    itucollection = models.ForeignKey(ItuCollection)
+
+    version = models.PositiveIntegerField(default=1)
+    previous = models.ForeignKey('self', null=True, blank=True)
+
     def __unicode__(self):
         return smart_unicode('Series: %s=%s' % (self.name,self.url))
 
 
-class ItuItem(models.Model):
+class ItuItemPeriodic(models.Model):
     name = models.CharField(max_length=255) # Labelled as "songName" in plist
     itu_id = models.IntegerField() # Labelled as "itemId" in plist
     url = models.URLField()
     genre = models.ForeignKey(ItuGenre)
     institution = models.ForeignKey(ItuInstitution)
-    series = models.ForeignKey(ItuSeries)
+    series = models.ForeignKey(ItuCollectionPeriodic)
     # anonymous = models.BooleanField()
-    artist_name = models.CharField(max_length=255) # Length rather arbitary
+    artist_name = models.CharField(max_length=255) # Length rather arbitrary
     # buy_params = models.URLField()
     description = models.TextField()
     duration = models.IntegerField()
@@ -154,14 +169,20 @@ class ItuItem(models.Model):
     #    def updated(self):
     #        return self.scanlog.time
 
+    ituitem = models.ForeignKey(ItuItem)
+
+    version = models.PositiveIntegerField(default=1)
+    previous = models.ForeignKey('self', null=True, blank=True)
+
     def __unicode__(self):
         return smart_unicode('Item: %s=%s' % (self.name, self.url))
 
 
-class ItuDownloadChart(models.Model):
+class ItuItemDaily(models.Model):
     date = models.DateTimeField() # Date of chart scan
     position = models.SmallIntegerField()
-    item = models.ForeignKey(ItuItem)
+    ituitemperiodic = models.ForeignKey(ItuItemPeriodic)
+    ituitem = models.ForeignKey(ItuItem)
     # updated = models.DateTimeField(auto_now=True) # Update timestamp
     scanlog = models.ForeignKey(ItuScanLog)
     #
@@ -173,10 +194,11 @@ class ItuDownloadChart(models.Model):
         return smart_unicode('Download@%s: %s (%s)' % (self.position, self.item.name, self.item.itu_id))
 
 
-class ItuCollectionChart(models.Model):
+class ItuCollectionDaily(models.Model):
     date = models.DateTimeField() # Date of chart scan
     position = models.SmallIntegerField()
-    series = models.ForeignKey(ItuSeries)
+    itucollectionperiodic = models.ForeignKey(ItuCollectionPeriodic)
+    itucollection = models.ForeignKey(ItuCollection)
     # updated = models.DateTimeField(auto_now=True) # Update timestamp
     scanlog = models.ForeignKey(ItuScanLog)
     #
