@@ -9,20 +9,6 @@ import datetime, sys
 from dateutil.parser import *
 import urllib2
 
-def update_missing(h,scanlog,url):
-#If we're looking at the latest version, we haven't just done an update, we haven't already marked this as missing and this is found at the URL we just scanned...
-    if h.institution.url == url:
-        if h == h.latest:
-            if h.scanlog != scanlog and h.missing == None:
-                print(h.name + " appears to have gone missing! We last saw it at " + str(h.scanlog.time()))
-                h.missing = scanlog
-                h.save()
-            elif h.scanlog == scanlog and h.missing:
-                print(h.name + " has reappeared! It went missing at" + str(h.missing.time()))
-                h.missing = None
-                h.save()
-    return None
-
 class Command(BaseCommand):
     help = 'Scan iTunes U Service (1:Institutional collection <default>; 2:Top Collections; 3:Top Downloads)'
     args = "<institution>"
@@ -80,7 +66,9 @@ class Command(BaseCommand):
 
             print("Getting information about collections...")
             collections = itunes.get_institution_collections(url)
-            print("Loading collection information and scanning individual items...")
+            print("Processing collection information and scanning individual items...")
+            collections_spotted = []
+            items_spotted = []
             for c in collections:
                 if c:
 #                    for k in c.keys():
@@ -153,6 +141,8 @@ class Command(BaseCommand):
                         print('Creating new periodic collection record for ' + cp.name + ', version ' + str(cp.version))
                         cp.save()
 
+                    collections_spotted.append(cp)
+
                     #Acquire the list of items for this collection.
                     items = itunes.get_collection_items(cp.url)
                     for item in items:
@@ -218,24 +208,67 @@ class Command(BaseCommand):
                                     itemp.ituitem = itemr
                                 print('Creating new periodic item record for ' + itemp.name + ', version ' + str(itemp.version))
                                 itemp.save()
+                            items_spotted.append(itemp)
                         else:
-                            print('WARNING: Missing item')
+                            print('WARNING: Blank item - perhaps we couldn\'t download the appropriate page?')
                 else:
-                    print('WARNING: Missing series') #TODO: Find the mystery bug that causes pages to fail to download.
+                    print('WARNING: Blank category - perhaps we couldn\'t download the appropriate page?') #TODO: Find the mystery bug that causes pages to fail to download.
             print("Checking whether anything has gone missing or reappeared...")
+            institution = ItuInstitution.objects.filter(name=collections[0]['institution'])[0]
             for h in ItuCollectionHistorical.objects.all():
-                update_missing(h,scanlog,url)
+                if h.institution == institution:
+                    if h == h.latest():
+                        if h not in collections_spotted and h.missing == None:
+                            print(h.name + " appears to have gone missing! We last saw it at " + str(h.scanlog.time))
+                            h.missing = scanlog
+                            h.save()
+                        elif h in collections_spotted and h.missing:
+                            print(h.name + " has reappeared! It went missing at" + str(h.missing.time))
+                            h.missing = None
+                            h.save()
             for h in ItuItemHistorical.objects.all():
-                update_missing(h,scanlog,url)
+                if h.institution == institution:
+                    if h == h.latest():
+                        if h not in items_spotted and h.missing == None:
+                            print(h.name + " appears to have gone missing! We last saw it at " + str(h.scanlog.time))
+                            h.missing = scanlog
+                            h.save()
+                        elif h in items_spotted and h.missing:
+                            print(h.name + " has reappeared! It went missing at" + str(h.missing.time))
+                            h.missing = None
+                            h.save()
         elif mode == 2:
             comment = "Scan of an Top Collections Chart from %s" % url
             self._errorlog("Log started for: %s" % comment)
             print comment
+            collections = itunes.get_topcollections()
+            for c in collections:
+                if c:
+                    historical_collections=ItuCollectionHistorical.objects.filter(url=c['series_url'])
+                    if historical_collections:
+                        historical_collection=historical_collections[0].latest()
+                        print('Creating new chart row: ' + historical_collection.name + ' Position: ' + str(c['chart_position']))
+                        chartrow=ItuCollectionChartScan(position=int(c['chart_position']),itucollection=historical_collection.itucollection,itucollectionperiodic=historical_collection,scanlog=scanlog,date=scanlog.time)
+                        chartrow.save()
+                    else:
+                        print('WARNING: Couldn\'t find an historical record of collection at ' + c['series_url'] + '. Perhaps do an historical scan of ' + c['institution'] + ' first?')
 
         elif mode == 3:
             comment = "Scan of an Top Downloads Chart from %s" % url
             self._errorlog("Log started for: %s" % comment)
             print comment
+            items = itunes.get_topdownloads()
+            for i in items:
+                if i:
+                    historical_items=ItuItemHistorical.objects.filter(name=i['item'])
+                    if historical_items:
+                        historical_item=historical_items[0].latest()
+                        print('Creating new download chart row: ' + historical_item.name + ' Position: ' + str(i['chart_position']))
+                        chartrow=ItuItemChartScan(position=int(i['chart_position']),ituitem=historical_item.ituitem,ituitemperiodic=historical_item,scanlog=scanlog,date=scanlog.time)
+                        chartrow.save()
+                    else:
+                        print('WARNING: Couldn\'t find an historical record of item at ' + i['item_url'] + '. Perhaps do an historical scan of ' + i['institution'] + ' first?')
+
         else:
             comment = "We shouldn't ever get this scan..."
             print comment

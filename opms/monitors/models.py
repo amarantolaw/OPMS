@@ -220,7 +220,7 @@ class ItuItemHistorical(models.Model):
 
 
 class ItuItemChartScan(models.Model):
-    date = models.DateTimeField() # Date of chart scan
+    date = models.DateTimeField() # Date of chart scan - a duplicate of that in scanlog but will be efficient.
     position = models.SmallIntegerField()
     ituitemperiodic = models.ForeignKey(ItuItemHistorical)
     ituitem = models.ForeignKey(ItuItem)
@@ -236,7 +236,7 @@ class ItuItemChartScan(models.Model):
 
 
 class ItuCollectionChartScan(models.Model):
-    date = models.DateTimeField() # Date of chart scan
+    date = models.DateTimeField() # Date of chart scan - a duplicate of that in scanlog but will be efficient.
     position = models.SmallIntegerField()
     itucollectionperiodic = models.ForeignKey(ItuCollectionHistorical)
     itucollection = models.ForeignKey(ItuCollection)

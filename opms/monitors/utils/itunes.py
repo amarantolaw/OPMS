@@ -78,8 +78,8 @@ def get_page(url, APPLE_STORE_LANGUAGE = 1):
                 #print "g_p:5.2"
                 explanation = plist.get('dialog').get('explanation')
                 #print "g_p:5.3"
-                print("ERROR: This url returned the following messages:")
-                print("%s\n%s" % (message, explanation))
+                print("WARNING: Attempting to download " + url + " returned the following message(s):")
+                print("%s %s" % (message, explanation))
                 return None
             except AttributeError: # If not allow next function to address decoding it
                 #print "g_p:5.4"
@@ -159,9 +159,9 @@ def get_collection_info(url):
 # ITEM (in a series) = http://itunes.apple.com/gb/podcast/(BLAH)/id(SERIES-ID)?i=(ITEM-ID)
 
 # Show Top Downloads
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTop?id=27753&popId=40&genreId=40000000'
-def get_topdownloads(url):
-    collection = []
+def get_topdownloads():
+    collections = []
+    url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTop?id=27753&popId=40&genreId=40000000'
     xml = get_page(url)
     root = etree.fromstring(xml)
     items = root.xpath('.//itms:MatrixView/itms:HBoxView',namespaces={'itms':'http://www.apple.com/itms/'})
@@ -175,17 +175,17 @@ def get_topdownloads(url):
                              namespaces={'itms':'http://www.apple.com/itms/'})
         item_dict['item'] = subtree[0].text.strip()
         item_dict['item_url'] = subtree[0].get("url")
-        item_dict['item_id'] = item_dict['item_url'].split('/')[-1].split('?')[-1].split('=')[-1]
+        item_dict['item_id'] = item_dict['item_url'].split('/')[-1].split('?')[-1].split('&amp;')[0].split('=')[-1]
         # item_dict['item_info'] = get_collection_info(item_dict.get('item_url'))
         item_dict = dict(item_dict.items() + get_collection_info(item_dict.get('item_url')).items())
-        collection.append(item_dict)
-    return collection
+        collections.append(item_dict)
+    return collections
 
 
 # Show Top Collections
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTop?id=27753&popId=36&genreId=40000000'
-def get_topcollections(url):
-    collection = []
+def get_topcollections():
+    collections = []
+    url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTop?id=27753&popId=36&genreId=40000000'
     xml = get_page(url)
     root = etree.fromstring(xml)
     items = root.xpath('.//itms:MatrixView/itms:HBoxView',namespaces={'itms':'http://www.apple.com/itms/'})
@@ -199,8 +199,8 @@ def get_topcollections(url):
         item_dict['series_img_75'] = item[2][0][0][0][0].get("url")
         item_dict['publisher_name'] = sub[1].text.strip()
         item_dict = dict(item_dict.items() + get_collection_info(sub[0].get("url")).items())
-        collection.append(item_dict)
-    return collection
+        collections.append(item_dict)
+    return collections
 
 
 ## Parse Oxford Collections
