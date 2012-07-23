@@ -65,6 +65,7 @@ class ItuScanLog(models.Model):
     time = models.DateTimeField(auto_now_add=True)
     mode = models.SmallIntegerField(default=0, choices=MODE_CHOICES) # Zero = Unknown mode
     comments = models.TextField(null=True)
+    complete = models.BooleanField(default=False)
 
     @property
     def mode_string(self):
@@ -101,20 +102,20 @@ class ItuCollection(models.Model):
     def __unicode__(self):
         return smart_unicode('Collection: %s' % (self.id))
 
-class ItuCollectionPeriodic(models.Model):
+class ItuCollectionHistorical(models.Model):
     name = models.CharField(max_length=255)
     itu_id = models.IntegerField(null=True) # Historical records don't have this :-(
     img170 = models.URLField(null=True)
-    img75 = models.URLField(null=True)
     url = models.URLField(null=True) # Historical records don't have this :-(
     language = models.CharField(max_length=100, null=True) # Historical records don't have this
     last_modified = models.DateField(null=True) # Historical records don't have this
     genre = models.ForeignKey(ItuGenre, null=True) # Historical records don't have this)
     institution = models.ForeignKey(ItuInstitution)
+    contains_movies = models.BooleanField()
     # Series Stats - to be done as methods
     # updated = models.DateTimeField(auto_now=True) # Update timestamp
-    scanlog = models.ForeignKey(ItuScanLog)
-    missing = models.DateTimeField(null=True) # When did this series go missing?
+    scanlog = models.ForeignKey(ItuScanLog, related_name='ich_scanlog')
+    missing = models.ForeignKey(ItuScanLog, null=True, related_name='missing_ich_scanlog') # When did this series go missing?
     # Eventual link to an FFM feed (not Feedgroup because iTU only does feeds)
     #    feed = models.ForeignKey(ffm_models.Feed, null=True)
     #
@@ -131,19 +132,19 @@ class ItuCollectionPeriodic(models.Model):
         return smart_unicode('Series: %s=%s' % (self.name,self.url))
 
 
-class ItuItemPeriodic(models.Model):
+class ItuItemHistorical(models.Model):
     name = models.CharField(max_length=255) # Labelled as "songName" in plist
     itu_id = models.IntegerField() # Labelled as "itemId" in plist
     url = models.URLField()
     genre = models.ForeignKey(ItuGenre)
     institution = models.ForeignKey(ItuInstitution)
-    series = models.ForeignKey(ItuCollectionPeriodic)
+    series = models.ForeignKey(ItuCollectionHistorical)
     # anonymous = models.BooleanField()
     artist_name = models.CharField(max_length=255) # Length rather arbitrary
     # buy_params = models.URLField()
     description = models.TextField()
-    duration = models.IntegerField()
-    explicit = models.IntegerField()
+    duration = models.IntegerField(null=True)
+    explicit = models.BooleanField()
     feed_url = models.URLField()
     file_extension = models.CharField(max_length=20)
     # is_episode = models.BooleanField()
@@ -160,8 +161,8 @@ class ItuItemPeriodic(models.Model):
     release_date = models.DateTimeField()
     # s = models.IntegerField()
     # updated = models.DateTimeField(auto_now=True) # Update timestamp
-    scanlog = models.ForeignKey(ItuScanLog)
-    missing = models.DateTimeField(null=True) # When did this item go missing?
+    scanlog = models.ForeignKey(ItuScanLog, related_name='iih_scanlog')
+    missing = models.ForeignKey(ItuScanLog, null=True, related_name='missing_iih_scanlog') # When did this item go missing?
     # Eventual link to an FFM FileInFeed, because all we really know is which FileInFeed should have been used here
     #    fileinfeed = models.ForeignKey(ffm_models.FileInFeed, null=True)
     #
@@ -178,10 +179,10 @@ class ItuItemPeriodic(models.Model):
         return smart_unicode('Item: %s=%s' % (self.name, self.url))
 
 
-class ItuItemDaily(models.Model):
+class ItuItemChartScan(models.Model):
     date = models.DateTimeField() # Date of chart scan
     position = models.SmallIntegerField()
-    ituitemperiodic = models.ForeignKey(ItuItemPeriodic)
+    ituitemperiodic = models.ForeignKey(ItuItemHistorical)
     ituitem = models.ForeignKey(ItuItem)
     # updated = models.DateTimeField(auto_now=True) # Update timestamp
     scanlog = models.ForeignKey(ItuScanLog)
@@ -194,10 +195,10 @@ class ItuItemDaily(models.Model):
         return smart_unicode('Download@%s: %s (%s)' % (self.position, self.item.name, self.item.itu_id))
 
 
-class ItuCollectionDaily(models.Model):
+class ItuCollectionChartScan(models.Model):
     date = models.DateTimeField() # Date of chart scan
     position = models.SmallIntegerField()
-    itucollectionperiodic = models.ForeignKey(ItuCollectionPeriodic)
+    itucollectionperiodic = models.ForeignKey(ItuCollectionHistorical)
     itucollection = models.ForeignKey(ItuCollection)
     # updated = models.DateTimeField(auto_now=True) # Update timestamp
     scanlog = models.ForeignKey(ItuScanLog)

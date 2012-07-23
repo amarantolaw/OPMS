@@ -4,7 +4,10 @@
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 from monitors.utils import itunes as itunes
+from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution
 import datetime, sys
+from dateutil.parser import *
+import urllib2
 
 
 class Command(BaseCommand):
@@ -49,24 +52,162 @@ class Command(BaseCommand):
                3) Scan the Top Downloads chart
                """)
 
+        scantime = datetime.datetime.now()
         print "Scan iTunes started at " + str(datetime.datetime.utcnow()) + "\n"
         # Create an error log
         self._errorlog_start('scan_itunes.log')
 
+        scanlog = ItuScanLog(starting_url=url, mode=mode, time=scantime, comments="")
+        scanlog.save()
+
         if mode == 1:
-            comment = "Scan (and update) of an Institution's collection from %s" % url
+            comment = "Scan (and update) of " + institution + "\'s collection from %s" % url
             self._errorlog("Log started for: %s" % comment)
             print comment
 
-            # TODO: Check that the pattern of the URL looks like what we expect of an institutional url
-            collection = itunes.get_institution_collections(url)
-            # TODO: Iterate, parse and store the items from the collection
-            for s, series in enumerate(collection):
-                series_obj, created = self._get_or_create_series(series)
-                # Scan for items
-                series = itunes.get_collection_items(series.get("series_url"))
-                # TODO: Scan for items in this series that we haven't just updated and mark as missing
-            # TODO: Scan for series in this institution that we haven't just updated and mark as missing
+            collections = itunes.get_institution_collections(url)
+            for c in collections:
+                if c:
+#                    for k in c.keys():
+#                        print(k + ': ' + c[k])
+
+                    #Check if this collection's institution exists - if not, create it.
+                    i = ItuInstitution(name=c['institution'], itu_id=int(c['institution_id']), url=c['institution_url'])
+                    i_exists = False
+                    for saved_i in ItuInstitution.objects.all():
+                        if int(i.itu_id) == int(saved_i.itu_id) and i.name==saved_i.name and i.url==saved_i.url:
+                            i_exists = True
+                            i = saved_i
+                    if i_exists==False:
+                        print('Creating new institution ' + i.name)
+                        i.save()
+
+                    #Check if this collection's genre exists - if not, create it.
+                    g = ItuGenre(name=c['genre'], itu_id=int(c['genre_id']), url=c['genre_url'])
+                    g_exists = False
+                    for saved_g in ItuGenre.objects.all():
+                        if int(g.itu_id) == int(saved_g.itu_id) and g.name==saved_g.name and g.url==saved_g.url:
+                            g_exists = True
+                            g = saved_g
+                    if g_exists==False:
+                        print('Creating new genre ' + g.name)
+                        g.save()
+
+                    cr = ItuCollection(institution=i)
+                    cp = ItuCollectionHistorical(name=c['series'],
+                                                 itu_id=int(c['series_id']),
+                                                 img170=c['series_img_170'],
+                                                 url=c['series_url'],
+                                                 language=c['language'],
+                                                 last_modified=parse(c['last modified']).date(),
+                                                 contains_movies=c['contains_movies'],
+                                                 missing=None,
+                                                 version=1,
+                                                 institution=i,
+                                                 scanlog=scanlog,
+                                                 genre=g,
+                                                 previous=None,
+                                                 itucollection=cr)
+
+                    #Put together a list of saved cps that look like they're the same as our cp, really.
+                    similar_cps = []
+                    cp_exists = False
+                    for saved_cp in ItuCollectionHistorical.objects.all():
+                        if (cp.name==saved_cp.name and cp.contains_movies==saved_cp.contains_movies) or cp.itu_id==saved_cp.itu_id or cp.url==saved_cp.url: #name AND Video/Audio
+                            if cp.url != saved_cp.url: #Don't add similar cp if the URLs are different, but both are accessible.
+                                try:
+                                    urllib2.urlopen(cp.url)
+                                    urllib2.urlopen(saved_cp.url)
+                                except urllib2.URLError:
+                                    similar_cps.append(saved_cp)
+                            else:
+                                similar_cps.append(saved_cp)
+                        if cp.name==saved_cp.name and cp.contains_movies==saved_cp.contains_movies and int(cp.itu_id)==int(saved_cp.itu_id) and cp.url==saved_cp.url and cp.img170==saved_cp.img170 and cp.language==saved_cp.language:
+                            cp_exists=True
+                            cp = saved_cp
+                    if cp_exists==False:
+                        if similar_cps:
+                            similar_cps.sort(key=lambda this_cp: this_cp.version)
+                            latest_similar_cp = similar_cps[-1]
+                            cp.previous = latest_similar_cp
+                            cp.version = latest_similar_cp.version + 1
+                            cp.itucollection = latest_similar_cp.itucollection
+                        else:
+                            cr.save()
+                            cp.itucollection = cr
+                        print('Creating new periodic collection record for ' + cp.name + ', version ' + str(cp.version))
+                        cp.save()
+
+                    #Acquire the list of items for this collection.
+                    items = itunes.get_collection_items(cp.url)
+                    for item in items:
+                        if item:
+                            itemr = ItuItem(institution=i)
+                            #Deal with things with no duration (like PDFs...)
+                            if 'duration' in item.keys():
+                                item['duration'] = int(item['duration'])
+                            else:
+                                item['duration'] = None
+                            itemp = ItuItemHistorical(name=item['songName'],
+                                                    itu_id=item['itemId'],
+                                                    url=item['url'],
+                                                    artist_name=item['artistName'],
+                                                    description=item['description'],
+                                                    duration=item['duration'],
+                                                    explicit=bool(item['explicit']),
+                                                    feed_url=item['feedURL'],
+                                                    file_extension=item['fileExtension'],
+                                                    kind=item['kind'],
+                                                    long_description=item['longDescription'],
+                                                    playlist_id=int(item['playlistId']),
+                                                    playlist_name=item['playlistName'],
+                                                    popularity=float(item['popularity']),
+                                                    preview_length=int(item['previewLength']),
+                                                    preview_url=item['previewURL'],
+                                                    rank=int(item['rank']),
+                                                    release_date=parse(item['releaseDate'],ignoretz=True),
+                                                    missing=None,
+                                                    version=1,
+                                                    previous=None,
+                                                    ituitem=itemr,
+                                                    institution=i,
+                                                    genre=g,
+                                                    scanlog=scanlog,
+                                                    series=cp,
+                                                    )
+                            #Put together a list of saved itemps that look like they're the same as our itemp, really.
+                            similar_itemps = []
+                            itemp_exists = False
+                            for saved_itemp in ItuItemHistorical.objects.filter(series=cp):
+                                if (itemp.name==saved_itemp.name or itemp.itu_id==saved_itemp.itu_id or itemp.url==saved_itemp.url) and itemp.file_extension==saved_itemp.file_extension: #name AND Video/Audio
+                                    if itemp.url != saved_itemp.url: #Don't add similar itemp if the URLs are different, but both are accessible.
+                                        try:
+                                            urllib2.urlopen(itemp.url)
+                                            urllib2.urlopen(saved_itemp.url)
+                                        except urllib2.URLError:
+                                            similar_itemps.append(saved_itemp)
+                                    else:
+                                        similar_itemps.append(saved_itemp)
+                                if itemp.name==saved_itemp.name and itemp.itu_id==saved_itemp.itu_id and itemp.url==saved_itemp.url and itemp.artist_name==saved_itemp.artist_name and itemp.description==saved_itemp.description and itemp.duration==saved_itemp.duration and itemp.explicit==saved_itemp.explicit and itemp.feed_url==saved_itemp.feed_url and itemp.file_extension==saved_itemp.file_extension and itemp.kind==saved_itemp.kind and itemp.long_description==saved_itemp.long_description and itemp.playlist_id==saved_itemp.playlist_id and itemp.playlist_name==saved_itemp.playlist_name and itemp.popularity==saved_itemp.popularity and itemp.preview_length==saved_itemp.preview_length and itemp.preview_url==saved_itemp.preview_url and itemp.rank==saved_itemp.rank and itemp.release_date==saved_itemp.release_date:
+                                    itemp_exists=True
+                                    itemp = saved_itemp
+                            if itemp_exists==False:
+                                if similar_itemps:
+                                    similar_itemps.sort(key=lambda this_itemp: this_itemp.version)
+                                    latest_similar_itemp = similar_itemps[-1]
+                                    itemp.previous = latest_similar_itemp
+                                    itemp.version = latest_similar_itemp.version + 1
+                                    itemp.ituitem = latest_similar_itemp.ituitem
+                                else:
+                                    itemr.save()
+                                    itemp.ituitem = itemr
+                                print('Creating new periodic item record for ' + itemp.name + ', version ' + str(itemp.version))
+                                itemp.save()
+                        else:
+                            print('WARNING: Missing item')
+                    #TODO: Update missing fields here.
+                else:
+                    print('WARNING: Missing series') #TODO: Find the mystery bug that causes pages to fail to download.
         elif mode == 2:
             comment = "Scan of an Top Collections Chart from %s" % url
             self._errorlog("Log started for: %s" % comment)
@@ -86,7 +227,8 @@ class Command(BaseCommand):
         # Write the error cache to disk
         self._error_log_save()
         self._errorlog_stop()
-
+        scanlog.complete = True
+        scanlog.save()
         return None
 
     def _get_or_create_genre(self, id):

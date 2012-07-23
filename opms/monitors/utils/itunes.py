@@ -28,6 +28,7 @@ INSTITUTIONAL_URLS = {
 'MIT': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=341593265",
 'Yale': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=341649956",
 'Stanford': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=384228265",
+'Reformed Theological Seminary': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=378878142", #Useful for testing things out *quickly* since they have very few podcasts.
     }
 
 def get_page(url, APPLE_STORE_LANGUAGE = 1):
@@ -37,6 +38,7 @@ def get_page(url, APPLE_STORE_LANGUAGE = 1):
     ACCEPT = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
     HOST = 'itunes.apple.com'
     ACCEPT_LANGUAGE = 'en-us, en;q=0.50'
+    print("Requesting " + url)
     request = urllib2.Request(url)
     request.add_header('User-Agent', USER_AGENT)
     request.add_header('X-Apple-Store-Front','%s,%s' % (APPLE_STORE_FRONT, APPLE_STORE_LANGUAGE))
@@ -112,6 +114,16 @@ def get_collection_info(url):
     if xml == None:
         return info
     root = etree.fromstring(xml)
+
+    #Detect whether any of the items is a movie. If so, set contains_movies to True for this collection.
+    items = root.xpath('.//itms:TrackList/itms:plist/itms:dict/itms:array/itms:dict/itms:string',
+        namespaces={'itms':'http://www.apple.com/itms/'})
+    contains_movies=False
+    for i, item in enumerate(items):
+        if item.text == 'movie':
+            contains_movies=True
+    info['contains_movies']=contains_movies
+
     # Get the Genre (x2), Institution, and Series Name from the Breadcrumb trail for this collection
     items = root.xpath('.//itms:Test/itms:HBoxView/itms:VBoxView/itms:TextView/itms:Color/itms:GotoURL',
                          namespaces={'itms':'http://www.apple.com/itms/'})
@@ -217,24 +229,23 @@ def get_topcollections(url):
 #url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=14&mt=10" # For a 15 page result, batchNumber 14 is last call
 
 def get_institution_collections(url):
-    collection = []
+    collections = []
     xml = get_page(url)
     root = etree.fromstring(xml)
     items = root.xpath('.//itms:MatrixView/itms:VBoxView/itms:TextView/itms:SetFontStyle/itms:GotoURL',
                        namespaces={'itms':'http://www.apple.com/itms/'})
     for i,item in enumerate(items): # Now have a mix of HBoxViews and Views, around 100 of each...
-        #print item.get('url')
         #print item.text.lower().strip()
+#        print(item.get('url'))
         if not item.text.lower().strip().startswith('category'):
-            collection.append(get_collection_info(item.get('url')))
-            print("-", end="")
+            collections.append(get_collection_info(item.get('url')))
+
     items = root.xpath('.//itms:VBoxView/itms:VBoxView/itms:VBoxView/itms:HBoxView/itms:VBoxView/itms:GotoURL/itms:PictureButtonView[@alt="next page"]/../@url',namespaces={'itms':'http://www.apple.com/itms/'}) # Looking for the follow on page links...
     if len(items) == 1:
         next_page_url = items[0]
-        print(">")
 #        print 'Next URL is: %s' % next_page_url
-        collection = collection + get_institution_collections(next_page_url)
-    return collection
+        collections = collections + get_institution_collections(next_page_url)
+    return collections
 
 
 def get_collection_items(url):
