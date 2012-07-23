@@ -128,6 +128,26 @@ class ItuCollectionHistorical(models.Model):
     version = models.PositiveIntegerField(default=1)
     previous = models.ForeignKey('self', null=True, blank=True)
 
+    def next(self):
+        try:
+            n = ItuCollectionHistorical.objects.filter(previous=self)[0]
+            return n
+        except:
+            return None
+    def original(self):
+        p = self.previous
+        o = self
+        while p:
+            o = p
+            p = p.previous
+        return o
+    def latest(self):
+        l = self
+        n = self.next()
+        while n:
+            l = n
+            n = l.next
+        return l
     def __unicode__(self):
         return smart_unicode('Series: %s=%s' % (self.name,self.url))
 
@@ -175,6 +195,26 @@ class ItuItemHistorical(models.Model):
     version = models.PositiveIntegerField(default=1)
     previous = models.ForeignKey('self', null=True, blank=True)
 
+    def next(self):
+        try:
+            n = ItuItemHistorical.objects.filter(previous=self)[0]
+            return n
+        except:
+            return None
+    def original(self):
+        p = self.previous
+        o = self
+        while p:
+            o = p
+            p = p.previous
+        return o
+    def latest(self):
+        l = self
+        n = self.next()
+        while n:
+            l = n
+            n = l.next
+        return l
     def __unicode__(self):
         return smart_unicode('Item: %s=%s' % (self.name, self.url))
 
