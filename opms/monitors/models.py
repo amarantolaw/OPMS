@@ -115,7 +115,7 @@ class ItuCollectionHistorical(models.Model):
     # Series Stats - to be done as methods
     # updated = models.DateTimeField(auto_now=True) # Update timestamp
     scanlog = models.ForeignKey(ItuScanLog, related_name='ich_scanlog')
-    missing = models.ForeignKey(ItuScanLog, null=True, related_name='missing_ich_scanlog') # When did this series go missing?
+    missing = models.ForeignKey(ItuScanLog, null=True, related_name='missing_ich_scanlog') # The scanlog when we first detected this was missing.
     # Eventual link to an FFM feed (not Feedgroup because iTU only does feeds)
     #    feed = models.ForeignKey(ffm_models.Feed, null=True)
     #
@@ -182,7 +182,7 @@ class ItuItemHistorical(models.Model):
     # s = models.IntegerField()
     # updated = models.DateTimeField(auto_now=True) # Update timestamp
     scanlog = models.ForeignKey(ItuScanLog, related_name='iih_scanlog')
-    missing = models.ForeignKey(ItuScanLog, null=True, related_name='missing_iih_scanlog') # When did this item go missing?
+    missing = models.ForeignKey(ItuScanLog, null=True, related_name='missing_iih_scanlog') # The scanlog when we first detected this was missing.
     # Eventual link to an FFM FileInFeed, because all we really know is which FileInFeed should have been used here
     #    fileinfeed = models.ForeignKey(ffm_models.FileInFeed, null=True)
     #

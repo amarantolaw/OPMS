@@ -9,6 +9,19 @@ import datetime, sys
 from dateutil.parser import *
 import urllib2
 
+def update_missing(h,scanlog,url):
+#If we're looking at the latest version, we haven't just done an update, we haven't already marked this as missing and this is found at the URL we just scanned...
+    if h.institution.url == url:
+        if h == h.latest:
+            if h.scanlog != scanlog and h.missing == None:
+                print(h.name + " appears to have gone missing! We last saw it at " + str(h.scanlog.time()))
+                h.missing = scanlog
+                h.save()
+            elif h.scanlog == scanlog and h.missing:
+                print(h.name + " has reappeared! It went missing at" + str(h.missing.time()))
+                h.missing = None
+                h.save()
+    return None
 
 class Command(BaseCommand):
     help = 'Scan iTunes U Service (1:Institutional collection <default>; 2:Top Collections; 3:Top Downloads)'
@@ -205,9 +218,13 @@ class Command(BaseCommand):
                                 itemp.save()
                         else:
                             print('WARNING: Missing item')
-                    #TODO: Update missing fields here.
                 else:
                     print('WARNING: Missing series') #TODO: Find the mystery bug that causes pages to fail to download.
+            print("Checking whether anything has gone missing or reappeared...")
+            for h in ItuCollectionHistorical.objects.all():
+                update_missing(h,scanlog,url)
+            for h in ItuItemHistorical.objects.all():
+                update_missing(h,scanlog,url)
         elif mode == 2:
             comment = "Scan of an Top Collections Chart from %s" % url
             self._errorlog("Log started for: %s" % comment)

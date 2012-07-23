@@ -19,7 +19,7 @@ from lxml import etree
 
 INSTITUTIONAL_URLS = {
 'Oxford University': 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=381699182',
-'Open University': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=380206132",
+'Open University': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=380206132", #Broken
 'UCL': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=390402969",
 'Cambridge': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=380451095",
 'Warwick': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=407474356",
@@ -28,8 +28,7 @@ INSTITUTIONAL_URLS = {
 'MIT': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=341593265",
 'Yale': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=341649956",
 'Stanford': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=384228265",
-'Reformed Theological Seminary': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=378878142", #Useful for testing things out *quickly* since they have very few podcasts.
-    }
+}
 
 def get_page(url, APPLE_STORE_LANGUAGE = 1):
     USER_AGENT = 'iTunes/10.5.1 (Macintosh; Intel Mac OS X 10.6.8) AppleWebKit/534.51.22'
@@ -38,7 +37,7 @@ def get_page(url, APPLE_STORE_LANGUAGE = 1):
     ACCEPT = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
     HOST = 'itunes.apple.com'
     ACCEPT_LANGUAGE = 'en-us, en;q=0.50'
-    print("Requesting " + url)
+#    print("Requesting " + url)
     request = urllib2.Request(url)
     request.add_header('User-Agent', USER_AGENT)
     request.add_header('X-Apple-Store-Front','%s,%s' % (APPLE_STORE_FRONT, APPLE_STORE_LANGUAGE))
