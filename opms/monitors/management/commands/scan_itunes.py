@@ -78,7 +78,9 @@ class Command(BaseCommand):
             self._errorlog("Log started for: %s" % comment)
             print comment
 
+            print("Getting information about collections...")
             collections = itunes.get_institution_collections(url)
+            print("Loading collection information and scanning individual items...")
             for c in collections:
                 if c:
 #                    for k in c.keys():
