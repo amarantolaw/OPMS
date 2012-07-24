@@ -68,12 +68,15 @@ class ItuScanLog(models.Model):
     comments = models.TextField(null=True)
     complete = models.BooleanField(default=False)
 
-    @property
-    def mode_string(self):
-        return self.MODE_CHOICES.get(self.mode,'')
-
+    def mode_string(self,MODE_CHOICES=MODE_CHOICES):
+        for mc in MODE_CHOICES:
+            if mc[0] == self.mode:
+                return mc[1]
+    class Meta:
+        verbose_name = "iTunes U Scanlog"
+        verbose_name_plural = "iTunes U Scanlogs"
     def __unicode__(self):
-        return smart_unicode('Scanlog: %s=%s' % (self.name,self.url))
+        return smart_unicode(str(self.time) + ': ' + self.mode_string())
 
 
 class ItuGenre(models.Model):
@@ -81,8 +84,11 @@ class ItuGenre(models.Model):
     itu_id = models.IntegerField()
     url = models.URLField()
 
+    class Meta:
+        verbose_name = "iTunes U Genre"
+        verbose_name_plural = "iTunes U Genres"
     def __unicode__(self):
-        return smart_unicode('Genre: %s=%s' % (self.name,self.url))
+        return smart_unicode(self.name)
 
 class ItuInstitution(models.Model):
     name = models.CharField(max_length=255)
@@ -90,16 +96,27 @@ class ItuInstitution(models.Model):
     url = models.URLField()
     # Institutional Stats - to be done as methods
 
+    class Meta:
+        verbose_name = "iTunes U Institution"
+        verbose_name_plural = "iTunes U Institutions"
     def __unicode__(self):
-        return smart_unicode('Institution: %s=%s' % (self.name,self.url))
+        return smart_unicode(self.name)
 
 class ItuItem(models.Model):
     institution = models.ForeignKey(ItuInstitution)
+
+    class Meta:
+        verbose_name = "iTunes U Item"
+        verbose_name_plural = "iTunes U Items"
     def __unicode__(self):
         return smart_unicode('Item: %s' % (self.id))
 
 class ItuCollection(models.Model):
     institution = models.ForeignKey(ItuInstitution)
+
+    class Meta:
+        verbose_name = "iTunes U Collection"
+        verbose_name_plural = "iTunes U Collections"
     def __unicode__(self):
         return smart_unicode('Collection: %s' % (self.id))
 
@@ -167,8 +184,11 @@ class ItuCollectionHistorical(models.Model):
             checksum += pow(10,rating.stars) + (rating.count/1000000000)
         return checksum
 
+    class Meta:
+        verbose_name = "iTunes U Historical Record of Collection"
+        verbose_name_plural = "iTunes U Historical Records of Collections"
     def __unicode__(self):
-        return smart_unicode('Series: %s=%s' % (self.name,self.url))
+        return smart_unicode('%s, %s' % (self.name,str(self.scanlog.time)))
 
 
 class ItuItemHistorical(models.Model):
@@ -234,8 +254,12 @@ class ItuItemHistorical(models.Model):
             l = n
             n = l.next
         return l
+
+    class Meta:
+        verbose_name = "iTunes U Historical Record of Item"
+        verbose_name_plural = "iTunes U Historical Records of Items"
     def __unicode__(self):
-        return smart_unicode('Item: %s=%s' % (self.name, self.url))
+        return smart_unicode('%s, %s' % (self.name,str(self.scanlog.time)))
 
 
 class ItuItemChartScan(models.Model):
@@ -251,7 +275,7 @@ class ItuItemChartScan(models.Model):
     #        return self.scanlog.time
 
     def __unicode__(self):
-        return smart_unicode('Download@%s: %s (%s)' % (self.position, self.item.name, self.item.itu_id))
+        return smart_unicode('%s: %s' % (self.position, self.ituitemperiodic.name))
 
 
 class ItuCollectionChartScan(models.Model):
@@ -267,14 +291,14 @@ class ItuCollectionChartScan(models.Model):
     #        return self.scanlog.time
 
     def __unicode__(self):
-        return smart_unicode('Collection@%s: %s (%s)' % (self.position, self.series.name, self.series.itu_id))
+        return smart_unicode('%s: %s' % (self.position, self.itucollectionperiodic.name))
 
 class ItuRating(models.Model):
     stars = models.PositiveIntegerField(choices=((1,'*'),(2,'**'),(3,'***'),(4,'****'),(5,'*****')))
     count = models.PositiveIntegerField()
     itucollectionhistorical = models.ForeignKey(ItuCollectionHistorical)
     def __unicode__(self):
-        return smart_unicode('%s rated something with %s stars.' % (self.count, self.stars))
+        return smart_unicode('%s people rated %s with %s stars.' % (self.count, self.itucollectionhistorical.name, self.stars))
 
 class ItuComment(models.Model):
     stars = models.PositiveIntegerField(choices=((1,'*'),(2,'**'),(3,'***'),(4,'****'),(5,'*****')))
@@ -282,5 +306,9 @@ class ItuComment(models.Model):
     date = models.DateField(null=True, blank=True)
     detail = models.CharField(max_length=10000)
     source = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name = "iTunes U Comment"
+        verbose_name_plural = "iTunes U Comments"
     def __unicode__(self):
-        return smart_unicode(str(self.date) + ': Comment from ' + self.source)
+        return smart_unicode(self.detail)
