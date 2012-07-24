@@ -81,7 +81,7 @@ class ItuScanLog(models.Model):
 
 class ItuGenre(models.Model):
     name = models.CharField(max_length=255)
-    itu_id = models.IntegerField()
+    itu_id = models.IntegerField("iTunes U ID")
     url = models.URLField()
 
     class Meta:
@@ -92,7 +92,7 @@ class ItuGenre(models.Model):
 
 class ItuInstitution(models.Model):
     name = models.CharField(max_length=255)
-    itu_id = models.IntegerField()
+    itu_id = models.IntegerField("iTunes U ID")
     url = models.URLField()
     # Institutional Stats - to be done as methods
 
@@ -122,7 +122,7 @@ class ItuCollection(models.Model):
 
 class ItuCollectionHistorical(models.Model):
     name = models.CharField(max_length=255)
-    itu_id = models.IntegerField(null=True) # Historical records don't have this :-(
+    itu_id = models.IntegerField("iTunes U ID", null=True) # Historical records don't have this :-(
     img170 = models.URLField(null=True)
     url = models.URLField(null=True) # Historical records don't have this :-(
     language = models.CharField(max_length=100, null=True) # Historical records don't have this
@@ -141,7 +141,7 @@ class ItuCollectionHistorical(models.Model):
     #    def updated(self):
     #        return self.scanlog.time
 
-    itucollection = models.ForeignKey(ItuCollection)
+    itucollection = models.ForeignKey(ItuCollection, verbose_name="Collection")
 
     version = models.PositiveIntegerField(default=1)
     previous = models.ForeignKey('self', null=True, blank=True)
@@ -229,7 +229,7 @@ class ItuItemHistorical(models.Model):
     #    def updated(self):
     #        return self.scanlog.time
 
-    ituitem = models.ForeignKey(ItuItem)
+    ituitem = models.ForeignKey(ItuItem, verbose_name="Item")
 
     version = models.PositiveIntegerField(default=1)
     previous = models.ForeignKey('self', null=True, blank=True)
@@ -265,8 +265,8 @@ class ItuItemHistorical(models.Model):
 class ItuItemChartScan(models.Model):
     date = models.DateTimeField() # Date of chart scan - a duplicate of that in scanlog but will be efficient.
     position = models.SmallIntegerField()
-    ituitemperiodic = models.ForeignKey(ItuItemHistorical)
-    ituitem = models.ForeignKey(ItuItem)
+    ituitemhistorical = models.ForeignKey(ItuItemHistorical, verbose_name="Historical Item Record")
+    ituitem = models.ForeignKey(ItuItem, verbose_name="Item")
     # updated = models.DateTimeField(auto_now=True) # Update timestamp
     scanlog = models.ForeignKey(ItuScanLog)
     #
@@ -275,14 +275,14 @@ class ItuItemChartScan(models.Model):
     #        return self.scanlog.time
 
     def __unicode__(self):
-        return smart_unicode('%s: %s' % (self.position, self.ituitemperiodic.name))
+        return smart_unicode('%s: %s' % (self.position, self.ituitemhistorical.name))
 
 
 class ItuCollectionChartScan(models.Model):
     date = models.DateTimeField() # Date of chart scan - a duplicate of that in scanlog but will be efficient.
     position = models.SmallIntegerField()
-    itucollectionperiodic = models.ForeignKey(ItuCollectionHistorical)
-    itucollection = models.ForeignKey(ItuCollection)
+    itucollectionhistorical = models.ForeignKey(ItuCollectionHistorical, verbose_name="Historical Collection Record")
+    itucollection = models.ForeignKey(ItuCollection, verbose_name="Collection")
     # updated = models.DateTimeField(auto_now=True) # Update timestamp
     scanlog = models.ForeignKey(ItuScanLog)
     #
@@ -291,18 +291,18 @@ class ItuCollectionChartScan(models.Model):
     #        return self.scanlog.time
 
     def __unicode__(self):
-        return smart_unicode('%s: %s' % (self.position, self.itucollectionperiodic.name))
+        return smart_unicode('%s: %s' % (self.position, self.itucollectionhistorical.name))
 
 class ItuRating(models.Model):
     stars = models.PositiveIntegerField(choices=((1,'*'),(2,'**'),(3,'***'),(4,'****'),(5,'*****')))
     count = models.PositiveIntegerField()
-    itucollectionhistorical = models.ForeignKey(ItuCollectionHistorical)
+    itucollectionhistorical = models.ForeignKey(ItuCollectionHistorical, verbose_name="Historical Collection Record")
     def __unicode__(self):
         return smart_unicode('%s people rated %s with %s stars.' % (self.count, self.itucollectionhistorical.name, self.stars))
 
 class ItuComment(models.Model):
     stars = models.PositiveIntegerField(choices=((1,'*'),(2,'**'),(3,'***'),(4,'****'),(5,'*****')))
-    itucollectionhistorical = models.ForeignKey(ItuCollectionHistorical)
+    itucollectionhistorical = models.ForeignKey(ItuCollectionHistorical, verbose_name="Historical Collection Record")
     date = models.DateField(null=True, blank=True)
     detail = models.CharField(max_length=10000)
     source = models.CharField(max_length=100)

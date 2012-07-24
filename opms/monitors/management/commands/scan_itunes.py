@@ -284,7 +284,7 @@ class Command(BaseCommand):
                     if historical_collections:
                         historical_collection=historical_collections[0].latest()
                         print('Creating new chart row: ' + historical_collection.name + ' Position: ' + str(c['chart_position']))
-                        chartrow=ItuCollectionChartScan(position=int(c['chart_position']),itucollection=historical_collection.itucollection,itucollectionperiodic=historical_collection,scanlog=scanlog,date=scanlog.time)
+                        chartrow=ItuCollectionChartScan(position=int(c['chart_position']),itucollection=historical_collection.itucollection,itucollectionhistorical=historical_collection,scanlog=scanlog,date=scanlog.time)
                         chartrow.save()
                     else:
                         print('WARNING: Couldn\'t find an historical record of collection at ' + c['series_url'] + '. Perhaps do an historical scan of ' + c['institution'] + ' first?')
@@ -300,7 +300,7 @@ class Command(BaseCommand):
                     if historical_items:
                         historical_item=historical_items[0].latest()
                         print('Creating new download chart row: ' + historical_item.name + ' Position: ' + str(i['chart_position']))
-                        chartrow=ItuItemChartScan(position=int(i['chart_position']),ituitem=historical_item.ituitem,ituitemperiodic=historical_item,scanlog=scanlog,date=scanlog.time)
+                        chartrow=ItuItemChartScan(position=int(i['chart_position']),ituitem=historical_item.ituitem,ituitemhistorical=historical_item,scanlog=scanlog,date=scanlog.time)
                         chartrow.save()
                     else:
                         print('WARNING: Couldn\'t find an historical record of item at ' + i['item_url'] + '. Perhaps do an historical scan of ' + i['institution'] + ' first?')
