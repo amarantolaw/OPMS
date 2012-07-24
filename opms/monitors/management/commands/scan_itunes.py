@@ -4,7 +4,8 @@
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 from monitors.utils import itunes as itunes
-from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution
+from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
+from feedback.models import Metric, Traffic, Category, Comment, Event
 import datetime, sys
 from dateutil.parser import *
 import urllib2
@@ -112,6 +113,10 @@ class Command(BaseCommand):
                                                  previous=None,
                                                  itucollection=cr)
 
+                    rating_checksum = 0
+                    for rating in c['ratings']:
+                        rating_checksum += pow(10,rating['stars']) + (rating['count']/1000000000)
+
                     #Put together a list of saved cps that look like they're the same as our cp, really.
                     similar_cps = []
                     cp_exists = False
@@ -125,7 +130,7 @@ class Command(BaseCommand):
                                     similar_cps.append(saved_cp)
                             else:
                                 similar_cps.append(saved_cp)
-                        if cp.name==saved_cp.name and cp.contains_movies==saved_cp.contains_movies and int(cp.itu_id)==int(saved_cp.itu_id) and cp.url==saved_cp.url and cp.img170==saved_cp.img170 and cp.language==saved_cp.language:
+                        if cp.name==saved_cp.name and cp.contains_movies==saved_cp.contains_movies and int(cp.itu_id)==int(saved_cp.itu_id) and cp.url==saved_cp.url and cp.img170==saved_cp.img170 and cp.language==saved_cp.language and rating_checksum==saved_cp.rating_checksum():
                             cp_exists=True
                             cp = saved_cp
                     if cp_exists==False:
@@ -138,8 +143,39 @@ class Command(BaseCommand):
                         else:
                             cr.save()
                             cp.itucollection = cr
-                        print('Creating new periodic collection record for ' + cp.name + ', version ' + str(cp.version))
+                        print('Creating new historical collection record for ' + cp.name + ', version ' + str(cp.version))
                         cp.save()
+
+                        ratings = c['ratings']
+                        for r in ratings:
+                            try:
+                                rating = ItuRating(stars=r['stars'],
+                                               count=r['count'],
+                                               itucollectionhistorical=cp,)
+                                rating.save()
+                            except:
+                                print('WARNING: Failed to save rating.')
+
+                    comments = c['comments']
+                    for comment in comments:
+                        if comment:
+                            comment_exists = False
+                            for existing_comment in ItuComment.objects.all():
+                                if existing_comment.detail == comment['detail']:
+                                    comment_exists = True
+                            if not comment_exists:
+                                try:
+                                    new_comment = ItuComment(
+                                        itucollectionhistorical=cp,
+                                        stars=comment['rating'],
+                                        date=comment['date'],
+                                        detail=comment['detail'],
+                                        source=comment['source'],
+                                    )
+                                    new_comment.save()
+                                    print('Saving new comment by ' + new_comment.source + ': \"' + new_comment.detail + '\".')
+                                except:
+                                    print('WARNING: Failed to save comment.')
 
                     collections_spotted.append(cp)
 
@@ -206,7 +242,7 @@ class Command(BaseCommand):
                                 else:
                                     itemr.save()
                                     itemp.ituitem = itemr
-                                print('Creating new periodic item record for ' + itemp.name + ', version ' + str(itemp.version))
+                                print('Creating new historical item record for ' + itemp.name + ', version ' + str(itemp.version))
                                 itemp.save()
                             items_spotted.append(itemp)
                         else:

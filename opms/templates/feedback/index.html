@@ -68,11 +68,11 @@
             var data{{ category_to_plot.id }} = {
                 'events': [
                     {% for comm in comments %}
-                        {% if comm.category == category_to_plot %}
+                        {% if comm.category == category_to_plot and comm.date %}
                             {
                                 'start':"{{ comm.datetime_timeplotxml }}",
                                 'title':"Comment from {{ comm.source|escapejs }}",
-                                'description':"\"{{ comm.detail|escapejs }}\" <br/><a href=\"comment/{{ comm.id }}\">View detail</a>"
+                                'description':"\"{{ comm.detail|escapejs }}\""
                             },
                         {% endif %}
                     {% endfor %}
@@ -81,7 +81,7 @@
                             {
                                 'start':"{{ event.datetime_timeplotxml }}",
                                 'title':"{{ event.title|escapejs }}",
-                                'description':"{{ event.detail|escapejs }}<br/><a href=\"event/{{ event.id }}\">View detail</a>"
+                                'description':"{{ event.detail|escapejs }}"
                             },
                         {% endif %}
                     {% endfor %}
@@ -322,7 +322,6 @@
 <table id="eventsTable" class="tablesorter">
     <thead>
     <tr>
-        <th>ID</th>
         <th>Date</th>
         <th>Title</th>
         <th>Detail</th>
@@ -332,7 +331,6 @@
     <tbody>
     {% for e in events %}
     <tr>
-        <td><a href="{% url event-detail event_id=e.id %}">{{ e.id }}</a></td>
         <td>{{ e.date }}</td>
         <td>{{ e.title }}</td>
         <td>{{ e.detail }}</td>
@@ -346,7 +344,6 @@
 <table id="commentsTable" class="tablesorter">
     <thead>
     <tr>
-        <th>ID</th>
         <th>Date</th>
         <th>Time</th>
         <th>Source</th>
@@ -357,7 +354,6 @@
     <tbody>
     {% for c in comments %}
     <tr>
-        <td><a href="{% url comment-detail comment_id=c.id %}">{{ c.id }}</a></td>
         <td>{{ c.date }}</td>
         <td>{{ c.time }}</td>
         <td>{{ c.source }}</td>

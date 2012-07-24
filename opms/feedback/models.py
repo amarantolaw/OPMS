@@ -46,12 +46,12 @@ class Traffic(models.Model):
 
 class Comment(models.Model):
     "A comment made about the website on a certain day"
-    date = models.DateField()                                                           #The day when the comment was made
+    date = models.DateField(null=True, blank=True)                                      #The day when the comment was made
     def date_timeplot(self):                                                            #Date in yyyy-mm-dd format so that timeplot can eat it. Code is here since str() can't be used in templates.
         return str(self.date)
     def datetime_timeplotxml(self):
         return self.date.strftime("%b %d %Y") + " " + self.time.strftime("%H:%M:%S") + " GMT"
-    time = models.TimeField()                                                           #The time at which the comment was made
+    time = models.TimeField(null=True, blank=True)                                      #The time at which the comment was made
     source = models.CharField(max_length=200)                                           #The source of the comment (DELIBERATELY VAGUE FOR THE MOMENT!)
     detail = models.TextField(unique=True)                                              #The text of the comment
     category = models.ForeignKey(Category)                                              #Categories may include Events as well as Comments

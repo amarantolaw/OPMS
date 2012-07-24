@@ -2,6 +2,7 @@ from __future__ import print_function
 import urllib2, plistlib
 from xml.parsers import expat
 from lxml import etree
+from dateutil.parser import *
 
 #from BeautifulSoup import BeautifulSoup
 
@@ -150,6 +151,42 @@ def get_collection_info(url):
             info[k.lower()] = v.strip()
         except ValueError:
             pass
+
+    items = root.xpath('.//itms:VBoxView/itms:MatrixView[@columnFormat="*,*,*"]/itms:VBoxView/itms:HBoxView',
+        namespaces={'itms':'http://www.apple.com/itms/'})
+    info['ratings'] = []
+    for i in items:
+        rating_text = i.get("alt")
+        stars = int(rating_text.split(', ')[0].split(' ')[0])
+        count = int(rating_text.split(', ')[-1].split(' ')[0])
+        info['ratings'].append({'stars': stars, 'count': count})
+
+    info['comments'] = []
+#    try:
+    review_url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?pageNumber=0&type=Podcast&id=' + str(info['series_id']) #This page (unlike the first) contains the complete text of longer, more interesting, comments.
+    review_xml = get_page(review_url)
+    xmls = review_xml.split('<View rightInset=\"0\" topInset=\"10\" bottomInset=\"15\" leftInset=\"10\" height=\"1\" stretchiness=\"1\" backColor=\"4c6d99\"></View>')
+    xmls[0] = ''
+    xmls[len(xmls) - 1] = ''
+    for x in xmls:
+        if x:
+            try:
+                try:
+                    try: #Necessary to deal with anonymous reviews...
+                        source = x.split('<b>')[3].split('</b>')[0].split('\n')[1].split('  ')[-1]
+                        date = parse(x.split('</GotoURL>')[3].split('</SetFontStyle>')[0].split('\n')[3].split('  ')[-1]).date()
+                    except:
+                        source = 'Anonymous'
+                        date = None
+                    detail = x.split('<SetFontStyle normalStyle=\"textColor\">')[4].split('</SetFontStyle>')[0].replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&#39;", "'").replace('&quot;', '"').replace("&#34;", "\"")
+                    rating = int(x.split('<HBoxView topInset="1" alt=\"')[1].split(' star')[0])
+                        #            print('Source: ' + source + ' date: ' + str(date) + ' detail: ' + detail + ' rating: ' + rating + '*')
+                    info['comments'].append({'source': source, 'date': date, 'detail': detail, 'rating': rating})
+                except:
+                    print("WARNING: Failed to parse comment XML properly when scanning " + review_url)
+            except:
+                print('WARNING: Couldn\'t get reviews.')
+
     return info
 
 # Base iTunes U URLS
@@ -251,9 +288,9 @@ def get_collection_items(url):
     try:
         xml = get_page(url)
     except ValueError: # If there's a bad URL, skip this link
-        return stats
+        return None
     if xml == None:
-        return stats
+        return None
     root = etree.fromstring(xml)
     # Get the tracklisting for this collection
     items = root.xpath('.//itms:TrackList',namespaces={'itms':'http://www.apple.com/itms/'})
@@ -264,17 +301,17 @@ def get_collection_items(url):
 # Get data about a single collection, in this instance Critical Reasoning for Begineers (Audio)
 url = 'http://itunes.apple.com/gb/itunes-u/critical-reasoning-for-beginners/id387875756'
 def get_collection_statistics(url):
+    stats = {}
     try:
         xml = get_page(url)
     except ValueError: # If there's a bad URL, skip this link
-        return stats
+        return None
     if xml == None:
-        return stats
+        return None
     root = etree.fromstring(xml)
     # Get the tracklisting for this collection
     items = root.xpath('.//itms:TrackList',namespaces={'itms':'http://www.apple.com/itms/'})
     plist = plistlib.readPlistFromString(etree.tostring(items[0]))
-    stats = {}
     stats['total_duration_in_seconds'] = 0
     stats['total_number_of_items'] = len(plist.get('items'))
     stats['item_counts_by_kind'] = {}

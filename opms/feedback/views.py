@@ -1,5 +1,6 @@
 from django.shortcuts import render_to_response, get_object_or_404
 from feedback.models import Metric, Traffic, Category, Comment, Event
+from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
 from stats.models import AppleWeeklySummary
 from django.db.models import Max, Min
 from django.template import RequestContext
@@ -66,11 +67,26 @@ def index(request, error='', message=''):
 
     #NOTE: We do not need to handle the temporal range of comments and events since this is done automatically by Timeplot.
 
+    comments_to_plot = []
+    for c in Comment.objects.filter(moderated=True):
+        comments_to_plot.append(c)
+    for c in categories_to_plot:
+        if c.description == 'From iTunes U':
+            for itu_comment in ItuComment.objects.all():
+                comments_to_plot.append(Comment(
+                    date=itu_comment.date,
+                    time=datetime.time(0,0,0),
+                    source=itu_comment.source,
+                    detail=itu_comment.detail,
+                    user_email='scan_itunes@manage.py',
+                    category=c
+                ))
+
     return render_to_response('feedback/index.html', {
         'metrics_to_plot': metrics_to_plot,
         'metric_textfiles': metric_textfiles,
         'categories_to_plot': categories_to_plot,
-        'comments': Comment.objects.filter(moderated=True),
+        'comments': comments_to_plot,
         'error': error,
         'message': message,
         'events': Event.objects.filter(moderated=True)
@@ -161,10 +177,6 @@ def comment_add(request,comment=None, error='', message=''):
                  'message': message,
                  'comment': default_comment},
             context_instance=RequestContext(request))
-
-def comment_detail(request, comment_id, error='', message=''):
-    comment = get_object_or_404(Comment, pk=int(comment_id)) #Find the appropriate comment object from comment_id.
-    return render_to_response('feedback/comment_detail.html', {'comment': comment, 'error': error, 'message': message}, context_instance=RequestContext(request))
 
 def event_add(request,event=None, error='', message=''):
     "Adds a new event to the database. Optionally, it may replace the event instead."
@@ -268,10 +280,6 @@ def event_add(request,event=None, error='', message=''):
                  'error_fields': error_fields,
                  'event': default_event},
             context_instance=RequestContext(request))
-
-def event_detail(request, event_id, error='', message=''):
-    event = get_object_or_404(Event, pk=int(event_id)) #Find the appropriate event object from event_id.
-    return render_to_response('feedback/event_detail.html', {'event': event, 'error': error, 'message': message}, context_instance=RequestContext(request))
 
 def email(request, error='', message=''):
     output = ''

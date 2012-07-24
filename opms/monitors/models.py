@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.encoding import smart_unicode
 from datetime import date
+import math
 
 #TODO: Add this to south, eventually...
 # Remember: this application is managed by Django South so when you change this file, do the following:
@@ -146,8 +147,26 @@ class ItuCollectionHistorical(models.Model):
         n = self.next()
         while n:
             l = n
-            n = l.next
+            n = l.next()
         return l
+
+    def average_rating(self):
+        rating_sum = 0
+        n = 0
+        for rating in ItuRating.objects.filter(itucollectionhistorical=self):
+            rating_sum += rating.stars
+            n += rating.count
+        if n > 0:
+            return (rating_sum/n)
+        else:
+            return None
+
+    def rating_checksum(self):
+        checksum = 0
+        for rating in ItuRating.objects.filter(itucollectionhistorical=self):
+            checksum += pow(10,rating.stars) + (rating.count/1000000000)
+        return checksum
+
     def __unicode__(self):
         return smart_unicode('Series: %s=%s' % (self.name,self.url))
 
@@ -249,3 +268,19 @@ class ItuCollectionChartScan(models.Model):
 
     def __unicode__(self):
         return smart_unicode('Collection@%s: %s (%s)' % (self.position, self.series.name, self.series.itu_id))
+
+class ItuRating(models.Model):
+    stars = models.PositiveIntegerField(choices=((1,'*'),(2,'**'),(3,'***'),(4,'****'),(5,'*****')))
+    count = models.PositiveIntegerField()
+    itucollectionhistorical = models.ForeignKey(ItuCollectionHistorical)
+    def __unicode__(self):
+        return smart_unicode('%s rated something with %s stars.' % (self.count, self.stars))
+
+class ItuComment(models.Model):
+    stars = models.PositiveIntegerField(choices=((1,'*'),(2,'**'),(3,'***'),(4,'****'),(5,'*****')))
+    itucollectionhistorical = models.ForeignKey(ItuCollectionHistorical)
+    date = models.DateField(null=True, blank=True)
+    detail = models.CharField(max_length=10000)
+    source = models.CharField(max_length=100)
+    def __unicode__(self):
+        return smart_unicode(str(self.date) + ': Comment from ' + self.source)

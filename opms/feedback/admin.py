@@ -61,6 +61,6 @@ class EventAdmin(admin.ModelAdmin):
 
 admin.site.register(Metric, MetricAdmin)
 admin.site.register(Category, CategoryAdmin)
-admin.site.register(Traffic)
+#admin.site.register(Traffic)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(Event, EventAdmin)
