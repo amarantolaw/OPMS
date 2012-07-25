@@ -11,12 +11,12 @@ from dateutil.parser import *
 import urllib2
 
 class Command(BaseCommand):
-    help = 'Scan iTunes U Service (1:Institutional collection <default>; 2:Top Collections; 3:Top Downloads)'
+    help = 'Scan iTunes U Service (1:Institutional collection <default>; 2:Top Collections; 3:Top Downloads; 4:Institutions)'
     args = "<institution>"
     label = "institution"
     option_list = BaseCommand.option_list + (
         make_option('--mode', action='store', dest='mode',
-            default=1, help='Specify the type of scan to be done (1,2,3)'),
+            default=1, help='Specify the type of scan to be done (1,2,3,4)'),
     )
 
     def __init__(self):
@@ -32,10 +32,6 @@ class Command(BaseCommand):
         # Some basic error checking
         if institution is None:
             raise CommandError("Please specify the institution to scan.")
-        try:
-            url = itunes.INSTITUTIONAL_URLS[institution]
-        except:
-            raise CommandError(institution + "is not a recognised institution. Recognised institutions are:\n" + "\n".join(itunes.INSTITUTIONAL_URLS.keys()))
 
         try:
             mode = int(options.get("mode",1))
@@ -44,12 +40,14 @@ class Command(BaseCommand):
                1) Scan an institution's collection
                2) Scan the Top Collections chart
                3) Scan the Top Downloads chart
+               4) Scan the list of institutions
                """)
-        if mode < 1 or mode > 3:
+        if mode < 1 or mode > 4:
             raise CommandError("""Please specify a valid mode for this scan.
                1) Scan an institution's collection
                2) Scan the Top Collections chart
                3) Scan the Top Downloads chart
+               4) Scan the list of institutions
                """)
 
         scantime = datetime.datetime.now()
@@ -57,10 +55,14 @@ class Command(BaseCommand):
         # Create an error log
         self._errorlog_start('scan_itunes.log')
 
-        scanlog = ItuScanLog(starting_url=url, mode=mode, time=scantime, comments="")
+        scanlog = ItuScanLog(mode=mode, time=scantime, comments="")
         scanlog.save()
 
         if mode == 1:
+            try:
+                url = ItuInstitution.objects.filter(name=institution)[0].url
+            except:
+                raise CommandError(institution + "is not a recognised institution.")
             comment = "Scan (and update) of " + institution + "\'s collection from %s" % url
             self._errorlog("Log started for: %s" % comment)
             print comment
@@ -79,9 +81,18 @@ class Command(BaseCommand):
                     i = ItuInstitution(name=c['institution'], itu_id=int(c['institution_id']), url=c['institution_url'])
                     i_exists = False
                     for saved_i in ItuInstitution.objects.all():
-                        if int(i.itu_id) == int(saved_i.itu_id) and i.name==saved_i.name and i.url==saved_i.url:
-                            i_exists = True
-                            i = saved_i
+                        if int(i.itu_id) == int(saved_i.itu_id) or i.name==saved_i.name or i.url==saved_i.url:
+                            if int(i.itu_id) == int(saved_i.itu_id) and i.name==saved_i.name and i.url==saved_i.url:
+                                i_exists = True
+                                i = saved_i
+                            else:
+                                i_exists = True
+                                print('Updating institution ' + i.name)
+                                saved_i.itu_id = i.itu_id
+                                saved_i.name = i.name
+                                saved_i.url = i.url
+                                saved_i.save()
+                                i = saved_i
                     if i_exists==False:
                         print('Creating new institution ' + i.name)
                         i.save()
@@ -274,7 +285,7 @@ class Command(BaseCommand):
                             h.missing = None
                             h.save()
         elif mode == 2:
-            comment = "Scan of an Top Collections Chart from %s" % url
+            comment = "Scan of the Top Collections Chart..."
             self._errorlog("Log started for: %s" % comment)
             print comment
             collections = itunes.get_topcollections()
@@ -290,7 +301,7 @@ class Command(BaseCommand):
                         print('WARNING: Couldn\'t find an historical record of collection at ' + c['series_url'] + '. Perhaps do an historical scan of ' + c['institution'] + ' first?')
 
         elif mode == 3:
-            comment = "Scan of an Top Downloads Chart from %s" % url
+            comment = "Scan of the Top Downloads Chart..."
             self._errorlog("Log started for: %s" % comment)
             print comment
             items = itunes.get_topdownloads()
@@ -304,6 +315,39 @@ class Command(BaseCommand):
                         chartrow.save()
                     else:
                         print('WARNING: Couldn\'t find an historical record of item at ' + i['item_url'] + '. Perhaps do an historical scan of ' + i['institution'] + ' first?')
+        elif mode == 4:
+            comment = "Scan of list of institutions..."
+            self._errorlog("Log started for: %s" % comment)
+            print comment
+            institutions = itunes.get_institutions()
+            for i in institutions:
+                if i:
+                    institution = ItuInstitution(
+                        name = i['text'],
+                        itu_id = int(i['itu_id']),
+                        url = i['url'],
+                    )
+                    need_update = False
+                    need_create = True
+                    for saved_i in ItuInstitution.objects.all():
+                        if saved_i.itu_id == institution.itu_id or saved_i.name == institution.name or saved_i.url == institution.url:
+                            if saved_i.itu_id == institution.itu_id and saved_i.name == institution.name and saved_i.url == institution.url:
+                                need_update = False
+                                need_create = False
+                            else:
+                                need_update = True
+                                need_create = False
+                                saved_i.itu_id = institution.itu_id
+                                saved_i.name = institution.name
+                                saved_i.url = institution.url
+                                institution = saved_i
+                    if need_update:
+                        print('Updating institution ' + institution.name)
+                        institution.save()
+                    elif need_create:
+                        print('Creating new institution ' + institution.name)
+                        institution.save()
+
 
         else:
             comment = "We shouldn't ever get this scan..."

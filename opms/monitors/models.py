@@ -60,9 +60,9 @@ class ItuScanLog(models.Model):
         (0,"Unknown"),
         (1,"Institutional Scan"),
         (2,"Top Collections Scan"),
-        (3,"Top Downloads Scan")
+        (3,"Top Downloads Scan"),
+        (4,"Institutions Scan")
         )
-    starting_url = models.URLField(null=True)
     time = models.DateTimeField(auto_now_add=True)
     mode = models.SmallIntegerField(default=0, choices=MODE_CHOICES) # Zero = Unknown mode
     comments = models.TextField(null=True)

@@ -1,8 +1,11 @@
 from __future__ import print_function
 import urllib2, plistlib
 from xml.parsers import expat
-from lxml import etree
+from lxml import etree, html
+from lxml.html.clean import *
 from dateutil.parser import *
+from django.utils.encoding import smart_unicode
+
 
 #from BeautifulSoup import BeautifulSoup
 
@@ -17,19 +20,6 @@ from dateutil.parser import *
 # 9 = Mostly HTML, iPad display version, content hard to view
 # 13 = XHTML page, but much much shorter than the rest. Suggest it simulates iOS 5 styling. TBD
 # [12,1,2]
-
-INSTITUTIONAL_URLS = {
-'Oxford University': 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=381699182',
-'Open University': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=380206132", #Broken
-'UCL': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=390402969",
-'Cambridge': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=380451095",
-'Warwick': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=407474356",
-'Nottingham': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=396415869",
-'UC Berkeley': 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=354813951',
-'MIT': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=341593265",
-'Yale': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=341649956",
-'Stanford': "http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=384228265",
-}
 
 def get_page(url, APPLE_STORE_LANGUAGE = 1):
     USER_AGENT = 'iTunes/10.5.1 (Macintosh; Intel Mac OS X 10.6.8) AppleWebKit/534.51.22'
@@ -100,6 +90,21 @@ def write_page(url, language = 1, filename=''):
     f.write(get_page(url, language))
     print('Output written to ./' + filename)
     return None
+
+def get_institutions():
+    institutions = []
+    url = 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewiTunesUProviders?id=EDU'
+    xml = clean_html(get_page(url,12)).replace('class="badge"></a>','class="badge"/></a>').replace('Choose Store">','Choose Store"/>')
+    root = etree.fromstring(xml)
+    items = root.xpath('/div/body/div/div/div/div/div/div/ul/li/a')
+    print(str(len(items)) + ' items found.')
+    for item in items: # Now have a mix of HBoxViews and Views, around 100 of each...
+        item_dict = {}
+        item_dict['text'] = smart_unicode(item.text)
+        item_dict['url'] = item.get('href')
+        item_dict['itu_id'] = item_dict['url'].split('id=')[1]
+        institutions.append(item_dict)
+    return institutions
 
 # Get Collection info
 def get_collection_info(url):
