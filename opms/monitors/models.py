@@ -105,20 +105,34 @@ class ItuInstitution(models.Model):
 class ItuItem(models.Model):
     institution = models.ForeignKey(ItuInstitution)
 
+    def latest(self):
+        hrecords = ItuItemHistorical.objects.filter(ituitem=self).order_by('version')
+        return hrecords[len(hrecords) - 1]
+    def original(self):
+        hrecords = ItuItemHistorical.objects.filter(ituitem=self).order_by('version')
+        return hrecords[0]
+
     class Meta:
         verbose_name = "iTunes U Item"
         verbose_name_plural = "iTunes U Items"
     def __unicode__(self):
-        return smart_unicode('Item: %s' % (self.id))
+        return smart_unicode(self.latest().name)
 
 class ItuCollection(models.Model):
     institution = models.ForeignKey(ItuInstitution)
+
+    def latest(self):
+        hrecords = ItuCollectionHistorical.objects.filter(itucollection=self).order_by('version')
+        return hrecords[len(hrecords) - 1]
+    def original(self):
+        hrecords = ItuCollectionHistorical.objects.filter(itucollection=self).order_by('version')
+        return hrecords[0]
 
     class Meta:
         verbose_name = "iTunes U Collection"
         verbose_name_plural = "iTunes U Collections"
     def __unicode__(self):
-        return smart_unicode('Collection: %s' % (self.id))
+        return smart_unicode(self.latest().name)
 
 class ItuCollectionHistorical(models.Model):
     name = models.CharField(max_length=255)

@@ -58,14 +58,15 @@ class ItuCommentInline(admin.StackedInline):
     fields = ('date','detail','stars','source')
 
 class ItuCollectionHistoricalAdmin(admin.ModelAdmin):
-    inlines = [ItuRatingInline,ItuCommentInline]
+    inlines = [ItuRatingInline,ItuCommentInline,ItuCollectionChartScanInline]
 
 admin.site.register(ItuCollectionHistorical, ItuCollectionHistoricalAdmin)
 
-#class ItuItemHistoricalAdmin(admin.ModelAdmin):
-#    inlines = [ItuItemChartScanInline]
+class ItuItemHistoricalAdmin(admin.ModelAdmin):
+    inlines = [ItuItemChartScanInline]
+    fields = ('name','itu_id','url','artist_name','description','duration','explicit','feed_url','file_extension','kind','long_description','playlist_id','playlist_name','popularity','preview_length','preview_url','rank','release_date','version','institution','genre','scanlog')
 
-admin.site.register(ItuItemHistorical)
+admin.site.register(ItuItemHistorical, ItuItemHistoricalAdmin)
 
 class ItuScanLogAdmin(admin.ModelAdmin):
     inlines = [ItuCollectionChartScanInline,ItuItemChartScanInline]
