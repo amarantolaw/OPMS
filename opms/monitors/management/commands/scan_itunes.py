@@ -3,12 +3,14 @@
 # Last Edited: 08-12-2011
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
+from django.core import management
 from monitors.utils import itunes as itunes
 from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
 from feedback.models import Metric, Traffic, Category, Comment, Event
 import datetime, sys
 from dateutil.parser import *
 import urllib2
+import codecs
 
 class Command(BaseCommand):
     help = 'Scan iTunes U Service (1:Institutional collection <default>; 2:Top Collections; 3:Top Downloads; 4:Institutions)'
@@ -60,15 +62,15 @@ class Command(BaseCommand):
 
         if mode == 1:
             try:
-                url = ItuInstitution.objects.filter(name=institution)[0].url
+                i = ItuInstitution.objects.filter(name=institution)[0]
             except:
                 raise CommandError(institution + "is not a recognised institution.")
-            comment = "Scan (and update) of " + institution + "\'s collection from %s" % url
-            self._errorlog("Log started for: %s" % comment)
+            comment = "Scan (and update) of " + institution + "\'s collection from %s" % i.url
+            self._log(u"Log started for: %s" % unicode(comment))
             print comment
 
             print("Getting information about collections...")
-            collections = itunes.get_institution_collections(url)
+            collections = itunes.get_institution_collections(i)
             print("Processing collection information and scanning individual items...")
             collections_spotted = []
             items_spotted = []
@@ -76,26 +78,6 @@ class Command(BaseCommand):
                 if c:
 #                    for k in c.keys():
 #                        print(k + ': ' + c[k])
-
-                    #Check if this collection's institution exists - if not, create it.
-                    i = ItuInstitution(name=c['institution'], itu_id=int(c['institution_id']), url=c['institution_url'])
-                    i_exists = False
-                    for saved_i in ItuInstitution.objects.all():
-                        if int(i.itu_id) == int(saved_i.itu_id) or i.name==saved_i.name or i.url==saved_i.url:
-                            if int(i.itu_id) == int(saved_i.itu_id) and i.name==saved_i.name and i.url==saved_i.url:
-                                i_exists = True
-                                i = saved_i
-                            else:
-                                i_exists = True
-                                print('Updating institution ' + i.name)
-                                saved_i.itu_id = i.itu_id
-                                saved_i.name = i.name
-                                saved_i.url = i.url
-                                saved_i.save()
-                                i = saved_i
-                    if i_exists==False:
-                        print('Creating new institution ' + i.name)
-                        i.save()
 
                     #Check if this collection's genre exists - if not, create it.
                     g = ItuGenre(name=c['genre'], itu_id=int(c['genre_id']), url=c['genre_url'])
@@ -105,7 +87,7 @@ class Command(BaseCommand):
                             g_exists = True
                             g = saved_g
                     if g_exists==False:
-                        print('Creating new genre ' + g.name)
+                        self._log(u'Created new genre ' + unicode(g.name))
                         g.save()
 
                     cr = ItuCollection(institution=i)
@@ -154,7 +136,7 @@ class Command(BaseCommand):
                         else:
                             cr.save()
                             cp.itucollection = cr
-                        print('Creating new historical collection record for ' + cp.name + ', version ' + str(cp.version))
+                        self._log(u'Created new historical collection record for ' + unicode(cp.name) + u', version ' + unicode(cp.version))
                         cp.save()
 
                         ratings = c['ratings']
@@ -165,7 +147,7 @@ class Command(BaseCommand):
                                                itucollectionhistorical=cp,)
                                 rating.save()
                             except:
-                                print('WARNING: Failed to save rating.')
+                                self._log(u'WARNING: Failed to save rating.')
 
                     comments = c['comments']
                     for comment in comments:
@@ -184,9 +166,9 @@ class Command(BaseCommand):
                                         source=comment['source'],
                                     )
                                     new_comment.save()
-                                    print('Saving new comment by ' + new_comment.source + ': \"' + new_comment.detail + '\".')
+                                    self._log(u'Saved new comment by ' + unicode(new_comment.source) + u': \"' + unicode(new_comment.detail) + u'\".')
                                 except:
-                                    print('WARNING: Failed to save comment.')
+                                    self._log(u'WARNING: Failed to save comment.')
 
                     collections_spotted.append(cp)
 
@@ -200,33 +182,39 @@ class Command(BaseCommand):
                                 item['duration'] = int(item['duration'])
                             else:
                                 item['duration'] = None
-                            itemp = ItuItemHistorical(name=item['songName'],
-                                                    itu_id=item['itemId'],
-                                                    url=item['url'],
-                                                    artist_name=item['artistName'],
-                                                    description=item['description'],
-                                                    duration=item['duration'],
-                                                    explicit=bool(item['explicit']),
-                                                    feed_url=item['feedURL'],
-                                                    file_extension=item['fileExtension'],
-                                                    kind=item['kind'],
-                                                    long_description=item['longDescription'],
-                                                    playlist_id=int(item['playlistId']),
-                                                    playlist_name=item['playlistName'],
-                                                    popularity=float(item['popularity']),
-                                                    preview_length=int(item['previewLength']),
-                                                    preview_url=item['previewURL'],
-                                                    rank=int(item['rank']),
-                                                    release_date=parse(item['releaseDate'],ignoretz=True),
-                                                    missing=None,
-                                                    version=1,
-                                                    previous=None,
-                                                    ituitem=itemr,
-                                                    institution=i,
-                                                    genre=g,
-                                                    scanlog=scanlog,
-                                                    series=cp,
-                                                    )
+                            if 'songName' not in item.keys():
+                                item['songName'] = item['playlistName'] + ' ' + str(item['rank']) + ' {UNKNOWN NAME}'
+                            try:
+                                itemp = ItuItemHistorical(name=item['songName'],
+                                                        itu_id=item['itemId'],
+                                                        url=item['url'],
+                                                        artist_name=item['artistName'],
+                                                        description=item['description'],
+                                                        duration=item['duration'],
+                                                        explicit=bool(item['explicit']),
+                                                        feed_url=item['feedURL'],
+                                                        file_extension=item['fileExtension'],
+                                                        kind=item['kind'],
+                                                        long_description=item['longDescription'],
+                                                        playlist_id=int(item['playlistId']),
+                                                        playlist_name=item['playlistName'],
+                                                        popularity=float(item['popularity']),
+                                                        preview_length=int(item['previewLength']),
+                                                        preview_url=item['previewURL'],
+                                                        rank=int(item['rank']),
+                                                        release_date=parse(item['releaseDate'],ignoretz=True),
+                                                        missing=None,
+                                                        version=1,
+                                                        previous=None,
+                                                        ituitem=itemr,
+                                                        institution=i,
+                                                        genre=g,
+                                                        scanlog=scanlog,
+                                                        series=cp,
+                                                        )
+                            except KeyError:
+                                raise CommandError('Mising key when trying to create an ItuItemHistorical. item=' + str(item))
+
                             #Put together a list of saved itemps that look like they're the same as our itemp, really.
                             similar_itemps = []
                             itemp_exists = False
@@ -253,71 +241,88 @@ class Command(BaseCommand):
                                 else:
                                     itemr.save()
                                     itemp.ituitem = itemr
-                                print('Creating new historical item record for ' + itemp.name + ', version ' + str(itemp.version))
+                                self._log(u'Created new historical item record for ' + unicode(itemp.name) + u', version ' + unicode(itemp.version))
                                 itemp.save()
                             items_spotted.append(itemp)
                         else:
-                            print('WARNING: Blank item - perhaps we couldn\'t download the appropriate page?')
+                            self._log(u'WARNING: Blank item - perhaps we couldn\'t download the appropriate page?')
                 else:
-                    print('WARNING: Blank category - perhaps we couldn\'t download the appropriate page?') #TODO: Find the mystery bug that causes pages to fail to download.
+                    self._log(u'WARNING: Blank category - perhaps we couldn\'t download the appropriate page?') #TODO: Find the mystery bug that causes pages to fail to download.
             print("Checking whether anything has gone missing or reappeared...")
-            institution = ItuInstitution.objects.filter(name=collections[0]['institution'])[0]
+            if collections:
+                institution = ItuInstitution.objects.filter(name=collections[0]['institution'])[0]
+            else:
+                self._log(u"WARNING: No collections found. Perhaps you scanned an instiution that only publishes courses?")
             for h in ItuCollectionHistorical.objects.all():
                 if h.institution == institution:
                     if h == h.latest():
                         if h not in collections_spotted and h.missing == None:
-                            print(h.name + " appears to have gone missing! We last saw it at " + str(h.scanlog.time))
+                            self._log(unicode(h.name) + u" appears to have gone missing! We last saw it at " + unicode(h.scanlog.time))
                             h.missing = scanlog
                             h.save()
                         elif h in collections_spotted and h.missing:
-                            print(h.name + " has reappeared! It went missing at" + str(h.missing.time))
+                            self._log(unicode(h.name) + u" has reappeared! It went missing at" + unicode(h.missing.time))
                             h.missing = None
                             h.save()
             for h in ItuItemHistorical.objects.all():
                 if h.institution == institution:
                     if h == h.latest():
                         if h not in items_spotted and h.missing == None:
-                            print(h.name + " appears to have gone missing! We last saw it at " + str(h.scanlog.time))
+                            self._log(unicode(h.name) + u" appears to have gone missing! We last saw it at " + unicode(h.scanlog.time))
                             h.missing = scanlog
                             h.save()
                         elif h in items_spotted and h.missing:
-                            print(h.name + " has reappeared! It went missing at" + str(h.missing.time))
+                            self._log(unicode(h.name) + u" has reappeared! It went missing at" + unicode(h.missing.time))
                             h.missing = None
                             h.save()
         elif mode == 2:
             comment = "Scan of the Top Collections Chart..."
-            self._errorlog("Log started for: %s" % comment)
-            print comment
+            self._log(u"Log started for: %s" % unicode(comment))
+            updated_institutions = False
             collections = itunes.get_topcollections()
             for c in collections:
                 if c:
                     historical_collections=ItuCollectionHistorical.objects.filter(url=c['series_url'])
+                    if not historical_collections:
+                        self._log(u'WARNING: Couldn\'t find an historical record of collection at ' + unicode(c['series_url']) + u'. Attempting an historical scan of ' + unicode(c['institution']) + u' first...')
+                        if not updated_institutions:
+                            management.call_command('scan_itunes', mode=4)
+                            updated_institutions = True
+                        management.call_command('scan_itunes', c['institution'], mode=1)
+                        historical_collections=ItuCollectionHistorical.objects.filter(url=c['series_url'])
                     if historical_collections:
                         historical_collection=historical_collections[0].latest()
-                        print('Creating new chart row: ' + historical_collection.name + ' Position: ' + str(c['chart_position']))
+                        self._log(u'Creating new chart row: ' + unicode(historical_collection.name) + u' Position: ' + unicode(c['chart_position']))
                         chartrow=ItuCollectionChartScan(position=int(c['chart_position']),itucollection=historical_collection.itucollection,itucollectionhistorical=historical_collection,scanlog=scanlog,date=scanlog.time)
                         chartrow.save()
                     else:
-                        print('WARNING: Couldn\'t find an historical record of collection at ' + c['series_url'] + '. Perhaps do an historical scan of ' + c['institution'] + ' first?')
+                        self._errorlog(u'Couldn\'tfind an historical record of collection at ' + unicode(c['series_url']) + u' despite updating the database. This is a bug.')
 
         elif mode == 3:
             comment = "Scan of the Top Downloads Chart..."
-            self._errorlog("Log started for: %s" % comment)
-            print comment
+            self._log(u"Log started for: %s" % unicode(comment))
+            updated_institutions = False
             items = itunes.get_topdownloads()
             for i in items:
                 if i:
                     historical_items=ItuItemHistorical.objects.filter(name=i['item'])
+                    if not historical_items:
+                        self._log(u'WARNING: Couldn\'t find an historical record of item at ' + unicode(i['item_url']) + u'. Attempting an historical scan of ' + unicode(i['institution']) + u' first...')
+                        if not updated_institutions:
+                            management.call_command('scan_itunes', mode=4)
+                            updated_institutions = True
+                        management.call_command('scan_itunes', i['institution'], mode=1)
+                        historical_items=ItuItemHistorical.objects.filter(name=i['item'])
                     if historical_items:
                         historical_item=historical_items[0].latest()
-                        print('Creating new download chart row: ' + historical_item.name + ' Position: ' + str(i['chart_position']))
+                        self._log(u'Created new download chart row: ' + unicode(historical_item.name) + u' Position: ' + unicode(i['chart_position']))
                         chartrow=ItuItemChartScan(position=int(i['chart_position']),ituitem=historical_item.ituitem,ituitemhistorical=historical_item,scanlog=scanlog,date=scanlog.time)
                         chartrow.save()
                     else:
-                        print('WARNING: Couldn\'t find an historical record of item at ' + i['item_url'] + '. Perhaps do an historical scan of ' + i['institution'] + ' first?')
+                        self._errorlog(u'WARNING: Couldn\'t find an historical record of item at ' + unicode(i['item_url']) + u' despite updating the database. This is a bug.')
         elif mode == 4:
             comment = "Scan of list of institutions..."
-            self._errorlog("Log started for: %s" % comment)
+            self._log(u"Log started for: %s" % unicode(comment))
             print comment
             institutions = itunes.get_institutions()
             for i in institutions:
@@ -342,17 +347,15 @@ class Command(BaseCommand):
                                 saved_i.url = institution.url
                                 institution = saved_i
                     if need_update:
-                        print('Updating institution ' + institution.name)
+                        self._log(u'Updated institution ' + unicode(institution.name))
                         institution.save()
                     elif need_create:
-                        print('Creating new institution ' + institution.name)
+                        self._log(u'Created new institution ' + unicode(institution.name))
                         institution.save()
 
 
         else:
-            comment = "We shouldn't ever get this scan..."
-            print comment
-
+            self._errorlog(u"We shouldn't ever get this scan...")
 
         print "\nScan iTunes finished at " + str(datetime.datetime.utcnow())
 
@@ -388,7 +391,8 @@ class Command(BaseCommand):
     def _debug(self,error_str):
         "Basic optional debug function. Print the string if enabled"
         if self.debug:
-            print 'DEBUG:' + str(error_str) + '\n'
+            print(unicode(datetime.datetime.utcnow()) + u': ' + u'DEBUG:' + unicode(error_str) + u'\n')
+            self._error_log_save()
         return None
 
 
@@ -396,29 +400,37 @@ class Command(BaseCommand):
         "Write errors to a log file"
         # sys.stderr.write('ERROR:' + str(error_str) + '\n')
         #self.error_log.write('ERROR:' + str(error_str) + '\n')
-        self.error_cache += 'ERROR:' + str(error_str) + '\n'
+        self.error_cache += u'ERROR:' + unicode(error_str) + u'\n'
+        print(unicode(datetime.datetime.utcnow()) + u': ' + u'ERROR: ' + unicode(error_str) + u'\n')
+        self._error_log_save()
+        return None
+
+    def _log(self,error_str):
+        "Write things that aren't errors to a log file"
+        self.error_cache += unicode(datetime.datetime.utcnow()) + u': ' + unicode(error_str) + u'\n'
+        print(unicode(error_str))
         return None
 
 
     def _errorlog_start(self, path_to_file):
         try:
-            self.error_log = open(path_to_file,'a')
+            self.error_log = codecs.open(path_to_file,'a', encoding='utf-8')
         except IOError:
             sys.stderr.write("WARNING: Could not open existing error file. New file being created")
-            self.error_log = open(path_to_file,'w')
+            self.error_log = codecs.open(path_to_file,'w', encoding='utf-8')
 
-        self.error_log.write("Log started at " + str(datetime.datetime.utcnow()) + "\n")
+        self.error_log.write(u"Log started at " + unicode(datetime.datetime.utcnow()) + u"\n")
         print "Writing errors to: " + path_to_file
         return None
 
     def _error_log_save(self):
         "Write errors to a log file"
         self.error_log.write(self.error_cache)
-        self.error_cache = ""
+        self.error_cache = u""
         return None
 
 
     def _errorlog_stop(self):
-        self.error_log.write("Log ended at " + str(datetime.datetime.utcnow()) + "\n")
+        self.error_log.write(u"Log ended at " + unicode(datetime.datetime.utcnow()) + u"\n")
         self.error_log.close()
         return None

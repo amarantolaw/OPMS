@@ -1,4 +1,5 @@
 from __future__ import print_function
+from django.core.management.base import BaseCommand, CommandError
 import urllib2, plistlib
 from xml.parsers import expat
 from lxml import etree, html
@@ -93,17 +94,18 @@ def write_page(url, language = 1, filename=''):
 
 def get_institutions():
     institutions = []
-    url = 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewiTunesUProviders?id=EDU'
-    xml = clean_html(get_page(url,12)).replace('class="badge"></a>','class="badge"/></a>').replace('Choose Store">','Choose Store"/>')
-    root = etree.fromstring(xml)
-    items = root.xpath('/div/body/div/div/div/div/div/div/ul/li/a')
-    print(str(len(items)) + ' items found.')
-    for item in items: # Now have a mix of HBoxViews and Views, around 100 of each...
-        item_dict = {}
-        item_dict['text'] = smart_unicode(item.text)
-        item_dict['url'] = item.get('href')
-        item_dict['itu_id'] = item_dict['url'].split('id=')[1]
-        institutions.append(item_dict)
+    for url in ('http://itunes.apple.com/WebObjects/DZR.woa/wa/viewiTunesUProviders?id=EDU','http://itunes.apple.com/WebObjects/DZR.woa/wa/viewiTunesUProviders?id=ORG','http://itunes.apple.com/WebObjects/DZR.woa/wa/viewiTunesUProviders?id=K12'): #Handle three pages of institutions: "Universities & Colleges", "Beyond Campus" and "K-12"
+        #Throw away lots of junk, and make sure all the tags are properly closed.
+        xml = clean_html(get_page(url,12)).replace('class="badge"></a>','class="badge"/></a>').replace('Choose Store">','Choose Store"/>')
+        root = etree.fromstring(xml)
+        items = root.xpath('/div/body/div/div/div/div/div/div/ul/li/a')
+        print(str(len(items)) + ' items found.')
+        for item in items: # Now have a mix of HBoxViews and Views, around 100 of each...
+            item_dict = {}
+            item_dict['text'] = smart_unicode(item.text)
+            item_dict['url'] = item.get('href')
+            item_dict['itu_id'] = item_dict['url'].split('id=')[1]
+            institutions.append(item_dict)
     return institutions
 
 # Get Collection info
@@ -269,23 +271,59 @@ def get_topcollections():
 #url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=13&mt=10"
 #url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=14&mt=10" # For a 15 page result, batchNumber 14 is last call
 
-def get_institution_collections(url):
+def get_institution_collections(i):
     collections = []
-    xml = get_page(url)
-    root = etree.fromstring(xml)
-    items = root.xpath('.//itms:MatrixView/itms:VBoxView/itms:TextView/itms:SetFontStyle/itms:GotoURL',
-                       namespaces={'itms':'http://www.apple.com/itms/'})
-    for i,item in enumerate(items): # Now have a mix of HBoxViews and Views, around 100 of each...
-        #print item.text.lower().strip()
-#        print(item.get('url'))
-        if not item.text.lower().strip().startswith('category'):
-            collections.append(get_collection_info(item.get('url')))
-
-    items = root.xpath('.//itms:VBoxView/itms:VBoxView/itms:VBoxView/itms:HBoxView/itms:VBoxView/itms:GotoURL/itms:PictureButtonView[@alt="next page"]/../@url',namespaces={'itms':'http://www.apple.com/itms/'}) # Looking for the follow on page links...
-    if len(items) == 1:
-        next_page_url = items[0]
-#        print 'Next URL is: %s' % next_page_url
-        collections = collections + get_institution_collections(next_page_url)
+#    try:
+#        url = i.url
+#        next_page = True
+#        while next_page:
+#            xml = get_page(url)
+#            if not xml:
+#                raise ValueError("Empty page at " + url)
+#            root = etree.fromstring(xml)
+#            items = root.xpath('.//itms:MatrixView/itms:VBoxView/itms:TextView/itms:SetFontStyle/itms:GotoURL',
+#                               namespaces={'itms':'http://www.apple.com/itms/'})
+#            if not items:
+#                raise ValueError("No collections found at " + url)
+#            for i,item in enumerate(items): # Now have a mix of HBoxViews and Views, around 100 of each...
+#                #print item.text.lower().strip()
+#                #print(item.get('url'))
+#                if not item.text.lower().strip().startswith('category'):
+#                    collection = get_collection_info(item.get('url'))
+#                    if collection:
+#                        collections.append(collection)
+#
+#            items = root.xpath('.//itms:VBoxView/itms:VBoxView/itms:VBoxView/itms:HBoxView/itms:VBoxView/itms:GotoURL/itms:PictureButtonView[@alt="next page"]/../@url',namespaces={'itms':'http://www.apple.com/itms/'}) # Looking for the follow on page links...
+#            if len(items) == 1:
+#                url = items[0]
+#            #        print 'Next URL is: %s' % url
+#            else:
+#                next_page = False
+#    except ValueError: #Institutions with courses give a ValueError, so we have to use a different method to get the links to their collection pages.
+    try:
+        page = 1
+        added_collections = True
+        while added_collections:
+            url = 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=' + str(i.itu_id) + '&page=' + str(page)
+    #            print(xml)
+            xml = get_page(url,12)
+            if xml:
+                #Throw away lots of junk, and make sure all the tags are properly closed.
+                xml = clean_html(xml).replace('png"></div>','png"/></div>').replace('<img width="30" height="30" alt="My Store: United Kingdom, Choose Store"></a>','<img width="30" height="30" alt="My Store: United Kingdom, Choose Store"/></a>')
+                root = etree.fromstring(xml)
+                items = root.xpath('/div/body/div/div/div/div/div/div/ul/li[@class="name"]/a')
+                if not items:
+                    added_collections = False
+                for item in items:
+                    print(item.text)
+                    collection = get_collection_info(item.get('href'))
+                    if collection:
+                        collections.append(collection)
+                page += 1
+            else:
+                added_collections = False
+    except:
+        raise CommandError("Failed to parse XML.")
     return collections
 
 

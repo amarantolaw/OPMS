@@ -13,7 +13,6 @@ class URLMonitorURLAdmin(admin.ModelAdmin):
 
 admin.site.register(URLMonitorURL, URLMonitorURLAdmin)
 
-admin.site.register(ItuInstitution)
 admin.site.register(ItuComment)
 
 
@@ -77,3 +76,5 @@ class ItuGenreAdmin(admin.ModelAdmin):
     inlines = [ItuCollectionHistoricalInline]
 
 admin.site.register(ItuGenre, ItuGenreAdmin)
+
+admin.site.register(ItuInstitution)
