@@ -5,6 +5,7 @@ from xml.parsers import expat
 from lxml import etree, html
 from lxml.html.clean import *
 from dateutil.parser import *
+import datetime
 from django.utils.encoding import smart_unicode
 
 
@@ -119,7 +120,7 @@ def get_collection_info(url):
     except AttributeError: # If there's no URL, skip this link
         return info
     if xml == None:
-        return info
+        return get_collection_info_arty(url)
     root = etree.fromstring(xml)
 
     #Detect whether any of the items is a movie. If so, set contains_movies to True for this collection.
@@ -171,8 +172,8 @@ def get_collection_info(url):
     info['comments'] = []
 #    try:
     review_url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?pageNumber=0&type=Podcast&id=' + str(info['series_id']) #This page (unlike the first) contains the complete text of longer, more interesting, comments.
-    review_xml = get_page(review_url)
-    xmls = review_xml.split('<View rightInset=\"0\" topInset=\"10\" bottomInset=\"15\" leftInset=\"10\" height=\"1\" stretchiness=\"1\" backColor=\"4c6d99\"></View>')
+    review_xml = unicode(get_page(review_url), encoding='utf-8', errors='replace')
+    xmls = review_xml.split(u'<View rightInset=\"0\" topInset=\"10\" bottomInset=\"15\" leftInset=\"10\" height=\"1\" stretchiness=\"1\" backColor=\"4c6d99\"></View>')
     xmls[0] = ''
     xmls[len(xmls) - 1] = ''
     for x in xmls:
@@ -180,14 +181,106 @@ def get_collection_info(url):
             try:
                 try:
                     try: #Necessary to deal with anonymous reviews...
-                        source = x.split('<b>')[3].split('</b>')[0].split('\n')[1].split('  ')[-1]
-                        date = parse(x.split('</GotoURL>')[3].split('</SetFontStyle>')[0].split('\n')[3].split('  ')[-1]).date()
+                        source = x.split(u'<b>')[3].split(u'</b>')[0].split(u'\n')[1].split(u'  ')[-1]
+                        date = parse(x.split(u'</GotoURL>')[3].split(u'</SetFontStyle>')[0].split(u'\n')[3].split(u'  ')[-1]).date()
                     except:
-                        source = 'Anonymous'
+                        source = u'Anonymous'
                         date = None
-                    detail = x.split('<SetFontStyle normalStyle=\"textColor\">')[4].split('</SetFontStyle>')[0].replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&#39;", "'").replace('&quot;', '"').replace("&#34;", "\"")
-                    rating = int(x.split('<HBoxView topInset="1" alt=\"')[1].split(' star')[0])
+                    detail = x.split(u'<SetFontStyle normalStyle=\"textColor\">')[4].split(u'</SetFontStyle>')[0].replace(u"&amp;", u"&").replace(u"&lt;", u"<").replace(u"&gt;", u">").replace(u"&#39;", u"'").replace(u'&quot;', u'"').replace(u"&#34;", u"\"")
+                    rating = int(x.split(u'<HBoxView topInset="1" alt=\"')[1].split(u' star')[0])
                         #            print('Source: ' + source + ' date: ' + str(date) + ' detail: ' + detail + ' rating: ' + rating + '*')
+                    info['comments'].append({'source': source, 'date': date, 'detail': detail, 'rating': rating})
+                except:
+                    print("WARNING: Failed to parse comment XML properly when scanning " + review_url)
+            except:
+                print('WARNING: Couldn\'t get reviews.')
+
+    return info
+
+def get_collection_info_arty(url): #Workaround for pages (typically related to drawing and painting...) which don't work with lang=1 or lang=12. This is non-ideal, but better than nothing.
+    # print "get_collection_info(%s) called" % url
+    info = {}
+    try:
+        xml = get_page(url,17)
+    except ValueError: # If there's a bad URL, skip this link
+        return info
+    except AttributeError: # If there's no URL, skip this link
+        return info
+    if xml == None:
+        return info
+    xml = clean_html(xml).replace('png">','png"/>').replace('Store">','Store"/>')
+    root = etree.fromstring(xml)
+
+    #Detect whether any of the items is a movie. If so, set contains_movies to True for this collection.
+    items = root.xpath('/div/body/div/div/div/div/div/div/table/tbody/tr/td/span/span/span')
+    contains_movies=False
+    for i, item in enumerate(items):
+        if item.text == 'Video':
+            contains_movies=True
+    info['contains_movies']=contains_movies
+
+    info['language'] = "Unknown"
+    info['genre'] = "Unknown"
+    for li in root.xpath('/div/body/div/div/div/div/ul/li'):
+        found_genre = False
+        found_language = False
+        for text_extract in li.itertext(): #Get round a nasty <span> which masks the text to its right...
+            if found_language:
+                info['language'] = text_extract
+            elif found_genre:
+                info['genre'] = text_extract
+            elif text_extract == 'Category: ':
+                found_genre = True
+            elif text_extract == 'Language: ':
+                found_language = True
+
+    info['genre_url'] = "Unkown"
+    info['genre_id'] = 666
+    info['institution'] = root.xpath('/div/body/div/div/ul/li/a')[1].text
+    info['institution_url'] = root.xpath('/div/body/div/div/ul/li/a')[1].get("href")
+    info['institution_id'] = info['institution_url'].split('/id')[len(info['institution_url'].split('/id')) - 1]
+    info['series'] = root.xpath('/div/body/div/div/div/div/div/h1/a')[0].text
+    info['series_url'] = root.xpath('/div/body/div/div/div/div/div/h1/a')[0].get("href")
+    info['series_id'] = info['series_url'].split('/id')[len(info['series_url'].split('/id')) - 1]
+    info['series_img_170'] = root.xpath('/div/body/div/div/div/div/a/div/img')[0].get("src")
+
+    info['last modified'] = str(datetime.date(1970,1,1))
+#    for i in items:
+#        try:
+#            k,v = i.text.strip().split(":")
+#            info[k.lower()] = v.strip()
+#        except ValueError:
+#            pass
+
+#    items = root.xpath('.//itms:VBoxView/itms:MatrixView[@columnFormat="*,*,*"]/itms:VBoxView/itms:HBoxView',
+#        namespaces={'itms':'http://www.apple.com/itms/'})
+    info['ratings'] = []
+#    for i in items:
+#        rating_text = i.get("alt")
+#        stars = int(rating_text.split(', ')[0].split(' ')[0])
+#        count = int(rating_text.split(', ')[-1].split(' ')[0])
+#        info['ratings'].append({'stars': stars, 'count': count})
+
+    info['comments'] = []
+    #    try:
+    review_url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?pageNumber=0&type=Podcast&id=' + str(info['series_id']) #This page (unlike the first) contains the complete text of longer, more interesting, comments.
+    review_xml = unicode(get_page(review_url), encoding='utf-8', errors='replace')
+    xmls = review_xml.split(u'<View rightInset=\"0\" topInset=\"10\" bottomInset=\"15\" leftInset=\"10\" height=\"1\" stretchiness=\"1\" backColor=\"4c6d99\"></View>')
+    xmls[0] = ''
+    xmls[len(xmls) - 1] = ''
+    for x in xmls:
+        if x:
+            try:
+                try:
+                    try: #Necessary to deal with anonymous reviews...
+                        source = x.split(u'<b>')[3].split(u'</b>')[0].split(u'\n')[1].split(u'  ')[-1]
+                        date = parse(x.split(u'</GotoURL>')[3].split(u'</SetFontStyle>')[0].split(u'\n')[3].split(u'  ')[-1]).date()
+                    except:
+                        source = u'Anonymous'
+                        date = None
+                    detail = x.split(u'<SetFontStyle normalStyle=\"textColor\">')[4].split(u'</SetFontStyle>')[0].replace(u"&amp;", u"&").replace(u"&lt;", u"<").replace(u"&gt;", u">").replace(u"&#39;", u"'").replace(u'&quot;', u'"').replace(u"&#34;", u"\"")
+                    rating = int(x.split(u'<HBoxView topInset="1" alt=\"')[1].split(u' star')[0])
+                    #            print('Source: ' + source + ' date: ' + str(date) + ' detail: ' + detail + ' rating: ' + rating + '*')
                     info['comments'].append({'source': source, 'date': date, 'detail': detail, 'rating': rating})
                 except:
                     print("WARNING: Failed to parse comment XML properly when scanning " + review_url)
@@ -330,15 +423,34 @@ def get_institution_collections(i):
 def get_collection_items(url):
     try:
         xml = get_page(url)
+        lang = 1
     except ValueError: # If there's a bad URL, skip this link
         return None
-    if xml == None:
-        return None
-    root = etree.fromstring(xml)
     # Get the tracklisting for this collection
-    items = root.xpath('.//itms:TrackList',namespaces={'itms':'http://www.apple.com/itms/'})
+    if xml:
+        root = etree.fromstring(xml)
+        items = root.xpath('.//itms:TrackList',namespaces={'itms':'http://www.apple.com/itms/'})
+    else:
+        try:
+            xml = get_page(url,2)
+            lang = 2
+        except ValueError: # If there's a bad URL, skip this link
+            return None
+        if xml:
+            root = etree.fromstring(xml)
+            items = root.xpath('.')
+        else:
+            return None
     plist = plistlib.readPlistFromString(etree.tostring(items[0]))
-    return plist.get('items')
+    if lang == 2:
+        tobereturned = plist.get('items')
+        tobereturned_norubbish = []
+        for i in tobereturned:
+            if i['type'] == 'podcast-episode':
+                tobereturned_norubbish.append(i)
+        return tobereturned_norubbish
+    else:
+        return plist.get('items')
 
 
 # Get data about a single collection, in this instance Critical Reasoning for Begineers (Audio)

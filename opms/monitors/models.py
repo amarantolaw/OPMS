@@ -81,7 +81,7 @@ class ItuScanLog(models.Model):
 
 class ItuGenre(models.Model):
     name = models.CharField(max_length=255)
-    itu_id = models.IntegerField("iTunes U ID")
+    itu_id = models.IntegerField("iTunes U ID") #666 codes for unknown.
     url = models.URLField()
 
     class Meta:
@@ -266,7 +266,7 @@ class ItuItemHistorical(models.Model):
         n = self.next()
         while n:
             l = n
-            n = l.next
+            n = l.next()
         return l
 
     class Meta:

@@ -53,7 +53,7 @@ class Command(BaseCommand):
                """)
 
         scantime = datetime.datetime.now()
-        print "Scan iTunes started at " + str(datetime.datetime.utcnow()) + "\n"
+        print "Scan iTunes started at " + str(scantime) + "\n"
         # Create an error log
         self._errorlog_start('scan_itunes.log')
 
@@ -64,8 +64,8 @@ class Command(BaseCommand):
             try:
                 i = ItuInstitution.objects.filter(name=institution)[0]
             except:
-                raise CommandError(institution + "is not a recognised institution.")
-            comment = "Scan (and update) of " + institution + "\'s collection from %s" % i.url
+                raise CommandError(institution + u" is not a recognised institution.")
+            comment = u"Scan (and update) of " + institution + u"\'s collection from %s" % i.url
             self._log(u"Log started for: %s" % unicode(comment))
             print comment
 
@@ -177,14 +177,14 @@ class Command(BaseCommand):
                     for item in items:
                         if item:
                             itemr = ItuItem(institution=i)
-                            #Deal with things with no duration (like PDFs...)
-                            if 'duration' in item.keys():
-                                item['duration'] = int(item['duration'])
-                            else:
-                                item['duration'] = None
-                            if 'songName' not in item.keys():
-                                item['songName'] = item['playlistName'] + ' ' + str(item['rank']) + ' {UNKNOWN NAME}'
                             try:
+                                #Deal with things with no duration (like PDFs...)
+                                if 'duration' in item.keys():
+                                    item['duration'] = int(item['duration'])
+                                else:
+                                    item['duration'] = None
+                                if 'songName' not in item.keys():
+                                    item['songName'] = item['playlistName'] + ' ' + str(item['rank']) + ' {UNKNOWN NAME}'
                                 itemp = ItuItemHistorical(name=item['songName'],
                                                         itu_id=item['itemId'],
                                                         url=item['url'],
@@ -213,7 +213,41 @@ class Command(BaseCommand):
                                                         series=cp,
                                                         )
                             except KeyError:
-                                raise CommandError('Mising key when trying to create an ItuItemHistorical. item=' + str(item))
+                                try:
+                                    duration = 0
+                                    feedurl = ""
+                                    for offerkey in item['store-offers'].keys():
+                                        duration = item['store-offers'][offerkey]['duration']
+                                        feedurl = item['store-offers'][offerkey]['asset-url']
+                                    itemp = ItuItemHistorical(name=item['title'],
+                                        itu_id=item['item-id'],
+                                        url=item['url'],
+                                        artist_name=item['artist-name'],
+                                        description=item['description'],
+                                        duration=duration,
+                                        explicit=False,
+                                        feed_url=feedurl,
+                                        file_extension=feedurl.split('.')[-1],
+                                        kind='unknown',
+                                        long_description=item['long-description'],
+                                        playlist_id=cp.id,
+                                        playlist_name=cp.name,
+                                        popularity=0.0,
+                                        preview_length=0,
+                                        preview_url='unknown',
+                                        rank=int(item['track-number']),
+                                        release_date=item['release-date'],
+                                        missing=None,
+                                        version=1,
+                                        previous=None,
+                                        ituitem=itemr,
+                                        institution=i,
+                                        genre=g,
+                                        scanlog=scanlog,
+                                        series=cp,
+                                    )
+                                except KeyError:
+                                    raise CommandError('Missing key when trying to create an ItuItemHistorical. item=' + str(item))
 
                             #Put together a list of saved itemps that look like they're the same as our itemp, really.
                             similar_itemps = []
@@ -247,7 +281,7 @@ class Command(BaseCommand):
                         else:
                             self._log(u'WARNING: Blank item - perhaps we couldn\'t download the appropriate page?')
                 else:
-                    self._log(u'WARNING: Blank category - perhaps we couldn\'t download the appropriate page?') #TODO: Find the mystery bug that causes pages to fail to download.
+                    self._log(u'WARNING: Blank category - perhaps we couldn\'t download the appropriate page?')
             print("Checking whether anything has gone missing or reappeared...")
             if collections:
                 institution = ItuInstitution.objects.filter(name=collections[0]['institution'])[0]
@@ -288,7 +322,19 @@ class Command(BaseCommand):
                         if not updated_institutions:
                             management.call_command('scan_itunes', mode=4)
                             updated_institutions = True
-                        management.call_command('scan_itunes', c['institution'], mode=1)
+                        try:
+                            management.call_command('scan_itunes', c['institution'], mode=1)
+                        except:
+                            try: #Deal with institutions which aren't listed by Apple.
+                                institution = ItuInstitution(
+                                    name = c['institution'],
+                                    itu_id = int(c['institution_id']),
+                                    url = c['institution_url'],
+                                )
+                                institution.save()
+                                management.call_command('scan_itunes', c['institution'], mode=1)
+                            except:
+                                self._errorlog('Failed to scan institution ' + c['institution'] + '. Perhaps this institution isn\'t listed by Apple?')
                         historical_collections=ItuCollectionHistorical.objects.filter(url=c['series_url'])
                     if historical_collections:
                         historical_collection=historical_collections[0].latest()
@@ -296,7 +342,7 @@ class Command(BaseCommand):
                         chartrow=ItuCollectionChartScan(position=int(c['chart_position']),itucollection=historical_collection.itucollection,itucollectionhistorical=historical_collection,scanlog=scanlog,date=scanlog.time)
                         chartrow.save()
                     else:
-                        self._errorlog(u'Couldn\'tfind an historical record of collection at ' + unicode(c['series_url']) + u' despite updating the database. This is a bug.')
+                        self._errorlog(u'Couldn\'tfind an historical record of collection at ' + unicode(c['series_url']) + u' despite updating the database.')
 
         elif mode == 3:
             comment = "Scan of the Top Downloads Chart..."
@@ -311,7 +357,19 @@ class Command(BaseCommand):
                         if not updated_institutions:
                             management.call_command('scan_itunes', mode=4)
                             updated_institutions = True
-                        management.call_command('scan_itunes', i['institution'], mode=1)
+                        try:
+                            management.call_command('scan_itunes', i['institution'], mode=1)
+                        except:
+                            try: #Deal with institutions which aren't listed by Apple.
+                                institution = ItuInstitution(
+                                    name = i['institution'],
+                                    itu_id = int(i['institution_id']),
+                                    url = i['institution_url'],
+                                )
+                                institution.save()
+                                management.call_command('scan_itunes', i['institution'], mode=1)
+                            except:
+                                self._errorlog('Failed to scan institution ' + i['institution'] + '. This is a bug.')
                         historical_items=ItuItemHistorical.objects.filter(name=i['item'])
                     if historical_items:
                         historical_item=historical_items[0].latest()
@@ -319,7 +377,7 @@ class Command(BaseCommand):
                         chartrow=ItuItemChartScan(position=int(i['chart_position']),ituitem=historical_item.ituitem,ituitemhistorical=historical_item,scanlog=scanlog,date=scanlog.time)
                         chartrow.save()
                     else:
-                        self._errorlog(u'WARNING: Couldn\'t find an historical record of item at ' + unicode(i['item_url']) + u' despite updating the database. This is a bug.')
+                        self._errorlog(u'Couldn\'t find an historical record of item at ' + unicode(i['item_url']) + u' despite updating the database.')
         elif mode == 4:
             comment = "Scan of list of institutions..."
             self._log(u"Log started for: %s" % unicode(comment))
