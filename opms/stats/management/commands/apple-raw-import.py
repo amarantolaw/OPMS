@@ -79,7 +79,7 @@ class Command(LabelCommand):
                 # This only needs setting/getting the once per call of this function
                 logfile_obj, created = self._logfile(filename, 'itu-raw')
                 if not created:
-                    err_string = "This file has already been imported: ({})".format(filename)
+                    err_string = "This file has already been imported: ({0})".format(filename)
                     debug.onscreen(err_string)
 #                    debug.errorlog_stop()
 #                    raise CommandError(err_string)
