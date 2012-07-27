@@ -349,3 +349,34 @@ def guid_detail(request, trackguid_id):
     }, context_instance=RequestContext(request))
 
 
+####
+# TEST RAW OUTPUT
+####
+#def list_daily_raw(request):
+#    raw_listing = AppleRawLogEntry.objects.raw(
+#        """
+#        SELECT date_trunc('day', timestamp) AS day, count(id) AS total, action_type
+#        FROM stats_applerawlogentry
+#        GROUP BY date_trunc('day', timestamp), action_type
+#        ORDER BY day, action_type;
+#        """
+#    )
+#    # Pivot this listing into a table on date vs action type, combining some actions to match the apple ones
+#    # Date vs Browse, Subscribe, Download, Stream, Enclosure
+#    listing = []
+#    for row in raw_listing:
+#
+#
+#
+#    AppleWeeklyTrackCount.merged.psuedo_feeds()
+#    return render_to_response('stats/apple/feeds.html',{
+#        'listing':listing
+#    }, context_instance=RequestContext(request))
+
+
+#SELECT date_trunc('day', timestamp) AS day, count(id) AS total, action_type
+#FROM stats_applerawlogentry
+#WHERE date_trunc('day', timestamp) >= '2012-01-24'
+#  AND date_trunc('day', timestamp) < '2012-01-25'
+#GROUP BY date_trunc('day', timestamp), action_type
+#ORDER BY day;

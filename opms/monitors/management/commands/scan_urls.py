@@ -4,6 +4,7 @@
 from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
 from opms.monitors.models import *
+from opms.utils import debug
 import datetime, sys, urllib2, time
 
 
@@ -24,7 +25,11 @@ class Command(LabelCommand):
         super(Command, self).__init__()
 
     def handle_label(self, comment = '', **options):
-        print "Scan URLs started at " + str(datetime.datetime.utcnow()) + "\n"
+        verbosity = int(options.get('verbosity', 0))
+        if verbosity > 1:
+            debug.DEBUG = True
+
+        print "Scan URLs started at {0}\n".format(datetime.datetime.utcnow())
 
         # Some basic checking
         if comment == '':
@@ -33,8 +38,8 @@ class Command(LabelCommand):
         iterations = int(options.get('iterations', 10))
 
         # Create an error log
-        self._errorlog_start('scan_urls.log')
-        self._errorlog("Log started for: " + comment)
+        debug.errorlog_start('scan_urls.log')
+        debug.errorlog("Log started for: " + comment)
 
         t = URLMonitorTask()
         t.comment = str(comment)
@@ -55,15 +60,17 @@ class Command(LabelCommand):
                     s.time_of_request = datetime.datetime.utcnow()
                 s.save()
                 count += 1
-        out_str = str(count-1) + " scans performed (" + str(iterations) + " iterations of " + str(len(targets)) + " urls)"
+        out_str = "{0} scans performed ({1} iterations of {2} urls)".format(count-1, iterations, len(targets))
         print out_str
-        self._errorlog(out_str)
+        debug.errorlog(out_str)
+        
+        t.completed = True
+        t.save()
 
         print "\nScan URLs finished at " + str(datetime.datetime.utcnow())
 
         # Write the error cache to disk
-        self._error_log_save()
-        self._errorlog_stop()
+        debug.errorlog_stop()
 
         return None
 
@@ -80,46 +87,5 @@ class Command(LabelCommand):
         output = request.read()
         status = 200 # Presumed because there would be an error otherwise
         ttlb = time.time() - start
-        print str(time_of_request) + ":" + url + " - TTFB=" + str(ttfb) + " - TTLB=" + str(ttlb)
+        debug.onscreen("{0}:{1} - TTFB={2} - TTLB={3}".format(time_of_request, url, ttfb, ttlb))
         return status, time_of_request, ttfb, ttlb
-
-
-    # DEBUG AND INTERNAL HELP METHODS ==============================================================
-
-    def _debug(self,error_str):
-        "Basic optional debug function. Print the string if enabled"
-        if self.debug:
-            print 'DEBUG:' + str(error_str) + '\n'
-        return None
-
-
-    def _errorlog(self,error_str):
-        "Write errors to a log file"
-        # sys.stderr.write('ERROR:' + str(error_str) + '\n')
-        #self.error_log.write('ERROR:' + str(error_str) + '\n')
-        self.error_cache += 'ERROR:' + str(error_str) + '\n'
-        return None
-
-
-    def _errorlog_start(self, path_to_file):
-        try:
-            self.error_log = open(path_to_file,'a')
-        except IOError:
-            sys.stderr.write("WARNING: Could not open existing error file. New file being created")
-            self.error_log = open(path_to_file,'w')
-
-        self.error_log.write("Log started at " + str(datetime.datetime.utcnow()) + "\n")
-        print "Writing errors to: " + path_to_file
-        return None
-
-    def _error_log_save(self):
-        "Write errors to a log file"
-        self.error_log.write(self.error_cache)
-        self.error_cache = ""
-        return None
-
-
-    def _errorlog_stop(self):
-        self.error_log.write("Log ended at " + str(datetime.datetime.utcnow()) + "\n")
-        self.error_log.close()
-        return None

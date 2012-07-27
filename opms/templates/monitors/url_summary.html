@@ -29,11 +29,11 @@ $(document).ready(function()
 </script>
 
 {% if url_id %}
-<p>This is a list of the last 3 days worth of scans</p>
-<h3>Data visualisation</h3>
-<p>Legend: Blue Dots = TTFB; Red Crosses = TTLB; Lightest colours represent the first iteration of each scan<br />
-    <img src="./graph/url_by_time/{{ url_id }}.png" /><br />
-    <a href="./graph/url_by_time/{{ url_id }}.png?dpi=300">[Print Version]</a> <a href="./graph/url_by_time/{{ url_id }}.png?dpi=600">[High Resolution]</a></p>
+{#<!--<p>This is a list of the last 3 days worth of scans</p>-->#}
+{#<!--<h3>Data visualisation</h3>-->#}
+{#<!--<p>Legend: Blue Dots = TTFB; Red Crosses = TTLB; Lightest colours represent the first iteration of each scan<br />-->#}
+{#    <!--<img src="./graph/url_by_time/{{ url_id }}.png" /><br />-->#}
+{#    <!--<a href="./graph/url_by_time/{{ url_id }}.png?dpi=300">[Print Version]</a> <a href="./graph/url_by_time/{{ url_id }}.png?dpi=600">[High Resolution]</a></p>-->#}
 {% endif %}
 {% if task_id %}
 <p>This is a list of all the scans performed as part of task {{ task_id }}.</p>

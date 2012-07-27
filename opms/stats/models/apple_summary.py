@@ -8,7 +8,6 @@ from datetime import date
 # Apple Summary Data
 ####
 
-
 # A Summary record based on a column of data from the Summary tab. Note there can be more than one for a given week (iTU + iTUPSM, or itu-raw + itu-psm)
 # aka: "AppleEntry", like ApacheLogEntry, but for Apple data.
 class AppleWeeklySummary(models.Model):
@@ -18,7 +17,7 @@ class AppleWeeklySummary(models.Model):
         (u'itu-raw', u'iTunes U PSM Raw Logs'), # This is a virtual summary produced from the more detailed log data
         )
     # Date from the column - typically from yyyy-mm-dd format
-    week_beginning = models.DateField("week ending", db_index=True)  # NB: This needs renaming to week_beginning
+    week_beginning = models.DateField("week beginning", db_index=True)
 
     # Logfile this data was pulled from
     logfile = models.ForeignKey(LogFile)
@@ -248,5 +247,3 @@ class AppleWeeklyPreviewCount(models.Model):
 
     class Meta:
         app_label = 'stats'
-
-
