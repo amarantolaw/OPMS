@@ -8,7 +8,6 @@ from datetime import date
 # Apple Summary Data
 ####
 
-
 # A Summary record based on a column of data from the Summary tab. Note there can be more than one for a given week (iTU + iTUPSM, or itu-raw + itu-psm)
 # aka: "AppleEntry", like ApacheLogEntry, but for Apple data.
 class AppleWeeklySummary(models.Model):
@@ -248,5 +247,3 @@ class AppleWeeklyPreviewCount(models.Model):
 
     class Meta:
         app_label = 'stats'
-
-

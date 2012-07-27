@@ -5,6 +5,7 @@ DEBUG = False
 ERROR_CACHE = ""
 ERROR_LOG = None
 
+
 def __init__():
     global DEBUG
     DEBUG = False
@@ -14,7 +15,6 @@ def __init__():
     ERROR_LOG = None
     return None
 
-
 def onscreen(error_str):
     "Basic optional debug function. Print the string if enabled"
     global DEBUG
@@ -22,13 +22,11 @@ def onscreen(error_str):
         sys.stderr.write('DEBUG:{}\n'.format(error_str))
     return None
 
-
 def errorlog(error_str=""):
     "Write errors to a log file cache"
     global ERROR_CACHE
     ERROR_CACHE += 'ERROR:{}\n'.format(error_str)
     return None
-
 
 def errorlog_start(path_to_file):
     global ERROR_LOG
@@ -51,7 +49,6 @@ def errorlog_save():
     else:
         sys.stderr.write("WARNING!! No Error Log file has been created\n\n{}".format(ERROR_CACHE))
     return None
-
 
 def errorlog_stop():
     global ERROR_LOG

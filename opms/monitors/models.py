@@ -49,7 +49,6 @@ class URLMonitorScan(models.Model):
                              str(self.url.url) + " #" + str(self.iteration) + ": TTFB:" + str(self.ttfb))
 
 
-
 ######
 # iTU Store analysis classes
 ######
@@ -82,6 +81,7 @@ class ItuGenre(models.Model):
     def __unicode__(self):
         return smart_unicode('Genre: %s=%s' % (self.name,self.url))
 
+
 class ItuInstitution(models.Model):
     name = models.CharField(max_length=255)
     itu_id = models.IntegerField()
@@ -90,6 +90,7 @@ class ItuInstitution(models.Model):
 
     def __unicode__(self):
         return smart_unicode('Institution: %s=%s' % (self.name,self.url))
+
 
 class ItuSeries(models.Model):
     name = models.CharField(max_length=255)
