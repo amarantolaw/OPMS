@@ -7,6 +7,8 @@ from lxml.html.clean import *
 from dateutil.parser import *
 import datetime
 from django.utils.encoding import smart_unicode
+import settings
+import time, random
 
 
 #from BeautifulSoup import BeautifulSoup
@@ -23,7 +25,9 @@ from django.utils.encoding import smart_unicode
 # 13 = XHTML page, but much much shorter than the rest. Suggest it simulates iOS 5 styling. TBD
 # [12,1,2]
 
-def get_page(url, APPLE_STORE_LANGUAGE = 1):
+def get_page(url, APPLE_STORE_LANGUAGE = 1, hurry = False):
+    if settings.WAIT_GET and not hurry:
+        time.sleep(random.random() * 5)
     USER_AGENT = 'iTunes/10.5.1 (Macintosh; Intel Mac OS X 10.6.8) AppleWebKit/534.51.22'
     APPLE_STORE_FRONT = '143444'
     APPLE_TZ = '0'
@@ -54,7 +58,7 @@ def get_page(url, APPLE_STORE_LANGUAGE = 1):
                 if action.get('kind') == 'Goto':
                     url = action.get('url')
                     print('URL Redirection, please goto: %s' % url)
-                    return get_page(url)
+                    return get_page(url, hurry=True)
                 else:
                     print('Unrecognised action: %s' % action.get('kind'))
                     print(plist)
@@ -89,7 +93,7 @@ def write_page(url, language = 1, filename=''):
     if filename == '':
         filename = url.replace('http://','').replace('/','_') + '-Lang_' + str(language) + '.xml'
     f = open('./' + filename, 'w')
-    f.write(get_page(url, language))
+    f.write(get_page(url, language, hurry=True))
     print('Output written to ./' + filename)
     return None
 
