@@ -274,8 +274,8 @@
     $(document).ready(function()
             {
                 onLoad();
-                $("#eventsTable").tablesorter({ sortList: [[1,1]] });
-                $("#commentsTable").tablesorter({ sortList: [[1,1]] });
+                $("#eventsTable").tablesorter({ sortList: [[0,0]] });
+                $("#commentsTable").tablesorter({ sortList: [[1,0]] });
             }
     );
     $(window).resize(function()
@@ -329,6 +329,14 @@
     </tr>
     </thead>
     <tbody>
+    {% if events|length == 0 %}
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    {% endif %}
     {% for e in events %}
     <tr>
         <td>{{ e.date }}</td>
@@ -345,7 +353,6 @@
     <thead>
     <tr>
         <th>Date</th>
-        <th>Time</th>
         <th>Source</th>
         <th>Detail</th>
         <th>Category</th>
@@ -354,8 +361,11 @@
     <tbody>
     {% for c in comments %}
     <tr>
+    {% if c.date == None %}
+        <td></td>
+    {% else %}
         <td>{{ c.date }}</td>
-        <td>{{ c.time }}</td>
+    {% endif %}
         <td>{{ c.source }}</td>
         <td>"{{ c.detail }}"</td>
         <td>{{ c.category.description }}</td>
