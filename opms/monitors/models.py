@@ -320,6 +320,7 @@ class ItuComment(models.Model):
     date = models.DateField(null=True, blank=True)
     detail = models.CharField(max_length=10000)
     source = models.CharField(max_length=100)
+    ituinstitution = models.ForeignKey(ItuInstitution, verbose_name="Institution")
 
     class Meta:
         verbose_name = "iTunes U Comment"

@@ -77,7 +77,7 @@ def index(request, error='', message=''):
                     comments_to_plot.append(Comment(
                         date=itu_comment.date,
                         time=datetime.time(0,0,0),
-                        source=itu_comment.itucollectionhistorical.name + ' - comment by ' + itu_comment.source,
+                        source=itu_comment.ituinstitution.name + ' - comment by ' + itu_comment.source,
                         detail=itu_comment.detail,
                         user_email='scan_itunes@manage.py',
                         category=c

@@ -168,6 +168,7 @@ class Command(BaseCommand):
                                         date=comment['date'],
                                         detail=comment['detail'],
                                         source=comment['source'],
+                                        ituinstitution=i,
                                     )
                                     new_comment.save()
                                     self._log(u'Saved new comment by ' + unicode(new_comment.source) + u': \"' + unicode(new_comment.detail) + u'\".')
