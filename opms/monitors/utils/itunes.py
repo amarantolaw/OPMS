@@ -242,7 +242,9 @@ def get_collection_info_arty(url): #Workaround for pages (typically related to d
     info['series'] = root.xpath('/div/body/div/div/div/div/div/h1/a')[0].text
     info['series_url'] = root.xpath('/div/body/div/div/div/div/div/h1/a')[0].get("href")
     info['series_id'] = info['series_url'].split('/id')[len(info['series_url'].split('/id')) - 1]
-    info['series_img_170'] = root.xpath('/div/body/div/div/div/div/a/div/img')[0].get("src")
+#    info['series_img_170'] = root.xpath('/div/body/div/div/div/div/a/div/img')[0].get("src")
+    info['series_img_170'] = "Unknown" #When this last-ditch attempt is used to extract category info, the image given in the html is not the right one, and changes every time the page is accessed...
+
 
     info['last modified'] = str(datetime.date(1970,1,1))
 #    for i in items:
@@ -432,6 +434,7 @@ def get_collection_items(url):
         items = root.xpath('.//itms:TrackList',namespaces={'itms':'http://www.apple.com/itms/'})
     else:
         try:
+            print("Trying lang=2 instead...")
             xml = get_page(url,2)
             lang = 2
         except ValueError: # If there's a bad URL, skip this link
@@ -443,6 +446,7 @@ def get_collection_items(url):
             return None
     plist = plistlib.readPlistFromString(etree.tostring(items[0]))
     if lang == 2:
+        #Get rid of all non-podcast-episode plist elements from the list of items to be returned.
         tobereturned = plist.get('items')
         tobereturned_norubbish = []
         for i in tobereturned:

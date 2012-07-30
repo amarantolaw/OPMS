@@ -2,7 +2,7 @@
 # Author: Carl Marshall
 # Last Edited: 08-12-2011
 from optparse import make_option
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.core import management
 from monitors.utils import itunes as itunes
 from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
@@ -33,24 +33,27 @@ class Command(BaseCommand):
     def handle(self, institution = "Oxford University",**options):
         # Some basic error checking
         if institution is None:
-            raise CommandError("Please specify the institution to scan.")
+            self._errorlog("Please specify the institution to scan.")
+            return False
 
         try:
             mode = int(options.get("mode",1))
         except ValueError:
-            raise CommandError("""Please specify a valid mode for this scan.
+            self._errorlog("""Please specify a valid mode for this scan.
                1) Scan an institution's collection
                2) Scan the Top Collections chart
                3) Scan the Top Downloads chart
                4) Scan the list of institutions
                """)
+            return False
         if mode < 1 or mode > 4:
-            raise CommandError("""Please specify a valid mode for this scan.
+            self._errorlog("""Please specify a valid mode for this scan.
                1) Scan an institution's collection
                2) Scan the Top Collections chart
                3) Scan the Top Downloads chart
                4) Scan the list of institutions
                """)
+            return False
 
         scantime = datetime.datetime.now()
         print "Scan iTunes started at " + str(scantime) + "\n"
@@ -64,7 +67,8 @@ class Command(BaseCommand):
             try:
                 i = ItuInstitution.objects.filter(name=institution)[0]
             except:
-                raise CommandError(institution + u" is not a recognised institution.")
+                self._errorlog(institution + u" is not a recognised institution.")
+                return False
             comment = u"Scan (and update) of " + institution + u"\'s collection from %s" % i.url
             self._log(u"Log started for: %s" % unicode(comment))
             print comment
@@ -212,7 +216,7 @@ class Command(BaseCommand):
                                                         scanlog=scanlog,
                                                         series=cp,
                                                         )
-                            except KeyError:
+                            except KeyError: #See if we've got data from a last-ditch attempt at downloading it instead.
                                 try:
                                     duration = 0
                                     feedurl = ""
@@ -247,37 +251,40 @@ class Command(BaseCommand):
                                         series=cp,
                                     )
                                 except KeyError:
-                                    raise CommandError('Missing key when trying to create an ItuItemHistorical. item=' + str(item))
+                                    self._errorlog('Missing key when trying to create an ItuItemHistorical. item=' + str(item))
 
-                            #Put together a list of saved itemps that look like they're the same as our itemp, really.
-                            similar_itemps = []
-                            itemp_exists = False
-                            for saved_itemp in ItuItemHistorical.objects.filter(series=cp):
-                                if (itemp.name==saved_itemp.name or itemp.itu_id==saved_itemp.itu_id or itemp.url==saved_itemp.url) and itemp.file_extension==saved_itemp.file_extension: #name AND Video/Audio
-                                    if itemp.url != saved_itemp.url: #Don't add similar itemp if the URLs are different, but both are accessible.
-                                        try:
-                                            urllib2.urlopen(itemp.url)
-                                            urllib2.urlopen(saved_itemp.url)
-                                        except urllib2.URLError:
+                            try: #We can't afford this bit to die in the middle of the night.
+                                #Put together a list of saved itemps that look like they're the same as our itemp, really.
+                                similar_itemps = []
+                                itemp_exists = False
+                                for saved_itemp in ItuItemHistorical.objects.filter(series=cp):
+                                    if (itemp.name==saved_itemp.name or itemp.itu_id==saved_itemp.itu_id or itemp.url==saved_itemp.url) and itemp.file_extension==saved_itemp.file_extension: #name AND Video/Audio
+                                        if itemp.url != saved_itemp.url: #Don't add similar itemp if the URLs are different, but both are accessible.
+                                            try:
+                                                urllib2.urlopen(itemp.url)
+                                                urllib2.urlopen(saved_itemp.url)
+                                            except urllib2.URLError:
+                                                similar_itemps.append(saved_itemp)
+                                        else:
                                             similar_itemps.append(saved_itemp)
+                                    if itemp.name==saved_itemp.name and itemp.itu_id==saved_itemp.itu_id and itemp.url==saved_itemp.url and itemp.artist_name==saved_itemp.artist_name and itemp.description==saved_itemp.description and itemp.duration==saved_itemp.duration and itemp.explicit==saved_itemp.explicit and itemp.feed_url==saved_itemp.feed_url and itemp.file_extension==saved_itemp.file_extension and itemp.kind==saved_itemp.kind and itemp.long_description==saved_itemp.long_description and itemp.playlist_id==saved_itemp.playlist_id and itemp.playlist_name==saved_itemp.playlist_name and itemp.popularity==saved_itemp.popularity and itemp.preview_length==saved_itemp.preview_length and itemp.preview_url==saved_itemp.preview_url and itemp.rank==saved_itemp.rank and itemp.release_date==saved_itemp.release_date:
+                                        itemp_exists=True
+                                        itemp = saved_itemp
+                                if itemp_exists==False:
+                                    if similar_itemps:
+                                        similar_itemps.sort(key=lambda this_itemp: this_itemp.version)
+                                        latest_similar_itemp = similar_itemps[-1]
+                                        itemp.previous = latest_similar_itemp
+                                        itemp.version = latest_similar_itemp.version + 1
+                                        itemp.ituitem = latest_similar_itemp.ituitem
                                     else:
-                                        similar_itemps.append(saved_itemp)
-                                if itemp.name==saved_itemp.name and itemp.itu_id==saved_itemp.itu_id and itemp.url==saved_itemp.url and itemp.artist_name==saved_itemp.artist_name and itemp.description==saved_itemp.description and itemp.duration==saved_itemp.duration and itemp.explicit==saved_itemp.explicit and itemp.feed_url==saved_itemp.feed_url and itemp.file_extension==saved_itemp.file_extension and itemp.kind==saved_itemp.kind and itemp.long_description==saved_itemp.long_description and itemp.playlist_id==saved_itemp.playlist_id and itemp.playlist_name==saved_itemp.playlist_name and itemp.popularity==saved_itemp.popularity and itemp.preview_length==saved_itemp.preview_length and itemp.preview_url==saved_itemp.preview_url and itemp.rank==saved_itemp.rank and itemp.release_date==saved_itemp.release_date:
-                                    itemp_exists=True
-                                    itemp = saved_itemp
-                            if itemp_exists==False:
-                                if similar_itemps:
-                                    similar_itemps.sort(key=lambda this_itemp: this_itemp.version)
-                                    latest_similar_itemp = similar_itemps[-1]
-                                    itemp.previous = latest_similar_itemp
-                                    itemp.version = latest_similar_itemp.version + 1
-                                    itemp.ituitem = latest_similar_itemp.ituitem
-                                else:
-                                    itemr.save()
-                                    itemp.ituitem = itemr
-                                self._log(u'Created new historical item record for ' + unicode(itemp.name) + u', version ' + unicode(itemp.version))
-                                itemp.save()
-                            items_spotted.append(itemp)
+                                        itemr.save()
+                                        itemp.ituitem = itemr
+                                    self._log(u'Created new historical item record for ' + unicode(itemp.name) + u', version ' + unicode(itemp.version))
+                                    itemp.save()
+                                items_spotted.append(itemp)
+                            except:
+                                self._errorlog('Failed to process potential historical item record.')
                         else:
                             self._log(u'WARNING: Blank item - perhaps we couldn\'t download the appropriate page?')
                 else:
@@ -423,26 +430,6 @@ class Command(BaseCommand):
         scanlog.complete = True
         scanlog.save()
         return None
-
-    def _get_or_create_genre(self, id):
-        return None
-
-    def _get_or_create_institution(self, id):
-        return None
-
-    def _get_or_create_series(self, series):
-#        series_dict = {}
-#        series_dict['name'] =
-#        series_dict['itu_id'] =
-#        series_dict['img170'] =
-#        series_dict['img75'] =
-#        series_dict['url'] =
-#        series_dict['language'] =
-#        series_dict['last_modified'] =
-#        series_dict['genre'] =
-#        series_dict['institution'] =
-        return None, False
-
 
     # DEBUG AND INTERNAL HELP METHODS ==============================================================
 
