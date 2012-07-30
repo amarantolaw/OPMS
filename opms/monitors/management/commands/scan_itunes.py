@@ -74,7 +74,7 @@ class Command(BaseCommand):
             print comment
 
             print("Getting information about collections...")
-            collections = itunes.get_institution_collections(i)
+            collections = itunes.get_institution_collections(i, hurry=True)
             print("Processing collection information and scanning individual items...")
             collections_spotted = []
             items_spotted = []
@@ -178,7 +178,7 @@ class Command(BaseCommand):
                     collections_spotted.append(cp)
 
                     #Acquire the list of items for this collection.
-                    items = itunes.get_collection_items(cp.url)
+                    items = itunes.get_collection_items(cp.url, hurry=True)
                     for item in items:
                         if item:
                             itemr = ItuItem(institution=i)
@@ -224,7 +224,7 @@ class Command(BaseCommand):
                                     for offerkey in item['store-offers'].keys():
                                         duration = item['store-offers'][offerkey]['duration']
                                         feedurl = item['store-offers'][offerkey]['asset-url']
-                                    itemp = ItuItemHistorical(name=item['title'],
+                                        itemp = ItuItemHistorical(name=item['title'],
                                         itu_id=item['item-id'],
                                         url=item['url'],
                                         artist_name=item['artist-name'],

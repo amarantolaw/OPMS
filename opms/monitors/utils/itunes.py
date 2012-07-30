@@ -101,7 +101,7 @@ def get_institutions():
     institutions = []
     for url in ('http://itunes.apple.com/WebObjects/DZR.woa/wa/viewiTunesUProviders?id=EDU','http://itunes.apple.com/WebObjects/DZR.woa/wa/viewiTunesUProviders?id=ORG','http://itunes.apple.com/WebObjects/DZR.woa/wa/viewiTunesUProviders?id=K12'): #Handle three pages of institutions: "Universities & Colleges", "Beyond Campus" and "K-12"
         #Throw away lots of junk, and make sure all the tags are properly closed.
-        xml = clean_html(get_page(url,12)).replace('class="badge"></a>','class="badge"/></a>').replace('Choose Store">','Choose Store"/>')
+        xml = clean_html(get_page(url,12, hurry=True)).replace('class="badge"></a>','class="badge"/></a>').replace('Choose Store">','Choose Store"/>')
         root = etree.fromstring(xml)
         items = root.xpath('/div/body/div/div/div/div/div/div/ul/li/a')
         print(str(len(items)) + ' items found.')
@@ -114,17 +114,17 @@ def get_institutions():
     return institutions
 
 # Get Collection info
-def get_collection_info(url):
+def get_collection_info(url, hurry=False):
     # print "get_collection_info(%s) called" % url
     info = {}
     try:
-        xml = get_page(url)
+        xml = get_page(url, hurry=hurry)
     except ValueError: # If there's a bad URL, skip this link
         return info
     except AttributeError: # If there's no URL, skip this link
         return info
     if xml == None:
-        return get_collection_info_arty(url)
+        return get_collection_info_arty(url, hurry=hurry)
     root = etree.fromstring(xml)
 
     #Detect whether any of the items is a movie. If so, set contains_movies to True for this collection.
@@ -176,7 +176,7 @@ def get_collection_info(url):
     info['comments'] = []
 #    try:
     review_url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?pageNumber=0&type=Podcast&id=' + str(info['series_id']) #This page (unlike the first) contains the complete text of longer, more interesting, comments.
-    review_xml = unicode(get_page(review_url), encoding='utf-8', errors='replace')
+    review_xml = unicode(get_page(review_url, hurry=hurry), encoding='utf-8', errors='replace')
     xmls = review_xml.split(u'<View rightInset=\"0\" topInset=\"10\" bottomInset=\"15\" leftInset=\"10\" height=\"1\" stretchiness=\"1\" backColor=\"4c6d99\"></View>')
     xmls[0] = ''
     xmls[len(xmls) - 1] = ''
@@ -201,11 +201,11 @@ def get_collection_info(url):
 
     return info
 
-def get_collection_info_arty(url): #Workaround for pages (typically related to drawing and painting...) which don't work with lang=1 or lang=12. This is non-ideal, but better than nothing.
+def get_collection_info_arty(url, hurry=False): #Workaround for pages (typically related to drawing and painting...) which don't work with lang=1 or lang=12. This is non-ideal, but better than nothing.
     # print "get_collection_info(%s) called" % url
     info = {}
     try:
-        xml = get_page(url,17)
+        xml = get_page(url,17, hurry=hurry)
     except ValueError: # If there's a bad URL, skip this link
         return info
     except AttributeError: # If there's no URL, skip this link
@@ -270,7 +270,7 @@ def get_collection_info_arty(url): #Workaround for pages (typically related to d
     info['comments'] = []
     #    try:
     review_url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?pageNumber=0&type=Podcast&id=' + str(info['series_id']) #This page (unlike the first) contains the complete text of longer, more interesting, comments.
-    review_xml = unicode(get_page(review_url), encoding='utf-8', errors='replace')
+    review_xml = unicode(get_page(review_url, hurry=hurry), encoding='utf-8', errors='replace')
     xmls = review_xml.split(u'<View rightInset=\"0\" topInset=\"10\" bottomInset=\"15\" leftInset=\"10\" height=\"1\" stretchiness=\"1\" backColor=\"4c6d99\"></View>')
     xmls[0] = ''
     xmls[len(xmls) - 1] = ''
@@ -370,7 +370,7 @@ def get_topcollections():
 #url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=13&mt=10"
 #url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=14&mt=10" # For a 15 page result, batchNumber 14 is last call
 
-def get_institution_collections(i):
+def get_institution_collections(i, hurry=False):
     collections = []
 #    try:
 #        url = i.url
@@ -405,7 +405,7 @@ def get_institution_collections(i):
         while added_collections:
             url = 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=' + str(i.itu_id) + '&page=' + str(page)
     #            print(xml)
-            xml = get_page(url,12)
+            xml = get_page(url,12,hurry=hurry)
             if xml:
                 #Throw away lots of junk, and make sure all the tags are properly closed.
                 xml = clean_html(xml).replace('png"></div>','png"/></div>').replace('<img width="30" height="30" alt="My Store: United Kingdom, Choose Store"></a>','<img width="30" height="30" alt="My Store: United Kingdom, Choose Store"/></a>')
@@ -415,7 +415,7 @@ def get_institution_collections(i):
                     added_collections = False
                 for item in items:
                     print(item.text)
-                    collection = get_collection_info(item.get('href'))
+                    collection = get_collection_info(item.get('href'), hurry=hurry)
                     if collection:
                         collections.append(collection)
                 page += 1
@@ -426,9 +426,9 @@ def get_institution_collections(i):
     return collections
 
 
-def get_collection_items(url):
+def get_collection_items(url, hurry=False):
     try:
-        xml = get_page(url)
+        xml = get_page(url, hurry=hurry)
         lang = 1
     except ValueError: # If there's a bad URL, skip this link
         return None
@@ -439,7 +439,7 @@ def get_collection_items(url):
     else:
         try:
             print("Trying lang=2 instead...")
-            xml = get_page(url,2)
+            xml = get_page(url,2,hurry=hurry)
             lang = 2
         except ValueError: # If there's a bad URL, skip this link
             return None
