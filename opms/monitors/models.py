@@ -104,11 +104,14 @@ class ItuInstitution(models.Model):
 
 class ItuItem(models.Model):
     institution = models.ForeignKey(ItuInstitution)
+    latest = models.ForeignKey("ItuItemHistorical", null=True, default=None, related_name="latest_historical_item_record")
 
-    def latest(self): #TODO: Make ForeignKey and override save() to get automatic updates.
+    def find_latest(self):
+        print('WARNING: Using find_latest will be inefficient! Don\'t do it!')
         hrecords = ItuItemHistorical.objects.filter(ituitem=self).order_by('version')
         return hrecords[len(hrecords) - 1]
-    def original(self):
+    def find_original(self):
+        print('WARNING: Using find_original will be inefficient! Don\'t do it!')
         hrecords = ItuItemHistorical.objects.filter(ituitem=self).order_by('version')
         return hrecords[0]
 
@@ -116,15 +119,21 @@ class ItuItem(models.Model):
         verbose_name = "iTunes U Item"
         verbose_name_plural = "iTunes U Items"
     def __unicode__(self):
-        return smart_unicode(self.latest().name)
+        try:
+            return smart_unicode(self.latest.name)
+        except:
+            return u'Unattached absolute item record.'
 
 class ItuCollection(models.Model):
     institution = models.ForeignKey(ItuInstitution)
+    latest = models.ForeignKey("ItuCollectionHistorical", null=True, default=None, related_name="latest_historical_collection_record")
 
-    def latest(self): #TODO: Make ForeignKey and override save() to get automatic updates.
+    def find_latest(self):
+        print('WARNING: Using find_latest will be inefficient! Don\'t do it!')
         hrecords = ItuCollectionHistorical.objects.filter(itucollection=self).order_by('version')
         return hrecords[len(hrecords) - 1]
-    def original(self):
+    def find_original(self):
+        print('WARNING: Using find_original will be inefficient! Don\'t do it!')
         hrecords = ItuCollectionHistorical.objects.filter(itucollection=self).order_by('version')
         return hrecords[0]
 
@@ -132,7 +141,10 @@ class ItuCollection(models.Model):
         verbose_name = "iTunes U Collection"
         verbose_name_plural = "iTunes U Collections"
     def __unicode__(self):
-        return smart_unicode(self.latest().name)
+        try:
+            return smart_unicode(self.latest.name)
+        except:
+            return u'Unattached absolute collection record.'
 
 class ItuCollectionHistorical(models.Model):
     name = models.CharField(max_length=255)
@@ -201,6 +213,10 @@ class ItuCollectionHistorical(models.Model):
     class Meta:
         verbose_name = "iTunes U Historical Record of Collection"
         verbose_name_plural = "iTunes U Historical Records of Collections"
+    def save(self): #Update absolute record so that the last-saved historical record is the latest record.
+        super(ItuCollectionHistorical, self).save()
+        self.itucollection.latest = self
+        self.itucollection.save()
     def __unicode__(self):
         return smart_unicode('%s, %s' % (self.name,str(self.scanlog.time)))
 
@@ -272,6 +288,10 @@ class ItuItemHistorical(models.Model):
     class Meta:
         verbose_name = "iTunes U Historical Record of Item"
         verbose_name_plural = "iTunes U Historical Records of Items"
+    def save(self): #Update absolute record so that the last-saved historical record is the latest record.
+        super(ItuItemHistorical, self).save()
+        self.ituitem.latest = self
+        self.ituitem.save()
     def __unicode__(self):
         return smart_unicode('%s, %s' % (self.name,str(self.scanlog.time)))
 

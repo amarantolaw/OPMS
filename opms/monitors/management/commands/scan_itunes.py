@@ -8,7 +8,7 @@ import codecs
 from optparse import make_option
 from django.core.management.base import BaseCommand
 from django.core import management
-from django.db.models import Q
+from django.db.models import Q, F
 
 from monitors.utils import itunes as itunes
 from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
@@ -212,7 +212,7 @@ class Command(BaseCommand):
                                 try:
                                     duration = 0
                                     feedurl = ""
-                                    for offerkey in item['store-offers'].keys(): #TODO: Can we put an if here?
+                                    for offerkey in item['store-offers'].keys(): #offerkey is something like 'standard-audio'. This code works on the assumption that, whatever the key, we want all the items in its list.
                                         duration = item['store-offers'][offerkey]['duration']
                                         feedurl = item['store-offers'][offerkey]['asset-url']
                                     item_record_historical = ItuItemHistorical(name=item['title'],
@@ -283,26 +283,24 @@ class Command(BaseCommand):
                     self._log(u'WARNING: Blank category - perhaps we couldn\'t download the appropriate page?')
             print("Checking whether anything has gone missing or reappeared...")
             if collections:
-                for historical_collection_record in ItuCollectionHistorical.objects.filter(institution=institution):
-                    if historical_collection_record == historical_collection_record.latest():
-                        if historical_collection_record not in collections_spotted and historical_collection_record.missing == None:
-                            self._log(unicode(historical_collection_record.name) + u" appears to have gone missing! We last saw it at " + unicode(historical_collection_record.scanlog.time))
-                            historical_collection_record.missing = scanlog
-                            historical_collection_record.save()
-                        elif historical_collection_record in collections_spotted and historical_collection_record.missing:
-                            self._log(unicode(historical_collection_record.name) + u" has reappeared! It went missing at" + unicode(historical_collection_record.missing.time))
-                            historical_collection_record.missing = None
-                            historical_collection_record.save()
-                for historical_item_record in ItuItemHistorical.objects.filter(institution=institution):
-                    if historical_item_record == historical_item_record.latest():
-                        if historical_item_record not in items_spotted and historical_item_record.missing == None:
-                            self._log(unicode(historical_item_record.name) + u" appears to have gone missing! We last saw it at " + unicode(historical_item_record.scanlog.time))
-                            historical_item_record.missing = scanlog
-                            historical_item_record.save()
-                        elif historical_item_record in items_spotted and historical_item_record.missing:
-                            self._log(unicode(historical_item_record.name) + u" has reappeared! It went missing at" + unicode(historical_item_record.missing.time))
-                            historical_item_record.missing = None
-                            historical_item_record.save()
+                for historical_collection_record in ItuCollectionHistorical.objects.filter(Q(institution=institution) & Q(itucollection__latest=F('id'))):
+                    if historical_collection_record not in collections_spotted and historical_collection_record.missing == None:
+                        self._log(unicode(historical_collection_record.name) + u" appears to have gone missing! We last saw it at " + unicode(historical_collection_record.scanlog.time))
+                        historical_collection_record.missing = scanlog
+                        historical_collection_record.save()
+                    elif historical_collection_record in collections_spotted and historical_collection_record.missing:
+                        self._log(unicode(historical_collection_record.name) + u" has reappeared! It went missing at" + unicode(historical_collection_record.missing.time))
+                        historical_collection_record.missing = None
+                        historical_collection_record.save()
+                for historical_item_record in ItuItemHistorical.objects.filter(Q(institution=institution) & Q(ituitem__latest=F('id'))):
+                    if historical_item_record not in items_spotted and historical_item_record.missing == None:
+                        self._log(unicode(historical_item_record.name) + u" appears to have gone missing! We last saw it at " + unicode(historical_item_record.scanlog.time))
+                        historical_item_record.missing = scanlog
+                        historical_item_record.save()
+                    elif historical_item_record in items_spotted and historical_item_record.missing:
+                        self._log(unicode(historical_item_record.name) + u" has reappeared! It went missing at" + unicode(historical_item_record.missing.time))
+                        historical_item_record.missing = None
+                        historical_item_record.save()
             else:
                 self._log(u"WARNING: No collections found. Perhaps you scanned an institution that only publishes courses?")
         elif mode == 2:
