@@ -130,8 +130,10 @@ class Command(BaseCommand):
                             similar_collection_records_historical.append(collection_record_historical_saved)
                             if collection_record_historical.name==collection_record_historical_saved.name and collection_record_historical.contains_movies==collection_record_historical_saved.contains_movies and int(collection_record_historical.itu_id)==int(collection_record_historical_saved.itu_id) and collection_record_historical.url==collection_record_historical_saved.url and collection_record_historical.img170==collection_record_historical_saved.img170 and collection_record_historical.language==collection_record_historical_saved.language and rating_checksum==collection_record_historical_saved.rating_checksum():
                                 collection_record_historical_exists=True
-                            collection_record_historical = collection_record_historical_saved
-                    if collection_record_historical_exists==False:
+                                collection_record_historical = collection_record_historical_saved
+                            else:
+                                similar_collection_records_historical.append(collection_record_historical_saved)
+                    if not collection_record_historical_exists:
                         if similar_collection_records_historical:
                             similar_collection_records_historical.sort(key=lambda this_collection_record_historical: this_collection_record_historical.version)
                             latest_similar_collection_record_historical = similar_collection_records_historical[-1]
@@ -242,9 +244,9 @@ class Command(BaseCommand):
                                                               scanlog=scanlog,
                                                               series=collection_record_historical)
                                 except KeyError:
-                                    self._errorlog('Missing key when trying to create an ItuItemHistorical. item=' + str(item))
+                                    self._errorlog(u'Missing key when trying to create an ItuItemHistorical. item=' + unicode(item))
                                 except:
-                                    self._errorlog('Failed to process ItuItemHistorical.')
+                                    self._errorlog(u'Failed to process ItuItemHistorical.')
 
                             try: #We can't afford this bit to die in the middle of the night.
                                 #Put together a list of saved item_record_historicals that look like they're the same as our item_record_historical, really.
@@ -258,10 +260,11 @@ class Command(BaseCommand):
                                         except urllib2.URLError:
                                             similar_item_record_historicals.append(saved_item_record_historical)
                                     else:
-                                        similar_item_record_historicals.append(saved_item_record_historical)
                                         if item_record_historical.name==saved_item_record_historical.name and item_record_historical.itu_id==saved_item_record_historical.itu_id and item_record_historical.url==saved_item_record_historical.url and item_record_historical.artist_name==saved_item_record_historical.artist_name and item_record_historical.description==saved_item_record_historical.description and item_record_historical.duration==saved_item_record_historical.duration and item_record_historical.explicit==saved_item_record_historical.explicit and item_record_historical.feed_url==saved_item_record_historical.feed_url and item_record_historical.file_extension==saved_item_record_historical.file_extension and item_record_historical.kind==saved_item_record_historical.kind and item_record_historical.long_description==saved_item_record_historical.long_description and item_record_historical.playlist_id==saved_item_record_historical.playlist_id and item_record_historical.playlist_name==saved_item_record_historical.playlist_name and item_record_historical.popularity==saved_item_record_historical.popularity and item_record_historical.preview_length==saved_item_record_historical.preview_length and item_record_historical.preview_url==saved_item_record_historical.preview_url and item_record_historical.rank==saved_item_record_historical.rank and item_record_historical.release_date==saved_item_record_historical.release_date:
-                                            item_record_historical_exists=True
+                                            item_record_historical_exists = True
                                             item_record_historical = saved_item_record_historical
+                                        else:
+                                            similar_item_record_historicals.append(saved_item_record_historical)
                                 if not item_record_historical_exists:
                                     if similar_item_record_historicals:
                                         similar_item_record_historicals.sort(key=lambda this_item_record_historical: this_item_record_historical.version)
@@ -276,12 +279,12 @@ class Command(BaseCommand):
                                     item_record_historical.save()
                                 items_spotted.append(item_record_historical)
                             except:
-                                self._errorlog('Failed to process potential historical item record.')
+                                self._errorlog(u'Failed to process potential historical item record.')
                         else:
                             self._log(u'WARNING: Blank item - perhaps we couldn\'t download the appropriate page?')
                 else:
                     self._log(u'WARNING: Blank category - perhaps we couldn\'t download the appropriate page?')
-            print("Checking whether anything has gone missing or reappeared...")
+            print(u"Checking whether anything has gone missing or reappeared...")
             if collections:
                 for historical_collection_record in ItuCollectionHistorical.objects.filter(Q(institution=institution) & Q(itucollection__latest=F('id'))):
                     if historical_collection_record not in collections_spotted and historical_collection_record.missing == None:
@@ -304,7 +307,7 @@ class Command(BaseCommand):
             else:
                 self._log(u"WARNING: No collections found. Perhaps you scanned an institution that only publishes courses?")
         elif mode == 2:
-            comment = "Scan of the Top Collections Chart..."
+            comment = u"Scan of the Top Collections Chart..."
             self._log(u"Log started for: %s" % unicode(comment))
             updated_institutions = False
             collections = itunes.get_topcollections()
@@ -341,7 +344,7 @@ class Command(BaseCommand):
                         self._errorlog(u'Couldn\'tfind an historical record of collection at ' + unicode(collection['series_url']) + u' despite updating the database.')
 
         elif mode == 3:
-            comment = "Scan of the Top Downloads Chart..."
+            comment = u"Scan of the Top Downloads Chart..."
             self._log(u"Log started for: %s" % unicode(comment))
             updated_institutions = False
             items = itunes.get_topdownloads()
