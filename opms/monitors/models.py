@@ -105,7 +105,7 @@ class ItuInstitution(models.Model):
 class ItuItem(models.Model):
     institution = models.ForeignKey(ItuInstitution)
 
-    def latest(self):
+    def latest(self): #TODO: Make ForeignKey and override save() to get automatic updates.
         hrecords = ItuItemHistorical.objects.filter(ituitem=self).order_by('version')
         return hrecords[len(hrecords) - 1]
     def original(self):
@@ -121,7 +121,7 @@ class ItuItem(models.Model):
 class ItuCollection(models.Model):
     institution = models.ForeignKey(ItuInstitution)
 
-    def latest(self):
+    def latest(self): #TODO: Make ForeignKey and override save() to get automatic updates.
         hrecords = ItuCollectionHistorical.objects.filter(itucollection=self).order_by('version')
         return hrecords[len(hrecords) - 1]
     def original(self):
@@ -192,7 +192,7 @@ class ItuCollectionHistorical(models.Model):
         else:
             return None
 
-    def rating_checksum(self):
+    def rating_checksum(self): #Generate a checksum from all the ratings attached to this historical collection record to allow easy (and slightly faster) comparisons.
         checksum = 0
         for rating in ItuRating.objects.filter(itucollectionhistorical=self):
             checksum += pow(10,rating.stars) + (rating.count/1000000000)

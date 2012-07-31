@@ -1,14 +1,18 @@
 from __future__ import print_function
+import time
+import random
+import datetime
+
 from django.core.management.base import BaseCommand, CommandError
-import urllib2, plistlib
+from django.utils.encoding import smart_unicode
+import urllib2
+import plistlib
 from xml.parsers import expat
 from lxml import etree, html
 from lxml.html.clean import *
 from dateutil.parser import *
-import datetime
-from django.utils.encoding import smart_unicode
+
 import settings
-import time, random
 
 
 #from BeautifulSoup import BeautifulSoup
