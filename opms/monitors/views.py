@@ -161,13 +161,17 @@ def itu_top_collections(request):
     """Show the most recent top collections chart."""
     message = ''
     error = ''
-    return render_to_response('monitors/itu_top_collections.html', {'error': error,'message':message}, context_instance=RequestContext(request))
+    latest_chartscan = ItuScanLog.objects.filter(mode=2).order_by('-time')[0]
+    chartrows = ItuCollectionChartScan.objects.filter(scanlog=latest_chartscan)
+    return render_to_response('monitors/itu_top_collections.html', {'error': error,'message':message,'chartrows':chartrows,'scanlog':latest_chartscan}, context_instance=RequestContext(request))
 
 def itu_top_items(request):
     """Show the most recent top items chart."""
     message = ''
     error = ''
-    return render_to_response('monitors/itu_top_items.html', {'error': error,'message':message}, context_instance=RequestContext(request))
+    latest_chartscan = ItuScanLog.objects.filter(mode=3).order_by('-time')[0]
+    chartrows = ItuItemChartScan.objects.filter(scanlog=latest_chartscan)
+    return render_to_response('monitors/itu_top_items.html', {'error': error,'message':message,'chartrows':chartrows,'scanlog':latest_chartscan}, context_instance=RequestContext(request))
 
 def itu_collections(request):
     """Show a clickable list of all collections."""
@@ -185,7 +189,8 @@ def itu_institutions(request):
     """Show a clickable list of all institutions."""
     message = ''
     error = ''
-    return render_to_response('monitors/itu_institutions.html', {'error': error,'message':message}, context_instance=RequestContext(request))
+    institutions = ItuInstitution.objects.order_by('name')
+    return render_to_response('monitors/itu_institutions.html', {'error': error,'message':message,'institutions':institutions}, context_instance=RequestContext(request))
 
 def itu_genres(request):
     """Show a clickable list of all genres."""

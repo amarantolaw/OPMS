@@ -1,17 +1,65 @@
 {% extends "base.html" %}
 {% load static sitetree %}
 
+{% block head %}
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection" />
+    <script>
+        $(document).ready(function()
+                {
+                    $("#chartTable").tablesorter({ sortList: [[0,0]] });
+                }
+        );
+    </script>
+{% endblock %}
+
 {% block sidebar %}
     {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
 {% endblock %}
 
 {% block content %}
     <h3>iTunes U Top Items</h3>
+    <div style="text-align:right">Last scanned: {{ scanlog.time }}</div>
     {% if error != '' %}
         <div class="alert alert-error">ERROR: {{ error }}</div>
     {% else %}
+        {% if not scanlog.complete %}
+            <div class="alert">WARNING: The latest scan is incomplete. This could be because the scan is in progress (reload in a few minutes), or could be because it crashed.</div>
+        {% endif %}
         {% if message != '' %}
             <div class="alert alert-success">{{ message }}</div>
         {% endif %}
+        {% if scanlog.comments %}
+            <div class="alert alert-info">{{ scanlog.comments }}</div>
+        {% endif %}
+        <table id="chartTable" class="tablesorter">
+            <thead>
+            <tr>
+                <th>Position</th>
+                <th>Item</th>
+                <th>Institution</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if chartrows|length == 0 %}
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            {% endif %}
+            {% for c in chartrows %}
+                <tr>
+                    <td>{{ c.position }}</td>
+                    <td><a href="{% url itu-item item_id=c.ituitem.id %}">{{ c.ituitemhistorical.name }}</a></td>
+                    <td><a href="{% url itu-institution institution_id=c.ituitem.institution.id %}">{{ c.ituitem.institution.name }}</a></td>
+                    <td><a href="{{ c.ituitemhistorical.url }}">iTunes U</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     {% endif %}
 {% endblock %}
