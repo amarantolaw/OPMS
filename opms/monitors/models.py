@@ -56,7 +56,7 @@ class URLMonitorScan(models.Model):
 ######
 
 class ItuScanLog(models.Model):
-    MODE_CHOICES = (
+    CHOICES = (
         (0,"Unknown"),
         (1,"Institutional Scan"),
         (2,"Top Collections Scan"),
@@ -64,12 +64,12 @@ class ItuScanLog(models.Model):
         (4,"Institutions Scan")
         )
     time = models.DateTimeField(auto_now_add=True)
-    mode = models.SmallIntegerField(default=0, choices=MODE_CHOICES) # Zero = Unknown mode
+    mode = models.SmallIntegerField(default=0, choices=CHOICES) # Zero = Unknown mode
     comments = models.TextField(null=True)
     complete = models.BooleanField(default=False)
 
-    def mode_string(self,MODE_CHOICES=MODE_CHOICES):
-        for mc in MODE_CHOICES:
+    def mode_string(self,CHOICES=CHOICES):
+        for mc in CHOICES:
             if mc[0] == self.mode:
                 return mc[1]
     class Meta:

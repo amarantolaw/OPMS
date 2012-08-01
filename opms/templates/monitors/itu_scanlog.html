@@ -9,7 +9,7 @@
     {% if error != '' %}
         <div class="alert alert-error">ERROR: {{ error }}</div>
     {% else %}
-        <h3>Mode {{ scanlog.mode }} scan on {{ scanlog.time }}</h3>
+        <h3>{{ scanlog.get_mode_display }} on {{ scanlog.time }}</h3>
         {% if message != '' %}
             <div class="alert alert-success">{{ message }}</div>
         {% endif %}
