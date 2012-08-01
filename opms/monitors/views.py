@@ -3,6 +3,7 @@ from django.views.decorators.http import require_safe
 from django.template import Context, loader, RequestContext
 from django.shortcuts import render_to_response
 from opms.monitors.models import URLMonitorURL, URLMonitorScan
+from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
 #import pylab
 #import numpy as np
 #import matplotlib
@@ -149,3 +150,86 @@ def urlmonitoring_url(request, url_id):
 #    response = HttpResponse(content_type='image/png')
 #    canvas.print_png(response)
 #    return response
+
+def itu_home(request):
+    """Show a mock version of the iTunes U home page."""
+    message = ''
+    error = ''
+    return render_to_response('monitors/itu_home.html', {'error': error,'message':message}, context_instance=RequestContext(request))
+
+def itu_top_collections(request):
+    """Show the most recent top collections chart."""
+    message = ''
+    error = ''
+    return render_to_response('monitors/itu_top_collections.html', {'error': error,'message':message}, context_instance=RequestContext(request))
+
+def itu_top_items(request):
+    """Show the most recent top items chart."""
+    message = ''
+    error = ''
+    return render_to_response('monitors/itu_top_items.html', {'error': error,'message':message}, context_instance=RequestContext(request))
+
+def itu_collections(request):
+    """Show a clickable list of all collections."""
+    message = ''
+    error = ''
+    return render_to_response('monitors/itu_collections.html', {'error': error,'message':message}, context_instance=RequestContext(request))
+
+def itu_items(request):
+    """Show a clickable list of all items."""
+    message = ''
+    error = ''
+    return render_to_response('monitors/itu_items.html', {'error': error,'message':message}, context_instance=RequestContext(request))
+
+def itu_institutions(request):
+    """Show a clickable list of all institutions."""
+    message = ''
+    error = ''
+    return render_to_response('monitors/itu_institutions.html', {'error': error,'message':message}, context_instance=RequestContext(request))
+
+def itu_genres(request):
+    """Show a clickable list of all genres."""
+    message = ''
+    error = ''
+    return render_to_response('monitors/itu_genres.html', {'error': error,'message':message}, context_instance=RequestContext(request))
+
+def itu_scanlogs(request):
+    """Show a clickable list of all scanlogs."""
+    message = ''
+    error = ''
+    return render_to_response('monitors/itu_scanlogs.html', {'error': error,'message':message}, context_instance=RequestContext(request))
+
+def itu_collection(request, collection_id):
+    """Display an absolute record of a collection."""
+    message = ''
+    error = ''
+    collection = ItuCollection.objects.get(id=int(collection_id))
+    return render_to_response('monitors/itu_collection.html', {'error': error,'message':message,'collection':collection}, context_instance=RequestContext(request))
+
+def itu_item(request, item_id):
+    """Display an absolute record of an item."""
+    message = ''
+    error = ''
+    item = ItuItem.objects.get(id=int(item_id))
+    return render_to_response('monitors/itu_item.html', {'error': error,'message':message,'item':item}, context_instance=RequestContext(request))
+
+def itu_institution(request, institution_id):
+    """Display an institution."""
+    message = ''
+    error = ''
+    institution = ItuInstitution.objects.get(id=int(institution_id))
+    return render_to_response('monitors/itu_institution.html', {'error': error,'message':message,'institution':institution}, context_instance=RequestContext(request))
+
+def itu_genre(request, genre_id):
+    """Display a genre."""
+    message = ''
+    error = ''
+    genre = ItuGenre.objects.get(id=int(genre_id))
+    return render_to_response('monitors/itu_genre.html', {'error': error,'message':message,'genre':genre}, context_instance=RequestContext(request))
+
+def itu_scanlog(request, scanlog_id):
+    """Display a scanlog, along with details of any relevant charts, modified items or modified collections."""
+    message = ''
+    error = ''
+    scanlog = ItuScanLog.objects.get(id=int(scanlog_id))
+    return render_to_response('monitors/itu_scanlog.html', {'error': error,'message':message,'scanlog':scanlog}, context_instance=RequestContext(request))

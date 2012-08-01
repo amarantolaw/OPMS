@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static sitetree %}
+
+{% block sidebar %}
+    {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+    <h3>iTunes U Scanlogs</h3>
+    {% if error != '' %}
+        <div class="alert alert-error">ERROR: {{ error }}</div>
+    {% else %}
+        {% if message != '' %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endif %}
+    {% endif %}
+{% endblock %}

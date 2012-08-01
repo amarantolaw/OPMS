@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static sitetree %}
+
+{% block sidebar %}
+    {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+    {% if error != '' %}
+        <div class="alert alert-error">ERROR: {{ error }}</div>
+    {% else %}
+        <h3>Mode {{ scanlog.mode }} scan on {{ scanlog.time }}</h3>
+        {% if message != '' %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endif %}
+    {% endif %}
+{% endblock %}
