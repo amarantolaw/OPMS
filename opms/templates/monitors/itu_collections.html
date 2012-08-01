@@ -13,5 +13,12 @@
         {% if message != '' %}
             <div class="alert alert-success">{{ message }}</div>
         {% endif %}
+        <div>For performance reasons, viewing all collections simultaneously has not been implemented. Instead, you could try:</div>
+        <ul>
+        <li>Viewing the <a href="{% url itu-top-collections %}">Top Collections Chart</a></li>
+        <li>Looking at the collections uploaded by a particular <a href="{% url itu-institutions %}">institution</a></li>
+        <li>Looking at the collections which belong to a particular <a href="{% url itu-genres %}">genre</a></li>
+        <li>Looking at collections which were updated or added during a particular <a href="{% url itu-scanlogs %}">scan</a></li>
+        </ul>
     {% endif %}
 {% endblock %}

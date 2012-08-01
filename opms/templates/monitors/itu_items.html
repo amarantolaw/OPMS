@@ -13,5 +13,11 @@
         {% if message != '' %}
             <div class="alert alert-success">{{ message }}</div>
         {% endif %}
+        <div>For performance reasons, viewing all items simultaneously has not been implemented. Instead, you could try:</div>
+        <ul>
+            <li>Viewing the <a href="{% url itu-top-items %}">Top Items Chart</a></li>
+            <li>Looking at items which were updated or added during a particular <a href="{% url itu-scanlogs %}">scan</a></li>
+            <li>Finding the collection an item is in, and then viewing the item</li>
+        </ul>
     {% endif %}
 {% endblock %}

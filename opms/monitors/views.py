@@ -189,14 +189,15 @@ def itu_institutions(request):
     """Show a clickable list of all institutions."""
     message = ''
     error = ''
-    institutions = ItuInstitution.objects.order_by('name')
+    institutions = ItuInstitution.objects.all()
     return render_to_response('monitors/itu_institutions.html', {'error': error,'message':message,'institutions':institutions}, context_instance=RequestContext(request))
 
 def itu_genres(request):
     """Show a clickable list of all genres."""
     message = ''
     error = ''
-    return render_to_response('monitors/itu_genres.html', {'error': error,'message':message}, context_instance=RequestContext(request))
+    genres = ItuGenre.objects.all()
+    return render_to_response('monitors/itu_genres.html', {'error': error,'message':message,'genres':genres}, context_instance=RequestContext(request))
 
 def itu_scanlogs(request):
     """Show a clickable list of all scanlogs."""
