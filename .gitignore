@@ -18,6 +18,11 @@ opms/media/
 ##################
 opms/settings.py
 opms/stats/ua_data/cache
+opms/feedback.dot
+opms/feedback.png
+opms/modelviz.py
+opms/monitors.dot
+opms/monitors.png
 
 # OS generated files #
 ######################

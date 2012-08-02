@@ -15,10 +15,11 @@ class Command(LabelCommand):
     help = 'Imports the contents of the specified directory of spreadsheets into the database'
     #option_list = LabelCommand.option_list + (
     #    make_option('--merge', action='store', dest='merge',
-    #        default=False, help='Use this option to add this data to exisiting data, thus summing counts for records.'),
+    #        default=False, help='Use this option to add this data to existing data, thus summing counts for records.'),
     #)
 
     def __init__(self):
+        super(LabelCommand, self).__init__()
         # Toggle debug statements on/off
         self.debug = False
         # Record basic information about the import process for reporting

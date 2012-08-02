@@ -1,6 +1,13 @@
+from __future__ import print_function
+from django.core.management.base import BaseCommand, CommandError
 import urllib2, plistlib
 from xml.parsers import expat
-from lxml import etree
+from lxml import etree, html
+from lxml.html.clean import *
+from dateutil.parser import *
+from django.utils.encoding import smart_unicode
+
+
 #from BeautifulSoup import BeautifulSoup
 
 # First, Apple-store-front is sensitive to use of comma to separate values
@@ -22,6 +29,7 @@ def get_page(url, APPLE_STORE_LANGUAGE = 1):
     ACCEPT = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
     HOST = 'itunes.apple.com'
     ACCEPT_LANGUAGE = 'en-us, en;q=0.50'
+#    print("Requesting " + url)
     request = urllib2.Request(url)
     request.add_header('User-Agent', USER_AGENT)
     request.add_header('X-Apple-Store-Front','%s,%s' % (APPLE_STORE_FRONT, APPLE_STORE_LANGUAGE))
@@ -44,11 +52,11 @@ def get_page(url, APPLE_STORE_LANGUAGE = 1):
                 #print "g_p:4.1"
                 if action.get('kind') == 'Goto':
                     url = action.get('url')
-                    print 'URL Redirection, please goto: %s' % url
+                    print('URL Redirection, please goto: %s' % url)
                     return get_page(url)
                 else:
-                    print 'Unrecognised action: %s' % action.get('kind')
-                    print plist
+                    print('Unrecognised action: %s' % action.get('kind'))
+                    print(plist)
                     return None
                 #print "g_p:4.2"
             except AttributeError:
@@ -62,16 +70,16 @@ def get_page(url, APPLE_STORE_LANGUAGE = 1):
                 #print "g_p:5.2"
                 explanation = plist.get('dialog').get('explanation')
                 #print "g_p:5.3"
-                print "ERROR: This url returned the following messages:"
-                print "%s\n%s" % (message, explanation)
+                print("WARNING: Attempting to download " + url + " returned the following message(s):")
+                print("%s %s" % (message, explanation))
                 return None
             except AttributeError: # If not allow next function to address decoding it
                 #print "g_p:5.4"
                 return data
             #print "g_p:3.4"
         except expat.ExpatError: # Plist barfed on something...
-            print "ExpatError: What sort of plist is this?"
-            print data
+            print("ExpatError: What sort of plist is this?")
+            print(data)
             return None
     return data
 
@@ -81,8 +89,24 @@ def write_page(url, language = 1, filename=''):
         filename = url.replace('http://','').replace('/','_') + '-Lang_' + str(language) + '.xml'
     f = open('./' + filename, 'w')
     f.write(get_page(url, language))
-    print 'Output written to ./' + filename
+    print('Output written to ./' + filename)
     return None
+
+def get_institutions():
+    institutions = []
+    for url in ('http://itunes.apple.com/WebObjects/DZR.woa/wa/viewiTunesUProviders?id=EDU','http://itunes.apple.com/WebObjects/DZR.woa/wa/viewiTunesUProviders?id=ORG','http://itunes.apple.com/WebObjects/DZR.woa/wa/viewiTunesUProviders?id=K12'): #Handle three pages of institutions: "Universities & Colleges", "Beyond Campus" and "K-12"
+        #Throw away lots of junk, and make sure all the tags are properly closed.
+        xml = clean_html(get_page(url,12)).replace('class="badge"></a>','class="badge"/></a>').replace('Choose Store">','Choose Store"/>')
+        root = etree.fromstring(xml)
+        items = root.xpath('/div/body/div/div/div/div/div/div/ul/li/a')
+        print(str(len(items)) + ' items found.')
+        for item in items: # Now have a mix of HBoxViews and Views, around 100 of each...
+            item_dict = {}
+            item_dict['text'] = smart_unicode(item.text)
+            item_dict['url'] = item.get('href')
+            item_dict['itu_id'] = item_dict['url'].split('id=')[1]
+            institutions.append(item_dict)
+    return institutions
 
 # Get Collection info
 def get_collection_info(url):
@@ -97,6 +121,16 @@ def get_collection_info(url):
     if xml == None:
         return info
     root = etree.fromstring(xml)
+
+    #Detect whether any of the items is a movie. If so, set contains_movies to True for this collection.
+    items = root.xpath('.//itms:TrackList/itms:plist/itms:dict/itms:array/itms:dict/itms:string',
+        namespaces={'itms':'http://www.apple.com/itms/'})
+    contains_movies=False
+    for i, item in enumerate(items):
+        if item.text == 'movie':
+            contains_movies=True
+    info['contains_movies']=contains_movies
+
     # Get the Genre (x2), Institution, and Series Name from the Breadcrumb trail for this collection
     items = root.xpath('.//itms:Test/itms:HBoxView/itms:VBoxView/itms:TextView/itms:Color/itms:GotoURL',
                          namespaces={'itms':'http://www.apple.com/itms/'})
@@ -124,6 +158,42 @@ def get_collection_info(url):
             info[k.lower()] = v.strip()
         except ValueError:
             pass
+
+    items = root.xpath('.//itms:VBoxView/itms:MatrixView[@columnFormat="*,*,*"]/itms:VBoxView/itms:HBoxView',
+        namespaces={'itms':'http://www.apple.com/itms/'})
+    info['ratings'] = []
+    for i in items:
+        rating_text = i.get("alt")
+        stars = int(rating_text.split(', ')[0].split(' ')[0])
+        count = int(rating_text.split(', ')[-1].split(' ')[0])
+        info['ratings'].append({'stars': stars, 'count': count})
+
+    info['comments'] = []
+#    try:
+    review_url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?pageNumber=0&type=Podcast&id=' + str(info['series_id']) #This page (unlike the first) contains the complete text of longer, more interesting, comments.
+    review_xml = get_page(review_url)
+    xmls = review_xml.split('<View rightInset=\"0\" topInset=\"10\" bottomInset=\"15\" leftInset=\"10\" height=\"1\" stretchiness=\"1\" backColor=\"4c6d99\"></View>')
+    xmls[0] = ''
+    xmls[len(xmls) - 1] = ''
+    for x in xmls:
+        if x:
+            try:
+                try:
+                    try: #Necessary to deal with anonymous reviews...
+                        source = x.split('<b>')[3].split('</b>')[0].split('\n')[1].split('  ')[-1]
+                        date = parse(x.split('</GotoURL>')[3].split('</SetFontStyle>')[0].split('\n')[3].split('  ')[-1]).date()
+                    except:
+                        source = 'Anonymous'
+                        date = None
+                    detail = x.split('<SetFontStyle normalStyle=\"textColor\">')[4].split('</SetFontStyle>')[0].replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&#39;", "'").replace('&quot;', '"').replace("&#34;", "\"")
+                    rating = int(x.split('<HBoxView topInset="1" alt=\"')[1].split(' star')[0])
+                        #            print('Source: ' + source + ' date: ' + str(date) + ' detail: ' + detail + ' rating: ' + rating + '*')
+                    info['comments'].append({'source': source, 'date': date, 'detail': detail, 'rating': rating})
+                except:
+                    print("WARNING: Failed to parse comment XML properly when scanning " + review_url)
+            except:
+                print('WARNING: Couldn\'t get reviews.')
+
     return info
 
 # Base iTunes U URLS
@@ -133,9 +203,9 @@ def get_collection_info(url):
 # ITEM (in a series) = http://itunes.apple.com/gb/podcast/(BLAH)/id(SERIES-ID)?i=(ITEM-ID)
 
 # Show Top Downloads
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTop?id=27753&popId=40&genreId=40000000'
-def get_topdownloads(url):
-    collection = []
+def get_topdownloads():
+    collections = []
+    url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTop?id=27753&popId=40&genreId=40000000'
     xml = get_page(url)
     root = etree.fromstring(xml)
     items = root.xpath('.//itms:MatrixView/itms:HBoxView',namespaces={'itms':'http://www.apple.com/itms/'})
@@ -149,17 +219,17 @@ def get_topdownloads(url):
                              namespaces={'itms':'http://www.apple.com/itms/'})
         item_dict['item'] = subtree[0].text.strip()
         item_dict['item_url'] = subtree[0].get("url")
-        item_dict['item_id'] = item_dict['item_url'].split('/')[-1].split('?')[-1].split('=')[-1]
+        item_dict['item_id'] = item_dict['item_url'].split('/')[-1].split('?')[-1].split('&amp;')[0].split('=')[-1]
         # item_dict['item_info'] = get_collection_info(item_dict.get('item_url'))
         item_dict = dict(item_dict.items() + get_collection_info(item_dict.get('item_url')).items())
-        collection.append(item_dict)
-    return collection
+        collections.append(item_dict)
+    return collections
 
 
 # Show Top Collections
-url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTop?id=27753&popId=36&genreId=40000000'
-def get_topcollections(url):
-    collection = []
+def get_topcollections():
+    collections = []
+    url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTop?id=27753&popId=36&genreId=40000000'
     xml = get_page(url)
     root = etree.fromstring(xml)
     items = root.xpath('.//itms:MatrixView/itms:HBoxView',namespaces={'itms':'http://www.apple.com/itms/'})
@@ -173,8 +243,8 @@ def get_topcollections(url):
         item_dict['series_img_75'] = item[2][0][0][0][0].get("url")
         item_dict['publisher_name'] = sub[1].text.strip()
         item_dict = dict(item_dict.items() + get_collection_info(sub[0].get("url")).items())
-        collection.append(item_dict)
-    return collection
+        collections.append(item_dict)
+    return collections
 
 
 ## Parse Oxford Collections
@@ -201,33 +271,69 @@ def get_topcollections(url):
 #url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=13&mt=10"
 #url = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?sortMode=1&id=381699182&batchNumber=14&mt=10" # For a 15 page result, batchNumber 14 is last call
 
-def get_institution_collections(url):
-    collection = []
-    xml = get_page(url)
-    root = etree.fromstring(xml)
-    items = root.xpath('.//itms:MatrixView/itms:VBoxView/itms:TextView/itms:SetFontStyle/itms:GotoURL',
-                       namespaces={'itms':'http://www.apple.com/itms/'})
-    for i,item in enumerate(items): # Now have a mix of HBoxViews and Views, around 100 of each...
-        #print item.get('url')
-        #print item.text.lower().strip()
-        if not item.text.lower().strip().startswith('category'):
-            collection.append(get_collection_info(item.get('url')))
-            #print "GETTING DATA!!"
-    items = root.xpath('.//itms:VBoxView/itms:VBoxView/itms:VBoxView/itms:HBoxView/itms:VBoxView/itms:GotoURL/itms:PictureButtonView[@alt="next page"]/../@url',namespaces={'itms':'http://www.apple.com/itms/'}) # Looking for the follow on page links...
-    if len(items) == 1:
-        next_page_url = items[0]
-        # print 'Next URL is: %s' % next_page_url
-        collection = collection + get_institution_collections(next_page_url)
-    return collection
+def get_institution_collections(i):
+    collections = []
+#    try:
+#        url = i.url
+#        next_page = True
+#        while next_page:
+#            xml = get_page(url)
+#            if not xml:
+#                raise ValueError("Empty page at " + url)
+#            root = etree.fromstring(xml)
+#            items = root.xpath('.//itms:MatrixView/itms:VBoxView/itms:TextView/itms:SetFontStyle/itms:GotoURL',
+#                               namespaces={'itms':'http://www.apple.com/itms/'})
+#            if not items:
+#                raise ValueError("No collections found at " + url)
+#            for i,item in enumerate(items): # Now have a mix of HBoxViews and Views, around 100 of each...
+#                #print item.text.lower().strip()
+#                #print(item.get('url'))
+#                if not item.text.lower().strip().startswith('category'):
+#                    collection = get_collection_info(item.get('url'))
+#                    if collection:
+#                        collections.append(collection)
+#
+#            items = root.xpath('.//itms:VBoxView/itms:VBoxView/itms:VBoxView/itms:HBoxView/itms:VBoxView/itms:GotoURL/itms:PictureButtonView[@alt="next page"]/../@url',namespaces={'itms':'http://www.apple.com/itms/'}) # Looking for the follow on page links...
+#            if len(items) == 1:
+#                url = items[0]
+#            #        print 'Next URL is: %s' % url
+#            else:
+#                next_page = False
+#    except ValueError: #Institutions with courses give a ValueError, so we have to use a different method to get the links to their collection pages.
+    try:
+        page = 1
+        added_collections = True
+        while added_collections:
+            url = 'http://itunes.apple.com/WebObjects/DZR.woa/wa/viewTopCollections?id=' + str(i.itu_id) + '&page=' + str(page)
+    #            print(xml)
+            xml = get_page(url,12)
+            if xml:
+                #Throw away lots of junk, and make sure all the tags are properly closed.
+                xml = clean_html(xml).replace('png"></div>','png"/></div>').replace('<img width="30" height="30" alt="My Store: United Kingdom, Choose Store"></a>','<img width="30" height="30" alt="My Store: United Kingdom, Choose Store"/></a>')
+                root = etree.fromstring(xml)
+                items = root.xpath('/div/body/div/div/div/div/div/div/ul/li[@class="name"]/a')
+                if not items:
+                    added_collections = False
+                for item in items:
+                    print(item.text)
+                    collection = get_collection_info(item.get('href'))
+                    if collection:
+                        collections.append(collection)
+                page += 1
+            else:
+                added_collections = False
+    except:
+        raise CommandError("Failed to parse XML.")
+    return collections
 
 
 def get_collection_items(url):
     try:
         xml = get_page(url)
     except ValueError: # If there's a bad URL, skip this link
-        return stats
+        return None
     if xml == None:
-        return stats
+        return None
     root = etree.fromstring(xml)
     # Get the tracklisting for this collection
     items = root.xpath('.//itms:TrackList',namespaces={'itms':'http://www.apple.com/itms/'})
@@ -238,17 +344,17 @@ def get_collection_items(url):
 # Get data about a single collection, in this instance Critical Reasoning for Begineers (Audio)
 url = 'http://itunes.apple.com/gb/itunes-u/critical-reasoning-for-beginners/id387875756'
 def get_collection_statistics(url):
+    stats = {}
     try:
         xml = get_page(url)
     except ValueError: # If there's a bad URL, skip this link
-        return stats
+        return None
     if xml == None:
-        return stats
+        return None
     root = etree.fromstring(xml)
     # Get the tracklisting for this collection
     items = root.xpath('.//itms:TrackList',namespaces={'itms':'http://www.apple.com/itms/'})
     plist = plistlib.readPlistFromString(etree.tostring(items[0]))
-    stats = {}
     stats['total_duration_in_seconds'] = 0
     stats['total_number_of_items'] = len(plist.get('items'))
     stats['item_counts_by_kind'] = {}
@@ -278,13 +384,13 @@ def get_collection_statistics(url):
     except IndexError:
         pass
     # print stats
-    print "Feed duration: %s seconds across %s (non-zero) items (Max:%s sec ; Min:%s sec) %s Items in total. " % (
+    print("Feed duration: %s seconds across %s (non-zero) items (Max:%s sec ; Min:%s sec) %s Items in total. " % (
         stats['total_duration_in_seconds'],
         len(stats['list_of_nonzero_durations']),
         stats['longest_duration_in_seconds'],
         stats['shortest_duration_in_seconds'],
         stats['total_number_of_items']
-    )
+    ))
     return stats
 
 def get_overall_statistics(url):
@@ -304,9 +410,9 @@ def get_overall_statistics(url):
     stats['item_counts_by_genre'] = {}
     stats['total_number_of_explicit_items'] = 0
     stats['mean_average_duration_of_items'] = 0
-    print 'Analysing %s series' % len(tc)
+    print('Analysing %s series' % len(tc))
     for i, series in enumerate(tc):
-        print "Analysing: %s) %s" % (i, series.get('series_name'))
+        print("Analysing: %s) %s" % (i, series.get('series_name')))
         collection_stats = get_collection_statistics(series.get('series_url'))
         stats['total_duration_in_seconds'] += int(collection_stats.get('total_duration_in_seconds',0))
         stats['list_of_durations'] += collection_stats.get('list_of_durations',[])
@@ -332,25 +438,25 @@ def get_overall_statistics(url):
     stats['mean_average_duration_of_items'] = int(stats['total_duration_in_seconds'] / len(stats['list_of_nonzero_durations']))
     hours = int(stats['total_duration_in_seconds']/60/60)
     minutes = int((stats['total_duration_in_seconds'] - (hours*60*60))/60)
-    print "There were %s items across %s feeds" % (stats['total_number_of_items'], len(tc))
-    print "Total duration is %s Hours and %s Minutes" % (hours, minutes)
-    print "Average duration for an item is %s seconds" % stats['mean_average_duration_of_items']
-    print "Durations ranged from %s to %s throughout the collection" % (stats['longest_duration_in_seconds'], stats['shortest_duration_in_seconds'])
+    print("There were %s items across %s feeds" % (stats['total_number_of_items'], len(tc)))
+    print("Total duration is %s Hours and %s Minutes" % (hours, minutes))
+    print("Average duration for an item is %s seconds" % stats['mean_average_duration_of_items'])
+    print("Durations ranged from %s to %s throughout the collection" % (stats['longest_duration_in_seconds'], stats['shortest_duration_in_seconds']))
     perc = float(
         float(len(stats['list_of_durations'])-len(stats['list_of_nonzero_durations'])) /
         len(stats['list_of_durations'])
     ) * 100
-    print "%s%% of the collection have a zero duration" % str(perc)[:4]
-    print "Breakdown of collection by Genre:"
-    print stats.get('item_counts_by_genre',{})
+    print("%s%% of the collection have a zero duration" % str(perc)[:4])
+    print("Breakdown of collection by Genre:")
+    print(stats.get('item_counts_by_genre',{}))
     #for k,v in stats.get('item_counts_by_genre',{}):
     #    print "%s : %s" % (k,v)
-    print "Breakdown of collection by File Extension:"
-    print stats.get('item_counts_by_fileExtension',{})
+    print("Breakdown of collection by File Extension:")
+    print(stats.get('item_counts_by_fileExtension',{}))
     #for k,v in stats.get('item_counts_by_fileExtension',{}):
     #    print "%s : %s" % (k,v)
-    print "Breakdown of collection by Kind:"
-    print stats.get('item_counts_by_kind',{})
+    print("Breakdown of collection by Kind:")
+    print(stats.get('item_counts_by_kind',{}))
     #for k,v in stats.get('item_counts_by_kind',{}):
     #    print "%s : %s" % (k,v)
     # print stats
@@ -491,7 +597,7 @@ def get_overall_statistics(url):
 
 # Test what all the STORE LANGUAGE values do for us...
 def test_responses(url):
-    print "test_responses(%s) called" % url
+    print("test_responses(%s) called" % url)
     USER_AGENT = 'iTunes/10.5.1 (Macintosh; Intel Mac OS X 10.6.8) AppleWebKit/534.51.22'
     APPLE_STORE_FRONT = '143444'
     APPLE_TZ = '0'
@@ -516,35 +622,35 @@ def test_responses(url):
                 try:
                     action = plist.get('action')
                     if action.get('kind') == 'Goto':
-                        print "1.1"
+                        print("1.1")
                         url = action.get('url')
                         output = 'URL Redirection, please goto: %s ' % url
                         output += str(test_responses(url))
-                        print "1.2"
+                        print("1.2")
                         return None
                     else:
-                        print "2.1"
+                        print("2.1")
                         output = 'Unrecognised action: %s \n' % action.get('kind')
                         output += repr(plist)
-                        print "2.2"
+                        print("2.2")
                 except AttributeError:
-                    print "3.1"
+                    print("3.1")
                     output = "AttributeError: What sort of plist is this?\n" + str(data)
-                    print "3.2"
+                    print("3.2")
             except expat.ExpatError:
                 # Plist barfed on something...
-                print "4.1"
+                print("4.1")
                 output = "ExpatError: What sort of plist is this?\n" + str(data)
-                print "4.2"
+                print("4.2")
         else:
             # Assume HTML and send that back out...
-            print "5.1"
+            print("5.1")
             output = str(data)
-            print "5.2"
+            print("5.2")
         filename = url.replace('http://','').replace('/','_') + '-Lang_' + str(i) + '.xml'
         f = open('./' + filename, 'w')
         f.write(output)
-        print 'Output written to ./' + filename
+        print('Output written to ./' + filename)
     return None
 
 #urls = [
