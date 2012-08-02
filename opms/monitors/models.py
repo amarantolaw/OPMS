@@ -55,7 +55,7 @@ class URLMonitorScan(models.Model):
 ######
 
 class ItuScanLog(models.Model):
-    MODE_CHOICES = (
+    CHOICES = (
         (0,"Unknown"),
         (1,"Institutional Scan"),
         (2,"Top Collections Scan"),
@@ -63,12 +63,13 @@ class ItuScanLog(models.Model):
         (4,"Institutions Scan")
         )
     time = models.DateTimeField(auto_now_add=True)
-    mode = models.SmallIntegerField(default=0, choices=MODE_CHOICES) # Zero = Unknown mode
+    mode = models.SmallIntegerField(default=0, choices=CHOICES) # Zero = Unknown mode
     comments = models.TextField(null=True)
     complete = models.BooleanField(default=False)
+    institution = models.ForeignKey("ItuInstitution", null=True, blank=True)
 
-    def mode_string(self,MODE_CHOICES=MODE_CHOICES):
-        for mc in MODE_CHOICES:
+    def mode_string(self,CHOICES=CHOICES):
+        for mc in CHOICES:
             if mc[0] == self.mode:
                 return mc[1]
     class Meta:
@@ -80,7 +81,7 @@ class ItuScanLog(models.Model):
 
 class ItuGenre(models.Model):
     name = models.CharField(max_length=255)
-    itu_id = models.IntegerField("iTunes U ID")
+    itu_id = models.IntegerField("iTunes U ID") #666 codes for unknown.
     url = models.URLField()
 
     class Meta:
@@ -104,11 +105,14 @@ class ItuInstitution(models.Model):
 
 class ItuItem(models.Model):
     institution = models.ForeignKey(ItuInstitution)
+    latest = models.ForeignKey("ItuItemHistorical", null=True, default=None, related_name="latest_historical_item_record")
 
-    def latest(self):
+    def find_latest(self):
+        print('WARNING: Using find_latest will be inefficient! Don\'t do it!')
         hrecords = ItuItemHistorical.objects.filter(ituitem=self).order_by('version')
         return hrecords[len(hrecords) - 1]
-    def original(self):
+    def find_original(self):
+        print('WARNING: Using find_original will be inefficient! Don\'t do it!')
         hrecords = ItuItemHistorical.objects.filter(ituitem=self).order_by('version')
         return hrecords[0]
 
@@ -116,15 +120,21 @@ class ItuItem(models.Model):
         verbose_name = "iTunes U Item"
         verbose_name_plural = "iTunes U Items"
     def __unicode__(self):
-        return smart_unicode(self.latest().name)
+        try:
+            return smart_unicode(self.latest.name)
+        except:
+            return u'Unattached absolute item record.'
 
 class ItuCollection(models.Model):
     institution = models.ForeignKey(ItuInstitution)
+    latest = models.ForeignKey("ItuCollectionHistorical", null=True, default=None, related_name="latest_historical_collection_record")
 
-    def latest(self):
+    def find_latest(self):
+        print('WARNING: Using find_latest will be inefficient! Don\'t do it!')
         hrecords = ItuCollectionHistorical.objects.filter(itucollection=self).order_by('version')
         return hrecords[len(hrecords) - 1]
-    def original(self):
+    def find_original(self):
+        print('WARNING: Using find_original will be inefficient! Don\'t do it!')
         hrecords = ItuCollectionHistorical.objects.filter(itucollection=self).order_by('version')
         return hrecords[0]
 
@@ -132,7 +142,10 @@ class ItuCollection(models.Model):
         verbose_name = "iTunes U Collection"
         verbose_name_plural = "iTunes U Collections"
     def __unicode__(self):
-        return smart_unicode(self.latest().name)
+        try:
+            return smart_unicode(self.latest.name)
+        except:
+            return u'Unattached absolute collection record.'
 
 
 class ItuCollectionHistorical(models.Model):
@@ -193,7 +206,7 @@ class ItuCollectionHistorical(models.Model):
         else:
             return None
 
-    def rating_checksum(self):
+    def rating_checksum(self): #Generate a checksum from all the ratings attached to this historical collection record to allow easy (and slightly faster) comparisons.
         checksum = 0
         for rating in ItuRating.objects.filter(itucollectionhistorical=self):
             checksum += pow(10,rating.stars) + (rating.count/1000000000)
@@ -202,6 +215,10 @@ class ItuCollectionHistorical(models.Model):
     class Meta:
         verbose_name = "iTunes U Historical Record of Collection"
         verbose_name_plural = "iTunes U Historical Records of Collections"
+    def save(self): #Update absolute record so that the last-saved historical record is the latest record.
+        super(ItuCollectionHistorical, self).save()
+        self.itucollection.latest = self
+        self.itucollection.save()
     def __unicode__(self):
         return smart_unicode('%s, %s' % (self.name,str(self.scanlog.time)))
 
@@ -267,12 +284,16 @@ class ItuItemHistorical(models.Model):
         n = self.next()
         while n:
             l = n
-            n = l.next
+            n = l.next()
         return l
 
     class Meta:
         verbose_name = "iTunes U Historical Record of Item"
         verbose_name_plural = "iTunes U Historical Records of Items"
+    def save(self): #Update absolute record so that the last-saved historical record is the latest record.
+        super(ItuItemHistorical, self).save()
+        self.ituitem.latest = self
+        self.ituitem.save()
     def __unicode__(self):
         return smart_unicode('%s, %s' % (self.name,str(self.scanlog.time)))
 
@@ -323,6 +344,7 @@ class ItuComment(models.Model):
     date = models.DateField(null=True, blank=True)
     detail = models.CharField(max_length=10000)
     source = models.CharField(max_length=100)
+    ituinstitution = models.ForeignKey(ItuInstitution, verbose_name="Institution")
 
     class Meta:
         verbose_name = "iTunes U Comment"

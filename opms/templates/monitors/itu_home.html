@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static sitetree %}
+
+{% block sidebar %}
+    {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+    <h3>iTunes U Monitoring</h3>
+    {% if error != '' %}
+        <div class="alert alert-error">ERROR: {{ error }}</div>
+    {% else %}
+        {% if message != '' %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endif %}
+        <div>The iTunes U Monitoring app allows the presentation of academic podcasts on iTunes to be tracked.</div>
+        <br/>
+        <a href="{% url itu-institution institution_id=oxford.id %}" class="btn btn-primary btn-large">Oxford University <i class="icon-chevron-right"></i></a>
+    {% endif %}
+{% endblock %}

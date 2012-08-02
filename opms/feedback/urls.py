@@ -5,5 +5,5 @@ urlpatterns = patterns('feedback.views',
     url(r'^$', 'index', name="index"),
     url(r'^comment/$', 'comment_add', name="comment-add"),
     url(r'^event/$', 'event_add', name="event-add"),
-    url(r'^email/$', 'email', name="email"),
+#    url(r'^email/$', 'email', name="email"),
 )

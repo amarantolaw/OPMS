@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static sitetree %}
+
+{% block head %}
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection" />
+    <script>
+        $(document).ready(function()
+                {
+                    $("#institutionTable").tablesorter({ sortList: [[0,0]] });
+                }
+        );
+    </script>
+{% endblock %}
+
+{% block sidebar %}
+    {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+    <h3>iTunes U Institutions</h3>
+    {% if error != '' %}
+        <div class="alert alert-error">ERROR: {{ error }}</div>
+    {% else %}
+        {% if message != '' %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endif %}
+        <table id="institutionTable" class="tablesorter">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if institutions|length == 0 %}
+                <tr>
+                    <td></td>
+                    <td></td>
+                </tr>
+            {% endif %}
+            {% for i in institutions %}
+                <tr>
+                    <td><a href="{% url itu-institution institution_id=i.id %}">{{ i.name }}</a></td>
+                    <td><a href="{{ i.url }}">iTunes U</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

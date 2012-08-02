@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% load static sitetree %}
+
+{% block head %}
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection"/>
+{% endblock %}
+
+{% block sidebar %}
+    {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+    {% if error != '' %}
+        <div class="alert alert-error">ERROR: {{ error }}</div>
+    {% else %}
+        {% if scanlog.institution %}
+            <h3>{{ scanlog.get_mode_display }} of <a href="{% url itu-institution institution_id=scanlog.institution.id %}">{{ scanlog.institution.name }}</a> on {{ scanlog.time }}</h3>
+        {% else %}
+            <h3>{{ scanlog.get_mode_display }} on {{ scanlog.time }}</h3>
+        {% endif %}
+        {% if not scanlog.complete %}
+            <div class="alert">WARNING: This scan is incomplete. This could be because the scan is in progress (reload
+                in a few minutes), or could be because it crashed.
+            </div>
+        {% endif %}
+        {% if message != '' %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endif %}
+        {% if scanlog.comments %}
+            <div class="alert alert-info">{{ scanlog.comments }}</div>
+        {% endif %}
+        {% if new_collections or updated_collections or missing_collections or new_items or updated_items or missing_items %}
+            <div>The following updates were made during this scan:</div>
+        {% else %}
+            <div>No updates were made during this scan.</div>
+        {% endif %}
+        {% if new_collections %}
+            <h4><a data-toggle="collapse" href="#collapseOne" class="btn btn-info" style="width:45%; text-align:left">New
+                Collections</a></h4>
+            <script>
+                $(document).ready(function () {
+                            $("#newCollectionTable").tablesorter({ sortList:[
+                                [2, 0]
+                            ], headers:{ 1:{ sorter:'shortDate'} }
+                            });
+                        }
+                );
+            </script>
+            <div id="collapseOne" class="collapse">
+                <table id="newCollectionTable" class="tablesorter">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Last modified</th>
+                        <th>Genre</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for c in new_collections %}
+                        {% with latest=c.latest %}
+                            <tr>
+                                <td><a href="{% url itu-collection collection_id=c.id %}">{{ latest.name }}</a></td>
+                                <td style="width: 12% ">{{ latest.last_modified|date:"M d, Y" }}</td>
+                                {% with genre=latest.genre %}
+                                    <td><a href="{% url itu-genre genre_id=genre.id %}">{{ genre.name }}</a></td>
+                                {% endwith %}
+                            </tr>
+                        {% endwith %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+        {% if updated_collections %}
+            <h4><a data-toggle="collapse" href="#collapseTwo" class="btn btn-info" style="width:45%; text-align:left">Updated
+                Collections</a></h4>
+            <script>
+                $(document).ready(function () {
+                            $("#updatedCollectionTable").tablesorter({ sortList:[
+                                [3, 0]
+                            ], headers:{ 2:{ sorter:'shortDate'} }
+                            });
+                        }
+                );
+            </script>
+            <div id="collapseTwo" class="collapse">
+                <table id="updatedCollectionTable" class="tablesorter">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Version</th>
+                        <th>Last modified</th>
+                        <th>Genre</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for c in updated_collections %}
+                        {% with latest=c.latest %}
+                            <tr>
+                                <td><a href="{% url itu-collection collection_id=c.id %}">{{ latest.name }}</a></td>
+                                <td>{{ latest.version }}</td>
+                                <td style="width: 12% ">{{ latest.last_modified|date:"M d, Y" }}</td>
+                                {% with genre=latest.genre %}
+                                    <td><a href="{% url itu-genre genre_id=genre.id %}">{{ genre.name }}</a></td>
+                                {% endwith %}
+                            </tr>
+                        {% endwith %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+        {% if missing_collections %}
+            <h4><a data-toggle="collapse" href="#collapseThree" class="btn btn-info" style="width:45%; text-align:left">Collections
+                found to have gone missing</a></h4>
+            <script>
+                $(document).ready(function () {
+                            $("#missingCollectionTable").tablesorter({ sortList:[
+                                [3, 0]
+                            ], headers:{ 2:{ sorter:'shortDate'} }
+                            });
+                        }
+                );
+            </script>
+            <div id="collapseThree" class="collapse">
+                <table id="missingCollectionTable" class="tablesorter">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Version</th>
+                        <th>Last modified</th>
+                        <th>Genre</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for c in missing_collections %}
+                        {% with latest=c.latest %}
+                            <tr>
+                                <td><a href="{% url itu-collection collection_id=c.id %}">{{ latest.name }}</a></td>
+                                <td>{{ latest.version }}</td>
+                                <td style="width: 12% ">{{ latest.last_modified|date:"M d, Y" }}</td>
+                                {% with genre=latest.genre %}
+                                    <td><a href="{% url itu-genre genre_id=genre.id %}">{{ genre.name }}</a></td>
+                                {% endwith %}
+                            </tr>
+                        {% endwith %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+        {% if new_items %}
+            <h4><a data-toggle="collapse" href="#collapseFour" class="btn btn-info" style="width:45%; text-align:left">New
+                Items</a></h4>
+            <script>
+                $(document).ready(function () {
+                            $("#newItemTable").tablesorter({sortList:[
+                                [1, 0]
+                            ]});
+                        }
+                );
+            </script>
+            <div id="collapseFour" class="collapse">
+                <table id="newItemTable" class="tablesorter">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Collection</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for i in new_items %}
+                        {% with latest=i.latest %}
+                            <tr>
+                                <td><a href="{% url itu-item item_id=i.id %}">{{ latest.name }}</a></td>
+                                {% with collection=latest.series.itucollection %}
+                                    <td>
+                                        <a href="{% url itu-collection collection_id=collection.id %}">{{ collection.latest.name }}</a>
+                                    </td>
+                                {% endwith %}
+                            </tr>
+                        {% endwith %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+        {% if updated_items %}
+            <h4><a data-toggle="collapse" href="#collapseFive" class="btn btn-info" style="width:45%; text-align:left">Updated
+                Items</a></h4>
+            <script>
+                $(document).ready(function () {
+                            $("#updatedItemTable").tablesorter({sortList:[
+                                [2, 0]
+                            ]});
+                        }
+                );
+            </script>
+            <div id="collapseFive" class="collapse">
+                <table id="updatedItemTable" class="tablesorter">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Version</th>
+                        <th>Collection</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for i in updated_items %}
+                        {% with latest=i.latest %}
+                            <tr>
+                                <td><a href="{% url itu-item item_id=i.id %}">{{ latest.name }}</a></td>
+                                <td>{{ latest.version }}</td>
+                                {% with collection=latest.series.itucollection %}
+                                    <td>
+                                        <a href="{% url itu-collection collection_id=collection.id %}">{{ collection.latest.name }}</a>
+                                    </td>
+                                {% endwith %}
+                            </tr>
+                        {% endwith %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+        {% if missing_items %}
+            <h4><a data-toggle="collapse" href="#collapseSix" class="btn btn-info" style="width:45%; text-align:left">Items
+                found to have gone missing</a></h4>
+            <script>
+                $(document).ready(function () {
+                            $("#missingItemTable").tablesorter({sortList:[
+                                [2, 0]
+                            ]});
+                        }
+                );
+            </script>
+            <div id="collapseSix" class="collapse">
+                <table id="missingItemTable" class="tablesorter">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Version</th>
+                        <th>Collection</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for i in missing_items %}
+                        {% with latest=i.latest %}
+                            <tr>
+                                <td><a href="{% url itu-item item_id=i.id %}">{{ latest.name }}</a></td>
+                                <td>{{ latest.version }}</td>
+                                {% with collection=latest.series.itucollection %}
+                                    <td>
+                                        <a href="{% url itu-collection collection_id=collection.id %}">{{ collection.latest.name }}</a>
+                                    </td>
+                                {% endwith %}
+                            </tr>
+                        {% endwith %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}

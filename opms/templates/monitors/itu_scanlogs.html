@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static sitetree %}
+
+{% block head %}
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection" />
+    <script>
+        $(document).ready(function()
+                {
+                    $("#scanlogTable").tablesorter({ sortList: [[0,1]], headers: { 0: { sorter: 'shortDate'} }
+                });
+                }
+        );
+    </script>
+{% endblock %}
+
+{% block sidebar %}
+    {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+    <h3>iTunes U Scanlogs</h3>
+    {% if error != '' %}
+        <div class="alert alert-error">ERROR: {{ error }}</div>
+    {% else %}
+        {% if message != '' %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endif %}
+        <table id="scanlogTable" class="tablesorter">
+            <thead>
+            <tr>
+                <th>Time</th>
+                <th>Mode</th>
+                <th>Comments</th>
+                <th>Complete?</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if scanlogs|length == 0 %}
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            {% endif %}
+            {% for s in scanlogs %}
+                <tr>
+                    {% if s.mode == 4 %}
+                        <td>{{ s.time|date:"M d, Y f A" }}</td>
+                    {% else %}
+                        <td><a href="{% url itu-scanlog scanlog_id=s.id %}">{{ s.time|date:"M d, Y f A" }}</a></td>
+                    {% endif %}
+                    <td>{{ s.get_mode_display }}</td>
+                    <td>{% if s.institution %}Scan of <a href="{% url itu-institution institution_id=s.institution.id %}">{{ s.institution.name }}</a>. {% endif %}{{ s.comments }}</td>
+                    <td>{% if s.complete %}
+                            <i class="icon-ok"></i>
+                        {% else %}
+                            <i class="icon-warning-sign"></i>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

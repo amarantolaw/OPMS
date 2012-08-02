@@ -73,14 +73,15 @@ def index(request, error='', message=''):
     for c in categories_to_plot:
         if c.description == 'From iTunes U':
             for itu_comment in ItuComment.objects.all():
-                comments_to_plot.append(Comment(
-                    date=itu_comment.date,
-                    time=datetime.time(0,0,0),
-                    source=itu_comment.source,
-                    detail=itu_comment.detail,
-                    user_email='scan_itunes@manage.py',
-                    category=c
-                ))
+                if itu_comment.ituinstitution.name == u'Oxford University':
+                    comments_to_plot.append(Comment(
+                        date=itu_comment.date,
+                        time=datetime.time(0,0,0),
+                        source=itu_comment.itucollectionhistorical.name + ' - comment by ' + itu_comment.source,
+                        detail=itu_comment.detail,
+                        user_email='scan_itunes@manage.py',
+                        category=c
+                    ))
 
     return render_to_response('feedback/index.html', {
         'metrics_to_plot': metrics_to_plot,

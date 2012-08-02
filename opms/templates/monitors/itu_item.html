@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static sitetree %}
+
+{% block sidebar %}
+    {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+    {% if error != '' %}
+        <div class="alert alert-error">ERROR: {{ error }}</div>
+    {% else %}
+        <div>
+            <img style="float:right; margin-left:10px" src="{{ item.latest.series.img170 }}"/>
+
+            <h3>{{ item.latest.name }} {% if item.latest.explicit %}<span class="badge badge-important">
+                Explicit</span>{% endif %}</h3>
+            {% if message != '' %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endif %}
+            <div>Part #{{ item.latest.rank }} of <a
+                    href="{% url itu-institution institution_id=item.institution.id %}">{{ item.institution.name }}</a>'s
+                collection "<a
+                        href="{% url itu-collection collection_id=item.latest.series.itucollection.id%}">{{ item.latest.series.name }}</a>"
+            </div>
+            <div>Artist: {{ item.latest.artist_name }}</div>
+            <div>Genre: <a href="{% url itu-genre genre_id=item.latest.genre.id %}">{{ item.latest.genre.name }}</a>
+            </div>
+            <div>"<i>{{ item.latest.long_description }}</i>"</div>
+            <div>Release date: {{ item.latest.release_date }} | Kind: {{ item.latest.kind }} | File
+                extension: {{ item.latest.file_extension }} | Duration: {{ item.latest.duration }} ms
+            </div>
+            <div>Latest stored version is version {{ item.latest.version }}, scanned on <a
+                    href="{% url itu-scanlog scanlog_id=item.latest.scanlog.id %}">{{ item.latest.scanlog.time }}</a>
+            </div>
+            <div style="text-align: right"><a href="{{ item.latest.url }}">View in iTunes</a></div>
+        </div>
+        {% if chartrecords %}
+            <h4><a data-toggle="collapse" href="#collapseOne" class="btn btn-info" style="width:45%; text-align:left">Appearances
+                in the Top Items Chart</a></h4>
+            <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
+            <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
+            <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection"/>
+            <script>
+                $(document).ready(function () {
+                            $("#chartTable").tablesorter({ sortList:[
+                                [0, 1]
+                            ], headers:{ 0:{ sorter:'shortDate'} }
+                            });
+                        }
+                );
+            </script>
+            <div id="collapseOne" class="collapse">
+                <table id="chartTable" class="tablesorter">
+                    <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Position</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for c in chartrecords %}
+                        <tr>
+                            <td>{{ c.date|date:"M d, Y f A" }}</td>
+                            <td>{{ c.position }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}
