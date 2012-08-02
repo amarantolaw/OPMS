@@ -228,14 +228,18 @@ def itu_institution(request, institution_id):
     message = ''
     error = ''
     institution = ItuInstitution.objects.get(id=int(institution_id))
-    return render_to_response('monitors/itu_institution.html', {'error': error,'message':message,'institution':institution}, context_instance=RequestContext(request))
+    comments = ItuComment.objects.filter(ituinstitution=institution)
+    collections = ItuCollection.objects.filter(institution=institution)
+    return render_to_response('monitors/itu_institution.html', {'error': error,'message':message,'institution':institution,'comments':comments,'collections':collections}, context_instance=RequestContext(request))
 
 def itu_genre(request, genre_id):
     """Display a genre."""
     message = ''
     error = ''
     genre = ItuGenre.objects.get(id=int(genre_id))
-    return render_to_response('monitors/itu_genre.html', {'error': error,'message':message,'genre':genre}, context_instance=RequestContext(request))
+    comments = ItuComment.objects.filter(itucollectionhistorical__genre=genre)
+    collections = ItuCollection.objects.filter(latest__genre=genre)
+    return render_to_response('monitors/itu_genre.html', {'error': error,'message':message,'genre':genre,'comments':comments,'collections':collections}, context_instance=RequestContext(request))
 
 def itu_scanlog(request, scanlog_id):
     """Display a scanlog, along with details of any relevant charts, modified items or modified collections."""
