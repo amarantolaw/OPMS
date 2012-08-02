@@ -16,7 +16,7 @@
         <div class="alert alert-error">ERROR: {{ error }}</div>
     {% else %}
         {% if scanlog.institution %}
-            <h3>{{ scanlog.get_mode_display }} of {{ scanlog.institution.name }} on {{ scanlog.time }}</h3>
+            <h3>{{ scanlog.get_mode_display }} of <a href="{% url itu-institution institution_id=scanlog.institution.id %}">{{ scanlog.institution.name }}</a> on {{ scanlog.time }}</h3>
         {% else %}
             <h3>{{ scanlog.get_mode_display }} on {{ scanlog.time }}</h3>
         {% endif %}

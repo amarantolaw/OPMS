@@ -53,7 +53,7 @@
                         <td><a href="{% url itu-scanlog scanlog_id=s.id %}">{{ s.time|date:"M d, Y f A" }}</a></td>
                     {% endif %}
                     <td>{{ s.get_mode_display }}</td>
-                    <td>{% if s.institution %}Scan of {{ s.institution.name }}. {% endif %}{{ s.comments }}</td>
+                    <td>{% if s.institution %}Scan of <a href="{% url itu-institution institution_id=s.institution.id %}">{{ s.institution.name }}</a>. {% endif %}{{ s.comments }}</td>
                     <td>{% if s.complete %}
                             <i class="icon-ok"></i>
                         {% else %}
