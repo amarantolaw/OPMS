@@ -70,6 +70,7 @@ class Command(BaseCommand):
                 institution = ItuInstitution.objects.filter(name__iexact=institution_name)[0]
             except:
                 self._errorlog(institution_name + u" is not a recognised institution.")
+                scanlog.delete()
                 return False
 
             scanlog.institution = institution
