@@ -25,7 +25,7 @@
         <div class="alert alert-error">ERROR: {{ error }}</div>
     {% else %}
         {% if not scanlog.complete %}
-            <div class="alert">WARNING: The latest scan is incomplete. This could be because the scan is in progress (reload in a few minutes), or could be because it crashed.</div>
+            <div class="alert">WARNING: This scan is incomplete. This could be because the scan is in progress (reload in a few minutes), or could be because it crashed.</div>
         {% endif %}
         {% if message != '' %}
             <div class="alert alert-success">{{ message }}</div>

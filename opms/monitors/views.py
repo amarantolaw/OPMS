@@ -160,7 +160,8 @@ def itu_home(request):
     """Show a mock version of the iTunes U home page."""
     message = ''
     error = ''
-    return render_to_response('monitors/itu_home.html', {'error': error, 'message': message},
+    oxford = ItuInstitution.objects.get(name="Oxford University")
+    return render_to_response('monitors/itu_home.html', {'error': error, 'message': message, 'oxford': oxford},
         context_instance=RequestContext(request))
 
 
