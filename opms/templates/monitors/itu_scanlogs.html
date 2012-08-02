@@ -47,7 +47,11 @@
             {% endif %}
             {% for s in scanlogs %}
                 <tr>
-                    <td><a href="{% url itu-scanlog scanlog_id=s.id %}">{{ s.time|date:"M d, Y f A" }}</a></td>
+                    {% if s.mode == 4 %}
+                        <td>{{ s.time|date:"M d, Y f A" }}</td>
+                    {% else %}
+                        <td><a href="{% url itu-scanlog scanlog_id=s.id %}">{{ s.time|date:"M d, Y f A" }}</a></td>
+                    {% endif %}
                     <td>{{ s.get_mode_display }}</td>
                     <td>{{ s.comments }}</td>
                     <td>{% if s.complete %}

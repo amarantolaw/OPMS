@@ -246,9 +246,15 @@ def itu_scanlog(request, scanlog_id):
     message = ''
     error = ''
     scanlog = ItuScanLog.objects.get(id=int(scanlog_id))
-    if scanlog.mode==2:
+    if scanlog.mode == 2:
         return itu_top_collections(request, chartscan=scanlog)
-    elif scanlog.mode==3:
+    elif scanlog.mode == 3:
         return itu_top_items(request, chartscan=scanlog)
+    elif scanlog.mode == 4:
+        error += 'No information is stored in the database about the results of scans of the lists of institutions. Perhaps try looking at the logfile scan_itunes.log?'
+        return render_to_response('monitors/itu_scanlog.html', {'error': error,'message':message,'scanlog':scanlog}, context_instance=RequestContext(request))
+    elif scanlog.mode == 1:
+        return render_to_response('monitors/itu_scanlog.html', {'error': error,'message':message,'scanlog':scanlog}, context_instance=RequestContext(request))
     else:
+        error += 'Invalid scanlog mode. This is a bug, so please report it!'
         return render_to_response('monitors/itu_scanlog.html', {'error': error,'message':message,'scanlog':scanlog}, context_instance=RequestContext(request))
