@@ -20,7 +20,7 @@
 
 {% block content %}
     <h3>iTunes U Top Collections</h3>
-    <div style="text-align:right">Last scanned: {{ scanlog.time }}</div>
+    <div style="text-align:right">As scanned on: {{ scanlog.time }}</div>
     {% if error != '' %}
         <div class="alert alert-error">ERROR: {{ error }}</div>
     {% else %}

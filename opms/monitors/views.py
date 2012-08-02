@@ -2,6 +2,7 @@ from django.http import Http404, HttpResponse
 from django.views.decorators.http import require_safe
 from django.template import Context, loader, RequestContext
 from django.shortcuts import render_to_response
+from django.db.models import Q, F
 from opms.monitors.models import URLMonitorURL, URLMonitorScan
 from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
 #import pylab
@@ -157,21 +158,19 @@ def itu_home(request):
     error = ''
     return render_to_response('monitors/itu_home.html', {'error': error,'message':message}, context_instance=RequestContext(request))
 
-def itu_top_collections(request):
+def itu_top_collections(request, chartscan = ItuScanLog.objects.filter(mode=2,complete=True).order_by('-time')[0]):
     """Show the most recent top collections chart."""
     message = ''
     error = ''
-    latest_chartscan = ItuScanLog.objects.filter(mode=2).order_by('-time')[0]
-    chartrows = ItuCollectionChartScan.objects.filter(scanlog=latest_chartscan)
-    return render_to_response('monitors/itu_top_collections.html', {'error': error,'message':message,'chartrows':chartrows,'scanlog':latest_chartscan}, context_instance=RequestContext(request))
+    chartrows = ItuCollectionChartScan.objects.filter(scanlog=chartscan)
+    return render_to_response('monitors/itu_top_collections.html', {'error': error,'message':message,'chartrows':chartrows,'scanlog':chartscan}, context_instance=RequestContext(request))
 
-def itu_top_items(request):
+def itu_top_items(request, chartscan = ItuScanLog.objects.filter(mode=3,complete=True).order_by('-time')[0]):
     """Show the most recent top items chart."""
     message = ''
     error = ''
-    latest_chartscan = ItuScanLog.objects.filter(mode=3).order_by('-time')[0]
-    chartrows = ItuItemChartScan.objects.filter(scanlog=latest_chartscan)
-    return render_to_response('monitors/itu_top_items.html', {'error': error,'message':message,'chartrows':chartrows,'scanlog':latest_chartscan}, context_instance=RequestContext(request))
+    chartrows = ItuItemChartScan.objects.filter(scanlog=chartscan)
+    return render_to_response('monitors/itu_top_items.html', {'error': error,'message':message,'chartrows':chartrows,'scanlog':chartscan}, context_instance=RequestContext(request))
 
 def itu_collections(request):
     """Show a clickable list of all collections."""
@@ -185,11 +184,10 @@ def itu_items(request):
     error = ''
     return render_to_response('monitors/itu_items.html', {'error': error,'message':message}, context_instance=RequestContext(request))
 
-def itu_institutions(request):
+def itu_institutions(request, institutions = ItuInstitution.objects.all()):
     """Show a clickable list of all institutions."""
     message = ''
     error = ''
-    institutions = ItuInstitution.objects.all()
     return render_to_response('monitors/itu_institutions.html', {'error': error,'message':message,'institutions':institutions}, context_instance=RequestContext(request))
 
 def itu_genres(request):
@@ -203,21 +201,27 @@ def itu_scanlogs(request):
     """Show a clickable list of all scanlogs."""
     message = ''
     error = ''
-    return render_to_response('monitors/itu_scanlogs.html', {'error': error,'message':message}, context_instance=RequestContext(request))
+    scanlogs = ItuScanLog.objects.all()
+    return render_to_response('monitors/itu_scanlogs.html', {'error': error,'message':message,'scanlogs':scanlogs}, context_instance=RequestContext(request))
 
 def itu_collection(request, collection_id):
     """Display an absolute record of a collection."""
     message = ''
     error = ''
     collection = ItuCollection.objects.get(id=int(collection_id))
-    return render_to_response('monitors/itu_collection.html', {'error': error,'message':message,'collection':collection}, context_instance=RequestContext(request))
+    chartrecords = ItuCollectionChartScan.objects.filter(itucollection=collection)
+    items = ItuItem.objects.filter(latest__series__itucollection=collection)
+    comments = ItuComment.objects.filter(itucollectionhistorical__itucollection=collection)
+    ratings = ItuRating.objects.filter(itucollectionhistorical=collection.latest)
+    return render_to_response('monitors/itu_collection.html', {'error': error,'message':message,'collection':collection,'chartrecords':chartrecords,'comments':comments,'items':items,'ratings':ratings}, context_instance=RequestContext(request))
 
 def itu_item(request, item_id):
     """Display an absolute record of an item."""
     message = ''
     error = ''
     item = ItuItem.objects.get(id=int(item_id))
-    return render_to_response('monitors/itu_item.html', {'error': error,'message':message,'item':item}, context_instance=RequestContext(request))
+    chartrecords = ItuItemChartScan.objects.filter(ituitem=item)
+    return render_to_response('monitors/itu_item.html', {'error': error,'message':message,'item':item,'chartrecords':chartrecords}, context_instance=RequestContext(request))
 
 def itu_institution(request, institution_id):
     """Display an institution."""
@@ -238,4 +242,9 @@ def itu_scanlog(request, scanlog_id):
     message = ''
     error = ''
     scanlog = ItuScanLog.objects.get(id=int(scanlog_id))
-    return render_to_response('monitors/itu_scanlog.html', {'error': error,'message':message,'scanlog':scanlog}, context_instance=RequestContext(request))
+    if scanlog.mode==2:
+        return itu_top_collections(request, chartscan=scanlog)
+    elif scanlog.mode==3:
+        return itu_top_items(request, chartscan=scanlog)
+    else:
+        return render_to_response('monitors/itu_scanlog.html', {'error': error,'message':message,'scanlog':scanlog}, context_instance=RequestContext(request))

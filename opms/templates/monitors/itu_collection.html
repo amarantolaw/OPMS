@@ -5,13 +5,151 @@
     {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
 {% endblock %}
 
+{% block head %}
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection" />
+{% endblock %}
+
 {% block content %}
     {% if error != '' %}
         <div class="alert alert-error">ERROR: {{ error }}</div>
     {% else %}
-        <h3>{{ collection.latest.name }}</h3>
-        {% if message != '' %}
-            <div class="alert alert-success">{{ message }}</div>
+        <div>
+            <img style="float:right; margin-left:10px" src="{{ collection.latest.img170 }}"/>
+            <h3>{{ collection.latest.name }} {% if collection.latest.contains_movies %}<i class="icon-facetime-video"></i>{% else %}<i class="icon-headphones"></i>{% endif %}</h3>
+            {% if message != '' %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endif %}
+            <div><a href="{% url itu-institution institution_id=collection.institution.id %}">{{ collection.institution.name }}</a></div>
+            <div>Genre: <a href="{% url itu-genre genre_id=collection.latest.genre.id %}">{{ collection.latest.genre.name }}</a></div>
+            <div>Last modified: {{ collection.latest.last_modified }}</div>
+            <div>Latest stored version is version {{ collection.latest.version }}, scanned on <a href="{% url itu-scanlog scanlog_id=collection.latest.scanlog.id %}">{{ collection.latest.scanlog.time }}</a></div>
+            <div style="text-align: right"><a href="{{ collection.latest.url }}">View in iTunes</a></div>
+        </div>
+        <div style="clear:right">
+        {% if items %}
+                <div>
+                    <h4><a data-toggle="collapse" href="#collapseOne" class="btn btn-info" style="width:45%; text-align:left">Items</a></h4>
+                </div>
+            <script>
+                $(document).ready(function()
+                        {
+                            $("#itemTable").tablesorter({ sortList: [[0,0]] });
+                        }
+                );
+            </script>
+
+                <div id="collapseOne" class="collapse">
+                        <table id="itemTable" class="tablesorter">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Name</th>
+                                <th>Time</th>
+                                <th>Released</th>
+                                <th>Description</th>
+                                <th>Popularity</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for i in items %}
+                                <tr>
+                                    <td>{{ i.latest.rank }}</td>
+                                    <td><a href="{% url itu-item item_id=i.id %}">{{ i.latest.name }}</a></td>
+                                    <td>{{ i.latest.duration }}</td>
+                                    <td>{{ i.latest.release_date }}</td>
+                                    <td>{{ i.latest.description }}</td>
+                                    <td>{{ i.latest.popularity }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                </div>
         {% endif %}
+        {% if chartrecords %}
+                <div>
+                    <a data-toggle="collapse" href="#collapseTwo" class="btn btn-info" style="width:45%; text-align:left"><h4>Appearances in the Top Collections Chart</h4></a>
+                </div>
+                <script>
+                    $(document).ready(function()
+                            {
+                                $("#chartTable").tablesorter({ sortList: [[0,1]], headers: { 0: { sorter: 'shortDate'} }
+                                });
+                            }
+                    );
+                </script>
+                <div id="collapseTwo" class="collapse">
+                        <table id="chartTable" class="tablesorter">
+                            <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Position</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for c in chartrecords %}
+                                <tr>
+                                    <td><a href="{% url itu-scanlog scanlog_id=c.scanlog.id %}">{{ c.date|date:"M d, Y f A" }}</a></td>
+                                    <td>{{ c.position }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                </div>
+        {% endif %}
+        {% if comments %}
+                <div>
+                    <a data-toggle="collapse" href="#collapseThree" class="btn btn-info" style="width:45%; text-align:left"><h4>Comments</h4></a>
+                </div>
+                <script>
+                    $(document).ready(function()
+                            {
+                                $("#commentTable").tablesorter({ sortList: [[0,1]], headers: { 0: { sorter: 'shortDate'} }
+                                });
+                            }
+                    );
+                </script>
+                <div id="collapseThree" class="collapse">
+                        <table id="commentTable" class="tablesorter">
+                            <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Rating</th>
+                                <th>Detail</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for c in comments %}
+                                <tr>
+                                    <td style="width: 12% ">{{ c.date|date:"M d, Y" }}</td>
+                                    <td>{{ c.source }}</td>
+                                    <td style="width: 70px">{% if c.stars %}{% for s in 12345|make_list %}{% if c.stars >= forloop.counter %}<i class="icon-star" alt="*"><span style="visibility:hidden">*</span></i>{% else %}<i class="icon-star-empty"></i>{% endif %}{% endfor %}{% endif %}</td>
+                                    <td>{{ c.detail }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                </div>
+        {% endif %}
+        {% if ratings %}
+            <div>
+                <a data-toggle="collapse" href="#collapseFour" class="btn btn-info" style="width:45%; text-align:left"><h4>Ratings</h4></a>
+            </div>
+            <div id="collapseFour" class="collapse">
+                <table id="ratingTable" class="table table-bordered">
+                    <tbody>
+                    {% for r in ratings %}
+                        <tr>
+                            <td style="width: 70px">{% for s in 12345|make_list %}{% if r.stars >= forloop.counter %}<i class="icon-star" alt="*"><span style="visibility:hidden">*</span></i>{% endif %}{% endfor %}</td>
+                            <td>{{ r.count }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+        </div>
     {% endif %}
 {% endblock %}
