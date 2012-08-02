@@ -282,15 +282,15 @@ def itu_scanlog(request, scanlog_id):
     message = ''
     error = ''
     scanlog = ItuScanLog.objects.get(id=int(scanlog_id))
-    if scanlog.mode == 2:
+    if scanlog.mode == 2: #Top collections scan
         return itu_top_collections(request, chartscan=scanlog)
-    elif scanlog.mode == 3:
+    elif scanlog.mode == 3: #Top items scan
         return itu_top_items(request, chartscan=scanlog)
-    elif scanlog.mode == 4:
+    elif scanlog.mode == 4: #Scan of institution lists
         error += 'No information is stored in the database about the results of scans of the lists of institutions. Perhaps try looking at the logfile scan_itunes.log?'
         return render_to_response('monitors/itu_scanlog.html', {'error': error, 'message': message, 'scanlog': scanlog},
             context_instance=RequestContext(request))
-    elif scanlog.mode == 1:
+    elif scanlog.mode == 1: #Institutional scan
         new_collections = ItuCollection.objects.filter(latest__scanlog=scanlog, latest__version=1)
         updated_collections = ItuCollection.objects.filter(latest__scanlog=scanlog, latest__version__gt=1)
         missing_collections = ItuCollection.objects.filter(latest__missing=scanlog)
