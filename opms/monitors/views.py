@@ -157,7 +157,7 @@ def urlmonitoring_url(request, url_id):
 #    return response
 
 def itu_home(request):
-    """Show a mock version of the iTunes U home page."""
+    """The iTunes U Monitoring home page."""
     message = ''
     error = ''
     oxford = ItuInstitution.objects.get(name="Oxford University")
@@ -166,7 +166,7 @@ def itu_home(request):
 
 
 def itu_top_collections(request, chartscan=ItuScanLog.objects.filter(mode=2, complete=True).order_by('-time')[0]):
-    """Show the most recent top collections chart."""
+    """Show a top collections chart, defaulting to the most recent completed scan."""
     message = ''
     error = ''
     chartrows = ItuCollectionChartScan.objects.filter(scanlog=chartscan)
@@ -176,7 +176,7 @@ def itu_top_collections(request, chartscan=ItuScanLog.objects.filter(mode=2, com
 
 
 def itu_top_items(request, chartscan=ItuScanLog.objects.filter(mode=3, complete=True).order_by('-time')[0]):
-    """Show the most recent top items chart."""
+    """Show a top items chart, defaulting to the most recent completed scan."""
     message = ''
     error = ''
     chartrows = ItuItemChartScan.objects.filter(scanlog=chartscan)
