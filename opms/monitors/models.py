@@ -67,6 +67,7 @@ class ItuScanLog(models.Model):
     mode = models.SmallIntegerField(default=0, choices=CHOICES) # Zero = Unknown mode
     comments = models.TextField(null=True)
     complete = models.BooleanField(default=False)
+    institution = models.ForeignKey("ItuInstitution", null=True, blank=True)
 
     def mode_string(self,CHOICES=CHOICES):
         for mc in CHOICES:

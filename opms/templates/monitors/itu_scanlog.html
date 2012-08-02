@@ -15,7 +15,11 @@
     {% if error != '' %}
         <div class="alert alert-error">ERROR: {{ error }}</div>
     {% else %}
-        <h3>{{ scanlog.get_mode_display }} on {{ scanlog.time }}</h3>
+        {% if scanlog.institution %}
+            <h3>{{ scanlog.get_mode_display }} of {{ scanlog.institution.name }} on {{ scanlog.time }}</h3>
+        {% else %}
+            <h3>{{ scanlog.get_mode_display }} on {{ scanlog.time }}</h3>
+        {% endif %}
         {% if not scanlog.complete %}
             <div class="alert">WARNING: This scan is incomplete. This could be because the scan is in progress (reload
                 in a few minutes), or could be because it crashed.

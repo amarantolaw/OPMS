@@ -71,6 +71,10 @@ class Command(BaseCommand):
             except:
                 self._errorlog(institution_name + u" is not a recognised institution.")
                 return False
+
+            scanlog.institution = institution
+            scanlog.save()
+
             comment = u"Scan (and update) of " + institution_name + u"\'s collection from %s" % institution.url
             self._log(u"Log started for: %s" % unicode(comment))
             print comment
