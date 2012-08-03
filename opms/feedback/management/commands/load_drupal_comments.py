@@ -6,6 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
 from collections import deque
 from feedback.models import Metric, Traffic, Category, Comment, Event
+import datetime
 
 
 class Command(BaseCommand):
@@ -31,7 +32,12 @@ class Command(BaseCommand):
         for line in lines:
             comment = {}
             comma_separated_chunks = line.split(',')
-            comma_separated_chunks.pop() #Throw away a long number
+            unix_timestamp = int(comma_separated_chunks.pop()) #Throw away a long number
+            try:
+                comment['date'] = datetime.datetime.fromtimestamp(unix_timestamp).date()
+                comment['time'] = datetime.datetime.fromtimestamp(unix_timestamp).time()
+            except:
+                raise CommandError('Failed to convert timestamp ' + str(unix_timestamp) + ' to a date and a time.')
             comma_separated_chunks.pop() #Throw away 'Let us know'
             comma_separated_chunks = deque(comma_separated_chunks)
             comment['feed'] = comma_separated_chunks.popleft()
@@ -55,7 +61,7 @@ class Command(BaseCommand):
             except:
                 raise CommandError("Could not find podcasts.ox.ac.uk category.")
             try:
-                comment_to_save = Comment(date=None, time=None, source=comment['feed'], detail=comment['detail'],
+                comment_to_save = Comment(date=comment['date'], time=comment['time'], source=comment['feed'], detail=comment['detail'],
                     user_email='load_drupal_comments@manage.py', category=category)
                 comment_to_save.save()
             except:
