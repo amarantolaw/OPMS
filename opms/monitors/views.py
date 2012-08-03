@@ -3,6 +3,7 @@ from django.views.decorators.http import require_safe
 from django.template import Context, loader, RequestContext
 from django.shortcuts import render_to_response
 from django.db.models import Q, F
+from settings import *
 from opms.monitors.models import URLMonitorURL, URLMonitorScan
 from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
 #import pylab
@@ -160,8 +161,8 @@ def itu_home(request):
     """The iTunes U Monitoring home page."""
     message = ''
     error = ''
-    oxford = ItuInstitution.objects.get(name="Oxford University")
-    return render_to_response('monitors/itu_home.html', {'error': error, 'message': message, 'oxford': oxford},
+    this_institution = ItuInstitution.objects.get(name=YOUR_INSTITUTION)
+    return render_to_response('monitors/itu_home.html', {'error': error, 'message': message, 'this_institution': this_institution},
         context_instance=RequestContext(request))
 
 
