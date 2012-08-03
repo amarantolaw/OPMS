@@ -274,8 +274,8 @@
     $(document).ready(function()
             {
                 onLoad();
-                $("#eventsTable").tablesorter({ sortList: [[0,0]] });
-                $("#commentsTable").tablesorter({ sortList: [[1,0]] });
+                $("#eventsTable").tablesorter({ sortList: [[0,1]], headers: { 0: { sorter: 'shortDate'} } });
+                $("#commentsTable").tablesorter({ sortList: [[0,1]], headers: { 0: { sorter: 'shortDate'} } });
             }
     );
     $(window).resize(function()
