@@ -254,7 +254,7 @@ def get_collection_info_arty(url, hurry=False): #Workaround for pages (typically
     info['series_img_170'] = "Unknown" #When this last-ditch attempt is used to extract category info, the image given in the html is not the right one, and changes every time the page is accessed...
 
 
-    info['last modified'] = str(datetime.date(1970,1,1))
+    info['last modified'] = None
 #    for i in items:
 #        try:
 #            k,v = i.text.strip().split(":")

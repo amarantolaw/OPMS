@@ -102,12 +102,16 @@ class Command(BaseCommand):
                         genre.save()
 
                     collection_record_absolute = ItuCollection(institution=institution)
+                    if collection_itunes['last modified']:
+                        last_modified = parse(collection_itunes['last modified']).date()
+                    else:
+                        last_modified = None
                     collection_record_historical = ItuCollectionHistorical(name=collection_itunes['series'],
                                                  itu_id=int(collection_itunes['series_id']),
                                                  img170=collection_itunes['series_img_170'],
                                                  url=collection_itunes['series_url'],
                                                  language=collection_itunes['language'],
-                                                 last_modified=parse(collection_itunes['last modified']).date(),
+                                                 last_modified=last_modified,
                                                  contains_movies=collection_itunes['contains_movies'],
                                                  missing=None,
                                                  version=1,
