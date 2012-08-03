@@ -257,7 +257,7 @@ class Command(BaseCommand):
                                 #Put together a list of saved item_record_historicals that look like they're the same as our item_record_historical, really.
                                 similar_item_record_historicals = []
                                 item_record_historical_exists = False
-                                for saved_item_record_historical in ItuItemHistorical.objects.filter(Q(series=collection_record_historical) & (Q(name=item_record_historical.name) | Q(itu_id=item_record_historical.itu_id) | Q(url=item_record_historical.url)) & Q(file_extension=item_record_historical.file_extension)): #name AND Video/Audio
+                                for saved_item_record_historical in ItuItemHistorical.objects.filter(Q(series__itucollection=collection_record_historical.itucollection) & (Q(name=item_record_historical.name) | Q(itu_id=item_record_historical.itu_id) | Q(url=item_record_historical.url)) & Q(file_extension=item_record_historical.file_extension)): #name AND Video/Audio
                                     if item_record_historical.url != saved_item_record_historical.url: #Don't add similar item_record_historical if the URLs are different, but both are accessible.
                                         try:
                                             urllib2.urlopen(item_record_historical.url)
