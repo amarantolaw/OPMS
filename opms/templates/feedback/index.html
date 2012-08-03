@@ -285,10 +285,10 @@
     );
 </script>
 {% if error != '' %}
-    <div class="alert alert-error">ERROR: {{ error }}</div>
+    <div class="alert alert-error">ERROR: {{ error|escape }}</div>
 {% else %}
     {% if message != '' %}
-        <div class="alert alert-success">{{ message }}</div>
+        <div class="alert alert-success">{{ message|escape }}</div>
     {% endif %}
 <div style="text-align:right">
     <a href="{% url comment-add %}">New comment</a> | <a href="{% url event-add %}">New event</a>
@@ -305,16 +305,16 @@
 <!-- Generate toggle buttons.-->
 {% for c in categories_to_plot %}
     {% if c.defaultvisibility %}
-        <input type="button" id="{{ c.id }}" value="{{ c.description }}" class="btn on_category_{{ c.id }}" onclick="toggle(this)" />
+        <input type="button" id="{{ c.id }}" value="{{ c.description|escape }}" class="btn on_category_{{ c.id }}" onclick="toggle(this)" />
     {% else %}
-        <input type="button" id="{{ c.id }}" value="{{ c.description }}" class="btn off_category" onclick="toggle(this)" />
+        <input type="button" id="{{ c.id }}" value="{{ c.description|escape }}" class="btn off_category" onclick="toggle(this)" />
     {% endif %}
 {% endfor %}
 {% for m in metrics_to_plot %}
     {% if m.defaultvisibility %}
-        <input type="button" id="{{ m.id }}" value="{{ m.description }}" class="btn on_metric_{{ m.id }}" onclick="toggle(this)" />
+        <input type="button" id="{{ m.id }}" value="{{ m.description|escape }}" class="btn on_metric_{{ m.id }}" onclick="toggle(this)" />
     {% else %}
-        <input type="button" id="{{ m.id }}" value="{{ m.description }}" class="btn off_metric" onclick="toggle(this)" />
+        <input type="button" id="{{ m.id }}" value="{{ m.description|escape }}" class="btn off_metric" onclick="toggle(this)" />
     {% endif %}
 {% endfor %}
 
@@ -340,9 +340,9 @@
     {% for e in events %}
     <tr>
         <td>{{ e.date }}</td>
-        <td>{{ e.title }}</td>
-        <td>{{ e.detail }}</td>
-        <td>{{ e.category.description }}</td>
+        <td>{{ e.title|escape }}</td>
+        <td>{{ e.detail|escape }}</td>
+        <td>{{ e.category.description|escape }}</td>
     </tr>
     {% endfor %}
     </tbody>
@@ -366,9 +366,9 @@
     {% else %}
         <td>{{ c.date }}</td>
     {% endif %}
-        <td>{{ c.source }}</td>
-        <td>"{{ c.detail }}"</td>
-        <td>{{ c.category.description }}</td>
+        <td>{{ c.source|escape }}</td>
+        <td>"{{ c.detail|escape }}"</td>
+        <td>{{ c.category.description|escape }}</td>
     </tr>
     {% endfor %}
     </tbody>

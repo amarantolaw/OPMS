@@ -7,10 +7,10 @@
 
 {% block content %}
 {% if error != '' %}
-    <div class="alert alert-error">ERROR: {{ error }}</div>
+    <div class="alert alert-error">ERROR: {{ error|escape }}</div>
 {% else %}
     {% if message != '' %}
-        <div class="alert alert-success">{{ message }}</div>
+        <div class="alert alert-success">{{ message|escape }}</div>
     {% endif %}
     <h3>E-mail</h3>
     <div>{{ output }}</div>

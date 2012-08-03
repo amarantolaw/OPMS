@@ -7,10 +7,10 @@
 
 {% block content %}
     {% if error != '' %}
-        <div class="alert alert-error">ERROR: {{ error }}</div>
+        <div class="alert alert-error">ERROR: {{ error|escape }}</div>
     {% else %}
         {% if message != '' %}
-            <div class="alert alert-success">{{ message }}</div>
+            <div class="alert alert-success">{{ message|escape }}</div>
         {% endif %}
     {% endif %}
 
@@ -22,13 +22,13 @@
             <div class="control-group{% if 'source' in error_fields %} error{% endif %}">
                 <label class="control-label" for="source">Source</label>
                 <div class="controls">
-                    <input type="text" name="source" value="{{ comment.title }}" maxlength=20 id="source" class="input-xlarge" />
+                    <input type="text" name="source" value="{{ comment.title|escape }}" maxlength=20 id="source" class="input-xlarge" />
                 </div>
             </div>
             <div class="control-group{% if 'detail' in error_fields %} error{% endif %}">
                 <label class="control-label" for="detail">Comment</label>
                 <div class="controls">
-                    <textarea name="detail" id="detail">{{ comment.detail }}</textarea>
+                    <textarea name="detail" id="detail">{{ comment.detail|escape }}</textarea>
                 </div>
             </div>
             <div class="control-group{% if 'date' in error_fields %} error{% endif %}">
@@ -49,9 +49,9 @@
                     <select name="category_id" id="category">
                         {% for c in categories %}
                             {% if c.id == comment.category.id %}
-                                <option value="{{ c.id }}" selected="selected">{{ c.description }}</option>
+                                <option value="{{ c.id }}" selected="selected">{{ c.description|escape }}</option>
                             {% else %}
-                                <option value="{{ c.id }}">{{ c.description }}</option>
+                                <option value="{{ c.id }}">{{ c.description|escape }}</option>
                             {% endif %}
                         {% endfor %}
                     </select>
@@ -60,7 +60,7 @@
             <div class="control-group{% if 'user_email' in error_fields %} error{% endif %}">
                 <label class="control-label" for="user_email">Your e-mail address</label>
                 <div class="controls">
-                    <input type="text" name="user_email" value="{{ comment.user_email }}" maxlength=20 id="user_email" class="input-medium" maxlength=75 />
+                    <input type="text" name="user_email" value="{{ comment.user_email|escape }}" maxlength=20 id="user_email" class="input-medium" maxlength=75 />
                 </div>
                 <label class="control-label" for="remember">Remember me</label>
                 <div class="controls">
