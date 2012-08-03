@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 import datetime
 
 class Metric(models.Model):
-    "A measure of web traffic"
+    """A measure of web traffic"""
     METRIC_SOURCES = (
         ('feedback', 'Stored in feedback app'),
         ('appleweekly', 'Apple weekly summary data')
@@ -23,7 +23,7 @@ class Metric(models.Model):
         return self.description
 
 class Category(models.Model):
-    "A group of Comments and/or Events which can be toggled together and displayed identically"
+    """A group of Comments and/or Events which can be toggled together and displayed identically"""
     description = models.CharField(max_length=200, unique=True)     #A description of the category eg. 'Comments made by e-mail' or 'iTunes store upgrades'
     color = models.CharField(max_length=7)                          #The colour of the line on the chart representing events and/or comments in this category
     defaultvisibility = models.BooleanField()                       #Whether the metric is visible by default
@@ -33,7 +33,7 @@ class Category(models.Model):
         return self.description
 
 class Traffic(models.Model):
-    "A day's worth of traffic to a website according to some metric."
+    """A day's worth of traffic to a website according to some metric."""
     date = models.DateField()                                       #The day on which this traffic occurred
     def date_timeplot(self):                                        #Date in yyyy-mm-dd format so that timeplot can eat it. Code is here since str() can't be used in templates.
         return str(self.date)
@@ -45,7 +45,7 @@ class Traffic(models.Model):
         return '\"' + self.metric.description + '\" = ' + str(self.count) + ' on ' + str(self.date)
 
 class Comment(models.Model):
-    "A comment made about the website on a certain day"
+    """A comment made about the website on a certain day"""
     date = models.DateField(null=True, blank=True)                                      #The day when the comment was made
     def date_timeplot(self):                                                            #Date in yyyy-mm-dd format so that timeplot can eat it. Code is here since str() can't be used in templates.
         return str(self.date)
@@ -64,7 +64,7 @@ class Comment(models.Model):
         return self.detail
 
 class Event(models.Model):
-    "An event which occurred on a certain day"
+    """An event which occurred on a certain day"""
     date = models.DateField()                                                           #The date on which the event occurred
     def date_timeplot(self):                                                            #Date in yyyy-mm-dd format so that timeplot can eat it. Code is here since str() can't be used in templates.
         return str(self.date)
