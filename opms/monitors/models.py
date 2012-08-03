@@ -134,7 +134,6 @@ class ItuCollection(models.Model):
         hrecords = ItuCollectionHistorical.objects.filter(itucollection=self).order_by('version')
         return hrecords[len(hrecords) - 1]
     def find_original(self):
-        print('WARNING: Using find_original will be inefficient! Don\'t do it!')
         hrecords = ItuCollectionHistorical.objects.filter(itucollection=self).order_by('version')
         return hrecords[0]
 

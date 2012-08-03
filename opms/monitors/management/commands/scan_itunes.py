@@ -102,12 +102,16 @@ class Command(BaseCommand):
                         genre.save()
 
                     collection_record_absolute = ItuCollection(institution=institution)
+                    if collection_itunes['last modified']:
+                        last_modified = parse(collection_itunes['last modified']).date()
+                    else:
+                        last_modified = None
                     collection_record_historical = ItuCollectionHistorical(name=collection_itunes['series'],
                                                  itu_id=int(collection_itunes['series_id']),
                                                  img170=collection_itunes['series_img_170'],
                                                  url=collection_itunes['series_url'],
                                                  language=collection_itunes['language'],
-                                                 last_modified=parse(collection_itunes['last modified']).date(),
+                                                 last_modified=last_modified,
                                                  contains_movies=collection_itunes['contains_movies'],
                                                  missing=None,
                                                  version=1,
@@ -257,7 +261,7 @@ class Command(BaseCommand):
                                 #Put together a list of saved item_record_historicals that look like they're the same as our item_record_historical, really.
                                 similar_item_record_historicals = []
                                 item_record_historical_exists = False
-                                for saved_item_record_historical in ItuItemHistorical.objects.filter(Q(series=collection_record_historical) & (Q(name=item_record_historical.name) | Q(itu_id=item_record_historical.itu_id) | Q(url=item_record_historical.url)) & Q(file_extension=item_record_historical.file_extension)): #name AND Video/Audio
+                                for saved_item_record_historical in ItuItemHistorical.objects.filter(Q(series__itucollection=collection_record_historical.itucollection) & (Q(name=item_record_historical.name) | Q(itu_id=item_record_historical.itu_id) | Q(url=item_record_historical.url)) & Q(file_extension=item_record_historical.file_extension)): #name AND Video/Audio
                                     if item_record_historical.url != saved_item_record_historical.url: #Don't add similar item_record_historical if the URLs are different, but both are accessible.
                                         try:
                                             urllib2.urlopen(item_record_historical.url)

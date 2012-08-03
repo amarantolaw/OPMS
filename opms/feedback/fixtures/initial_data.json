@@ -64,5 +64,14 @@
             "description":"From iTunes U",
             "defaultvisibility":true
         }
+    },
+    {
+        "pk":5,
+        "model":"feedback.category",
+        "fields":{
+            "color":"#FF0099",
+            "description":"podcasts.ox.ac.uk",
+            "defaultvisibility":true
+        }
     }
 ]
