@@ -169,20 +169,36 @@ def itu_home(request):
         context_instance=RequestContext(request))
 
 
-def itu_top_collections(request, chartscan=ItuScanLog.objects.filter(mode=2, complete=True).order_by('-time')[0]):
+def itu_top_collections(request, chartscan = None):
     """Show a top collections chart, defaulting to the most recent completed scan."""
     message = ''
     error = ''
+    if not chartscan:
+        try:
+            chartscan=ItuScanLog.objects.filter(mode=2, complete=True).order_by('-time')[0]
+        except:
+            error += 'Couldn\'t find latest top collections scan. You probably need to run one first.'
+            return render_to_response('monitors/itu_top_collections.html',
+                    {'error': error, 'message': message},
+                context_instance=RequestContext(request))
     chartrows = ItuCollectionChartScan.objects.filter(scanlog=chartscan)
     return render_to_response('monitors/itu_top_collections.html',
             {'error': error, 'message': message, 'chartrows': chartrows, 'scanlog': chartscan},
         context_instance=RequestContext(request))
 
 
-def itu_top_items(request, chartscan=ItuScanLog.objects.filter(mode=3, complete=True).order_by('-time')[0]):
+def itu_top_items(request, chartscan = None):
     """Show a top items chart, defaulting to the most recent completed scan."""
     message = ''
     error = ''
+    if not chartscan:
+        try:
+            chartscan=ItuScanLog.objects.filter(mode=3, complete=True).order_by('-time')[0]
+        except:
+            error += 'Couldn\'t find latest top items scan. You probably need to run one first.'
+            return render_to_response('monitors/itu_top_items.html',
+                    {'error': error, 'message': message},
+                context_instance=RequestContext(request))
     chartrows = ItuItemChartScan.objects.filter(scanlog=chartscan)
     return render_to_response('monitors/itu_top_items.html',
             {'error': error, 'message': message, 'chartrows': chartrows, 'scanlog': chartscan},
