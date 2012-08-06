@@ -42,7 +42,9 @@ var category_visibility = {};
 
 //Load data - for efficiency we don't want to reload this every time we refresh.
 {% for metricid, metrictext in metric_textfiles.items %}
-    var text{{ metricid }} = "{{ metrictext }}";
+    {% if metrictext %}
+        var text{{ metricid }} = "{{ metrictext }}";
+    {% endif %}
 {% endfor %}
 {% for category_to_plot in categories_to_plot %}
     var data{{ category_to_plot.id }} = {
@@ -71,8 +73,8 @@ var category_visibility = {};
 
 function onLoad() {
     var timeGeometry;
-{% for m in metrics_to_plot %}
-    var eventSourceMetric{{ m.id }} = new Timeplot.DefaultEventSource();
+{% for metricid, metrictext in metric_textfiles.items %}
+    var eventSourceMetric{{ metricid }} = new Timeplot.DefaultEventSource();
 {% endfor %}
 {% for category_to_plot in categories_to_plot %}
     {% if category_to_plot %}
@@ -110,6 +112,8 @@ function onLoad() {
     var plotInfo = [];
 
 {% for m in metrics_to_plot %}
+    {% for metricid, metrictext in metric_textfiles.items %}
+        {% if metricid == m.id and metrictext %}
     var metric_plot_{{ m.id }} = Timeplot.createPlotInfo({
         id: "plot{{ m.id }}",
         dataSource: new Timeplot.ColumnSource(eventSourceMetric{{ m.id }},1),
@@ -122,6 +126,8 @@ function onLoad() {
         {% endif %}
         showValues: {{ m.mouseover_timeplot }}
     });
+        {% endif %}
+    {% endfor %}
 {% endfor %}
 
 {% for c in categories_to_plot %}
@@ -133,11 +139,13 @@ function onLoad() {
     });
 {% endfor %}
 
-{% for m in metrics_to_plot %}
-    if (metric_visibility['{{ m.id }}'])
+{% for metricid, metrictext in metric_textfiles.items %}
+    {% if metrictext %}
+    if (metric_visibility['{{ metricid }}'])
     {
-        plotInfo.push(metric_plot_{{ m.id }});
+        plotInfo.push(metric_plot_{{ metricid }});
     }
+    {% endif %}
 {% endfor %}
 {% for c in categories_to_plot %}
     if (category_visibility['{{ c.id }}'])
@@ -146,8 +154,10 @@ function onLoad() {
     }
 {% endfor %}
     timeplot = Timeplot.create(document.getElementById("my-timeplot"), plotInfo);
-{% for m in metrics_to_plot %}
-    eventSourceMetric{{ m.id }}.loadText(text{{ m.id }}, ",", ".");
+{% for metricid, metrictext in metric_textfiles.items %}
+    {% if metrictext %}
+        eventSourceMetric{{ metricid }}.loadText(text{{ metricid }}, ",", ".");
+    {% endif %}
 {% endfor %}
 
 {% for category_to_plot in categories_to_plot %}
