@@ -9,6 +9,7 @@ from optparse import make_option
 from django.core.management.base import BaseCommand
 from django.core import management
 from django.db.models import Q, F
+from settings import *
 
 from monitors.utils import itunes as itunes
 from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
@@ -32,7 +33,7 @@ class Command(BaseCommand):
 
         super(Command, self).__init__()
 
-    def handle(self, institution_name = "Oxford University",**options):
+    def handle(self, institution_name = YOUR_INSTITUTION,**options):
         # Some basic error checking
         if institution_name is None:
             self._errorlog("Please specify the institution to scan.")
