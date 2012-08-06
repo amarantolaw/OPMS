@@ -1,0 +1,290 @@
+<style type="text/css" xmlns="http://www.w3.org/1999/html">
+    {% for c in categories_to_plot %}
+        .on_category_{{ c.id }} {
+            background:{{ c.color }};
+        }
+    {% endfor %}
+    {% for m in metrics_to_plot %}
+        .on_metric_{{ m.id }} {
+            background:{{ m.linecolor }};
+        }
+    {% endfor %}
+    .off_category {
+        background:#efefef;
+    }
+    .off_metric {
+        background:#cccccc;
+    }
+</style>
+<script>
+var timeplot;
+var min = "";
+var max = "";
+var change_time_range = false;
+var zoomin_min = "";
+var zoomin_max = "";
+var zoomout_min = "";
+var zoomout_max = "";
+var panright_min = "";
+var panright_max = "";
+var panleft_min = "";
+var panleft_max = "";
+var one_day = 1000*60*60*24; //in ms
+
+var metric_visibility = {};
+{% for m in metrics_to_plot %}
+    metric_visibility['{{ m.id }}'] = {{ m.defaultvisibility|lower }};
+{% endfor %}
+var category_visibility = {};
+{% for c in categories_to_plot %}
+    category_visibility['{{ c.id }}'] = {{ c.defaultvisibility|lower }};
+{% endfor %}
+
+//Load data - for efficiency we don't want to reload this every time we refresh.
+{% for metricid, metrictext in metric_textfiles.items %}
+    var text{{ metricid }} = "{{ metrictext }}";
+{% endfor %}
+{% for category_to_plot in categories_to_plot %}
+    var data{{ category_to_plot.id }} = {
+        'events': [
+            {% for comm in comments_to_plot %}
+                {% if comm.category == category_to_plot and comm.date %}
+                    {
+                        'start':"{{ comm.datetime_timeplotxml }}",
+                        'title':"Comment from {{ comm.source|escapejs }}",
+                        'description':"\"{{ comm.detail|escapejs }}\""
+                    },
+                {% endif %}
+            {% endfor %}
+            {% for event in events %}
+                {% if event.category == category_to_plot %}
+                    {
+                        'start':"{{ event.datetime_timeplotxml }}",
+                        'title':"{{ event.title|escapejs }}",
+                        'description':"{{ event.detail|escapejs }}"
+                    },
+                {% endif %}
+            {% endfor %}
+        ]
+    };
+{% endfor %}
+
+function onLoad() {
+    var timeGeometry;
+{% for m in metrics_to_plot %}
+    var eventSourceMetric{{ m.id }} = new Timeplot.DefaultEventSource();
+{% endfor %}
+{% for category_to_plot in categories_to_plot %}
+    {% if category_to_plot %}
+        var eventSourceJSON{{ category_to_plot.id }} = new Timeplot.DefaultEventSource();
+    {% endif %}
+{% endfor %}
+    if (change_time_range)
+    {
+        timeGeometry = new Timeplot.DefaultTimeGeometry({
+            gridColor: new Timeplot.Color("#000000"),
+            axisLabelsPlacement: "bottom",
+            min: min, //ISO 8601 dates: yyyy-mm-dd
+            max: max
+        });
+        change_time_range = false;
+    }
+    else
+    {
+        timeGeometry = new Timeplot.DefaultTimeGeometry({
+            gridColor: new Timeplot.Color("#000000"),
+            axisLabelsPlacement: "bottom",
+            min: "", //ISO 8601 dates: yyyy-mm-dd
+            max: ""  //Null min/max result in auto-calculation by timeplot.
+        });
+    }
+
+    var valueGeometry = new Timeplot.DefaultValueGeometry({
+        gridColor: "#000000",
+        {% if chart %}
+        min: -100,
+        max: 0
+        {% endif %}
+    });
+
+    var plotInfo = [];
+
+{% for m in metrics_to_plot %}
+    var metric_plot_{{ m.id }} = Timeplot.createPlotInfo({
+        id: "plot{{ m.id }}",
+        dataSource: new Timeplot.ColumnSource(eventSourceMetric{{ m.id }},1),
+        valueGeometry: valueGeometry,
+        timeGeometry: timeGeometry,
+        lineColor: "{{ m.linecolor }}",
+        dotColor: "{{ m.linecolor }}",
+        {% if not chart %}
+        fillColor: "{{ m.fillcolor }}",
+        {% endif %}
+        showValues: {{ m.mouseover_timeplot }}
+    });
+{% endfor %}
+
+{% for c in categories_to_plot %}
+    var category_plot_{{ c.id }} = Timeplot.createPlotInfo({
+        id: "plot{{ c.id }}d",
+        timeGeometry: timeGeometry,
+        eventSource: eventSourceJSON{{ c.id }},
+        lineColor: "{{ c.color }}"
+    });
+{% endfor %}
+
+{% for m in metrics_to_plot %}
+    if (metric_visibility['{{ m.id }}'])
+    {
+        plotInfo.push(metric_plot_{{ m.id }});
+    }
+{% endfor %}
+{% for c in categories_to_plot %}
+    if (category_visibility['{{ c.id }}'])
+    {
+        plotInfo.push(category_plot_{{ c.id }});
+    }
+{% endfor %}
+    timeplot = Timeplot.create(document.getElementById("my-timeplot"), plotInfo);
+{% for m in metrics_to_plot %}
+    eventSourceMetric{{ m.id }}.loadText(text{{ m.id }}, ",", ".");
+{% endfor %}
+
+{% for category_to_plot in categories_to_plot %}
+    eventSourceJSON{{ category_to_plot.id }}.loadJSON(data{{ category_to_plot.id }}, ".");
+{% endfor %}
+
+    min = timeGeometry._earliestDate;
+    max = timeGeometry._latestDate;
+
+    var current_min = new Date(min);
+    var current_max = new Date(max);
+
+    var length_in_days = Math.round((current_max.getTime() - current_min.getTime())/one_day);
+
+    var zoomin_min_date = new Date(min);
+    var zoomin_max_date = new Date(max);
+    var zoomout_min_date = new Date(min);
+    var zoomout_max_date = new Date(max);
+    var panright_min_date = new Date(min);
+    var panright_max_date = new Date(max);
+    var panleft_min_date = new Date(min);
+    var panleft_max_date = new Date(max);
+
+    panright_max_date.setDate(panright_max_date.getDate() + (length_in_days/10));
+    panright_min_date.setDate(panright_min_date.getDate() + (length_in_days/10));
+    panleft_max_date.setDate(panleft_max_date.getDate() - (length_in_days/10));
+    panleft_min_date.setDate(panleft_min_date.getDate() - (length_in_days/10));
+    zoomin_min_date.setDate(zoomin_min_date.getDate() + (length_in_days/10));
+    zoomin_max_date.setDate(zoomin_max_date.getDate() - (length_in_days/10));
+    zoomout_min_date.setDate(zoomout_min_date.getDate() - (length_in_days/8));
+    zoomout_max_date.setDate(zoomout_max_date.getDate() + (length_in_days/8));
+
+    zoomin_min = zoomin_min_date.toISOString();
+    zoomin_max = zoomin_max_date.toISOString();
+    zoomout_min = zoomout_min_date.toISOString();
+    zoomout_max = zoomout_max_date.toISOString();
+    panright_min = panright_min_date.toISOString();
+    panright_max = panright_max_date.toISOString();
+    panleft_min = panleft_min_date.toISOString();
+    panleft_max = panleft_max_date.toISOString();
+
+//            document.getElementById("debug").innerHTML = "Length in days: " + length_in_days;
+}
+
+var resizeTimerID = null;
+function onResize() {
+    if (resizeTimerID == null) {
+        resizeTimerID = window.setTimeout(function() {
+            resizeTimerID = null;
+            timeplot.repaint();
+        }, 100);
+    }
+}
+
+function toggle(el){
+    //Set global variables appropriately when someone clicks on a toggle button
+    switch(el.className) {
+        case "btn on_category_" + el.id :
+            el.className = "btn off_category";
+            category_visibility[el.id] = false;
+            break;
+        case "btn on_metric_" + el.id :
+            el.className = "btn off_metric";
+            metric_visibility[el.id] = false;
+            break;
+        case "btn off_category":
+            el.className = "btn on_category_" + el.id;
+            category_visibility[el.id] = true;
+            break;
+        case "btn off_metric":
+            el.className = "btn on_metric_" + el.id;
+            metric_visibility[el.id] = true;
+            break;
+        default:
+            window.alert("ERROR: Invalid button class name.");
+    }
+
+    //Wipe the old timeplot
+    var div = timeplot.getElement();
+    div.parentElement.removeChild(div);
+
+    //Create a new div identical to the old one to put the new timeplot in
+    var parent = document.getElementById("timeplot-parent");
+    parent.innerHTML = "<div id=\"my-timeplot\" style=\"height: 150px;\"></div>";
+
+    onLoad();
+}
+
+function setTimeRange(newmin,newmax){
+    min = newmin;
+    max = newmax;
+    change_time_range = true;
+
+    //Wipe the old timeplot
+    var div = timeplot.getElement();
+    div.parentElement.removeChild(div);
+
+    //Create a new div identical to the old one to put the new timeplot in
+    var parent = document.getElementById("timeplot-parent");
+    parent.innerHTML = "<div id=\"my-timeplot\" style=\"height: 150px;\"></div>";
+
+    onLoad();
+}
+</script>
+<script>
+    $(document).ready(function()
+            {
+                onLoad();
+            }
+    );
+    $(window).resize(function()
+            {
+                onResize();
+            }
+    );
+</script>
+<div id="timeplot-parent">
+    <div id="my-timeplot" style="height: 150px;"></div>
+</div>
+
+<a class="btn" id="panleft" onclick="setTimeRange(panleft_min,panleft_max)"><i class="icon-chevron-left"></i> </a></input>
+<a class="btn" id="zoomin" onclick="setTimeRange(zoomin_min,zoomin_max)"><i class="icon-zoom-in"></i> </a>
+<a class="btn" id="zoomout" onclick="setTimeRange(zoomout_min,zoomout_max)"><i class="icon-zoom-out"></i> </a>
+<a class="btn" id="panright" onclick="setTimeRange(panright_min,panright_max)"><i class="icon-chevron-right"></i> </a>
+
+<!-- Generate toggle buttons.-->
+{% for c in categories_to_plot %}
+    {% if c.defaultvisibility %}
+        <input type="button" id="{{ c.id }}" value="{{ c.description|escape }}" class="btn on_category_{{ c.id }}" onclick="toggle(this)" />
+    {% else %}
+        <input type="button" id="{{ c.id }}" value="{{ c.description|escape }}" class="btn off_category" onclick="toggle(this)" />
+    {% endif %}
+{% endfor %}
+{% for m in metrics_to_plot %}
+    {% if m.defaultvisibility %}
+        <input type="button" id="{{ m.id }}" value="{{ m.description|escape }}" class="btn on_metric_{{ m.id }}" onclick="toggle(this)" />
+    {% else %}
+        <input type="button" id="{{ m.id }}" value="{{ m.description|escape }}" class="btn off_metric" onclick="toggle(this)" />
+    {% endif %}
+{% endfor %}

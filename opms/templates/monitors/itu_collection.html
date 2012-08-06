@@ -8,6 +8,9 @@
 {% block head %}
     <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
     <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/ajax/api/simile-ajax-api.js" type="text/javascript"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/timeline/api/timeline-api.js" type="text/javascript"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/timeplot/api/timeplot-api.js" type="text/javascript"></script>
     <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection"/>
 {% endblock %}
 
@@ -92,24 +95,25 @@
                     );
                 </script>
                 <div id="collapseTwo" class="collapse">
-                    <table id="chartTable" class="tablesorter">
-                        <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>Position</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for c in chartrecords %}
-                            <tr>
-                                <td>
-                                    <a href="{% url itu-scanlog scanlog_id=c.scanlog.id %}">{{ c.date|date:"M d, Y f A" }}</a>
-                                </td>
-                                <td>{{ c.position }}</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                    {% include 'feedback/opms_plot.html' %}
+{#                    <table id="chartTable" class="tablesorter">#}
+{#                        <thead>#}
+{#                        <tr>#}
+{#                            <th>Time</th>#}
+{#                            <th>Position</th>#}
+{#                        </tr>#}
+{#                        </thead>#}
+{#                        <tbody>#}
+{#                        {% for c in chartrecords %}#}
+{#                            <tr>#}
+{#                                <td>#}
+{#                                    <a href="{% url itu-scanlog scanlog_id=c.scanlog.id %}">{{ c.date|date:"M d, Y f A" }}</a>#}
+{#                                </td>#}
+{#                                <td>{{ c.position }}</td>#}
+{#                            </tr>#}
+{#                        {% endfor %}#}
+{#                        </tbody>#}
+{#                    </table>#}
                 </div>
             {% endif %}
             {% if comments %}

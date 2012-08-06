@@ -50,7 +50,10 @@ class Comment(models.Model):
     def date_timeplot(self):                                                            #Date in yyyy-mm-dd format so that timeplot can eat it. Code is here since str() can't be used in templates.
         return str(self.date)
     def datetime_timeplotxml(self):
-        return self.date.strftime("%b %d %Y") + " " + self.time.strftime("%H:%M:%S") + " GMT"
+        if self.time:
+            return self.date.strftime("%b %d %Y") + " " + self.time.strftime("%H:%M:%S") + " GMT"
+        else:
+            return self.date.strftime("%b %d %Y") + " " + "00:00:00" + " GMT"
     time = models.TimeField(null=True, blank=True)                                      #The time at which the comment was made
     source = models.CharField(max_length=200)                                           #The source of the comment (DELIBERATELY VAGUE FOR THE MOMENT!)
     detail = models.TextField(unique=True)                                              #The text of the comment
