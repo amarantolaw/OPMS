@@ -214,6 +214,8 @@ def get_collection_info_arty(url, hurry=False): #Workaround for pages (typically
         return info
     except AttributeError: # If there's no URL, skip this link
         return info
+    except urllib2.HTTPError:
+        return info
     if xml == None:
         return info
     xml = clean_html(xml).replace('png">','png"/>').replace('Store">','Store"/>')
