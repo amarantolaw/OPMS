@@ -309,8 +309,43 @@ def itu_item(request, item_id):
     error = ''
     item = ItuItem.objects.get(id=int(item_id))
     chartrecords = ItuItemChartScan.objects.filter(ituitem=item)
+
+    metrics_to_plot = []
+    traffic_to_plot = []
+    categories_to_plot = []
+    comments_to_plot = []
+    if chartrecords:
+
+        #Get or create a suitable Metric
+        metrics = Metric.objects.filter(description=item.latest.name)
+        if len(metrics) == 0:
+            random_colour = '#' + str(random.randint(222222,999999))
+            top_items_position = Metric(description=item.latest.name,linecolor=random_colour,fillcolor='#FFFFFF',mouseover=True,defaultvisibility=True,source='itunes-chart')
+            top_items_position.save()
+            metrics_to_plot.append(top_items_position)
+        else:
+            metrics_to_plot.append(metrics[0])
+
+        #Add the first chartrecord of the day to traffic_to_plot
+        dates = []
+        for chartrecord in chartrecords:
+            if chartrecord.date.date() not in dates:
+                dates.append(chartrecord.date.date())
+        for date in dates:
+            chartrecords_day = []
+            for chartrecord in chartrecords:
+                if chartrecord.date.date() == date:
+                    chartrecords_day.append(chartrecord)
+            traffic_to_plot.append(Traffic(date=date,count=(-1*chartrecords_day[0].position),metric=metrics_to_plot[0]))
+
     return render_to_response('monitors/itu_item.html',
-            {'error': error, 'message': message, 'item': item, 'chartrecords': chartrecords},
+            {'error': error, 'message': message, 'item': item, 'chartrecords': chartrecords,
+             'comments_to_plot': [],
+             'metrics_to_plot': metrics_to_plot,
+             'metric_textfiles': create_metric_textfiles(traffic_to_plot,metrics_to_plot),
+             'categories_to_plot': categories_to_plot,
+             'events': [],
+             'chart': True},
         context_instance=RequestContext(request))
 
 
