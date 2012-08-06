@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.encoding import smart_unicode
 from datetime import date
-import math
+#import math
 
 #TODO: Add this to south, eventually...
 # Remember: this application is managed by Django South so when you change this file, do the following:
