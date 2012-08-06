@@ -13,26 +13,50 @@ from email import message_from_string
 from email.parser import Parser
 
 def index(request, error='', message=''):
-    metrics_to_plot = Metric.objects.all()
+    metrics_to_plot = Metric.objects.filter(source='appleweekly')
     categories_to_plot = Category.objects.all()
     traffic_to_plot = list(Traffic.objects.all())
 
     try:
         #Import Apple weekly summary metrics, but just for one-time use - don't save in db.
-        appleweekly_metrics = []
-        for m in metrics_to_plot:
-            if m.source == 'appleweekly':
-                appleweekly_metrics.append(m)
-
         append = traffic_to_plot.append #Avoid re-calling the .append function in the middle of all those loops.
         for w in AppleWeeklySummary.merged.all():
-            for m in appleweekly_metrics:
+            for m in metrics_to_plot:
                 for field in AppleWeeklySummary._meta._fields():             #This grabs a list of field objects from the model specified as part of the stats app
                     if field.verbose_name == m.appleweeklyfield:             #Verbose name is specified as ("verbose_name") in stats/models/apple_summary.py
                         append(Traffic(date=w.week_beginning, count=w.__dict__[field.name], metric=m))
     except:
         print('WARNING: Can\'t find any Apple summary data. Have you imported it?')
 
+    #NOTE: We do not need to handle the temporal range of comments and events since this is done automatically by Timeplot.
+
+    comments_to_plot = []
+    for c in Comment.objects.filter(moderated=True):
+        comments_to_plot.append(c)
+    for c in categories_to_plot:
+        if c.description == 'From iTunes U':
+            for itu_comment in ItuComment.objects.filter(ituinstitution__name = 'Oxford University'):
+                comments_to_plot.append(Comment(
+                    date=itu_comment.date,
+                    time=datetime.time(0,0,0),
+                    source=itu_comment.itucollectionhistorical.name + ' - comment by ' + itu_comment.source,
+                    detail=itu_comment.detail,
+                    user_email='scan_itunes@manage.py',
+                    category=c
+                ))
+
+    return render_to_response('feedback/index.html', {
+        'metrics_to_plot': metrics_to_plot,
+        'metric_textfiles': create_metric_textfiles(traffic_to_plot,metrics_to_plot),
+        'categories_to_plot': categories_to_plot,
+        'comments_to_plot': comments_to_plot,
+        'events': Event.objects.filter(moderated=True),
+        'chart': True,
+        'error': error,
+        'message': message,
+    }, context_instance=RequestContext(request))
+
+def create_metric_textfiles(traffic_to_plot,metrics_to_plot):
     if traffic_to_plot:
         start = traffic_to_plot[0].date
         stop = start
@@ -64,34 +88,7 @@ def index(request, error='', message=''):
                     if t.metric == m:
                         append('%s%s%s' % (sd,',',str(t.count)))
         metric_textfiles[m.id] = '\\n'.join(metric_textfile_strlist)
-
-    #NOTE: We do not need to handle the temporal range of comments and events since this is done automatically by Timeplot.
-
-    comments_to_plot = []
-    for c in Comment.objects.filter(moderated=True):
-        comments_to_plot.append(c)
-    for c in categories_to_plot:
-        if c.description == 'From iTunes U':
-            for itu_comment in ItuComment.objects.all():
-                if itu_comment.ituinstitution.name == u'Oxford University':
-                    comments_to_plot.append(Comment(
-                        date=itu_comment.date,
-                        time=datetime.time(0,0,0),
-                        source=itu_comment.itucollectionhistorical.name + ' - comment by ' + itu_comment.source,
-                        detail=itu_comment.detail,
-                        user_email='scan_itunes@manage.py',
-                        category=c
-                    ))
-
-    return render_to_response('feedback/index.html', {
-        'metrics_to_plot': metrics_to_plot,
-        'metric_textfiles': metric_textfiles,
-        'categories_to_plot': categories_to_plot,
-        'comments': comments_to_plot,
-        'error': error,
-        'message': message,
-        'events': Event.objects.filter(moderated=True)
-    }, context_instance=RequestContext(request))
+    return metric_textfiles
 
 def comment_add(request,comment=None, error='', message=''):
     "Adds a new comment to the database. Optionally, it may replace the comment instead."
