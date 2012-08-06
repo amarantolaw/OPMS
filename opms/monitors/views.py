@@ -165,17 +165,18 @@ def itu_home(request):
     message = ''
     error = ''
     this_institution = ItuInstitution.objects.get(name=YOUR_INSTITUTION)
-    return render_to_response('monitors/itu_home.html', {'error': error, 'message': message, 'this_institution': this_institution},
+    return render_to_response('monitors/itu_home.html',
+            {'error': error, 'message': message, 'this_institution': this_institution},
         context_instance=RequestContext(request))
 
 
-def itu_top_collections(request, chartscan = None):
+def itu_top_collections(request, chartscan=None):
     """Show a top collections chart, defaulting to the most recent completed scan."""
     message = ''
     error = ''
     if not chartscan:
         try:
-            chartscan=ItuScanLog.objects.filter(mode=2, complete=True).order_by('-time')[0]
+            chartscan = ItuScanLog.objects.filter(mode=2, complete=True).order_by('-time')[0]
         except:
             error += 'Couldn\'t find latest top collections scan. You probably need to run one first.'
             return render_to_response('monitors/itu_top_collections.html',
@@ -187,13 +188,13 @@ def itu_top_collections(request, chartscan = None):
         context_instance=RequestContext(request))
 
 
-def itu_top_items(request, chartscan = None):
+def itu_top_items(request, chartscan=None):
     """Show a top items chart, defaulting to the most recent completed scan."""
     message = ''
     error = ''
     if not chartscan:
         try:
-            chartscan=ItuScanLog.objects.filter(mode=3, complete=True).order_by('-time')[0]
+            chartscan = ItuScanLog.objects.filter(mode=3, complete=True).order_by('-time')[0]
         except:
             error += 'Couldn\'t find latest top items scan. You probably need to run one first.'
             return render_to_response('monitors/itu_top_items.html',
@@ -262,14 +263,71 @@ def itu_collection(request, collection_id):
     categories_to_plot = []
     comments_to_plot = []
     if chartrecords:
-
         #Get or create a suitable Metric
-        metrics = Metric.objects.filter(description=collection.latest.name)
-        if len(metrics) == 0:
-            random_colour = '#' + str(random.randint(222222,999999))
-            top_collections_position = Metric(description=collection.latest.name,linecolor=random_colour,fillcolor='#FFFFFF',mouseover=True,defaultvisibility=True,source='itunes-chart')
+        try:
+            top_collections_position = Metric.objects.get(description=collection.latest.name)
+            metrics_to_plot.append(top_collections_position)
+        except:
+            random_colour = '#' + str(random.randint(222222, 999999))
+            top_collections_position = Metric(description=collection.latest.name, linecolor=random_colour,
+                fillcolor='#FFFFFF', mouseover=True, defaultvisibility=True, source='itunes-chart')
             top_collections_position.save()
             metrics_to_plot.append(top_collections_position)
+
+        #Add the first chartrecord of the day to traffic_to_plot
+        dates = []
+        for chartrecord in chartrecords:
+            if chartrecord.date.date() not in dates:
+                dates.append(chartrecord.date.date())
+        for date in dates:
+            chartrecords_day = []
+            for chartrecord in chartrecords:
+                if chartrecord.date.date() == date:
+                    chartrecords_day.append(chartrecord)
+            traffic_to_plot.append(
+                Traffic(date=date, count=(-1 * chartrecords_day[0].position), metric=top_collections_position))
+
+        if comments:
+            from_itunes_u = Category.objects.get(description='From iTunes U')
+            from_itunes_u.defaultvisibility = False
+            categories_to_plot.append(from_itunes_u)
+            for comment in comments:
+                comment_to_plot = Comment(date=comment.date,
+                    source=(comment.itucollectionhistorical.name + ' - comment by ' + comment.source),
+                    detail=comment.detail, user_email='scan_itunes@manage.py', category=from_itunes_u)
+                comments_to_plot.append(comment_to_plot)
+
+    return render_to_response('monitors/itu_collection.html',
+            {'error': error, 'message': message, 'collection': collection, 'chartrecords': chartrecords,
+             'comments': comments, 'items': items, 'ratings': ratings,
+             'comments_to_plot': comments_to_plot,
+             'metrics_to_plot': metrics_to_plot,
+             'metric_textfiles': create_metric_textfiles(traffic_to_plot, metrics_to_plot),
+             'categories_to_plot': categories_to_plot,
+             'events': [],
+             'chart': True}, context_instance=RequestContext(request), )
+
+
+def itu_item(request, item_id):
+    """Display an absolute record of an item."""
+    message = ''
+    error = ''
+    item = ItuItem.objects.get(id=int(item_id))
+    chartrecords = ItuItemChartScan.objects.filter(ituitem=item)
+
+    metrics_to_plot = []
+    traffic_to_plot = []
+    categories_to_plot = []
+    comments_to_plot = []
+    if chartrecords:
+        #Get or create a suitable Metric
+        metrics = Metric.objects.filter(description=item.latest.name)
+        if len(metrics) == 0:
+            random_colour = '#' + str(random.randint(222222, 999999))
+            top_items_position = Metric(description=item.latest.name, linecolor=random_colour, fillcolor='#FFFFFF',
+                mouseover=True, defaultvisibility=True, source='itunes-chart')
+            top_items_position.save()
+            metrics_to_plot.append(top_items_position)
         else:
             metrics_to_plot.append(metrics[0])
 
@@ -283,34 +341,17 @@ def itu_collection(request, collection_id):
             for chartrecord in chartrecords:
                 if chartrecord.date.date() == date:
                     chartrecords_day.append(chartrecord)
-            traffic_to_plot.append(Traffic(date=date,count=(-1*chartrecords_day[0].position),metric=metrics_to_plot[0]))
+            traffic_to_plot.append(
+                Traffic(date=date, count=(-1 * chartrecords_day[0].position), metric=metrics_to_plot[0]))
 
-        if comments:
-            from_itunes_u = Category.objects.get(description='From iTunes U')
-            categories_to_plot.append(from_itunes_u)
-            for comment in comments:
-                comment_to_plot = Comment(date=comment.date,source=(comment.itucollectionhistorical.name + ' - comment by ' + comment.source),detail=comment.detail,user_email='scan_itunes@manage.py',category=from_itunes_u)
-                comments_to_plot.append(comment_to_plot)
-
-    return render_to_response('monitors/itu_collection.html',
-            {'error': error, 'message': message, 'collection': collection, 'chartrecords': chartrecords,
-             'comments': comments, 'items': items, 'ratings': ratings,
-             'comments_to_plot': comments_to_plot,
+    return render_to_response('monitors/itu_item.html',
+            {'error': error, 'message': message, 'item': item, 'chartrecords': chartrecords,
+             'comments_to_plot': [],
              'metrics_to_plot': metrics_to_plot,
-             'metric_textfiles': create_metric_textfiles(traffic_to_plot,metrics_to_plot),
+             'metric_textfiles': create_metric_textfiles(traffic_to_plot, metrics_to_plot),
              'categories_to_plot': categories_to_plot,
              'events': [],
-             'chart': True}, context_instance=RequestContext(request),)
-
-
-def itu_item(request, item_id):
-    """Display an absolute record of an item."""
-    message = ''
-    error = ''
-    item = ItuItem.objects.get(id=int(item_id))
-    chartrecords = ItuItemChartScan.objects.filter(ituitem=item)
-    return render_to_response('monitors/itu_item.html',
-            {'error': error, 'message': message, 'item': item, 'chartrecords': chartrecords},
+             'chart': True},
         context_instance=RequestContext(request))
 
 
@@ -321,9 +362,55 @@ def itu_institution(request, institution_id):
     institution = ItuInstitution.objects.get(id=int(institution_id))
     comments = ItuComment.objects.filter(ituinstitution=institution)
     collections = ItuCollection.objects.filter(institution=institution)
+
+    metrics_to_plot = []
+    traffic_to_plot = []
+    categories_to_plot = []
+    comments_to_plot = []
+    for collection in collections:
+        chartrecords = ItuCollectionChartScan.objects.filter(itucollection=collection).order_by('date')
+        if chartrecords:
+            #Get or create a suitable Metric
+            try:
+                top_collections_position = Metric.objects.get(description=collection.latest.name)
+                metrics_to_plot.append(top_collections_position)
+            except:
+                random_colour = '#' + str(random.randint(222222, 999999))
+                top_collections_position = Metric(description=collection.latest.name, linecolor=random_colour,
+                    fillcolor='#FFFFFF', mouseover=True, defaultvisibility=True, source='itunes-chart')
+                top_collections_position.save()
+                metrics_to_plot.append(top_collections_position)
+
+            #Add the first chartrecord of the day to traffic_to_plot
+            dates = []
+            for chartrecord in chartrecords:
+                if chartrecord.date.date() not in dates:
+                    dates.append(chartrecord.date.date())
+            for date in dates:
+                chartrecords_day = []
+                for chartrecord in chartrecords:
+                    if chartrecord.date.date() == date:
+                        chartrecords_day.append(chartrecord)
+                traffic_to_plot.append(Traffic(date=date, count=(-1 * chartrecords_day[0].position), metric=top_collections_position))
+
+    if comments:
+        from_itunes_u = Category.objects.get(description='From iTunes U')
+        from_itunes_u.defaultvisibility = False
+        categories_to_plot.append(from_itunes_u)
+        for comment in comments:
+            comment_to_plot = Comment(date=comment.date,
+                source=(comment.itucollectionhistorical.name + ' - comment by ' + comment.source), detail=comment.detail
+                , user_email='scan_itunes@manage.py', category=from_itunes_u)
+            comments_to_plot.append(comment_to_plot)
     return render_to_response('monitors/itu_institution.html',
             {'error': error, 'message': message, 'institution': institution, 'comments': comments,
-             'collections': collections}, context_instance=RequestContext(request))
+             'collections': collections,
+             'comments_to_plot': comments_to_plot,
+             'metrics_to_plot': metrics_to_plot,
+             'metric_textfiles': create_metric_textfiles(traffic_to_plot, metrics_to_plot),
+             'categories_to_plot': categories_to_plot,
+             'events': [],
+             'chart': True}, context_instance=RequestContext(request))
 
 
 def itu_genre(request, genre_id):
