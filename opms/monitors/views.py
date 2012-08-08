@@ -380,6 +380,8 @@ def itu_institution(request, institution_id):
     comments = ItuComment.objects.filter(ituinstitution=institution)
     collections = ItuCollection.objects.filter(institution=institution)
 
+    total_duration = timedelta(microseconds = int(ItuItem.objects.filter(institution=institution).aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
+
     metrics_to_plot = []
     traffic_to_plot = []
     categories_to_plot = []
@@ -420,7 +422,7 @@ def itu_institution(request, institution_id):
                 , user_email='scan_itunes@manage.py', category=from_itunes_u)
             comments_to_plot.append(comment_to_plot)
     return render_to_response('monitors/itu_institution.html',
-            {'error': error, 'message': message, 'institution': institution, 'comments': comments,
+            {'error': error, 'message': message, 'institution': institution, 'comments': comments, 'total_duration': total_duration,
              'collections': collections,
              'comments_to_plot': comments_to_plot,
              'metrics_to_plot': metrics_to_plot,
@@ -437,9 +439,10 @@ def itu_genre(request, genre_id):
     genre = ItuGenre.objects.get(id=int(genre_id))
     comments = ItuComment.objects.filter(itucollectionhistorical__genre=genre)
     collections = ItuCollection.objects.filter(latest__genre=genre)
+    total_duration = timedelta(microseconds = int(ItuItem.objects.filter(latest__genre=genre).aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
     return render_to_response('monitors/itu_genre.html',
-            {'error': error, 'message': message, 'genre': genre, 'comments': comments, 'collections': collections},
-        context_instance=RequestContext(request))
+            {'error': error, 'message': message, 'genre': genre, 'comments': comments, 'collections': collections, 'total_duration': total_duration},
+            context_instance=RequestContext(request))
 
 
 def itu_scanlog(request, scanlog_id):
