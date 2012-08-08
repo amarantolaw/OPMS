@@ -37,7 +37,25 @@
             </tr>
             </thead>
             <tbody>
-            {% if scanlogs|length == 0 %}
+            {% if scanlogs %}
+                {% for s in scanlogs %}
+                    <tr>
+                        {% if s.mode == 4 %}
+                            <td>{{ s.time|date:"M d, Y f A" }}</td>
+                        {% else %}
+                            <td><a href="{% url itu-scanlog scanlog_id=s.id %}">{{ s.time|date:"M d, Y f A" }}</a></td>
+                        {% endif %}
+                        <td>{{ s.get_mode_display }}</td>
+                        <td>{% if s.institution %}Scan of <a href="{% url itu-institution institution_id=s.institution.id %}">{{ s.institution.name }}</a>. {% endif %}{{ s.comments }}</td>
+                        <td>{% if s.complete %}
+                                <i class="icon-ok"></i>
+                            {% else %}
+                                <i class="icon-warning-sign"></i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
                 <tr>
                     <td></td>
                     <td></td>
@@ -45,23 +63,6 @@
                     <td></td>
                 </tr>
             {% endif %}
-            {% for s in scanlogs %}
-                <tr>
-                    {% if s.mode == 4 %}
-                        <td>{{ s.time|date:"M d, Y f A" }}</td>
-                    {% else %}
-                        <td><a href="{% url itu-scanlog scanlog_id=s.id %}">{{ s.time|date:"M d, Y f A" }}</a></td>
-                    {% endif %}
-                    <td>{{ s.get_mode_display }}</td>
-                    <td>{% if s.institution %}Scan of <a href="{% url itu-institution institution_id=s.institution.id %}">{{ s.institution.name }}</a>. {% endif %}{{ s.comments }}</td>
-                    <td>{% if s.complete %}
-                            <i class="icon-ok"></i>
-                        {% else %}
-                            <i class="icon-warning-sign"></i>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
             </tbody>
         </table>
     {% endif %}

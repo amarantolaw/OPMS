@@ -1,9 +1,10 @@
 import random
+from datetime import timedelta
 from django.http import Http404, HttpResponse
 from django.views.decorators.http import require_safe
 from django.template import Context, loader, RequestContext
 from django.shortcuts import render_to_response
-from django.db.models import Q, F
+from django.db.models import Q, F, Sum
 from settings import *
 from opms.monitors.models import URLMonitorURL, URLMonitorScan
 from feedback.models import Metric, Traffic, Category, Comment, Event
@@ -180,7 +181,7 @@ def itu_top_collections(request, chartscan=None):
         except:
             error += 'Couldn\'t find latest top collections scan. You probably need to run one first.'
             return render_to_response('monitors/itu_top_collections.html',
-                    {'error': error, 'message': message},
+                    {'error': error, 'message': message, 'chartrows': [], 'scanlog': None},
                 context_instance=RequestContext(request))
     chartrows = ItuCollectionChartScan.objects.filter(scanlog=chartscan)
     return render_to_response('monitors/itu_top_collections.html',
@@ -198,7 +199,7 @@ def itu_top_items(request, chartscan=None):
         except:
             error += 'Couldn\'t find latest top items scan. You probably need to run one first.'
             return render_to_response('monitors/itu_top_items.html',
-                    {'error': error, 'message': message},
+                    {'error': error, 'message': message, 'chartrows': [], 'scanlog': None},
                 context_instance=RequestContext(request))
     chartrows = ItuItemChartScan.objects.filter(scanlog=chartscan)
     return render_to_response('monitors/itu_top_items.html',
@@ -222,10 +223,17 @@ def itu_items(request):
         context_instance=RequestContext(request))
 
 
-def itu_institutions(request, institutions=ItuInstitution.objects.all()):
+def itu_institutions(request, institutions=[]):
     """Show a clickable list of all institutions."""
     message = ''
     error = ''
+    if not institutions:
+        try:
+            institutions = ItuInstitution.objects.all()
+        except:
+            error += 'Failed to query the database for institutions.'
+    if not institutions:
+        error += 'Couldn\'t find any institutions. Perhaps you haven\'t run scan_itunes --mode 4 yet?'
     return render_to_response('monitors/itu_institutions.html',
             {'error': error, 'message': message, 'institutions': institutions},
         context_instance=RequestContext(request))
@@ -235,7 +243,12 @@ def itu_genres(request):
     """Show a clickable list of all genres."""
     message = ''
     error = ''
-    genres = ItuGenre.objects.all()
+    try:
+        genres = ItuGenre.objects.all()
+    except:
+        error += 'Failed to query the database for genres.'
+    if not genres:
+        error += 'Couldn\'t find any genres. Perhaps you haven\'t run scan_itunes yet?'
     return render_to_response('monitors/itu_genres.html', {'error': error, 'message': message, 'genres': genres},
         context_instance=RequestContext(request))
 
@@ -245,6 +258,8 @@ def itu_scanlogs(request):
     message = ''
     error = ''
     scanlogs = ItuScanLog.objects.all()
+    if not scanlogs:
+        error += 'Can\'t find any scanlogs. Perhaps you haven\'t run scan_itunes yet?'
     return render_to_response('monitors/itu_scanlogs.html', {'error': error, 'message': message, 'scanlogs': scanlogs},
         context_instance=RequestContext(request))
 
@@ -256,8 +271,10 @@ def itu_collection(request, collection_id):
     collection = ItuCollection.objects.get(id=int(collection_id))
     chartrecords = ItuCollectionChartScan.objects.filter(itucollection=collection).order_by('date')
     items = ItuItem.objects.filter(latest__series__itucollection=collection)
+    total_duration = timedelta(microseconds = int(items.aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
     comments = ItuComment.objects.filter(itucollectionhistorical__itucollection=collection)
     ratings = ItuRating.objects.filter(itucollectionhistorical=collection.latest)
+    average_rating = collection.latest.average_rating()
     metrics_to_plot = []
     traffic_to_plot = []
     categories_to_plot = []
@@ -299,7 +316,7 @@ def itu_collection(request, collection_id):
 
     return render_to_response('monitors/itu_collection.html',
             {'error': error, 'message': message, 'collection': collection, 'chartrecords': chartrecords,
-             'comments': comments, 'items': items, 'ratings': ratings,
+             'comments': comments, 'items': items, 'total_duration': total_duration, 'ratings': ratings, 'average_rating': average_rating,
              'comments_to_plot': comments_to_plot,
              'metrics_to_plot': metrics_to_plot,
              'metric_textfiles': create_metric_textfiles(traffic_to_plot, metrics_to_plot),

@@ -20,7 +20,7 @@
             <div class="alert alert-success">{{ message }}</div>
         {% endif %}
         {% if collections %}
-            <h4><a data-toggle="collapse" href="#collapseOne" class="btn btn-info" style="width:45%; text-align:left">Collections</a></h4>
+            <h4><a data-toggle="collapse" href="#collapseOne" class="btn btn-info" style="width:45%; text-align:left">Collections ({{ collections|length }})</a></h4>
             <script>
                 $(document).ready(function () {
                             $("#collectionTable").tablesorter({ sortList:[
