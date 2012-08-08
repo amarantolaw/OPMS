@@ -225,7 +225,10 @@ class Command(BaseCommand):
                                     duration = 0
                                     feedurl = ""
                                     for offerkey in item['store-offers'].keys(): #offerkey is something like 'standard-audio'. This code works on the assumption that, whatever the key, we want all the items in its list.
-                                        duration = item['store-offers'][offerkey]['duration']
+                                        try:
+                                            duration = item['store-offers'][offerkey]['duration']
+                                        except KeyError:
+                                            duration = None
                                         feedurl = item['store-offers'][offerkey]['asset-url']
                                     item_record_historical = ItuItemHistorical(name=item['title'],
                                                               itu_id=item['item-id'],

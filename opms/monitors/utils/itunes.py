@@ -334,20 +334,32 @@ def get_topdownloads():
 # Show Top Collections
 def get_topcollections():
     collections = []
+#    url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTop?id=27753&popId=36&genreId=40000000'
+#    xml = get_page(url)
+#    root = etree.fromstring(xml)
+#    items = root.xpath('.//itms:MatrixView/itms:HBoxView',namespaces={'itms':'http://www.apple.com/itms/'})
+#    for i,item in enumerate(items): # Now have a mix of HBoxViews and Views, around 100 of each...
+#        # print i
+#        # print int(float(item[0][0].text))
+#        item_dict = {}
+#        sub = item.xpath('.//itms:TextView/itms:SetFontStyle/itms:GotoURL',
+#                         namespaces={'itms':'http://www.apple.com/itms/'})
+#        item_dict['chart_position'] = int(float(item[0][0].text)) # Somewhat hacky...
+#        item_dict['series_img_75'] = item[2][0][0][0][0].get("url")
+#        item_dict['publisher_name'] = sub[1].text.strip()
+#        item_dict = dict(item_dict.items() + get_collection_info(sub[0].get("url")).items())
+#        collections.append(item_dict)
     url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTop?id=27753&popId=36&genreId=40000000'
-    xml = get_page(url)
+    xml = get_page(url,12)
+    xml = clean_html(xml).replace('png">','png"/>').replace('Store">','Store"/>')
     root = etree.fromstring(xml)
-    items = root.xpath('.//itms:MatrixView/itms:HBoxView',namespaces={'itms':'http://www.apple.com/itms/'})
-    for i,item in enumerate(items): # Now have a mix of HBoxViews and Views, around 100 of each...
-        # print i
-        # print int(float(item[0][0].text))
+    items = root.xpath('/div/body/div/div/div/div/div/div')
+    for i,item in enumerate(items):
         item_dict = {}
-        sub = item.xpath('.//itms:TextView/itms:SetFontStyle/itms:GotoURL',
-                         namespaces={'itms':'http://www.apple.com/itms/'})
-        item_dict['chart_position'] = int(float(item[0][0].text)) # Somewhat hacky...
-        item_dict['series_img_75'] = item[2][0][0][0][0].get("url")
-        item_dict['publisher_name'] = sub[1].text.strip()
-        item_dict = dict(item_dict.items() + get_collection_info(sub[0].get("url")).items())
+        item_dict['chart_position'] = int(item.xpath('span/span')[0].text.split('.')[0])
+        item_dict['series_img_75'] = item.xpath('a/div/img')[0].get('src')
+        item_dict['publisher_name'] = item.xpath('ul/li/a')[1].text
+        item_dict = dict(item_dict.items() + get_collection_info(item.xpath('ul/li/a')[0].get('href')).items())
         collections.append(item_dict)
     return collections
 
