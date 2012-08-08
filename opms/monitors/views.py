@@ -181,7 +181,7 @@ def itu_top_collections(request, chartscan=None):
         except:
             error += 'Couldn\'t find latest top collections scan. You probably need to run one first.'
             return render_to_response('monitors/itu_top_collections.html',
-                    {'error': error, 'message': message},
+                    {'error': error, 'message': message, 'chartrows': [], 'scanlog': None},
                 context_instance=RequestContext(request))
     chartrows = ItuCollectionChartScan.objects.filter(scanlog=chartscan)
     return render_to_response('monitors/itu_top_collections.html',
@@ -199,7 +199,7 @@ def itu_top_items(request, chartscan=None):
         except:
             error += 'Couldn\'t find latest top items scan. You probably need to run one first.'
             return render_to_response('monitors/itu_top_items.html',
-                    {'error': error, 'message': message},
+                    {'error': error, 'message': message, 'chartrows': [], 'scanlog': None},
                 context_instance=RequestContext(request))
     chartrows = ItuItemChartScan.objects.filter(scanlog=chartscan)
     return render_to_response('monitors/itu_top_items.html',
@@ -223,10 +223,17 @@ def itu_items(request):
         context_instance=RequestContext(request))
 
 
-def itu_institutions(request, institutions=ItuInstitution.objects.all()):
+def itu_institutions(request, institutions=[]):
     """Show a clickable list of all institutions."""
     message = ''
     error = ''
+    if not institutions:
+        try:
+            institutions = ItuInstitution.objects.all()
+        except:
+            error += 'Failed to query the database for institutions.'
+    if not institutions:
+        error += 'Couldn\'t find any institutions. Perhaps you haven\'t run scan_itunes --mode 4 yet?'
     return render_to_response('monitors/itu_institutions.html',
             {'error': error, 'message': message, 'institutions': institutions},
         context_instance=RequestContext(request))
@@ -236,7 +243,12 @@ def itu_genres(request):
     """Show a clickable list of all genres."""
     message = ''
     error = ''
-    genres = ItuGenre.objects.all()
+    try:
+        genres = ItuGenre.objects.all()
+    except:
+        error += 'Failed to query the database for genres.'
+    if not genres:
+        error += 'Couldn\'t find any genres. Perhaps you haven\'t run scan_itunes yet?'
     return render_to_response('monitors/itu_genres.html', {'error': error, 'message': message, 'genres': genres},
         context_instance=RequestContext(request))
 
@@ -246,6 +258,8 @@ def itu_scanlogs(request):
     message = ''
     error = ''
     scanlogs = ItuScanLog.objects.all()
+    if not scanlogs:
+        error += 'Can\'t find any scanlogs. Perhaps you haven\'t run scan_itunes yet?'
     return render_to_response('monitors/itu_scanlogs.html', {'error': error, 'message': message, 'scanlogs': scanlogs},
         context_instance=RequestContext(request))
 
