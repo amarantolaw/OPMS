@@ -359,6 +359,7 @@ def get_topcollections():
         item_dict['chart_position'] = int(item.xpath('span/span')[0].text.split('.')[0])
         item_dict['series_img_75'] = item.xpath('a/div/img')[0].get('src')
         item_dict['publisher_name'] = item.xpath('ul/li/a')[1].text
+        print('Scanning position ' + str(item_dict['chart_position']))
         item_dict = dict(item_dict.items() + get_collection_info(item.xpath('ul/li/a')[0].get('href')).items())
         collections.append(item_dict)
     return collections
