@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load static sitetree %}
+
+{% block sidebar %}
+{% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+    {% if error != '' %}
+        <div class="alert alert-error">ERROR: {{ error|escape }}</div>
+    {% else %}
+        {% if message != '' %}
+            <div class="alert alert-success">{{ message|escape }}</div>
+        {% endif %}
+    {% endif %}
+
+    <form action="{% url comment-add %}" method="post" onsubmit="storeCookie()" class="form-horizontal">
+        <fieldset>
+            {% csrf_token %}
+            <legend>Add a new comment using the form below:</legend>
+            <input type="hidden" name="add" value="1 /">
+            <div class="control-group{% if 'source' in error_fields %} error{% endif %}">
+                <label class="control-label" for="source">Source</label>
+                <div class="controls">
+                    <input type="text" name="source" value="{{ comment.title|escape }}" maxlength=20 id="source" class="input-xlarge" />
+                </div>
+            </div>
+            <div class="control-group{% if 'detail' in error_fields %} error{% endif %}">
+                <label class="control-label" for="detail">Comment</label>
+                <div class="controls">
+                    <textarea name="detail" id="detail">{{ comment.detail|escape }}</textarea>
+                </div>
+            </div>
+            <div class="control-group{% if 'date' in error_fields %} error{% endif %}">
+                <label class="control-label" for="dp">Date</label>
+                <div class="controls">
+                    <input type="text" name="date" value="{{ comment.date.day }}/{{ comment.date.month }}/{{ comment.date.year }}" data-date-format="dd/mm/yyyy" id="dp" class="input-small" />
+                </div>
+            </div>
+            <div class="control-group{% if 'time' in error_fields %} error{% endif %}">
+                <label class="control-label" for="tp">Time</label>
+                <div class="controls">
+                    <input type="text" name="time" value="{{ comment.time.hour }}:{{ comment.time.minute }}:{{ comment.time.second }}" data-date-format="dd/mm/yyyy" id="tp" class="timepicker input-small" />
+                </div>
+            </div>
+            <div class="control-group{% if 'category' in error_fields %} error{% endif %}">
+                <label class="control-label" for="category">Category</label>
+                <div class="controls">
+                    <select name="category_id" id="category">
+                        {% for c in categories %}
+                            {% if c.id == comment.category.id %}
+                                <option value="{{ c.id }}" selected="selected">{{ c.description|escape }}</option>
+                            {% else %}
+                                <option value="{{ c.id }}">{{ c.description|escape }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group{% if 'user_email' in error_fields %} error{% endif %}">
+                <label class="control-label" for="user_email">Your e-mail address</label>
+                <div class="controls">
+                    <input type="text" name="user_email" value="{{ comment.user_email|escape }}" maxlength=20 id="user_email" class="input-medium" maxlength=75 />
+                </div>
+                <label class="control-label" for="remember">Remember me</label>
+                <div class="controls">
+                    <input type="checkbox" name="remember" value="remember" id="remember"/>
+                </div>
+            </div>
+            <input type="hidden" name="action" id="action" />
+            <div class="form-actions">
+                <input type="submit" value="Save" name="save" class="btn btn-primary"/> <input type="submit" value="Save and add another" name="saveandaddanother" class="btn btn-primary"/> <input type="reset" value="Reset"class="btn btn-info"></div>
+            </div>
+        </fieldset>
+    </form>
+
+<script>
+    $(document).ready(function() {
+            $('#dp').datepicker();
+            $('.timepicker').timepicker({
+            defaultTime: '{{ comment.time.hour }}:{{ comment.time.minute }}:{{ comment.time.second }}',
+            template: 'dropdown',
+            showSeconds: true,
+            showMeridian: false
+                 });
+            // When a submit button is clicked, put its name into the action hidden field
+            $(":submit").click(function () { $("#action").val(this.name); });
+            if ($.cookie('opms_feedback_user_email') != null){ //If the cookie exists, put it in the user_email box and check the 'remember' box.
+                $("input[name='user_email']").val($.cookie('opms_feedback_user_email'));
+                $("input[name='remember']").prop("checked",true);
+            };
+    });
+    function storeCookie() {
+        if ($("input[name='remember']").prop("checked")){
+            $.cookie('opms_feedback_user_email', $("input[name='user_email']").val(), { expires: 28, path: '/' }); //If the box is checked, store the cookie.
+        }
+        else {
+            $.cookie('opms_feedback_user_email', null, { expires: 28, path: '/' }); //If not, delete the cookie.
+        }
+    }
+</script>
+{% endblock %}

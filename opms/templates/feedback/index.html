@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static sitetree %}
+{% get_static_prefix as STATIC_PREFIX %}
+
+{% block sidebar %}
+{% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block head %}
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
+
+    <!-- Load timeplot and its dependencies. These must be loaded in this order, after jquery.-->
+{#    <script src="http://api.simile-widgets.org/timeplot/1.1/timeplot-api.js"#}
+{#            type="text/javascript"></script> #}
+    <script src="{{ STATIC_PREFIX }}scripts/ajax/api/simile-ajax-api.js" type="text/javascript"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/timeline/api/timeline-api.js" type="text/javascript"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/timeplot/api/timeplot-api.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection" />
+{% endblock %}
+
+{% block content %}
+{% if error != '' %}
+    <div class="alert alert-error">ERROR: {{ error|escape }}</div>
+{% else %}
+    {% if message != '' %}
+        <div class="alert alert-success">{{ message|escape }}</div>
+    {% endif %}
+<script>
+    $(document).ready(function()
+            {
+                $("#eventsTable").tablesorter({ sortList: [[0,1]], headers: { 0: { sorter: 'shortDate'} } });
+                $("#commentsTable").tablesorter({ sortList: [[0,1]], headers: { 0: { sorter: 'shortDate'} } });
+            }
+    );
+</script>
+<div style="text-align:right">
+    <a href="{% url comment-add %}">New comment</a> | <a href="{% url event-add %}">New event</a>
+</div>
+{% include 'feedback/opms_plot.html' %}
+
+<h2>Events</h2>
+<table id="eventsTable" class="tablesorter">
+    <thead>
+    <tr>
+        <th>Date</th>
+        <th>Title</th>
+        <th>Detail</th>
+        <th>Category</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% if events|length == 0 %}
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    {% endif %}
+    {% for e in events %}
+    <tr>
+        <td>{{ e.date }}</td>
+        <td>{{ e.title|escape }}</td>
+        <td>{{ e.detail|escape }}</td>
+        <td>{{ e.category.description|escape }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h2>Comments</h2>
+<table id="commentsTable" class="tablesorter">
+    <thead>
+    <tr>
+        <th>Date</th>
+        <th>Source</th>
+        <th>Detail</th>
+        <th>Category</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% if comments_to_plot %}
+    {% for c in comments_to_plot %}
+    <tr>
+    {% if c.date == None %}
+        <td></td>
+    {% else %}
+        <td>{{ c.date }}</td>
+    {% endif %}
+        <td>{{ c.source|escape }}</td>
+        <td>"{{ c.detail|escape }}"</td>
+        <td>{{ c.category.description|escape }}</td>
+    </tr>
+    {% endfor %}
+    {% else %}
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    {% endif %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}

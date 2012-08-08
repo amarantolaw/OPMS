@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static sitetree %}
+
+{% block sidebar %}
+{% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+{% if error != '' %}
+    <div class="alert alert-error">ERROR: {{ error|escape }}</div>
+{% else %}
+    {% if message != '' %}
+        <div class="alert alert-success">{{ message|escape }}</div>
+    {% endif %}
+    <h3>E-mail</h3>
+    <div>{{ output }}</div>
+{% endif %}
+{% endblock %}

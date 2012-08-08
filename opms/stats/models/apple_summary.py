@@ -25,6 +25,7 @@ class AppleWeeklySummary(models.Model):
     service_name = models.CharField("service name associate with this log", max_length=20, choices=SERVICE_NAME_CHOICES)
 
     # User Actions section
+    # NOTE: The verbose_name attributes specified below are used by the feedback module to determine magic metric descriptions. Edit these with caution.
     browse = models.IntegerField("browse")
     download_preview  = models.IntegerField("download preview")
     download_preview_ios = models.IntegerField("download preview iOS", blank=True, null=True)

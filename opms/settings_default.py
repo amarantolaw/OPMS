@@ -142,6 +142,7 @@ INSTALLED_APPS = (
     'core',
     'stats',
     'monitors',
+    'feedback',
     'ffm',
     'oxitems', # This is to temporarily link OPMS with the OxItems database whilst it is definitive
 )
