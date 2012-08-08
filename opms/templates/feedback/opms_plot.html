@@ -104,8 +104,9 @@ function onLoad() {
     var valueGeometry = new Timeplot.DefaultValueGeometry({
         gridColor: "#000000",
         {% if chart %}
-        min: -100,
-        max: 0
+        min: -200,
+        max: 0,
+        gridType: "long"
         {% endif %}
     });
 
@@ -257,7 +258,7 @@ function setTimeRange(newmin,newmax){
 
     //Create a new div identical to the old one to put the new timeplot in
     var parent = document.getElementById("timeplot-parent");
-    parent.innerHTML = "<div id=\"my-timeplot\" style=\"height: 150px;\"></div>";
+    parent.innerHTML = "<div id=\"my-timeplot\" style=\"height: 300px;\"></div>";
 
     onLoad();
 }
@@ -275,7 +276,7 @@ function setTimeRange(newmin,newmax){
     );
 </script>
 <div id="timeplot-parent">
-    <div id="my-timeplot" style="height: 150px;"></div>
+    <div id="my-timeplot" style="height: 300px;"></div>
 </div>
 
 <a class="btn" id="panleft" onclick="setTimeRange(panleft_min,panleft_max)"><i class="icon-chevron-left"></i> </a></input>

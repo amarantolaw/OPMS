@@ -311,23 +311,40 @@ def get_collection_info_arty(url, hurry=False): #Workaround for pages (typically
 def get_topdownloads():
     collections = []
     url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTop?id=27753&popId=40&genreId=40000000'
-    xml = get_page(url)
+#    xml = get_page(url)
+#    root = etree.fromstring(xml)
+#    items = root.xpath('.//itms:MatrixView/itms:HBoxView',namespaces={'itms':'http://www.apple.com/itms/'})
+#    for item in items: # Now have a mix of HBoxViews and Views, around 100 of each...
+#        item_dict = {}
+#        item_dict['chart_position'] = int(float(item[0][0].text)) # Somewhat hacky...
+#        subtree = item.xpath('.//itms:VBoxView/itms:MatrixView/itms:GotoURL/itms:View/itms:PictureView',
+#                             namespaces={'itms':'http://www.apple.com/itms/'}) # item[2][0].getchildren()
+#        item_dict['series_img_75'] = subtree[0].get("url")
+#        subtree = item.xpath('.//itms:TextView/itms:SetFontStyle/itms:GotoURL',
+#                             namespaces={'itms':'http://www.apple.com/itms/'})
+#        item_dict['item'] = subtree[0].text.strip()
+#        item_dict['item_url'] = subtree[0].get("url")
+#        item_dict['item_id'] = item_dict['item_url'].split('/')[-1].split('?')[-1].split('&amp;')[0].split('=')[-1]
+#        # item_dict['item_info'] = get_collection_info(item_dict.get('item_url'))
+#        item_dict = dict(item_dict.items() + get_collection_info(item_dict.get('item_url')).items())
+#        collections.append(item_dict)
+#        url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTop?id=27753&popId=36&genreId=40000000'
+    xml = get_page(url,12)
+    xml = clean_html(xml).replace('png">','png"/>').replace('Store">','Store"/>')
     root = etree.fromstring(xml)
-    items = root.xpath('.//itms:MatrixView/itms:HBoxView',namespaces={'itms':'http://www.apple.com/itms/'})
-    for item in items: # Now have a mix of HBoxViews and Views, around 100 of each...
+    items = root.xpath('/div/body/div/div/div/div/div/div')
+    for i,item in enumerate(items):
         item_dict = {}
-        item_dict['chart_position'] = int(float(item[0][0].text)) # Somewhat hacky...
-        subtree = item.xpath('.//itms:VBoxView/itms:MatrixView/itms:GotoURL/itms:View/itms:PictureView',
-                             namespaces={'itms':'http://www.apple.com/itms/'}) # item[2][0].getchildren()
-        item_dict['series_img_75'] = subtree[0].get("url")
-        subtree = item.xpath('.//itms:TextView/itms:SetFontStyle/itms:GotoURL',
-                             namespaces={'itms':'http://www.apple.com/itms/'})
-        item_dict['item'] = subtree[0].text.strip()
-        item_dict['item_url'] = subtree[0].get("url")
-        item_dict['item_id'] = item_dict['item_url'].split('/')[-1].split('?')[-1].split('&amp;')[0].split('=')[-1]
+        item_dict['chart_position'] = int(item.xpath('span/span')[0].text.split('.')[0])
+        item_dict['series_img_75'] = item.xpath('a/div/img')[0].get('src')
+        item_dict['item'] = item.xpath('ul/li/a')[0].text
+        item_dict['item_url'] = item.xpath('ul/li/a')[0].get('href')
+        item_dict['item_id'] = item_dict['item_url'].split('/')[-1].split('?')[-1].split('&')[0].split('=')[-1]
         # item_dict['item_info'] = get_collection_info(item_dict.get('item_url'))
+        print('Scanning position ' + str(item_dict['chart_position']) + '...')
         item_dict = dict(item_dict.items() + get_collection_info(item_dict.get('item_url')).items())
         collections.append(item_dict)
+        url = 'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTop?id=27753&popId=36&genreId=40000000'
     return collections
 
 
@@ -359,7 +376,7 @@ def get_topcollections():
         item_dict['chart_position'] = int(item.xpath('span/span')[0].text.split('.')[0])
         item_dict['series_img_75'] = item.xpath('a/div/img')[0].get('src')
         item_dict['publisher_name'] = item.xpath('ul/li/a')[1].text
-        print('Scanning position ' + str(item_dict['chart_position']))
+        print('Scanning position ' + str(item_dict['chart_position']) + '...')
         item_dict = dict(item_dict.items() + get_collection_info(item.xpath('ul/li/a')[0].get('href')).items())
         collections.append(item_dict)
     return collections
