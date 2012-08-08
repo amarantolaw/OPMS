@@ -1,4 +1,5 @@
 from django.shortcuts import render_to_response, get_object_or_404
+from opms.utils import debug
 from feedback.models import Metric, Traffic, Category, Comment, Event
 from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
 from stats.models import AppleWeeklySummary
@@ -26,7 +27,7 @@ def index(request, error='', message=''):
                     if field.verbose_name == m.appleweeklyfield:             #Verbose name is specified as ("verbose_name") in stats/models/apple_summary.py
                         append(Traffic(date=w.week_beginning, count=w.__dict__[field.name], metric=m))
     except:
-        print('WARNING: Can\'t find any Apple summary data. Have you imported it?')
+        debug.onscreen('WARNING: Can\'t find any Apple summary data. Have you imported it?')
 
     #NOTE: We do not need to handle the temporal range of comments and events since this is done automatically by Timeplot.
 
@@ -74,7 +75,7 @@ def create_metric_textfiles(traffic_to_plot,metrics_to_plot):
             date_range.append(x)
     else:
         date_range = []
-        print('WARNING: No traffic to plot. Did you put any in the database?')
+        debug.onscreen('WARNING: No traffic to plot. Did you put any in the database?')
 
     #Timeplot is designed to take in CSV text files, so build one as a string for each metric:
     metric_textfiles = {}
@@ -194,8 +195,8 @@ def event_add(request,event=None, error='', message=''):
             datetimestamp = parse(timestamp)
         except:
             datetimestamp = datetime.datetime.now()
-            print('WARNING: Widget returned datetime we couldn\'t process. Defaulting to today.')
-        print('Autocompleting form from widget... ' + url + str(timestamp) + title)
+            debug.onscreen('WARNING: Widget returned datetime we couldn\'t process. Defaulting to today.')
+        debug.onscreen('Autocompleting form from widget... ' + url + str(timestamp) + title)
         default_event = Event(date=datetimestamp.date(), title=title, detail=detail, category=Category.objects.filter(description='Found on the internet')[0], user_email='')
     else:
         default_event = Event(date=datetime.date.today(), title='', detail='', category=Category.objects.filter(description='Default')[0], user_email='')
