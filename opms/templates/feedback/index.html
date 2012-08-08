@@ -80,6 +80,7 @@
     </tr>
     </thead>
     <tbody>
+    {% if comments_to_plot %}
     {% for c in comments_to_plot %}
     <tr>
     {% if c.date == None %}
@@ -92,6 +93,14 @@
         <td>{{ c.category.description|escape }}</td>
     </tr>
     {% endfor %}
+    {% else %}
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    {% endif %}
     </tbody>
 </table>
 {% endif %}
