@@ -5,7 +5,7 @@ from django.views.decorators.http import require_safe
 from django.template import Context, loader, RequestContext
 from django.shortcuts import render_to_response
 from django.db.models import Q, F, Sum
-from settings import *
+import settings
 from opms.monitors.models import URLMonitorURL, URLMonitorScan
 from feedback.models import Metric, Traffic, Category, Comment, Event
 from feedback.views import create_metric_textfiles
@@ -165,7 +165,7 @@ def itu_home(request):
     """The iTunes U Monitoring home page."""
     message = ''
     error = ''
-    this_institution = ItuInstitution.objects.get(name=YOUR_INSTITUTION)
+    this_institution = ItuInstitution.objects.get(name=settings.YOUR_INSTITUTION)
     return render_to_response('monitors/itu_home.html',
             {'error': error, 'message': message, 'this_institution': this_institution},
         context_instance=RequestContext(request))
