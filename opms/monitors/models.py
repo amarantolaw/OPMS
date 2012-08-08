@@ -212,8 +212,8 @@ class ItuCollectionHistorical(models.Model):
         return checksum
 
     class Meta:
-        verbose_name = "iTunes U Historical Record of Collection"
-        verbose_name_plural = "iTunes U Historical Records of Collections"
+        verbose_name = "iTunes U Historical Collection Record"
+        verbose_name_plural = "iTunes U Historical Collection Records"
     def save(self): #Update absolute record so that the last-saved historical record is the latest record.
         super(ItuCollectionHistorical, self).save()
         self.itucollection.latest = self
