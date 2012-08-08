@@ -197,7 +197,7 @@ class ItuCollectionHistorical(models.Model):
         rating_sum = 0
         n = 0
         for rating in ItuRating.objects.filter(itucollectionhistorical=self):
-            rating_sum += rating.stars
+            rating_sum += rating.stars * rating.count
             n += rating.count
         if n > 0:
             return (rating_sum/n)

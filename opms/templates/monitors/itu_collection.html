@@ -40,8 +40,8 @@
         <div style="clear:right">
             {% if items %}
                 <div>
-                    <h4><a data-toggle="collapse" href="#collapseOne" class="btn btn-info"
-                           style="width:45%; text-align:left">Items ({{ items|length }})</a></h4>
+                    <a data-toggle="collapse" href="#collapseOne" class="btn btn-info"
+                           style="width:45%; text-align:left"><h4>Items ({{ items|length }}, total duration {{ total_duration }})</h4></a>
                 </div>
                 <script>
                     $(document).ready(function () {
@@ -159,7 +159,7 @@
             {% if ratings %}
                 <div>
                     <a data-toggle="collapse" href="#collapseFour" class="btn btn-info"
-                       style="width:45%; text-align:left"><h4>Ratings</h4></a>
+                       style="width:45%; text-align:left"><h4>Ratings (average: {{ average_rating }} star{{ average_rating|pluralize }})</h4></a>
                 </div>
                 <div id="collapseFour" class="collapse">
                     <table id="ratingTable" class="table table-bordered">

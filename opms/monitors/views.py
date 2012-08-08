@@ -1,9 +1,10 @@
 import random
+from datetime import timedelta
 from django.http import Http404, HttpResponse
 from django.views.decorators.http import require_safe
 from django.template import Context, loader, RequestContext
 from django.shortcuts import render_to_response
-from django.db.models import Q, F
+from django.db.models import Q, F, Sum
 from settings import *
 from opms.monitors.models import URLMonitorURL, URLMonitorScan
 from feedback.models import Metric, Traffic, Category, Comment, Event
@@ -256,8 +257,10 @@ def itu_collection(request, collection_id):
     collection = ItuCollection.objects.get(id=int(collection_id))
     chartrecords = ItuCollectionChartScan.objects.filter(itucollection=collection).order_by('date')
     items = ItuItem.objects.filter(latest__series__itucollection=collection)
+    total_duration = timedelta(microseconds = int(items.aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
     comments = ItuComment.objects.filter(itucollectionhistorical__itucollection=collection)
     ratings = ItuRating.objects.filter(itucollectionhistorical=collection.latest)
+    average_rating = collection.latest.average_rating()
     metrics_to_plot = []
     traffic_to_plot = []
     categories_to_plot = []
@@ -299,7 +302,7 @@ def itu_collection(request, collection_id):
 
     return render_to_response('monitors/itu_collection.html',
             {'error': error, 'message': message, 'collection': collection, 'chartrecords': chartrecords,
-             'comments': comments, 'items': items, 'ratings': ratings,
+             'comments': comments, 'items': items, 'total_duration': total_duration, 'ratings': ratings, 'average_rating': average_rating,
              'comments_to_plot': comments_to_plot,
              'metrics_to_plot': metrics_to_plot,
              'metric_textfiles': create_metric_textfiles(traffic_to_plot, metrics_to_plot),
