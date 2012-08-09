@@ -249,6 +249,7 @@ def itu_genres(request):
     try:
         genres = ItuGenre.objects.all()
     except:
+        genres = []
         error += 'Failed to query the database for genres.'
     if not genres:
         error += 'Couldn\'t find any genres. Perhaps you haven\'t run scan_itunes yet?'
