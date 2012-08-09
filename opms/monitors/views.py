@@ -5,11 +5,13 @@ from django.views.decorators.http import require_safe
 from django.template import Context, loader, RequestContext
 from django.shortcuts import render_to_response
 from django.db.models import Q, F, Sum
+from django_tables2 import RequestConfig
 import settings
 from opms.monitors.models import URLMonitorURL, URLMonitorScan
 from feedback.models import Metric, Traffic, Category, Comment, Event
 from feedback.views import create_metric_textfiles
 from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
+from monitors.models import InstitutionalCollectionTable
 #import pylab
 #import numpy as np
 #import matplotlib
@@ -271,7 +273,11 @@ def itu_collection(request, collection_id):
     collection = ItuCollection.objects.get(id=int(collection_id))
     chartrecords = ItuCollectionChartScan.objects.filter(itucollection=collection).order_by('date')
     items = ItuItem.objects.filter(latest__series__itucollection=collection)
-    total_duration = timedelta(microseconds = int(items.aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
+    try:
+        total_duration = timedelta(microseconds = int(items.aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
+    except:
+        total_duration = timedelta(microseconds = 0)
+        message += 'WARNING: Couldn\'t calculate the total duration properly.'
     comments = ItuComment.objects.filter(itucollectionhistorical__itucollection=collection)
     ratings = ItuRating.objects.filter(itucollectionhistorical=collection.latest)
     average_rating = collection.latest.average_rating()
@@ -377,10 +383,14 @@ def itu_institution(request, institution_id):
     message = ''
     error = ''
     institution = ItuInstitution.objects.get(id=int(institution_id))
-    comments = ItuComment.objects.filter(ituinstitution=institution)
-    collections = ItuCollection.objects.filter(institution=institution)
+    comments = ItuComment.objects.filter(ituinstitution=institution).order_by('-date')
+    collections = ItuCollection.objects.filter(institution=institution).order_by('-latest__last_modified')
 
-    total_duration = timedelta(microseconds = int(ItuItem.objects.filter(institution=institution).aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
+    try:
+        total_duration = timedelta(microseconds = int(ItuItem.objects.filter(institution=institution).aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
+    except:
+        total_duration = timedelta(microseconds = 0)
+        message += 'WARNING: Couldn\'t calculate the total duration properly.'
 
     metrics_to_plot = []
     traffic_to_plot = []
@@ -421,9 +431,11 @@ def itu_institution(request, institution_id):
                 source=(comment.itucollectionhistorical.name + ' - comment by ' + comment.source), detail=comment.detail
                 , user_email='scan_itunes@manage.py', category=from_itunes_u)
             comments_to_plot.append(comment_to_plot)
+    collection_table = InstitutionalCollectionTable(collections)
+    RequestConfig(request, paginate = {'per_page': 15}).configure(collection_table)
     return render_to_response('monitors/itu_institution.html',
             {'error': error, 'message': message, 'institution': institution, 'comments': comments, 'total_duration': total_duration,
-             'collections': collections,
+             'collections': collections, 'collection_table': collection_table,
              'comments_to_plot': comments_to_plot,
              'metrics_to_plot': metrics_to_plot,
              'metric_textfiles': create_metric_textfiles(traffic_to_plot, metrics_to_plot),
@@ -439,7 +451,11 @@ def itu_genre(request, genre_id):
     genre = ItuGenre.objects.get(id=int(genre_id))
     comments = ItuComment.objects.filter(itucollectionhistorical__genre=genre)
     collections = ItuCollection.objects.filter(latest__genre=genre)
-    total_duration = timedelta(microseconds = int(ItuItem.objects.filter(latest__genre=genre).aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
+    try:
+        total_duration = timedelta(microseconds = int(ItuItem.objects.filter(latest__genre=genre).aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
+    except:
+        total_duration = timedelta(microseconds = 0)
+        message += 'WARNING: Couldn\'t calculate the total duration properly.'
     return render_to_response('monitors/itu_genre.html',
             {'error': error, 'message': message, 'genre': genre, 'comments': comments, 'collections': collections, 'total_duration': total_duration},
             context_instance=RequestContext(request))

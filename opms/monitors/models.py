@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils.encoding import smart_unicode
+import django_tables2 as tables
+from django_tables2.utils import A
 from datetime import date
 import math
 
@@ -347,3 +349,12 @@ class ItuComment(models.Model):
         verbose_name_plural = "iTunes U Comments"
     def __unicode__(self):
         return smart_unicode(self.detail)
+
+class InstitutionalCollectionTable(tables.Table):
+    name = tables.LinkColumn('itu-collection', args=[A('pk')], accessor='latest.name', order_by='latest.name')
+    version = tables.Column(accessor='latest.version', order_by='latest.version')
+    last_modified = tables.Column(accessor='latest.last_modified', order_by='latest.last_modified')
+    genre = tables.LinkColumn('itu-genre', args=[A('latest.genre.pk')], accessor='latest.genre.name', order_by='latest.genre.name', verbose_name='Genre')
+
+    class Meta:
+        attrs = {'class': 'paleblue'}
