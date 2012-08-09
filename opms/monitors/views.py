@@ -1,10 +1,11 @@
 import random
+import datetime
 from datetime import timedelta
 from django.http import Http404, HttpResponse
 from django.views.decorators.http import require_safe
 from django.template import Context, loader, RequestContext
 from django.shortcuts import render_to_response
-from django.db.models import Q, F, Sum
+from django.db.models import Q, F, Sum, Count
 from django_tables2 import RequestConfig
 import settings
 from opms.monitors.models import URLMonitorURL, URLMonitorScan
@@ -231,7 +232,7 @@ def itu_institutions(request, institutions=[]):
     error = ''
     if not institutions:
         try:
-            institutions = ItuInstitution.objects.all()
+            institutions = ItuInstitution.objects.annotate(number_of_collections=Count('itucollection')).filter(number_of_collections__gt=0)
         except:
             error += 'Failed to query the database for institutions.'
     if not institutions:
@@ -272,7 +273,7 @@ def itu_collection(request, collection_id):
     error = ''
     collection = ItuCollection.objects.get(id=int(collection_id))
     chartrecords = ItuCollectionChartScan.objects.filter(itucollection=collection).order_by('date')
-    items = ItuItem.objects.filter(latest__series__itucollection=collection)
+    items = ItuItem.objects.filter(latest__series__itucollection=collection,latest__missing=None)
     try:
         total_duration = timedelta(microseconds = int(items.aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
     except:
@@ -385,13 +386,11 @@ def itu_institution(request, institution_id):
     institution = ItuInstitution.objects.get(id=int(institution_id))
     comments = ItuComment.objects.filter(ituinstitution=institution).order_by('-date')
     collections = ItuCollection.objects.filter(institution=institution).order_by('-latest__last_modified')
-
     try:
-        total_duration = timedelta(microseconds = int(ItuItem.objects.filter(institution=institution).aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
+        total_duration = timedelta(microseconds = int(ItuItem.objects.filter(institution=institution,latest__missing=None).aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
     except:
         total_duration = timedelta(microseconds = 0)
         message += 'WARNING: Couldn\'t calculate the total duration properly.'
-
     metrics_to_plot = []
     traffic_to_plot = []
     categories_to_plot = []
@@ -421,7 +420,6 @@ def itu_institution(request, institution_id):
                     if chartrecord.date.date() == date:
                         chartrecords_day.append(chartrecord)
                 traffic_to_plot.append(Traffic(date=date, count=(-1 * chartrecords_day[0].position), metric=top_collections_position))
-
     if comments:
         from_itunes_u = Category.objects.get(description='From iTunes U')
         from_itunes_u.defaultvisibility = False
@@ -432,7 +430,7 @@ def itu_institution(request, institution_id):
                 , user_email='scan_itunes@manage.py', category=from_itunes_u)
             comments_to_plot.append(comment_to_plot)
     collection_table = InstitutionalCollectionTable(collections)
-    RequestConfig(request, paginate = {'per_page': 15}).configure(collection_table)
+    RequestConfig(request, paginate = {'per_page': 10}).configure(collection_table)
     return render_to_response('monitors/itu_institution.html',
             {'error': error, 'message': message, 'institution': institution, 'comments': comments, 'total_duration': total_duration,
              'collections': collections, 'collection_table': collection_table,
@@ -452,7 +450,7 @@ def itu_genre(request, genre_id):
     comments = ItuComment.objects.filter(itucollectionhistorical__genre=genre)
     collections = ItuCollection.objects.filter(latest__genre=genre)
     try:
-        total_duration = timedelta(microseconds = int(ItuItem.objects.filter(latest__genre=genre).aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
+        total_duration = timedelta(microseconds = int(ItuItem.objects.filter(latest__genre=genre,latest__missing=None).aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
     except:
         total_duration = timedelta(microseconds = 0)
         message += 'WARNING: Couldn\'t calculate the total duration properly.'

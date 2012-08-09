@@ -15,6 +15,8 @@ table.paleblue + ul.pagination > li > a {
     color: #5B80B2;
     text-decoration: none;
     font-weight: bold;
+    border-width: 1px 1px 1px 1px;
+    border-radius: 3px 3px 3px 3px;
 }
 
 table.paleblue a:hover {
@@ -80,6 +82,8 @@ table.paleblue + ul.pagination {
 
 table.paleblue + ul.pagination > li {
     line-height: 35px;
+    padding-left: 10px;
+    padding-right: 10px
 }
 
 table.paleblue + ul.pagination > li:first-child {
