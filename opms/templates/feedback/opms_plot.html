@@ -90,6 +90,7 @@ function onLoad() {
         timeGeometry = new Timeplot.DefaultTimeGeometry({
             gridColor: new Timeplot.Color("#000000"),
             axisLabelsPlacement: "bottom",
+            gridStep: 50,
             min: min, //ISO 8601 dates: yyyy-mm-dd
             max: max
         });
@@ -100,6 +101,7 @@ function onLoad() {
         timeGeometry = new Timeplot.DefaultTimeGeometry({
             gridColor: new Timeplot.Color("#000000"),
             axisLabelsPlacement: "bottom",
+            gridStep: 50,
             min: "", //ISO 8601 dates: yyyy-mm-dd
             max: ""  //Null min/max result in auto-calculation by timeplot.
         });
@@ -110,7 +112,8 @@ function onLoad() {
         {% if chart %}
         min: -200,
         max: 0,
-        gridType: "long"
+        gridType: "long",
+        axisLabelsPlacement: "left"
         {% endif %}
     });
 

@@ -246,7 +246,7 @@ Timeplot.DefaultValueGeometry.prototype = {
         if (this._minValue >= 0) {
             while (y < this._canvas.height) {
                 if (y > 0) {
-                    grid.push({ y: y, label: v });
+                    grid.push({ y: y, label: Math.abs(v) });
                 }
                 v += inc;
                 y = this.toScreen(v);
@@ -254,7 +254,7 @@ Timeplot.DefaultValueGeometry.prototype = {
         } else if (this._maxValue <= 0) {
             while (y > 0) {
                 if (y < this._canvas.height) {
-                    grid.push({ y: y, label: v });
+                    grid.push({ y: y, label: Math.abs(v) });
                 }
                 v -= inc;
                 y = this.toScreen(v);
@@ -262,7 +262,7 @@ Timeplot.DefaultValueGeometry.prototype = {
         } else {
             while (y < this._canvas.height) {
                 if (y > 0) {
-                    grid.push({ y: y, label: v });
+                    grid.push({ y: y, label: Math.abs(v) });
                 }
                 v += inc;
                 y = this.toScreen(v);
@@ -271,7 +271,7 @@ Timeplot.DefaultValueGeometry.prototype = {
             y = this.toScreen(v);
             while (y > 0) {
                 if (y < this._canvas.height) {
-                    grid.push({ y: y, label: v });
+                    grid.push({ y: y, label: Math.abs(v) });
                 }
                 v -= inc;
                 y = this.toScreen(v);
@@ -586,15 +586,15 @@ Timeplot.DefaultTimeGeometry.prototype = {
         var time = SimileAjax.DateTime;
         var u = this._unit;
         var p = this._period;
-        
+
         if (p == 0) return grid;
-        
+
         // find the time units nearest to the time period
         if (p > time.gregorianUnitLengths[time.MILLENNIUM]) {
-            unit = time.MILLENNIUM; 
+            unit = time.MILLENNIUM;
         } else {
             for (var unit = time.MILLENNIUM; unit > 0; unit--) {
-                if (time.gregorianUnitLengths[unit-1] <= p && p < time.gregorianUnitLengths[unit]) {
+                if (time.gregorianUnitLengths[unit-1] <= (p/2.2) && (p/2.2) < time.gregorianUnitLengths[unit]) {
                     unit--;
                     break;
                 }

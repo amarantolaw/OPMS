@@ -84,16 +84,17 @@
                     <a data-toggle="collapse" href="#collapseTwo" class="btn btn-info"
                        style="width:45%; text-align:left"><h4>Appearances in the Top Collections Chart</h4></a>
                 </div>
-                <script>
-                    $(document).ready(function () {
-                                $("#chartTable").tablesorter({ sortList:[
-                                    [0, 1]
-                                ], headers:{ 0:{ sorter:'shortDate'} }
-                                });
-                            }
-                    );
-                </script>
+{#                <script>#}
+{#                    $(document).ready(function () {#}
+{#                                $("#chartTable").tablesorter({ sortList:[#}
+{#                                    [0, 1]#}
+{#                                ], headers:{ 0:{ sorter:'shortDate'} }#}
+{#                                });#}
+{#                            }#}
+{#                    );#}
+{#                </script>#}
                 <div id="collapseTwo" class="collapse">
+                    <h4>Daily ranking in the top 200 collections over time</h4>
                     {% include 'feedback/opms_plot.html' %}
 {#                    <table id="chartTable" class="tablesorter">#}
 {#                        <thead>#}
