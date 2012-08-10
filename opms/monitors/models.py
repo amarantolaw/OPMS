@@ -196,13 +196,13 @@ class ItuCollectionHistorical(models.Model):
         return l
 
     def average_rating(self):
-        rating_sum = 0
-        n = 0
+        rating_sum = 0.0
+        n = 0.0
         for rating in ItuRating.objects.filter(itucollectionhistorical=self):
             rating_sum += rating.stars * rating.count
             n += rating.count
-        if n > 0:
-            return (rating_sum/n)
+        if n > 0.0:
+            return round(rating_sum/n,2)
         else:
             return None
 
@@ -352,9 +352,16 @@ class ItuComment(models.Model):
 
 class InstitutionalCollectionTable(tables.Table):
     name = tables.LinkColumn('itu-collection', args=[A('pk')], accessor='latest.name', order_by='latest.name')
+    contains_movies = tables.Column(accessor='latest.contains_movies', order_by='latest.contains_movies', verbose_name='Type')
     version = tables.Column(accessor='latest.version', order_by='latest.version')
     last_modified = tables.Column(accessor='latest.last_modified', order_by='latest.last_modified')
     genre = tables.LinkColumn('itu-genre', args=[A('latest.genre.pk')], accessor='latest.genre.name', order_by='latest.genre.name', verbose_name='Genre')
+
+    def render_contains_movies(self, value):
+        if value:
+            return 'Video'
+        else:
+            return 'Audio'
 
     class Meta:
         attrs = {'class': 'paleblue'}

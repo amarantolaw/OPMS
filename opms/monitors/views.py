@@ -186,6 +186,14 @@ def itu_top_collections(request, chartscan=None):
             return render_to_response('monitors/itu_top_collections.html',
                     {'error': error, 'message': message, 'chartrows': [], 'scanlog': None},
                 context_instance=RequestContext(request))
+#    try:
+#        next_chartscan = ItuScanLog.objects.filter(mode=2, complete=True, time__gt=chartscan.time).order_by('time')[0]
+#    except:
+#        next_chartscan = None
+#    try:
+#        previous_chartscan = ItuScanLog.objects.filter(mode=2, complete=True, time__lt=chartscan.time).order_by('-time')[0]
+#    except:
+#        previous_chartscan = None
     chartrows = ItuCollectionChartScan.objects.filter(scanlog=chartscan)
     return render_to_response('monitors/itu_top_collections.html',
             {'error': error, 'message': message, 'chartrows': chartrows, 'scanlog': chartscan},
@@ -431,7 +439,7 @@ def itu_institution(request, institution_id):
                 , user_email='scan_itunes@manage.py', category=from_itunes_u)
             comments_to_plot.append(comment_to_plot)
     collection_table = InstitutionalCollectionTable(collections)
-    RequestConfig(request, paginate = {'per_page': 10}).configure(collection_table)
+    RequestConfig(request, paginate = {'per_page': 100}).configure(collection_table)
     return render_to_response('monitors/itu_institution.html',
             {'error': error, 'message': message, 'institution': institution, 'comments': comments, 'total_duration': total_duration,
              'collections': collections, 'collection_table': collection_table,

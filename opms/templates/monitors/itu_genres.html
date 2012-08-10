@@ -39,7 +39,7 @@
             {% for g in genres %}
                 <tr>
                     <td><a href="{% url itu-genre genre_id=g.id %}">{{ g.name }}</a></td>
-                    <td><a href="{{ g.url }}">iTunes U</a></td>
+                    <td><a href="{{ g.url }}">iTunes U</a> <i class="icon-share-alt"></i></td>
                 </tr>
             {% endfor %}
             </tbody>
