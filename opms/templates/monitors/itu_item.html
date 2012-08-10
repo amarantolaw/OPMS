@@ -37,7 +37,7 @@
             <div><a href="{{ item.latest.url }}">{{ item.latest.url }}</a> <i class="icon-share-alt"></i></div>
             <div>"<i>{{ item.latest.long_description }}</i>"</div>
             <div>Release date: {{ item.latest.release_date }} | Kind: {{ item.latest.kind }} | File
-                extension: {{ item.latest.file_extension }} | Duration: {{ item.latest.duration }} ms
+                extension: {{ item.latest.file_extension }} | Duration: {{ item.latest.duration_datetime }}
             </div>
             <div>Latest stored version is version {{ item.latest.version }}, scanned on <a
                     href="{% url itu-scanlog scanlog_id=item.latest.scanlog.id %}">{{ item.latest.scanlog.time }}</a>
