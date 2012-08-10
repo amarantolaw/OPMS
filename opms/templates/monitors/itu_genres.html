@@ -32,6 +32,8 @@
             <thead>
             <tr>
                 <th>Genre</th>
+                <th>Collections in top 200</th>
+                <th>Items in top 200</th>
                 <th>Actions</th>
             </tr>
             </thead>
@@ -39,6 +41,8 @@
             {% for g in genres %}
                 <tr>
                     <td><a href="{% url itu-genre genre_id=g.id %}">{{ g.name }}</a></td>
+                    <td>{{ g.collections_in_chart }}</td>
+                    <td>{{ g.items_in_chart }}</td>
                     <td><a href="{{ g.url }}">iTunes U</a> <i class="icon-share-alt"></i></td>
                 </tr>
             {% endfor %}

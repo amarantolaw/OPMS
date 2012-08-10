@@ -25,7 +25,8 @@
         {% endif %}
         {% if metrics_to_plot %}
             <h4><a data-toggle="collapse" href="#collapseZero" class="btn btn-info" style="width:45%; text-align:left">In the charts</a></h4>
-            <div id="collapseZero" class="collapse">
+            <div id="collapseZero" class="collapse in">
+                <h4>Number of collections and items in the top 200</h4>
                 {% include 'feedback/opms_plot.html' %}
             </div>
         {% endif %}

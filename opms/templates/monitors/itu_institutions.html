@@ -33,6 +33,8 @@
             <tr>
                 <th>Name</th>
                 <th># of Collections</th>
+                <th>Collections in top 200</th>
+                <th>Items in top 200</th>
                 <th>Actions</th>
             </tr>
             </thead>
@@ -41,6 +43,8 @@
                 <tr>
                     <td><a href="{% url itu-institution institution_id=i.id %}">{{ i.name }}</a></td>
                     <td>{{ i.number_of_collections }}</td>
+                    <td>{{ i.collections_in_chart }}</td>
+                    <td>{{ i.items_in_chart }}</td>
                     <td><a href="{{ i.url }}">iTunes U</a></td>
                 </tr>
             {% endfor %}
