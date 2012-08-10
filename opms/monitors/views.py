@@ -424,27 +424,20 @@ def itu_institution(request, institution_id):
         top_items_count.save()
         metrics_to_plot.append(top_items_count)
 
-    top_collections_scans = ItuScanLog.objects.filter(mode=2).order_by('time')
-    top_items_scans = ItuScanLog.objects.filter(mode=3).order_by('time')
-
-    top_collections_scans_daily = []
-    top_items_scans_daily = []
     dates_processed = []
-    for tc_scan in top_collections_scans:
-        if tc_scan.time.date() not in dates_processed:
-            dates_processed.append(tc_scan.time.date())
-            top_collections_scans_daily.append(tc_scan)
+    for tc_scan in ItuScanLog.objects.filter(mode=2).order_by('time'):
+        date = tc_scan.time.date()
+        if date not in dates_processed:
+            dates_processed.append(date)
+            tc_count = ItuCollectionChartScan.objects.filter(scanlog=tc_scan,itucollection__institution=institution).count()
+            traffic_to_plot.append(Traffic(date=date, count=tc_count, metric=top_collections_count))
     dates_processed = []
-    for ti_scan in top_items_scans:
-        if ti_scan.time.date() not in dates_processed:
-            dates_processed.append(ti_scan.time.date())
-            top_items_scans_daily.append(ti_scan)
-    for scan in top_collections_scans_daily:
-        tc_count = ItuCollectionChartScan.objects.filter(scanlog=scan,itucollection__institution=institution).count()
-        traffic_to_plot.append(Traffic(date=scan.time.date(), count=tc_count, metric=top_collections_count))
-    for scan in top_items_scans_daily:
-        ti_count = ItuItemChartScan.objects.filter(scanlog=scan,ituitem__institution=institution).count()
-        traffic_to_plot.append(Traffic(date=scan.time.date(), count=ti_count, metric=top_items_count))
+    for ti_scan in ItuScanLog.objects.filter(mode=3).order_by('time'):
+        date = ti_scan.time.date()
+        if date not in dates_processed:
+            dates_processed.append(date)
+            ti_count = ItuItemChartScan.objects.filter(scanlog=ti_scan,ituitem__institution=institution).count()
+            traffic_to_plot.append(Traffic(date=date, count=ti_count, metric=top_items_count))
 
     if comments:
         from_itunes_u = Category.objects.get(description='From iTunes U')
