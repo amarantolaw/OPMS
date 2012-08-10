@@ -1,19 +1,23 @@
 <style type="text/css" xmlns="http://www.w3.org/1999/html">
     {% for c in categories_to_plot %}
         .on_category_{{ c.id }} {
-            background:{{ c.color }};
+            background:#cccccc;
+            padding:4px 4px
         }
     {% endfor %}
     {% for m in metrics_to_plot %}
         .on_metric_{{ m.id }} {
-            background:{{ m.linecolor }};
+            background:#cccccc;
+            padding:4px 4px
         }
     {% endfor %}
     .off_category {
         background:#efefef;
+        padding:4px 4px
     }
     .off_metric {
-        background:#cccccc;
+        background:#efefef;
+        padding:4px 4px
     }
 </style>
 <script>
@@ -186,10 +190,10 @@ function onLoad() {
     panright_min_date.setDate(panright_min_date.getDate() + (length_in_days/10));
     panleft_max_date.setDate(panleft_max_date.getDate() - (length_in_days/10));
     panleft_min_date.setDate(panleft_min_date.getDate() - (length_in_days/10));
-    zoomin_min_date.setDate(zoomin_min_date.getDate() + (length_in_days/10));
-    zoomin_max_date.setDate(zoomin_max_date.getDate() - (length_in_days/10));
-    zoomout_min_date.setDate(zoomout_min_date.getDate() - (length_in_days/8));
-    zoomout_max_date.setDate(zoomout_max_date.getDate() + (length_in_days/8));
+    zoomout_min_date.setDate(zoomout_min_date.getDate() - (length_in_days/3.2));
+    zoomout_max_date.setDate(zoomout_max_date.getDate() + (length_in_days/3.2));
+    zoomin_min_date.setDate(zoomin_min_date.getDate() + (length_in_days/5));
+    zoomin_max_date.setDate(zoomin_max_date.getDate() - (length_in_days/5));
 
     zoomin_min = zoomin_min_date.toISOString();
     zoomin_max = zoomin_max_date.toISOString();
@@ -285,17 +289,20 @@ function setTimeRange(newmin,newmax){
 <a class="btn" id="panright" onclick="setTimeRange(panright_min,panright_max)"><i class="icon-chevron-right"></i> </a>
 
 <!-- Generate toggle buttons.-->
-{% for c in categories_to_plot %}
-    {% if c.defaultvisibility %}
-        <input type="button" id="{{ c.id }}" value="{{ c.description|escape }}" class="btn on_category_{{ c.id }}" onclick="toggle(this)" />
-    {% else %}
-        <input type="button" id="{{ c.id }}" value="{{ c.description|escape }}" class="btn off_category" onclick="toggle(this)" />
-    {% endif %}
-{% endfor %}
+{% if metrics_to_plot %} Metrics: {% endif %}
 {% for m in metrics_to_plot %}
     {% if m.defaultvisibility %}
-        <input type="button" id="{{ m.id }}" value="{{ m.description|escape }}" class="btn on_metric_{{ m.id }}" onclick="toggle(this)" />
+        <a id="{{ m.id }}" class="btn on_metric_{{ m.id }}" onclick="toggle(this)">{{ m.description|escape }}&nbsp;<span class="label" style="background-color: {{ m.linecolor }}; padding: 4px 4px 2px; border-radius: 0 15px 0 15px">&nbsp;&nbsp;&nbsp;</span></a>
     {% else %}
-        <input type="button" id="{{ m.id }}" value="{{ m.description|escape }}" class="btn off_metric" onclick="toggle(this)" />
+        <a id="{{ m.id }}" class="btn off_metric" onclick="toggle(this)">{{ m.description|escape }}&nbsp;<span class="label" style="background-color: {{ m.linecolor }}; padding: 4px 4px 2px; border-radius: 0 15px 0 15px">&nbsp;&nbsp;&nbsp;</span></a>
+    {% endif %}
+{% endfor %}
+{% if metrics_to_plot and categories_to_plot %}<b> | </b>{% endif %}
+{% if categories_to_plot %}Categories: {% endif %}
+{% for c in categories_to_plot %}
+    {% if c.defaultvisibility %}
+        <a id="{{ c.id }}" class="btn on_category_{{ c.id }}" onclick="toggle(this)">{{ c.description|escape }}&nbsp;<span class="label" style="background-color: {{ c.color }}; padding: 4px 4px 2px; border-radius: 0 15px 0 15px">&nbsp;&nbsp;&nbsp;</span></a>
+    {% else %}
+        <a id="{{ c.id }}" class="btn off_category" onclick="toggle(this)">{{ c.description|escape }}&nbsp;<span class="label" style="background-color: {{ c.color }}; padding: 4px 4px 2px; border-radius: 0 15px 0 15px">&nbsp;&nbsp;&nbsp;</span></a>
     {% endif %}
 {% endfor %}

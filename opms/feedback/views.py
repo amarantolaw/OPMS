@@ -95,7 +95,7 @@ def comment_add(request,comment=None, error='', message=''):
     "Adds a new comment to the database. Optionally, it may replace the comment instead."
     categories = Category.objects.all()
     error_fields=[]
-    default_comment = Comment(date=datetime.date.today(), time=datetime.datetime.now().time, source='', detail='', category=Category.objects.filter(description='Default')[0], user_email='')
+    default_comment = Comment(date=datetime.date.today(), time=datetime.datetime.now().time, source='', detail='', category=Category.objects.filter(description='Events')[0], user_email='')
 
     try:
         added = bool(request.POST['add'])
@@ -199,7 +199,7 @@ def event_add(request,event=None, error='', message=''):
         debug.onscreen('Autocompleting form from widget... ' + url + str(timestamp) + title)
         default_event = Event(date=datetimestamp.date(), title=title, detail=detail, category=Category.objects.filter(description='Found on the internet')[0], user_email='')
     else:
-        default_event = Event(date=datetime.date.today(), title='', detail='', category=Category.objects.filter(description='Default')[0], user_email='')
+        default_event = Event(date=datetime.date.today(), title='', detail='', category=Category.objects.filter(description='Events')[0], user_email='')
 
     try:
         added = bool(request.POST['add'])
