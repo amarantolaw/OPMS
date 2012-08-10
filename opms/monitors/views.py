@@ -404,31 +404,48 @@ def itu_institution(request, institution_id):
     traffic_to_plot = []
     categories_to_plot = []
     comments_to_plot = []
-    for collection in collections:
-        chartrecords = ItuCollectionChartScan.objects.filter(itucollection=collection).order_by('date')
-        if chartrecords:
-            #Get or create a suitable Metric
-            try:
-                top_collections_position = Metric.objects.get(description=collection.latest.name)
-                metrics_to_plot.append(top_collections_position)
-            except:
-                random_colour = '#' + str(random.randint(222222, 999999))
-                top_collections_position = Metric(description=collection.latest.name, linecolor=random_colour,
-                    fillcolor='#FFFFFF', mouseover=True, defaultvisibility=True, source='itunes-chart')
-                top_collections_position.save()
-                metrics_to_plot.append(top_collections_position)
 
-            #Add the first chartrecord of the day to traffic_to_plot
-            dates = []
-            for chartrecord in chartrecords:
-                if chartrecord.date.date() not in dates:
-                    dates.append(chartrecord.date.date())
-            for date in dates:
-                chartrecords_day = []
-                for chartrecord in chartrecords:
-                    if chartrecord.date.date() == date:
-                        chartrecords_day.append(chartrecord)
-                traffic_to_plot.append(Traffic(date=date, count=(-1 * chartrecords_day[0].position), metric=top_collections_position))
+    try:
+        top_collections_count = Metric.objects.get(description='# of collections in the top 200')
+        metrics_to_plot.append(top_collections_count)
+    except:
+        random_colour = '#' + str(random.randint(222222, 999999))
+        top_collections_count = Metric(description='# of collections in the top 200', linecolor=random_colour,
+            fillcolor='#FFFFFF', mouseover=True, defaultvisibility=True, source='itunes-chart')
+        top_collections_count.save()
+        metrics_to_plot.append(top_collections_count)
+    try:
+        top_items_count = Metric.objects.get(description='# of items in the top 200')
+        metrics_to_plot.append(top_items_count)
+    except:
+        random_colour = '#' + str(random.randint(222222, 999999))
+        top_items_count = Metric(description='# of items in the top 200', linecolor=random_colour,
+            fillcolor='#FFFFFF', mouseover=True, defaultvisibility=True, source='itunes-chart')
+        top_items_count.save()
+        metrics_to_plot.append(top_items_count)
+
+    top_collections_scans = ItuScanLog.objects.filter(mode=2).order_by('time')
+    top_items_scans = ItuScanLog.objects.filter(mode=3).order_by('time')
+
+    top_collections_scans_daily = []
+    top_items_scans_daily = []
+    dates_processed = []
+    for tc_scan in top_collections_scans:
+        if tc_scan.time.date() not in dates_processed:
+            dates_processed.append(tc_scan.time.date())
+            top_collections_scans_daily.append(tc_scan)
+    dates_processed = []
+    for ti_scan in top_items_scans:
+        if ti_scan.time.date() not in dates_processed:
+            dates_processed.append(ti_scan.time.date())
+            top_items_scans_daily.append(ti_scan)
+    for scan in top_collections_scans_daily:
+        tc_count = ItuCollectionChartScan.objects.filter(scanlog=scan,itucollection__institution=institution).count()
+        traffic_to_plot.append(Traffic(date=scan.time.date(), count=tc_count, metric=top_collections_count))
+    for scan in top_items_scans_daily:
+        ti_count = ItuItemChartScan.objects.filter(scanlog=scan,ituitem__institution=institution).count()
+        traffic_to_plot.append(Traffic(date=scan.time.date(), count=ti_count, metric=top_items_count))
+
     if comments:
         from_itunes_u = Category.objects.get(description='From iTunes U')
         from_itunes_u.defaultvisibility = False
@@ -448,7 +465,7 @@ def itu_institution(request, institution_id):
              'metric_textfiles': create_metric_textfiles(traffic_to_plot, metrics_to_plot),
              'categories_to_plot': categories_to_plot,
              'events': [],
-             'chart': True}, context_instance=RequestContext(request))
+             'chart': False}, context_instance=RequestContext(request))
 
 
 def itu_genre(request, genre_id):

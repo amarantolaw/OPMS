@@ -90,7 +90,6 @@ function onLoad() {
         timeGeometry = new Timeplot.DefaultTimeGeometry({
             gridColor: new Timeplot.Color("#000000"),
             axisLabelsPlacement: "bottom",
-            gridStep: 50,
             min: min, //ISO 8601 dates: yyyy-mm-dd
             max: max
         });
@@ -101,7 +100,6 @@ function onLoad() {
         timeGeometry = new Timeplot.DefaultTimeGeometry({
             gridColor: new Timeplot.Color("#000000"),
             axisLabelsPlacement: "bottom",
-            gridStep: 50,
             min: "", //ISO 8601 dates: yyyy-mm-dd
             max: ""  //Null min/max result in auto-calculation by timeplot.
         });
@@ -109,11 +107,11 @@ function onLoad() {
 
     var valueGeometry = new Timeplot.DefaultValueGeometry({
         gridColor: "#000000",
+        axisLabelsPlacement: "left",
         {% if chart %}
-        min: -200,
-        max: 0,
+        min: -201,
+        max: -1,
         gridType: "long",
-        axisLabelsPlacement: "left"
         {% endif %}
     });
 
@@ -292,7 +290,7 @@ function setTimeRange(newmin,newmax){
 <a class="btn" id="panright" onclick="setTimeRange(panright_min,panright_max)"><i class="icon-chevron-right"></i> </a>
 
 <!-- Generate toggle buttons.-->
-{% if metrics_to_plot %} Metrics: {% endif %}
+{% if metrics_to_plot %} <span>Metrics:</span> {% endif %}
 {% for m in metrics_to_plot %}
     {% if m.defaultvisibility %}
         <a id="{{ m.id }}" class="btn on_metric_{{ m.id }}" onclick="toggle(this)">{{ m.description|escape }}&nbsp;<span class="label" style="background-color: {{ m.linecolor }}; padding: 4px 4px 2px; border-radius: 0 15px 0 15px">&nbsp;&nbsp;&nbsp;</span></a>
@@ -301,7 +299,7 @@ function setTimeRange(newmin,newmax){
     {% endif %}
 {% endfor %}
 {% if metrics_to_plot and categories_to_plot %}<b> | </b>{% endif %}
-{% if categories_to_plot %}Categories: {% endif %}
+{% if categories_to_plot %}<span>Categories:</span> {% endif %}
 {% for c in categories_to_plot %}
     {% if c.defaultvisibility %}
         <a id="{{ c.id }}" class="btn on_category_{{ c.id }}" onclick="toggle(this)">{{ c.description|escape }}&nbsp;<span class="label" style="background-color: {{ c.color }}; padding: 4px 4px 2px; border-radius: 0 15px 0 15px">&nbsp;&nbsp;&nbsp;</span></a>
