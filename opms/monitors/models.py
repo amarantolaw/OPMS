@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.encoding import smart_unicode
 import django_tables2 as tables
 from django_tables2.utils import A
-from datetime import date
+from datetime import date, timedelta
 import math
 
 #TODO: Add this to south, eventually...
@@ -235,6 +235,8 @@ class ItuItemHistorical(models.Model):
     # buy_params = models.URLField()
     description = models.TextField()
     duration = models.IntegerField(null=True)
+    def duration_datetime(self):
+        return timedelta(microseconds=self.duration * 1000)
     explicit = models.BooleanField()
     feed_url = models.URLField()
     file_extension = models.CharField(max_length=20)
