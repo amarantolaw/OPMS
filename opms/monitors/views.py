@@ -395,10 +395,12 @@ def itu_institution(request, institution_id):
     message = ''
     error = ''
     latest_tc_scanlog = ItuScanLog.objects.filter(mode=2).order_by('-time')[0]
+    latest_ti_scanlog = ItuScanLog.objects.filter(mode=3).order_by('-time')[0]
     institution = ItuInstitution.objects.get(id=int(institution_id))
     comments = ItuComment.objects.filter(ituinstitution=institution).order_by('-date')
     collections = ItuCollection.objects.filter(institution=institution).order_by('-latest__last_modified')
     current_collection_chartscans = ItuCollectionChartScan.objects.filter(itucollection__institution=institution,scanlog=latest_tc_scanlog)
+    current_item_chartscans = ItuItemChartScan.objects.filter(ituitem__institution=institution,scanlog=latest_ti_scanlog)
     try:
         audio_items = ItuItem.objects.filter(Q(institution=institution) & Q(latest__missing=None) & (
         Q(latest__file_extension='mp3') | Q(latest__file_extension='m4a') | Q(latest__file_extension='aac') | Q(
@@ -494,7 +496,7 @@ def itu_institution(request, institution_id):
              'collections_number': collections_number,
              'collections_containing_movies_number': collections_containing_movies_number,
              'collections_not_containing_movies_number': collections_not_containing_movies_number,
-             'collections': collections, 'current_collection_chartscans': current_collection_chartscans,
+             'collections': collections, 'current_collection_chartscans': current_collection_chartscans, 'current_item_chartscans': current_item_chartscans,
              'comments_to_plot': comments_to_plot,
              'metrics_to_plot': metrics_to_plot,
              'metric_textfiles': create_metric_textfiles(traffic_to_plot, metrics_to_plot),

@@ -75,7 +75,7 @@
                     $(document).ready(function () {
                                 $("#collectionTable").tablesorter({ sortList:[
                                     [0, 0]
-                                ], headers:{ 2:{ sorter:'shortDate'} }
+                                ], headers:{ 3:{ sorter:'shortDate'} }
                                 });
                             }
                     );
@@ -103,6 +103,46 @@
                                 <td><a href="{% url itu-genre genre_id=genre.id %}">{{ genre.name }}</a></td>
                             {% endwith %}
                         </tr>
+                        {% endwith %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+        {% if current_item_chartscans %}
+            <h4><a data-toggle="collapse" href="#collapseFive" class="btn btn-info" style="width:45%; text-align:left">Items currently in the top 200 ({{ current_item_chartscans|length }})</a></h4>
+            <script>
+                $(document).ready(function () {
+                            $("#itemTable").tablesorter({ sortList:[
+                                [0, 0]
+                            ], headers:{ 3:{ sorter:'shortDate'} }
+                            });
+                        }
+                );
+            </script>
+            <div id="collapseFive" class="collapse">
+                <table id="itemTable" class="tablesorter">
+                    <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Name</th>
+                        <th>Version</th>
+                        <th>Collection</th>
+                        <th>Genre</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for c in current_item_chartscans %}
+                        {% with latest=c.ituitem.latest %}
+                            <tr>
+                                <td>{{ c.position }}</td>
+                                <td><a href="{% url itu-item item_id=c.ituitem.id %}">{{ latest.name }}</a></td>
+                                <td>{{ latest.version }}</td>
+                                <td><a href="{% url itu-collection collection_id=latest.series.itucollection.id %}">{{ latest.series.name }}</a></td>
+                                {% with genre=latest.genre %}
+                                    <td><a href="{% url itu-genre genre_id=genre.id %}">{{ genre.name }}</a></td>
+                                {% endwith %}
+                            </tr>
                         {% endwith %}
                     {% endfor %}
                     </tbody>
