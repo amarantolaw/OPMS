@@ -39,7 +39,7 @@
                                     {% with c.latest as latest %}
                                         <tr>
                                             <td>{{ latest.last_modified }}</td>
-                                            <td><a href="{% url itu-collection collection_id=c.id %}">{{ latest.name|chop:40 }}</a></td>
+                                            <td>{% if latest.contains_movies %}<i class="icon-facetime-video"></i>{% else %}<i class="icon-headphones"></i>{% endif %} <a href="{% url itu-collection collection_id=c.id %}">{{ latest.name|chop:40 }}</a></td>
                                         </tr>
                                     {% endwith %}
                                 {% endfor %}
@@ -59,7 +59,7 @@
                             {% for c in top_five_tc_scanlogs %}
                                 <tr>
                                     <td>{{ c.position }}</td>
-                                    <td><a href="{% url itu-collection collection_id=c.itucollection.id %}">{{ c.itucollectionhistorical.name|chop:40 }}</a></td>
+                                    <td>{% if c.itucollectionhistorical.contains_movies %}<i class="icon-facetime-video"></i>{% else %}<i class="icon-headphones"></i>{% endif %} <a href="{% url itu-collection collection_id=c.itucollection.id %}">{{ c.itucollectionhistorical.name|chop:40 }}</a></td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -71,10 +71,17 @@
         <table class="tablesorter">
             <thead>
                 <tr>
-                    <th></th>
-                    <th># of collections</th>
-                    <th># of items</th>
-                    <th>Total running time</th>
+                    <th rowspan="2" style="text-align: center; vertical-align: middle">Content</th>
+                    <th colspan="2" style="text-align: center">Total number</th>
+                    <th rowspan="2" style="text-align: center; vertical-align: middle">Total running time</th>
+                    <th rowspan="2" style="text-align: center; vertical-align: middle">Average collection size</th>
+                    <th colspan="2" style="text-align: center">Average duration</th>
+                </tr>
+                <tr>
+                    <th style="text-align: center">Collections</th>
+                    <th style="text-align: center">Items</th>
+                    <th style="text-align: center">Collections</th>
+                    <th style="text-align: center">Items</th>
                 </tr>
             </thead>
             <tbody>
@@ -83,23 +90,33 @@
                     <td>{{ collections_containing_movies_number }} ({{ collections_containing_movies_number|percentage:collections_number }})</td>
                     <td>{{ video_number }} ({{ video_number|percentage:total_number }})</td>
                     <td>{{ video_duration }} ({{ video_duration|percentage:total_duration }})</td>
+                    <td>{{ video_number|mean:collections_containing_movies_number }}</td>
+                    <td>{{ video_duration|mean:collections_containing_movies_number }}</td>
+                    <td>{{ video_duration|mean:video_number }}</td>
                 </tr>
                 <tr>
                     <td style="font-weight: bold">Audio</td>
                     <td rowspan="2" style="vertical-align: middle">{{ collections_not_containing_movies_number }} ({{ collections_not_containing_movies_number|percentage:collections_number }})</td>
                     <td>{{ audio_number }} ({{ audio_number|percentage:total_number }})</td>
                     <td>{{ audio_duration }} ({{ audio_duration|percentage:total_duration }})</td>
+                    <td rowspan="2" style="vertical-align: middle">{{ audio_number|mean:collections_not_containing_movies_number }}</td>
+                    <td rowspan="2" style="vertical-align: middle">{{ audio_duration|mean:collections_not_containing_movies_number }}</td>
+                    <td>{{ audio_duration|mean:audio_number }}</td>
                 </tr>
                 <tr>
                     <td style="font-weight: bold">Other/Unknown</td>
                     <td>{{ other_number }} ({{ other_number|percentage:total_number }})</td>
                     <td>{{ unknown_duration }} ({{ unknown_duration|percentage:total_duration }})</td>
+                    <td>{{ unknown_duration|mean:other_number }}</td>
                 </tr>
                 <tr style="border: 1px solid black">
-                    <td style="font-weight: bold">Total</td>
+                    <td style="font-weight: bold">All</td>
                     <td>{{ collections_number }}</td>
                     <td>{{ total_number }}</td>
                     <td>{{ total_duration }}</td>
+                    <td>{{ total_number|mean:collections_number }}</td>
+                    <td>{{ total_duration|mean:collections_number }}</td>
+                    <td>{{ total_duration|mean:total_number }}</td>
                 </tr>
             </tbody>
         </table>
@@ -137,7 +154,7 @@
                         {% with latest=c.itucollection.latest %}
                         <tr>
                             <td>{{ c.position }}</td>
-                            <td><a href="{% url itu-collection collection_id=c.itucollection.id %}">{{ latest.name }}</a></td>
+                            <td>{% if latest.contains_movies %}<i class="icon-facetime-video"></i>{% else %}<i class="icon-headphones"></i>{% endif %} <a href="{% url itu-collection collection_id=c.itucollection.id %}">{{ latest.name }}</a></td>
                             <td>{{ latest.version }}</td>
                             <td style="width: 12% ">{{ latest.last_modified|date:"M d, Y" }}</td>
                             {% with genre=latest.genre %}
