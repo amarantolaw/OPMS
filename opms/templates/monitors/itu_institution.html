@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static sitetree %}
+{% load percentages %}
 
 {% block head %}
     <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
@@ -23,51 +24,89 @@
         {% if message != '' %}
             <div class="alert alert-success">{{ message }}</div>
         {% endif %}
-        {% if metrics_to_plot %}
-            <h4><a data-toggle="collapse" href="#collapseZero" class="btn btn-info" style="width:45%; text-align:left">In the charts</a></h4>
-            <div id="collapseZero" class="collapse in">
-                <h4>Number of collections and items in the top 200</h4>
-                {% include 'feedback/opms_plot.html' %}
-            </div>
-        {% endif %}
+        <h4><a data-toggle="collapse" href="#collapseBasicStats" class="btn btn-info" style="width:45%; text-align:left">Basic Statistics</a></h4>
+        <div id="collapseBasicStats" class="collapse in">
+            <table class="tablesorter">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th># of collections</th>
+                        <th># of items</th>
+                        <th>Total running time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="font-weight: bold">Video</td>
+                        <td>{{ collections_containing_movies_number }} ({{ collections_containing_movies_number|percentage:collections_number }})</td>
+                        <td>{{ video_number }} ({{ video_number|percentage:total_number }})</td>
+                        <td>{{ video_duration }} ({{ video_duration|percentage:total_duration }})</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold">Audio</td>
+                        <td rowspan="2" style="vertical-align: middle">{{ collections_not_containing_movies_number }} ({{ collections_not_containing_movies_number|percentage:collections_number }})</td>
+                        <td>{{ audio_number }} ({{ audio_number|percentage:total_number }})</td>
+                        <td>{{ audio_duration }} ({{ audio_duration|percentage:total_duration }})</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold">Other/Unknown</td>
+                        <td>{{ other_number }} ({{ other_number|percentage:total_number }})</td>
+                        <td>{{ unknown_duration }} ({{ unknown_duration|percentage:total_duration }})</td>
+                    </tr>
+                    <tr style="border: 1px solid black">
+                        <td style="font-weight: bold">Total</td>
+                        <td>{{ collections_number }}</td>
+                        <td>{{ total_number }}</td>
+                        <td>{{ total_duration }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
         {% if collections %}
             <h4><a data-toggle="collapse" href="#collapseOne" class="btn btn-info" style="width:45%; text-align:left">Collections ({{ collections|length }}, total duration: {{ total_duration }})</a></h4>
-{#            <script>#}
-{#                $(document).ready(function () {#}
-{#                            $("#collectionTable").tablesorter({ sortList:[#}
-{#                                [2, 1]#}
-{#                            ], headers:{ 2:{ sorter:'shortDate'} }#}
-{#                            });#}
-{#                        }#}
-{#                );#}
-{#            </script>#}
+            {#            <script>#}
+            {#                $(document).ready(function () {#}
+            {#                            $("#collectionTable").tablesorter({ sortList:[#}
+            {#                                [2, 1]#}
+            {#                            ], headers:{ 2:{ sorter:'shortDate'} }#}
+            {#                            });#}
+            {#                        }#}
+            {#                );#}
+            {#            </script>#}
             <div id="collapseOne" class="collapse">
-{#                <table id="collectionTable" class="tablesorter">#}
-{#                    <thead>#}
-{#                    <tr>#}
-{#                        <th>Name</th>#}
-{#                        <th>Version</th>#}
-{#                        <th>Last modified</th>#}
-{#                        <th>Genre</th>#}
-{#                    </tr>#}
-{#                    </thead>#}
-{#                    <tbody>#}
-{#                    {% for c in collections %}#}
-{#                        {% with latest=c.latest %}#}
-{#                        <tr>#}
-{#                            <td><a href="{% url itu-collection collection_id=c.id %}">{{ latest.name }}</a></td>#}
-{#                            <td>{{ latest.version }}</td>#}
-{#                            <td style="width: 12% ">{{ latest.last_modified|date:"M d, Y" }}</td>#}
-{#                            {% with genre=latest.genre %}#}
-{#                                <td><a href="{% url itu-genre genre_id=genre.id %}">{{ genre.name }}</a></td>#}
-{#                            {% endwith %}#}
-{#                        </tr>#}
-{#                        {% endwith %}#}
-{#                    {% endfor %}#}
-{#                    </tbody>#}
-{#                </table>#}
+                {#                <table id="collectionTable" class="tablesorter">#}
+                {#                    <thead>#}
+                {#                    <tr>#}
+                {#                        <th>Name</th>#}
+                {#                        <th>Version</th>#}
+                {#                        <th>Last modified</th>#}
+                {#                        <th>Genre</th>#}
+                {#                    </tr>#}
+                {#                    </thead>#}
+                {#                    <tbody>#}
+                {#                    {% for c in collections %}#}
+                {#                        {% with latest=c.latest %}#}
+                {#                        <tr>#}
+                {#                            <td><a href="{% url itu-collection collection_id=c.id %}">{{ latest.name }}</a></td>#}
+                {#                            <td>{{ latest.version }}</td>#}
+                {#                            <td style="width: 12% ">{{ latest.last_modified|date:"M d, Y" }}</td>#}
+                {#                            {% with genre=latest.genre %}#}
+                {#                                <td><a href="{% url itu-genre genre_id=genre.id %}">{{ genre.name }}</a></td>#}
+                {#                            {% endwith %}#}
+                {#                        </tr>#}
+                {#                        {% endwith %}#}
+                {#                    {% endfor %}#}
+                {#                    </tbody>#}
+                {#                </table>#}
                 {% load render_table from django_tables2 %}
                 {% render_table collection_table %}
+            </div>
+        {% endif %}
+        {% if metrics_to_plot %}
+            <h4><a data-toggle="collapse" href="#collapseZero" class="btn btn-info" style="width:45%; text-align:left">In the charts</a></h4>
+            <div id="collapseZero" class="collapse">
+                <h4>Number of collections and items in the top 200</h4>
+                {% include 'feedback/opms_plot.html' %}
             </div>
         {% endif %}
         {% if comments %}

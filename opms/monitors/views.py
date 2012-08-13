@@ -21,7 +21,6 @@ from monitors.models import InstitutionalCollectionTable
 #from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 #from matplotlib.figure import Figure
 
-
 # Default Monitors module homepage
 #@require_safe(request)
 def index(request):
@@ -186,14 +185,14 @@ def itu_top_collections(request, chartscan=None):
             return render_to_response('monitors/itu_top_collections.html',
                     {'error': error, 'message': message, 'chartrows': [], 'scanlog': None},
                 context_instance=RequestContext(request))
-#    try:
-#        next_chartscan = ItuScanLog.objects.filter(mode=2, complete=True, time__gt=chartscan.time).order_by('time')[0]
-#    except:
-#        next_chartscan = None
-#    try:
-#        previous_chartscan = ItuScanLog.objects.filter(mode=2, complete=True, time__lt=chartscan.time).order_by('-time')[0]
-#    except:
-#        previous_chartscan = None
+        #    try:
+        #        next_chartscan = ItuScanLog.objects.filter(mode=2, complete=True, time__gt=chartscan.time).order_by('time')[0]
+        #    except:
+        #        next_chartscan = None
+        #    try:
+        #        previous_chartscan = ItuScanLog.objects.filter(mode=2, complete=True, time__lt=chartscan.time).order_by('-time')[0]
+        #    except:
+        #        previous_chartscan = None
     chartrows = ItuCollectionChartScan.objects.filter(scanlog=chartscan)
     return render_to_response('monitors/itu_top_collections.html',
             {'error': error, 'message': message, 'chartrows': chartrows, 'scanlog': chartscan},
@@ -240,7 +239,8 @@ def itu_institutions(request, institutions=[]):
     error = ''
     if not institutions:
         try:
-            institutions = ItuInstitution.objects.annotate(number_of_collections=Count('itucollection')).filter(number_of_collections__gt=0)
+            institutions = ItuInstitution.objects.annotate(number_of_collections=Count('itucollection')).filter(
+                number_of_collections__gt=0)
         except:
             error += 'Failed to query the database for institutions.'
     if not institutions:
@@ -282,11 +282,12 @@ def itu_collection(request, collection_id):
     error = ''
     collection = ItuCollection.objects.get(id=int(collection_id))
     chartrecords = ItuCollectionChartScan.objects.filter(itucollection=collection).order_by('date')
-    items = ItuItem.objects.filter(latest__series__itucollection=collection,latest__missing=None)
+    items = ItuItem.objects.filter(latest__series__itucollection=collection, latest__missing=None)
     try:
-        total_duration = timedelta(microseconds = int(items.aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
+        total_duration = timedelta(
+            microseconds=int(items.aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
     except:
-        total_duration = timedelta(microseconds = 0)
+        total_duration = timedelta(microseconds=0)
         message += 'WARNING: Couldn\'t calculate the total duration properly.'
     comments = ItuComment.objects.filter(itucollectionhistorical__itucollection=collection)
     ratings = ItuRating.objects.filter(itucollectionhistorical=collection.latest)
@@ -332,7 +333,8 @@ def itu_collection(request, collection_id):
 
     return render_to_response('monitors/itu_collection.html',
             {'error': error, 'message': message, 'collection': collection, 'chartrecords': chartrecords,
-             'comments': comments, 'items': items, 'total_duration': total_duration, 'ratings': ratings, 'average_rating': average_rating,
+             'comments': comments, 'items': items, 'total_duration': total_duration, 'ratings': ratings,
+             'average_rating': average_rating,
              'comments_to_plot': comments_to_plot,
              'metrics_to_plot': metrics_to_plot,
              'metric_textfiles': create_metric_textfiles(traffic_to_plot, metrics_to_plot),
@@ -396,10 +398,43 @@ def itu_institution(request, institution_id):
     comments = ItuComment.objects.filter(ituinstitution=institution).order_by('-date')
     collections = ItuCollection.objects.filter(institution=institution).order_by('-latest__last_modified')
     try:
-        total_duration = timedelta(microseconds = int(ItuItem.objects.filter(institution=institution,latest__missing=None).aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
+        audio_items = ItuItem.objects.filter(Q(institution=institution) & Q(latest__missing=None) & (
+        Q(latest__file_extension='mp3') | Q(latest__file_extension='m4a') | Q(latest__file_extension='aac') | Q(
+            latest__file_extension='aif') | Q(latest__file_extension='aiff') | Q(latest__file_extension='aifc') | Q(
+            latest__file_extension='wav')))
+        audio_duration = timedelta(
+            microseconds=int(audio_items.aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
+        audio_number = audio_items.count()
     except:
-        total_duration = timedelta(microseconds = 0)
-        message += 'WARNING: Couldn\'t calculate the total duration properly.'
+        audio_duration = timedelta(microseconds=0)
+        audio_number = 0
+        message += 'WARNING: Couldn\'t calculate the total audio duration/number properly. '
+    try:
+        video_items = ItuItem.objects.filter(Q(institution=institution) & Q(latest__missing=None) & (
+        Q(latest__file_extension='mp4') | Q(latest__file_extension='m4v') | Q(latest__file_extension='mov')))
+        video_duration = timedelta(
+            microseconds=int(video_items.aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
+        video_number = video_items.count()
+    except:
+        video_duration = timedelta(microseconds=0)
+        video_number = 0
+        message += 'WARNING: Couldn\'t calculate the total video duration/number properly. '
+    try:
+        total_duration = timedelta(microseconds=int(ItuItem.objects.filter(Q(institution=institution) & Q(latest__missing=None)).aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
+    except:
+        total_duration = timedelta(microseconds=0)
+        message += 'WARNING: Couldn\'t calculate total duration properly. '
+    unknown_duration = total_duration - (audio_duration + video_duration)
+    try:
+        total_number = ItuItem.objects.filter(latest__missing=None, latest__institution=institution).count()
+    except:
+        total_number = 0
+        message += 'WARNING: Couldn\'t calculate the total number of items properly. '
+    other_number = total_number - (audio_number + video_number)
+    collections_number = collections.count()
+    collections_containing_movies_number = collections.filter(latest__contains_movies=True).count()
+    collections_not_containing_movies_number = collections_number - collections_containing_movies_number
+
     metrics_to_plot = []
     traffic_to_plot = []
     categories_to_plot = []
@@ -429,14 +464,15 @@ def itu_institution(request, institution_id):
         date = tc_scan.time.date()
         if date not in dates_processed:
             dates_processed.append(date)
-            tc_count = ItuCollectionChartScan.objects.filter(scanlog=tc_scan,itucollection__institution=institution).count()
+            tc_count = ItuCollectionChartScan.objects.filter(scanlog=tc_scan,
+                itucollection__institution=institution).count()
             traffic_to_plot.append(Traffic(date=date, count=tc_count, metric=top_collections_count))
     dates_processed = []
     for ti_scan in ItuScanLog.objects.filter(mode=3).order_by('time'):
         date = ti_scan.time.date()
         if date not in dates_processed:
             dates_processed.append(date)
-            ti_count = ItuItemChartScan.objects.filter(scanlog=ti_scan,ituitem__institution=institution).count()
+            ti_count = ItuItemChartScan.objects.filter(scanlog=ti_scan, ituitem__institution=institution).count()
             traffic_to_plot.append(Traffic(date=date, count=ti_count, metric=top_items_count))
 
     if comments:
@@ -449,9 +485,14 @@ def itu_institution(request, institution_id):
                 , user_email='scan_itunes@manage.py', category=from_itunes_u)
             comments_to_plot.append(comment_to_plot)
     collection_table = InstitutionalCollectionTable(collections)
-    RequestConfig(request, paginate = {'per_page': 100}).configure(collection_table)
+    RequestConfig(request, paginate={'per_page': 100}).configure(collection_table)
     return render_to_response('monitors/itu_institution.html',
-            {'error': error, 'message': message, 'institution': institution, 'comments': comments, 'total_duration': total_duration,
+            {'error': error, 'message': message, 'institution': institution, 'comments': comments,
+             'total_duration': total_duration, 'audio_duration': audio_duration, 'video_duration': video_duration, 'unknown_duration': unknown_duration,
+             'audio_number': audio_number, 'video_number': video_number, 'total_number': total_number, 'other_number': other_number,
+             'collections_number': collections_number,
+             'collections_containing_movies_number': collections_containing_movies_number,
+             'collections_not_containing_movies_number': collections_not_containing_movies_number,
              'collections': collections, 'collection_table': collection_table,
              'comments_to_plot': comments_to_plot,
              'metrics_to_plot': metrics_to_plot,
@@ -469,13 +510,16 @@ def itu_genre(request, genre_id):
     comments = ItuComment.objects.filter(itucollectionhistorical__genre=genre)
     collections = ItuCollection.objects.filter(latest__genre=genre)
     try:
-        total_duration = timedelta(microseconds = int(ItuItem.objects.filter(latest__genre=genre,latest__missing=None).aggregate(Sum('latest__duration'))['latest__duration__sum']) * 1000)
+        total_duration = timedelta(microseconds=int(
+            ItuItem.objects.filter(latest__genre=genre, latest__missing=None).aggregate(Sum('latest__duration'))[
+            'latest__duration__sum']) * 1000)
     except:
-        total_duration = timedelta(microseconds = 0)
+        total_duration = timedelta(microseconds=0)
         message += 'WARNING: Couldn\'t calculate the total duration properly.'
     return render_to_response('monitors/itu_genre.html',
-            {'error': error, 'message': message, 'genre': genre, 'comments': comments, 'collections': collections, 'total_duration': total_duration},
-            context_instance=RequestContext(request))
+            {'error': error, 'message': message, 'genre': genre, 'comments': comments, 'collections': collections,
+             'total_duration': total_duration},
+        context_instance=RequestContext(request))
 
 
 def itu_scanlog(request, scanlog_id):
