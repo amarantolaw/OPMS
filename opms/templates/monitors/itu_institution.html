@@ -36,10 +36,12 @@
                             </thead>
                             <tbody>
                                 {% for c in recently_updated_collections %}
-                                    <tr>
-                                        <td>{{ c.latest.last_modified }}</td>
-                                        <td><a href="{% url itu-collection collection_id=c.id %}">{{ c.latest.name|chop:40 }}</a></td>
-                                    </tr>
+                                    {% with c.latest as latest %}
+                                        <tr>
+                                            <td>{{ latest.last_modified }}</td>
+                                            <td><a href="{% url itu-collection collection_id=c.id %}">{{ latest.name|chop:40 }}</a></td>
+                                        </tr>
+                                    {% endwith %}
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -172,16 +174,20 @@
                     </thead>
                     <tbody>
                     {% for c in current_item_chartscans %}
-                        {% with latest=c.ituitem.latest %}
-                            <tr>
-                                <td>{{ c.position }}</td>
-                                <td><a href="{% url itu-item item_id=c.ituitem.id %}">{{ latest.name }}</a></td>
-                                <td>{{ latest.version }}</td>
-                                <td><a href="{% url itu-collection collection_id=latest.series.itucollection.id %}">{{ latest.series.name }}</a></td>
-                                {% with genre=latest.genre %}
-                                    <td><a href="{% url itu-genre genre_id=genre.id %}">{{ genre.name }}</a></td>
-                                {% endwith %}
-                            </tr>
+                        {% with c.ituitem as ituitem %}
+                            {% with latest=ituitem.latest %}
+                                <tr>
+                                    <td>{{ c.position }}</td>
+                                    <td><a href="{% url itu-item item_id=ituitem.id %}">{{ latest.name }}</a></td>
+                                    <td>{{ latest.version }}</td>
+                                    {% with latest.series as latest_series %}
+                                        <td><a href="{% url itu-collection collection_id=latest_series.itucollection.id %}">{{ latest_series.name }}</a></td>
+                                    {% endwith %}
+                                    {% with genre=latest.genre %}
+                                        <td><a href="{% url itu-genre genre_id=genre.id %}">{{ genre.name }}</a></td>
+                                    {% endwith %}
+                                </tr>
+                            {% endwith %}
                         {% endwith %}
                     {% endfor %}
                     </tbody>
