@@ -394,9 +394,11 @@ def itu_institution(request, institution_id):
     """Display an institution."""
     message = ''
     error = ''
+    latest_tc_scanlog = ItuScanLog.objects.filter(mode=2).order_by('-time')[0]
     institution = ItuInstitution.objects.get(id=int(institution_id))
     comments = ItuComment.objects.filter(ituinstitution=institution).order_by('-date')
     collections = ItuCollection.objects.filter(institution=institution).order_by('-latest__last_modified')
+    current_collection_chartscans = ItuCollectionChartScan.objects.filter(itucollection__institution=institution,scanlog=latest_tc_scanlog)
     try:
         audio_items = ItuItem.objects.filter(Q(institution=institution) & Q(latest__missing=None) & (
         Q(latest__file_extension='mp3') | Q(latest__file_extension='m4a') | Q(latest__file_extension='aac') | Q(
@@ -484,8 +486,7 @@ def itu_institution(request, institution_id):
                 source=(comment.itucollectionhistorical.name + ' - comment by ' + comment.source), detail=comment.detail
                 , user_email='scan_itunes@manage.py', category=from_itunes_u)
             comments_to_plot.append(comment_to_plot)
-    collection_table = InstitutionalCollectionTable(collections)
-    RequestConfig(request, paginate={'per_page': 100}).configure(collection_table)
+
     return render_to_response('monitors/itu_institution.html',
             {'error': error, 'message': message, 'institution': institution, 'comments': comments,
              'total_duration': total_duration, 'audio_duration': audio_duration, 'video_duration': video_duration, 'unknown_duration': unknown_duration,
@@ -493,12 +494,26 @@ def itu_institution(request, institution_id):
              'collections_number': collections_number,
              'collections_containing_movies_number': collections_containing_movies_number,
              'collections_not_containing_movies_number': collections_not_containing_movies_number,
-             'collections': collections, 'collection_table': collection_table,
+             'collections': collections, 'current_collection_chartscans': current_collection_chartscans,
              'comments_to_plot': comments_to_plot,
              'metrics_to_plot': metrics_to_plot,
              'metric_textfiles': create_metric_textfiles(traffic_to_plot, metrics_to_plot),
              'categories_to_plot': categories_to_plot,
              'events': [],
+             'chart': False}, context_instance=RequestContext(request))
+
+
+def itu_institution_collections(request, institution_id):
+    """Display all collections belonging to an institution."""
+    message = ''
+    error = ''
+    institution = ItuInstitution.objects.get(id=int(institution_id))
+    collections = ItuCollection.objects.filter(institution=institution).order_by('-latest__last_modified')
+    collection_table = InstitutionalCollectionTable(collections)
+    RequestConfig(request, paginate={'per_page': 100}).configure(collection_table)
+    return render_to_response('monitors/itu_institution_collections.html',
+            {'error': error, 'message': message, 'institution': institution,
+             'collections': collections, 'collection_table': collection_table,
              'chart': False}, context_instance=RequestContext(request))
 
 
