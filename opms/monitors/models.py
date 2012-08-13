@@ -379,3 +379,4 @@ class InstitutionalCollectionTable(tables.Table):
 
     class Meta:
         attrs = {'class': 'paleblue'}
+        order_by_field = True

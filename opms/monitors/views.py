@@ -399,8 +399,16 @@ def itu_institution(request, institution_id):
     institution = ItuInstitution.objects.get(id=int(institution_id))
     comments = ItuComment.objects.filter(ituinstitution=institution).order_by('-date')
     collections = ItuCollection.objects.filter(institution=institution).order_by('-latest__last_modified')
-    current_collection_chartscans = ItuCollectionChartScan.objects.filter(itucollection__institution=institution,scanlog=latest_tc_scanlog)
+    current_collection_chartscans = ItuCollectionChartScan.objects.filter(itucollection__institution=institution,scanlog=latest_tc_scanlog).order_by('position')
     current_item_chartscans = ItuItemChartScan.objects.filter(ituitem__institution=institution,scanlog=latest_ti_scanlog)
+    if current_collection_chartscans.count() > 5:
+        top_five_tc_scanlogs = current_collection_chartscans[0:5]
+    else:
+        top_five_tc_scanlogs = current_collection_chartscans
+    if collections.filter(latest__last_modified__isnull=False).count() > 5:
+        recently_updated_collections = collections.filter(latest__last_modified__isnull=False)[0:5]
+    else:
+        recently_updated_collections = collections.filter(latest__last_modified__isnull=False)
     try:
         audio_items = ItuItem.objects.filter(Q(institution=institution) & Q(latest__missing=None) & (
         Q(latest__file_extension='mp3') | Q(latest__file_extension='m4a') | Q(latest__file_extension='aac') | Q(
@@ -496,7 +504,7 @@ def itu_institution(request, institution_id):
              'collections_number': collections_number,
              'collections_containing_movies_number': collections_containing_movies_number,
              'collections_not_containing_movies_number': collections_not_containing_movies_number,
-             'collections': collections, 'current_collection_chartscans': current_collection_chartscans, 'current_item_chartscans': current_item_chartscans,
+             'collections': collections, 'current_collection_chartscans': current_collection_chartscans, 'current_item_chartscans': current_item_chartscans, 'top_five_tc_scanlogs': top_five_tc_scanlogs, 'recently_updated_collections': recently_updated_collections,
              'comments_to_plot': comments_to_plot,
              'metrics_to_plot': metrics_to_plot,
              'metric_textfiles': create_metric_textfiles(traffic_to_plot, metrics_to_plot),
@@ -511,7 +519,7 @@ def itu_institution_collections(request, institution_id):
     error = ''
     institution = ItuInstitution.objects.get(id=int(institution_id))
     collections = ItuCollection.objects.filter(institution=institution).order_by('-latest__last_modified')
-    collection_table = InstitutionalCollectionTable(collections)
+    collection_table = InstitutionalCollectionTable(collections, order_by=('-last_modified'))
     RequestConfig(request, paginate={'per_page': 100}).configure(collection_table)
     return render_to_response('monitors/itu_institution_collections.html',
             {'error': error, 'message': message, 'institution': institution,

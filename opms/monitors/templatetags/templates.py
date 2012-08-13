@@ -15,3 +15,11 @@ def percentage(fraction, population):
             return 'TypeError'
     except ValueError:
         return ''
+
+@register.filter(name='chop')
+def chop(text, length=10):
+    """Ensure that a string text is shorter than length, adding ... if appropriate."""
+    if len(text) > length:
+        return text[:length] + '...'
+    else:
+        return text
