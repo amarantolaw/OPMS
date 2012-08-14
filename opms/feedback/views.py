@@ -14,8 +14,10 @@ from email import message_from_string
 from email.parser import Parser
 
 
-def index(request, error='', message='', tag=None):
-    metrics_to_plot = Metric.objects.filter(source='appleweekly',tags=tag)
+def index(request, error='', message='', tag=None, tag_id=None, comment_id=None):
+    metrics_to_plot = Metric.objects.filter(source='appleweekly')
+    if tag:
+        metrics_to_plot = metrics_to_plot.filter(tags=tag)
 
     traffic_to_plot = []
     for metric in metrics_to_plot:
@@ -54,17 +56,23 @@ def index(request, error='', message='', tag=None):
             pass
         else:
             comment.save()
+    if tag:
+        comments_to_plot = Comment.objects.filter(moderated=True,tags=tag)
+        events_to_plot = Event.objects.filter(moderated=True,tags=tag)
+    else:
+        comments_to_plot = Comment.objects.filter(moderated=True)
+        events_to_plot = Event.objects.filter(moderated=True)
 
     return render_to_response('feedback/index.html', {
         'metrics_to_plot': metrics_to_plot,
         'metric_textfiles': create_metric_textfiles(traffic_to_plot,metrics_to_plot),
         'categories_to_plot': categories_to_plot,
-        'comments_to_plot': Comment.objects.filter(moderated=True,tags=tag),
-        'events': Event.objects.filter(moderated=True,tags=tag),
+        'comments_to_plot': comments_to_plot,
+        'events': events_to_plot,
         'chart': True,
         'error': error,
         'message': message,
-        'tag': tag,
+        'tag': tag, 'tag_id': tag_id, 'tags': Tag.objects.all(), 'comment_id': comment_id,
     }, context_instance=RequestContext(request))
 
 
@@ -322,14 +330,12 @@ def email(request, error='', message=''):
     return render_to_response('feedback/email.html', {'error': error, 'message': message, 'output': output}, context_instance=RequestContext(request))
 
 
-def tags(request, error='', message=''):
+def tags(request, error='', message='', tag_id=None):
     tags = Tag.objects.all()
-    if not tags.count():
-        error += 'No tags exist at the moment. Perhaps you need to create some first?'
     return render_to_response('feedback/tags.html', {
         'error': error,
         'message': message,
-        'tags': tags,
+        'tags': tags, 'tag_id': tag_id,
         }, context_instance=RequestContext(request))
 
 
@@ -410,36 +416,58 @@ def tag_create(request, error='', message=''):
 
 def tag_view(request, tag_id, error='', message=''):
     tag = Tag.objects.get(id=tag_id)
-    return index(request=request, error=error, message=message, tag=tag)
+    return index(request=request, error=error, message=message, tag=tag, tag_id=tag_id)
 
 
-def tag_delete(request, error='', message=''):
-
-    return render_to_response('feedback/tag_delete.html', {
-        'error': error,
-        'message': message,
-        }, context_instance=RequestContext(request))
-
-
-def tag_created(request, error='', message=''):
-
-    return render_to_response('feedback/tag_created.html', {
-        'error': error,
-        'message': message,
-        }, context_instance=RequestContext(request))
+def tag_delete(request, tag_id, error='', message=''):
+    tag = Tag.objects.get(id=tag_id)
+    try:
+        name = tag.name
+        tag.delete()
+        message += tag.name + ' deleted.'
+    except:
+        error += 'Failed to delete tag ' + tag_id + '.'
+    return tags(request=request, error=error, message=message, tag_id=tag_id)
 
 
-def tag_comment(request, error='', message=''):
+def tag_comment(request, tag_id, comment_id, error='', message=''):
+    try:
+        tag = Tag.objects.get(id=tag_id)
+    except:
+        error += 'Couldn\'t retrieve tag ' + tag_id + '.'
+    try:
+        comment = Comment.objects.get(id=comment_id)
+    except:
+        error += 'Couldn\'t retrieve comment ' + comment_id + '.'
 
-    return render_to_response('feedback/tag_comment.html', {
-        'error': error,
-        'message': message,
-        }, context_instance=RequestContext(request))
+    if tag in comment.tags.all():
+        error += 'This comment has already been tagged.'
+
+    if not error:
+        try:
+            comment.tags.add(tag)
+            message += 'Tagged comment ' + str(comment.id) + ' with ' + tag.name + '.'
+        except:
+            error += 'Couldn\'t tag comment.'
+    return index(request=request, error=error, message=message, comment_id=comment_id, tag_id=tag_id)
 
 
-def untag_comment(request, error='', message=''):
+def untag_comment(request, tag_id, comment_id, error='', message=''):
+    try:
+        tag = Tag.objects.get(id=tag_id)
+    except:
+        error += 'Couldn\'t retrieve tag ' + tag_id + '.'
+    try:
+        comment = Comment.objects.get(id=comment_id)
+    except:
+        error += 'Couldn\'t retrieve comment ' + comment_id + '.'
 
-    return render_to_response('feedback/untag_comment.html', {
-        'error': error,
-        'message': message,
-        }, context_instance=RequestContext(request))
+    if tag not in comment.tags.all():
+        error += 'This comment isn\'t tagged with this tag.'
+
+    if not error:
+        try:
+            comment.tags.remove(tag)
+        except:
+            error += 'Couldn\'t remove tag from comment.'
+    return index(request=request, error=error, message=message, comment_id=comment_id, tag_id=tag_id)

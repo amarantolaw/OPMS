@@ -31,98 +31,6 @@
         }
     },
     {
-        "pk":40,
-        "model":"sitetree.treeitem",
-        "fields":{
-            "parent":38,
-            "access_restricted":false,
-            "access_permissions":[],
-            "description":"",
-            "insitetree":false,
-            "hint":"",
-            "url":"tag-view tag.id",
-            "inbreadcrumbs":true,
-            "title":"{{tag.name}}",
-            "tree":1,
-            "access_perm_type":1,
-            "alias":null,
-            "sort_order":40,
-            "inmenu":false,
-            "access_loggedin":false,
-            "hidden":false,
-            "urlaspattern":true
-        }
-    },
-    {
-        "pk":41,
-        "model":"sitetree.treeitem",
-        "fields":{
-            "parent":40,
-            "access_restricted":false,
-            "access_permissions":[],
-            "description":"",
-            "insitetree":false,
-            "hint":"",
-            "url":"tag-delete tag.id",
-            "inbreadcrumbs":true,
-            "title":"Delete",
-            "tree":1,
-            "access_perm_type":1,
-            "alias":null,
-            "sort_order":41,
-            "inmenu":false,
-            "access_loggedin":false,
-            "hidden":false,
-            "urlaspattern":true
-        }
-    },
-    {
-        "pk":43,
-        "model":"sitetree.treeitem",
-        "fields":{
-            "parent":40,
-            "access_restricted":false,
-            "access_permissions":[],
-            "description":"",
-            "insitetree":false,
-            "hint":"",
-            "url":"tag-comment tag.id comment.id",
-            "inbreadcrumbs":true,
-            "title":"Tag comment {{comment.id}}",
-            "tree":1,
-            "access_perm_type":1,
-            "alias":null,
-            "sort_order":43,
-            "inmenu":false,
-            "access_loggedin":false,
-            "hidden":false,
-            "urlaspattern":true
-        }
-    },
-    {
-        "pk":44,
-        "model":"sitetree.treeitem",
-        "fields":{
-            "parent":40,
-            "access_restricted":false,
-            "access_permissions":[],
-            "description":"",
-            "insitetree":false,
-            "hint":"",
-            "url":"untag_comment tag.id comment.id",
-            "inbreadcrumbs":true,
-            "title":"Untag comment {{comment.id}}",
-            "tree":1,
-            "access_perm_type":1,
-            "alias":null,
-            "sort_order":44,
-            "inmenu":false,
-            "access_loggedin":false,
-            "hidden":false,
-            "urlaspattern":true
-        }
-    },
-    {
         "pk":39,
         "model":"sitetree.treeitem",
         "fields":{
@@ -232,29 +140,6 @@
             "alias":null,
             "sort_order":15,
             "inmenu":true,
-            "access_loggedin":false,
-            "hidden":false,
-            "urlaspattern":false
-        }
-    },
-    {
-        "pk":42,
-        "model":"sitetree.treeitem",
-        "fields":{
-            "parent":40,
-            "access_restricted":false,
-            "access_permissions":[],
-            "description":"",
-            "insitetree":false,
-            "hint":"",
-            "url":"/monitoring/feedback/tags/created/",
-            "inbreadcrumbs":true,
-            "title":"Tag created",
-            "tree":1,
-            "access_perm_type":1,
-            "alias":null,
-            "sort_order":42,
-            "inmenu":false,
             "access_loggedin":false,
             "hidden":false,
             "urlaspattern":false
@@ -560,6 +445,29 @@
         }
     },
     {
+        "pk":41,
+        "model":"sitetree.treeitem",
+        "fields":{
+            "parent":40,
+            "access_restricted":false,
+            "access_permissions":[],
+            "description":"",
+            "insitetree":false,
+            "hint":"",
+            "url":"tag-delete tag_id",
+            "inbreadcrumbs":true,
+            "title":"Delete",
+            "tree":1,
+            "access_perm_type":1,
+            "alias":null,
+            "sort_order":41,
+            "inmenu":false,
+            "access_loggedin":false,
+            "hidden":false,
+            "urlaspattern":true
+        }
+    },
+    {
         "pk":33,
         "model":"sitetree.treeitem",
         "fields":{
@@ -576,6 +484,29 @@
             "access_perm_type":1,
             "alias":null,
             "sort_order":33,
+            "inmenu":false,
+            "access_loggedin":false,
+            "hidden":false,
+            "urlaspattern":true
+        }
+    },
+    {
+        "pk":40,
+        "model":"sitetree.treeitem",
+        "fields":{
+            "parent":38,
+            "access_restricted":false,
+            "access_permissions":[],
+            "description":"",
+            "insitetree":false,
+            "hint":"",
+            "url":"tag-view tag_id",
+            "inbreadcrumbs":true,
+            "title":"{{tag_id}}",
+            "tree":1,
+            "access_perm_type":1,
+            "alias":null,
+            "sort_order":40,
             "inmenu":false,
             "access_loggedin":false,
             "hidden":false,
@@ -606,6 +537,29 @@
         }
     },
     {
+        "pk":43,
+        "model":"sitetree.treeitem",
+        "fields":{
+            "parent":40,
+            "access_restricted":false,
+            "access_permissions":[],
+            "description":"",
+            "insitetree":false,
+            "hint":"",
+            "url":"tag-comment tag_id comment_id",
+            "inbreadcrumbs":true,
+            "title":"Tag comment {{comment_id}}",
+            "tree":1,
+            "access_perm_type":1,
+            "alias":null,
+            "sort_order":43,
+            "inmenu":false,
+            "access_loggedin":false,
+            "hidden":false,
+            "urlaspattern":true
+        }
+    },
+    {
         "pk":35,
         "model":"sitetree.treeitem",
         "fields":{
@@ -622,6 +576,29 @@
             "access_perm_type":1,
             "alias":null,
             "sort_order":35,
+            "inmenu":false,
+            "access_loggedin":false,
+            "hidden":false,
+            "urlaspattern":true
+        }
+    },
+    {
+        "pk":44,
+        "model":"sitetree.treeitem",
+        "fields":{
+            "parent":40,
+            "access_restricted":false,
+            "access_permissions":[],
+            "description":"",
+            "insitetree":false,
+            "hint":"",
+            "url":"untag-comment tag_id comment_id",
+            "inbreadcrumbs":true,
+            "title":"Untag comment {{comment_id}}",
+            "tree":1,
+            "access_perm_type":1,
+            "alias":null,
+            "sort_order":44,
             "inmenu":false,
             "access_loggedin":false,
             "hidden":false,

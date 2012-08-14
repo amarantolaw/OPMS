@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block head %}
+    <script src="{{ STATIC_PREFIX }}js/bootstrap-modal.js"></script>
     <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
     <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
 
@@ -66,15 +67,32 @@
     $(document).ready(function()
             {
                 $("#commentsTable").tablesorter({ sortList: [[0,1]], headers: { 0: { sorter: 'shortDate'} } });
+                {% for c in comments_to_plot %}
+                    $('commentTagModal{{ c.id }}').modal();
+                {% endfor %}
             }
     );
 </script>
+{% for c in comments_to_plot %}
+    <div class="modal hide" id="commentTagModal{{ c.id }}">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">×</button>
+            <h3>Choose a tag to tag this comment with:</h3>
+        </div>
+        <div class="modal-body">
+            {% for tag in tags %}
+                <a href="{% url tag-comment tag_id=tag.id comment_id=c.id %}"><span class="label" style="background-color: {{ tag.color }}">{{ tag.name }} +</span></a>&nbsp;&nbsp;
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}
 <table id="commentsTable" class="tablesorter">
     <thead>
     <tr>
         <th>Date</th>
         <th>Source</th>
         <th>Detail</th>
+        <th><i class="icon-tags"/></th>
         <th>Category</th>
     </tr>
     </thead>
@@ -88,6 +106,7 @@
     {% endif %}
         <td>{{ c.source|escape }}</td>
         <td>"{{ c.detail|escape }}"</td>
+        <td>{% for tag in c.tags.all %}<span class="label" style="background-color: {{ tag.color }}"><a href="{% url tag-view tag_id=tag.id %}" style="color: #FFFFFF">{{ tag.name }}</a> <a href="{% url untag-comment tag_id=tag.id comment_id=c.id %}" style="color: #FFFFFF" name="comment{{ c.id }}" id="comment{{ c.id }}">x</a></span>&nbsp;&nbsp;{% endfor %}<a data-toggle="modal" href="#commentTagModal{{ c.id }}"><i class="icon-plus-sign"/></a></td>
         <td>{{ c.category.description|escape }}</td>
     </tr>
     {% endfor %}
