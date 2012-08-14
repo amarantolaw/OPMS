@@ -39,12 +39,28 @@
             }
     );
 </script>
+{% for e in events %}
+    <div class="modal hide" id="eventTagModal{{ e.id }}">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">×</button>
+            <h3>Choose a tag to tag this event with:</h3>
+        </div>
+        <div class="modal-body">
+            {% for tag in tags %}
+                {% if tag not in e.tags.all %}
+                    <a href="{% url tag-event tag_id=tag.id event_id=e.id %}"><span class="label" style="background-color: {{ tag.color }}">{{ tag.name }} +</span></a>&nbsp;&nbsp;
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}
 <table id="eventsTable" class="tablesorter">
     <thead>
     <tr>
         <th>Date</th>
         <th>Title</th>
         <th>Detail</th>
+        <th><i class="icon-tags"/></th>
         <th>Category</th>
     </tr>
     </thead>
@@ -53,7 +69,8 @@
     <tr>
         <td>{{ e.date }}</td>
         <td>{{ e.title|escape }}</td>
-        <td>{{ e.detail|escape }}</td>
+        <td>{{ e.detail|escape }} {% for tag in e.tags.all %}<span class="label" style="background-color: {{ tag.color }}"><a href="{% url tag-view tag_id=tag.id %}" style="color: #FFFFFF">{{ tag.name }}</a> <a href="{% url untag-event tag_id=tag.id event_id=e.id %}" style="color: #FFFFFF" name="event{{ e.id }}" id="event{{ e.id }}">x</a></span>&nbsp;&nbsp;{% endfor %}</td>
+        <td><a data-toggle="modal" href="#eventTagModal{{ e.id }}"><i class="icon-plus-sign"/></a></td>
         <td>{{ e.category.description|escape }}</td>
     </tr>
     {% endfor %}
@@ -67,9 +84,6 @@
     $(document).ready(function()
             {
                 $("#commentsTable").tablesorter({ sortList: [[0,1]], headers: { 0: { sorter: 'shortDate'} } });
-                {% for c in comments_to_plot %}
-                    $('commentTagModal{{ c.id }}').modal();
-                {% endfor %}
             }
     );
 </script>

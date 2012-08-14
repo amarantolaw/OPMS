@@ -14,7 +14,7 @@ from email import message_from_string
 from email.parser import Parser
 
 
-def index(request, error='', message='', tag=None, tag_id=None, comment_id=None):
+def index(request, error='', message='', tag=None, tag_id=None, comment_id=None, event_id=None, metric_id=None):
     if tag:
         metrics_to_plot = Metric.objects.filter(tags=tag)
     else:
@@ -73,7 +73,7 @@ def index(request, error='', message='', tag=None, tag_id=None, comment_id=None)
         'chart': True,
         'error': error,
         'message': message,
-        'tag': tag, 'tag_id': tag_id, 'tags': Tag.objects.all(), 'comment_id': comment_id,
+        'tag': tag, 'tag_id': tag_id, 'tags': Tag.objects.all(), 'comment_id': comment_id, 'event_id': event_id, 'metric_id': metric_id,
     }, context_instance=RequestContext(request))
 
 
@@ -472,3 +472,89 @@ def untag_comment(request, tag_id, comment_id, error='', message=''):
         except:
             error += 'Couldn\'t remove tag from comment.'
     return index(request=request, error=error, message=message, comment_id=comment_id, tag_id=tag_id)
+
+
+def tag_event(request, tag_id, event_id, error='', message=''):
+    try:
+        tag = Tag.objects.get(id=tag_id)
+    except:
+        error += 'Couldn\'t retrieve tag ' + tag_id + '.'
+    try:
+        event = Event.objects.get(id=event_id)
+    except:
+        error += 'Couldn\'t retrieve event ' + event_id + '.'
+
+    if tag in event.tags.all():
+        error += 'This event has already been tagged.'
+
+    if not error:
+        try:
+            event.tags.add(tag)
+            message += 'Tagged event ' + str(event.id) + ' with ' + tag.name + '.'
+        except:
+            error += 'Couldn\'t tag event.'
+    return index(request=request, error=error, message=message, event_id=event_id, tag_id=tag_id)
+
+
+def untag_event(request, tag_id, event_id, error='', message=''):
+    try:
+        tag = Tag.objects.get(id=tag_id)
+    except:
+        error += 'Couldn\'t retrieve tag ' + tag_id + '.'
+    try:
+        event = Event.objects.get(id=event_id)
+    except:
+        error += 'Couldn\'t retrieve event ' + event_id + '.'
+
+    if tag not in event.tags.all():
+        error += 'This event isn\'t tagged with this tag.'
+
+    if not error:
+        try:
+            event.tags.remove(tag)
+        except:
+            error += 'Couldn\'t remove tag from comment.'
+    return index(request=request, error=error, message=message, event_id=event_id, tag_id=tag_id)
+
+
+def tag_metric(request, tag_id, metric_id, error='', message=''):
+    try:
+        tag = Tag.objects.get(id=tag_id)
+    except:
+        error += 'Couldn\'t retrieve tag ' + tag_id + '.'
+    try:
+        metric = Metric.objects.get(id=metric_id)
+    except:
+        error += 'Couldn\'t retrieve metric ' + metric_id + '.'
+
+    if tag in metric.tags.all():
+        error += 'This metric has already been tagged.'
+
+    if not error:
+        try:
+            metric.tags.add(tag)
+            message += 'Tagged metric ' + str(metric.id) + ' with ' + tag.name + '.'
+        except:
+            error += 'Couldn\'t tag metric.'
+    return index(request=request, error=error, message=message, metric_id=metric_id, tag_id=tag_id)
+
+
+def untag_metric(request, tag_id, metric_id, error='', message=''):
+    try:
+        tag = Tag.objects.get(id=tag_id)
+    except:
+        error += 'Couldn\'t retrieve tag ' + tag_id + '.'
+    try:
+        metric = Metric.objects.get(id=metric_id)
+    except:
+        error += 'Couldn\'t retrieve metric ' + metric_id + '.'
+
+    if tag not in metric.tags.all():
+        error += 'This metric isn\'t tagged with this tag.'
+
+    if not error:
+        try:
+            metric.tags.remove(tag)
+        except:
+            error += 'Couldn\'t remove tag from metric.'
+    return index(request=request, error=error, message=message, metric_id=metric_id, tag_id=tag_id)
