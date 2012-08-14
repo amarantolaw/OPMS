@@ -15,9 +15,10 @@ from email.parser import Parser
 
 
 def index(request, error='', message='', tag=None, tag_id=None, comment_id=None):
-    metrics_to_plot = Metric.objects.filter(source='appleweekly')
     if tag:
-        metrics_to_plot = metrics_to_plot.filter(tags=tag)
+        metrics_to_plot = Metric.objects.filter(tags=tag)
+    else:
+        metrics_to_plot = Metric.objects.filter(source='appleweekly')
 
     traffic_to_plot = []
     for metric in metrics_to_plot:
