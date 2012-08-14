@@ -26,20 +26,18 @@
     {% if message != '' %}
         <div class="alert alert-success">{{ message|escape }}</div>
     {% endif %}
+{% if tag %}<h1>{{ tag.title }}</h1>{% endif %}
+{% include 'feedback/opms_plot.html' %}
+
+{% if events %}
+<h2>Events</h2>
 <script>
     $(document).ready(function()
             {
                 $("#eventsTable").tablesorter({ sortList: [[0,1]], headers: { 0: { sorter: 'shortDate'} } });
-                $("#commentsTable").tablesorter({ sortList: [[0,1]], headers: { 0: { sorter: 'shortDate'} } });
             }
     );
 </script>
-<div style="text-align:right">
-    <a href="{% url comment-add %}">New comment</a> | <a href="{% url event-add %}">New event</a>
-</div>
-{% include 'feedback/opms_plot.html' %}
-
-<h2>Events</h2>
 <table id="eventsTable" class="tablesorter">
     <thead>
     <tr>
@@ -50,14 +48,6 @@
     </tr>
     </thead>
     <tbody>
-    {% if events|length == 0 %}
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    {% endif %}
     {% for e in events %}
     <tr>
         <td>{{ e.date }}</td>
@@ -68,8 +58,17 @@
     {% endfor %}
     </tbody>
 </table>
+{% endif %}
 
+{% if comments_to_plot %}
 <h2>Comments</h2>
+<script>
+    $(document).ready(function()
+            {
+                $("#commentsTable").tablesorter({ sortList: [[0,1]], headers: { 0: { sorter: 'shortDate'} } });
+            }
+    );
+</script>
 <table id="commentsTable" class="tablesorter">
     <thead>
     <tr>
@@ -80,7 +79,6 @@
     </tr>
     </thead>
     <tbody>
-    {% if comments_to_plot %}
     {% for c in comments_to_plot %}
     <tr>
     {% if c.date == None %}
@@ -93,15 +91,8 @@
         <td>{{ c.category.description|escape }}</td>
     </tr>
     {% endfor %}
-    {% else %}
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-    {% endif %}
     </tbody>
 </table>
+{% endif %}
 {% endif %}
 {% endblock %}

@@ -24,7 +24,7 @@ class Metric(models.Model):
 
     appleweeklyfield = models.CharField(max_length=200, default=None, blank=True, null=True)
 
-    tags = models.ManyToManyField(Tag,null=True,blank=True,symmetrical=False)
+    tags = models.ManyToManyField(Tag,null=True,blank=True)
 
     def mouseover_timeplot(self):
         return str(self.mouseover).lower()
@@ -72,7 +72,7 @@ class Comment(models.Model):
     dt_uploaded = models.DateTimeField("Datetime uploaded",auto_now_add=True)           #The datetime at which the comment was originally uploaded.
     dt_moderated = models.DateTimeField("Datetime approved",blank=True,null=True)       #The datetime at which the comment was moderated. Should be blank if the comment has yet to be moderated.
     moderator = models.ForeignKey(User,blank=True,null=True)                            #The django admin user who moderated the comment.
-    tags = models.ManyToManyField(Tag,null=True,blank=True,symmetrical=False)
+    tags = models.ManyToManyField(Tag,null=True,blank=True)
     itu_source = models.ForeignKey(ItuComment,null=True,blank=True,default=None)
     def __unicode__(self):
         return self.detail
@@ -92,6 +92,6 @@ class Event(models.Model):
     dt_uploaded = models.DateTimeField("Datetime uploaded",auto_now_add=True)           #The datetime at which the event was originally uploaded.
     dt_moderated = models.DateTimeField("Datetime approved",blank=True,null=True)       #The datetime at which the event was moderated. Should be blank if the event has yet to be moderated.
     moderator = models.ForeignKey(User,blank=True,null=True)                            #The django admin user who moderated the event.
-    tags = models.ManyToManyField(Tag,null=True,blank=True,symmetrical=False)
+    tags = models.ManyToManyField(Tag,null=True,blank=True)
     def __unicode__(self):
         return self.title

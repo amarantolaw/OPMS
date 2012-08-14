@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static sitetree %}
+{% get_static_prefix as STATIC_PREFIX %}
+
+{% block sidebar %}
+    {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+    {% if error != '' %}
+        <div class="alert alert-error">ERROR: {{ error|escape }}</div>
+    {% endif %}
+    {% if message != '' %}
+        <div class="alert alert-success">{{ message|escape }}</div>
+    {% endif %}
+    <form action="{% url tag-create %}" method="post" class="form-horizontal">
+        <fieldset>
+            {% csrf_token %}
+            <legend>Add a new tag using the form below:</legend>
+            <input type="hidden" name="add" value="1 /">
+            <div class="control-group{% if 'name' in error_fields %} error{% endif %}">
+                <label class="control-label" for="name">Name</label>
+                <div class="controls">
+                    <input type="text" name="name" maxlength=10 id="name" value="{{ default_tag.name }}"/>
+                </div>
+            </div>
+            <div class="control-group{% if 'title' in error_fields %} error{% endif %}">
+                <label class="control-label" for="title">Title</label>
+                <div class="controls">
+                    <input type="text" name="title" maxlength=200 id="title" class="input-xlarge" value="{{ default_tag.title }}"/>
+                </div>
+            </div>
+            <div class="control-group{% if 'color' in error_fields %} error{% endif %}">
+                <label class="control-label" for="color">Colour</label>
+                <div class="controls">
+                    <input type="text" name="color" value="{{ default_tag.color }}" maxlength=10 id="color"/>
+                </div>
+            </div>
+            <input type="hidden" name="action" id="action" />
+            <div class="form-actions">
+                <input type="submit" value="Save" name="save" class="btn btn-primary"/> <input type="submit" value="Save and add another" name="saveandaddanother" class="btn btn-primary"/> <input type="reset" value="Reset"class="btn btn-info"/></div>
+            </div>
+        </fieldset>
+    </form>
+    <script>
+    $(document).ready(function () {
+        // When a submit button is clicked, put its name into the action hidden field
+        $(":submit").click(function () { $("#action").val(this.name); });
+    });
+    </script>
+{% endblock %}

@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response, get_object_or_404
 from opms.utils import debug
-from feedback.models import Metric, Traffic, Category, Comment, Event
+from feedback.models import Tag, Metric, Traffic, Category, Comment, Event
 from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
 from stats.models import AppleWeeklySummary
 from django.db.models import Max, Min
@@ -13,10 +13,15 @@ import imaplib
 from email import message_from_string
 from email.parser import Parser
 
-def index(request, error='', message=''):
-    metrics_to_plot = Metric.objects.filter(source='appleweekly')
-    categories_to_plot = Category.objects.all()
-    traffic_to_plot = list(Traffic.objects.all())
+
+def index(request, error='', message='', tag=None):
+    metrics_to_plot = Metric.objects.filter(source='appleweekly',tags=tag)
+
+    traffic_to_plot = []
+    for metric in metrics_to_plot:
+        metric_traffic = list(Traffic.objects.filter(metric=metric))
+        if metric_traffic:
+            traffic_to_plot.append(metric_traffic)
 
     try:
         #Import Apple weekly summary metrics, but just for one-time use - don't save in db.
@@ -31,6 +36,7 @@ def index(request, error='', message=''):
 
     #NOTE: We do not need to handle the temporal range of comments and events since this is done automatically by Timeplot.
 
+    categories_to_plot = Category.objects.all()
     from_itunes_u = categories_to_plot.get(description='From iTunes U')
     #Create comments in the feedback database if they don't already exist.
     for itu_comment in ItuComment.objects.filter(ituinstitution__name = 'Oxford University'):
@@ -48,18 +54,19 @@ def index(request, error='', message=''):
             pass
         else:
             comment.save()
-    comments_to_plot = Comment.objects.filter(moderated=True)
 
     return render_to_response('feedback/index.html', {
         'metrics_to_plot': metrics_to_plot,
         'metric_textfiles': create_metric_textfiles(traffic_to_plot,metrics_to_plot),
         'categories_to_plot': categories_to_plot,
-        'comments_to_plot': comments_to_plot,
-        'events': Event.objects.filter(moderated=True),
+        'comments_to_plot': Comment.objects.filter(moderated=True,tags=tag),
+        'events': Event.objects.filter(moderated=True,tags=tag),
         'chart': True,
         'error': error,
         'message': message,
+        'tag': tag,
     }, context_instance=RequestContext(request))
+
 
 def create_metric_textfiles(traffic_to_plot,metrics_to_plot):
     if traffic_to_plot:
@@ -94,6 +101,7 @@ def create_metric_textfiles(traffic_to_plot,metrics_to_plot):
                         append('%s%s%s' % (sd,',',str(t.count)))
         metric_textfiles[m.id] = '\\n'.join(metric_textfile_strlist)
     return metric_textfiles
+
 
 def comment_add(request,comment=None, error='', message=''):
     "Adds a new comment to the database. Optionally, it may replace the comment instead."
@@ -180,6 +188,7 @@ def comment_add(request,comment=None, error='', message=''):
                  'message': message,
                  'comment': default_comment},
             context_instance=RequestContext(request))
+
 
 def event_add(request,event=None, error='', message=''):
     "Adds a new event to the database. Optionally, it may replace the event instead."
@@ -284,6 +293,7 @@ def event_add(request,event=None, error='', message=''):
                  'event': default_event},
             context_instance=RequestContext(request))
 
+
 def email(request, error='', message=''):
     output = ''
     try:
@@ -310,3 +320,126 @@ def email(request, error='', message=''):
                 if part.get_content_type() == 'text/plain':
                     output += 'PART: ' + str(part.get_payload()) + '\n'
     return render_to_response('feedback/email.html', {'error': error, 'message': message, 'output': output}, context_instance=RequestContext(request))
+
+
+def tags(request, error='', message=''):
+    tags = Tag.objects.all()
+    if not tags.count():
+        error += 'No tags exist at the moment. Perhaps you need to create some first?'
+    return render_to_response('feedback/tags.html', {
+        'error': error,
+        'message': message,
+        'tags': tags,
+        }, context_instance=RequestContext(request))
+
+
+def tag_create(request, error='', message=''):
+    error_fields=[]
+    default_tag = Tag(name='',title='',color='#')
+
+    try:
+        added = bool(request.POST['add'])
+    except:
+        added = False
+    try:
+        action = request.POST['action']
+    except:
+        action = 'add'
+
+    if added == True:
+        try:
+            new_name = request.POST['name']
+            if new_name == '':
+                error += ' Name is blank.'
+            else:
+                default_tag.name = new_name
+        except:
+            error += ' No name provided.'
+        try:
+            new_title = request.POST['title']
+            if new_title == '':
+                error += ' Title is blank.'
+            else:
+                default_tag.title = new_title
+        except:
+            error += ' No title provided.'
+        try:
+            new_color = request.POST['color']
+            default_tag.color = new_color
+            if len(new_color) != 7:
+                error += ' Invalid colour - hex colours are 7 characters long, including the #.'
+        except:
+            error += ' No colour provided.'
+
+        if error == '':
+            try:
+                new_tag = Tag(name=new_name, title=new_title, color=new_color)
+                new_tag.full_clean()
+                try:
+                    new_tag.save()
+                    message += 'Your tag was added to the database.'
+                    default_tag = Tag(name='',title='',color='#')
+                except:
+                    error += 'Failed to access the database.'
+            except ValidationError as ve:
+                for k in ve.message_dict.keys():
+                    error_fields.append(k)
+                    for m in ve.message_dict[k]:
+                        error += m + ' '
+
+    if action == 'saveandaddanother' or action == 'add' or error != '':
+        return render_to_response('feedback/tag_create.html',
+                {'error': error,
+                 'error_fields': error_fields,
+                 'message': message,
+                 'added': added,
+                 'default_tag': default_tag},
+            context_instance=RequestContext(request))
+    elif action == 'save':
+        return tags(request, error=error, message=message)
+    else:
+        error += 'Invalid submit action requested.'
+        return render_to_response('feedback/tag_create.html',
+                {'error': error,
+                 'error_fields': error_fields,
+                 'added': added,
+                 'message': message,
+                 'default_tag': default_tag},
+            context_instance=RequestContext(request))
+
+
+def tag_view(request, tag_id, error='', message=''):
+    tag = Tag.objects.get(id=tag_id)
+    return index(request=request, error=error, message=message, tag=tag)
+
+
+def tag_delete(request, error='', message=''):
+
+    return render_to_response('feedback/tag_delete.html', {
+        'error': error,
+        'message': message,
+        }, context_instance=RequestContext(request))
+
+
+def tag_created(request, error='', message=''):
+
+    return render_to_response('feedback/tag_created.html', {
+        'error': error,
+        'message': message,
+        }, context_instance=RequestContext(request))
+
+
+def tag_comment(request, error='', message=''):
+
+    return render_to_response('feedback/tag_comment.html', {
+        'error': error,
+        'message': message,
+        }, context_instance=RequestContext(request))
+
+
+def untag_comment(request, error='', message=''):
+
+    return render_to_response('feedback/untag_comment.html', {
+        'error': error,
+        'message': message,
+        }, context_instance=RequestContext(request))
