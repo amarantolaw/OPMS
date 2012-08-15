@@ -905,6 +905,29 @@
         }
     },
     {
+        "pk":49,
+        "model":"sitetree.treeitem",
+        "fields":{
+            "parent":30,
+            "access_restricted":false,
+            "access_permissions":[],
+            "description":"",
+            "insitetree":false,
+            "hint":"",
+            "url":"/monitoring/itunes/scanlogs/all/",
+            "inbreadcrumbs":true,
+            "title":"All",
+            "tree":1,
+            "access_perm_type":1,
+            "alias":null,
+            "sort_order":49,
+            "inmenu":false,
+            "access_loggedin":false,
+            "hidden":false,
+            "urlaspattern":false
+        }
+    },
+    {
         "pk":23,
         "model":"sitetree.treeitem",
         "fields":{
