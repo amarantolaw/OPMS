@@ -71,6 +71,30 @@ def index(request, error='', message='', tag=None, tag_id=None, comment_id=None,
                         Traffic(date=date, count=(-1 * chartrecords_day[0].position), metric=m))
             except:
                 error += 'Failed to process traffic for an itu-item-chart.'
+        elif m.source =='itu-#tc':
+            try:
+                dates_processed = []
+                for tc_scan in ItuScanLog.objects.filter(mode=2).order_by('time'):
+                    date = tc_scan.time.date()
+                    if date not in dates_processed:
+                        dates_processed.append(date)
+                        tc_count = ItuCollectionChartScan.objects.filter(scanlog=tc_scan,
+                            itucollection__institution=m.ituinstitution).count()
+                        traffic_to_plot.append(Traffic(date=date, count=tc_count, metric=m))
+            except:
+                error += 'Failed to process traffic for the # of collections in the top 200.'
+        elif m.source =='itu-#ti':
+            try:
+                dates_processed = []
+                for ti_scan in ItuScanLog.objects.filter(mode=3).order_by('time'):
+                    date = ti_scan.time.date()
+                    if date not in dates_processed:
+                        dates_processed.append(date)
+                        ti_count = ItuItemChartScan.objects.filter(scanlog=ti_scan,
+                            ituitem__institution=m.ituinstitution).count()
+                        traffic_to_plot.append(Traffic(date=date, count=ti_count, metric=m))
+            except:
+                error += 'Failed to process traffic for the # of collections in the top 200.'
 
     #NOTE: We do not need to handle the temporal range of comments and events since this is done automatically by Timeplot.
 

@@ -461,7 +461,7 @@ def itu_institution(request, institution_id):
     except:
         random_colour = '#' + str(random.randint(222222, 999999))
         top_collections_count = Metric(description='# of collections in the top 200', linecolor=random_colour,
-            fillcolor='#FFFFFF', mouseover=True, defaultvisibility=True, source='itu-#tc')
+            fillcolor='#FFFFFF', mouseover=True, defaultvisibility=True, source='itu-#tc', ituinstitution=institution)
         top_collections_count.save()
         metrics_to_plot.append(top_collections_count)
     try:
@@ -470,7 +470,7 @@ def itu_institution(request, institution_id):
     except:
         random_colour = '#' + str(random.randint(222222, 999999))
         top_items_count = Metric(description='# of items in the top 200', linecolor=random_colour,
-            fillcolor='#FFFFFF', mouseover=True, defaultvisibility=True, source='itu-#ti')
+            fillcolor='#FFFFFF', mouseover=True, defaultvisibility=True, source='itu-#ti', ituinstitution=institution)
         top_items_count.save()
         metrics_to_plot.append(top_items_count)
 

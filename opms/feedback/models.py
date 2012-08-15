@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from monitors.models import ItuComment, ItuItem, ItuCollection
+from monitors.models import ItuComment, ItuItem, ItuCollection, ItuInstitution
 import datetime
 
 class Tag(models.Model):
@@ -23,6 +23,7 @@ class Metric(models.Model):
     source = models.CharField(max_length=20, choices=METRIC_SOURCES, default='feedback')
     itucollection = models.ForeignKey(ItuCollection, null=True, blank=True, default=None)
     ituitem = models.ForeignKey(ItuItem, null=True, blank=True, default=None)
+    ituinstitution = models.ForeignKey(ItuInstitution, null=True, blank=True, default=None)
 
     appleweeklyfield = models.CharField(max_length=200, default=None, blank=True, null=True)
 
