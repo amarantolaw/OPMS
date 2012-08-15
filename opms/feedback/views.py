@@ -26,16 +26,51 @@ def index(request, error='', message='', tag=None, tag_id=None, comment_id=None,
         if metric_traffic:
             traffic_to_plot.append(metric_traffic)
 
-    try:
-        #Import Apple weekly summary metrics, but just for one-time use - don't save in db.
-        append = traffic_to_plot.append #Avoid re-calling the .append function in the middle of all those loops.
-        for w in AppleWeeklySummary.merged.all():
-            for m in metrics_to_plot:
-                for field in AppleWeeklySummary._meta._fields():             #This grabs a list of field objects from the model specified as part of the stats app
-                    if field.verbose_name == m.appleweeklyfield:             #Verbose name is specified as ("verbose_name") in stats/models/apple_summary.py
-                        append(Traffic(date=w.week_beginning, count=w.__dict__[field.name], metric=m))
-    except:
-        debug.onscreen('WARNING: Can\'t find any Apple summary data. Have you imported it?')
+    for m in metrics_to_plot:
+        if m.source == 'appleweekly':
+            try:
+                #Import Apple weekly summary metrics, but just for one-time use - don't save in db.
+                append = traffic_to_plot.append #Avoid re-calling the .append function in the middle of all those loops.
+                for w in AppleWeeklySummary.merged.all():
+                    for field in AppleWeeklySummary._meta._fields():             #This grabs a list of field objects from the model specified as part of the stats app
+                        if field.verbose_name == m.appleweeklyfield:             #Verbose name is specified as ("verbose_name") in stats/models/apple_summary.py
+                            append(Traffic(date=w.week_beginning, count=w.__dict__[field.name], metric=m))
+            except:
+                debug.onscreen('WARNING: Can\'t find any Apple summary data. Have you imported it?')
+        elif m.source == 'itu-collection-chart':
+            try:
+                #Add the first chartrecord of the day to traffic_to_plot
+                dates = []
+                chartrecords = ItuCollectionChartScan.objects.filter(itucollection=m.itucollection).order_by('date')
+                for chartrecord in chartrecords:
+                    if chartrecord.date.date() not in dates:
+                        dates.append(chartrecord.date.date())
+                for date in dates:
+                    chartrecords_day = []
+                    for chartrecord in chartrecords:
+                        if chartrecord.date.date() == date:
+                            chartrecords_day.append(chartrecord)
+                    traffic_to_plot.append(
+                        Traffic(date=date, count=(-1 * chartrecords_day[0].position), metric=m))
+            except:
+                error += 'Failed to process traffic for an itu-collection-chart.'
+        elif m.source == 'itu-item-chart':
+            try:
+                #Add the first chartrecord of the day to traffic_to_plot
+                dates = []
+                chartrecords = ItuItemChartScan.objects.filter(ituitem=m.ituitem).order_by('date')
+                for chartrecord in chartrecords:
+                    if chartrecord.date.date() not in dates:
+                        dates.append(chartrecord.date.date())
+                for date in dates:
+                    chartrecords_day = []
+                    for chartrecord in chartrecords:
+                        if chartrecord.date.date() == date:
+                            chartrecords_day.append(chartrecord)
+                    traffic_to_plot.append(
+                        Traffic(date=date, count=(-1 * chartrecords_day[0].position), metric=m))
+            except:
+                error += 'Failed to process traffic for an itu-item-chart.'
 
     #NOTE: We do not need to handle the temporal range of comments and events since this is done automatically by Timeplot.
 

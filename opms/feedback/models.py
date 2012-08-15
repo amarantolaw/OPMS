@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from monitors.models import ItuComment
+from monitors.models import ItuComment, ItuItem, ItuCollection
 import datetime
 
 class Tag(models.Model):
@@ -21,6 +21,8 @@ class Metric(models.Model):
     mouseover = models.BooleanField()                               #Whether rolling the mouse over a point will display the precise position of the point as an overlay
     defaultvisibility = models.BooleanField()                       #Whether the metric is visible by default
     source = models.CharField(max_length=20, choices=METRIC_SOURCES, default='feedback')
+    itucollection = models.ForeignKey(ItuCollection, null=True, blank=True, default=None)
+    ituitem = models.ForeignKey(ItuItem, null=True, blank=True, default=None)
 
     appleweeklyfield = models.CharField(max_length=200, default=None, blank=True, null=True)
 

@@ -305,7 +305,7 @@ def itu_collection(request, collection_id):
         except:
             random_colour = '#' + str(random.randint(222222, 999999))
             top_collections_position = Metric(description=collection.latest.name, linecolor=random_colour,
-                fillcolor='#FFFFFF', mouseover=True, defaultvisibility=True, source='itunes-chart')
+                fillcolor='#FFFFFF', mouseover=True, defaultvisibility=True, source='itu-collection-chart', itucollection=collection)
             top_collections_position.save()
             metrics_to_plot.append(top_collections_position)
 
@@ -363,7 +363,7 @@ def itu_item(request, item_id):
         if len(metrics) == 0:
             random_colour = '#' + str(random.randint(222222, 999999))
             top_items_position = Metric(description=item.latest.name, linecolor=random_colour, fillcolor='#FFFFFF',
-                mouseover=True, defaultvisibility=True, source='itunes-chart')
+                mouseover=True, defaultvisibility=True, source='itu-item-chart', ituitem=item)
             top_items_position.save()
             metrics_to_plot.append(top_items_position)
         else:
@@ -461,7 +461,7 @@ def itu_institution(request, institution_id):
     except:
         random_colour = '#' + str(random.randint(222222, 999999))
         top_collections_count = Metric(description='# of collections in the top 200', linecolor=random_colour,
-            fillcolor='#FFFFFF', mouseover=True, defaultvisibility=True, source='itunes-chart')
+            fillcolor='#FFFFFF', mouseover=True, defaultvisibility=True, source='itu-#tc')
         top_collections_count.save()
         metrics_to_plot.append(top_collections_count)
     try:
@@ -470,7 +470,7 @@ def itu_institution(request, institution_id):
     except:
         random_colour = '#' + str(random.randint(222222, 999999))
         top_items_count = Metric(description='# of items in the top 200', linecolor=random_colour,
-            fillcolor='#FFFFFF', mouseover=True, defaultvisibility=True, source='itunes-chart')
+            fillcolor='#FFFFFF', mouseover=True, defaultvisibility=True, source='itu-#ti')
         top_items_count.save()
         metrics_to_plot.append(top_items_count)
 
