@@ -102,8 +102,7 @@ def index(request, error='', message='', tag=None, tag_id=None, comment_id=None,
 
     #NOTE: We do not need to handle the temporal range of comments and events since this is done automatically by Timeplot.
 
-    categories_to_plot = Category.objects.all()
-    from_itunes_u = categories_to_plot.get(description='From iTunes U')
+    from_itunes_u = Category.objects.get(description='From iTunes U')
     #Create comments in the feedback database if they don't already exist.
     for itu_comment in ItuComment.objects.filter(ituinstitution__name = 'Oxford University'):
         comment = Comment(
@@ -126,6 +125,13 @@ def index(request, error='', message='', tag=None, tag_id=None, comment_id=None,
     else:
         comments_to_plot = Comment.objects.filter(moderated=True)
         events_to_plot = Event.objects.filter(moderated=True)
+
+    categories_to_plot = []
+    for category in comments_to_plot.values_list('category').distinct():
+        categories_to_plot.append(Category.objects.get(id=category[0]))
+    for category in events_to_plot.values_list('category').distinct():
+        if Category.objects.get(id=category[0]) not in categories_to_plot:
+            categories_to_plot.append(Category.objects.get(id=category[0]))
 
     return render_to_response('feedback/index.html', {
         'metrics_to_plot': metrics_to_plot,
