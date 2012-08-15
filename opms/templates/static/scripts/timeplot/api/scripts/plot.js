@@ -81,7 +81,7 @@ Timeplot.Plot.prototype = {
                     x = plot._timeGeometry.toScreen(validTime);
                     var v = plot._dataSource.getValue(validTime);
                     if (plot._plotInfo.roundValues) v = Math.round(v);
-                    plot._valueFlag.innerHTML = new String(v);
+                    plot._valueFlag.innerHTML = new String(Math.abs(v));
                     var d = new Date(validTime);
                     var p = plot._timeGeometry.getPeriod(); 
                     if (p < day) {

@@ -61,7 +61,8 @@
                     {% for c in new_collections %}
                         {% with latest=c.latest %}
                             <tr>
-                                <td><a href="{% url itu-collection collection_id=c.id %}">{{ latest.name }}</a></td>
+                                <td><a href="{% url itu-collection collection_id=c.id %}">{{ latest.name }}</a> {% if latest.contains_movies %}<i
+                                        class="icon-facetime-video"></i>{% else %}<i class="icon-headphones"></i>{% endif %}</td>
                                 <td style="width: 12% ">{{ latest.last_modified|date:"M d, Y" }}</td>
                                 {% with genre=latest.genre %}
                                     <td><a href="{% url itu-genre genre_id=genre.id %}">{{ genre.name }}</a></td>
@@ -99,7 +100,8 @@
                     {% for c in updated_collections %}
                         {% with latest=c.latest %}
                             <tr>
-                                <td><a href="{% url itu-collection collection_id=c.id %}">{{ latest.name }}</a></td>
+                                <td><a href="{% url itu-collection collection_id=c.id %}">{{ latest.name }} {% if latest.contains_movies %}<i
+                                        class="icon-facetime-video"></i>{% else %}<i class="icon-headphones"></i>{% endif %}</a></td>
                                 <td>{{ latest.version }}</td>
                                 <td style="width: 12% ">{{ latest.last_modified|date:"M d, Y" }}</td>
                                 {% with genre=latest.genre %}
@@ -138,7 +140,8 @@
                     {% for c in missing_collections %}
                         {% with latest=c.latest %}
                             <tr>
-                                <td><a href="{% url itu-collection collection_id=c.id %}">{{ latest.name }}</a></td>
+                                <td><a href="{% url itu-collection collection_id=c.id %}">{{ latest.name }}</a> {% if latest.contains_movies %}<i
+                                        class="icon-facetime-video"></i>{% else %}<i class="icon-headphones"></i>{% endif %}</td>
                                 <td>{{ latest.version }}</td>
                                 <td style="width: 12% ">{{ latest.last_modified|date:"M d, Y" }}</td>
                                 {% with genre=latest.genre %}

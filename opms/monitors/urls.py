@@ -18,10 +18,12 @@ urlpatterns = patterns('monitors.views',
     url(r'^itunes/institutions/$', 'itu_institutions', name="itu-institutions"),
     url(r'^itunes/genres/$', 'itu_genres', name="itu-genres"),
     url(r'^itunes/scanlogs/$', 'itu_scanlogs', name="itu-scanlogs"),
+    url(r'^itunes/scanlogs/all/$', 'itu_scanlogs', name="itu-scanlogs-all", kwargs={'all': True}),
 
     url(r'^itunes/collections/(?P<collection_id>\d+)/$', 'itu_collection', name="itu-collection"),
     url(r'^itunes/items/(?P<item_id>\d+)/$', 'itu_item', name="itu-item"),
     url(r'^itunes/institutions/(?P<institution_id>\d+)/$', 'itu_institution', name="itu-institution"),
+    url(r'^itunes/institutions/(?P<institution_id>\d+)/collections/$', 'itu_institution_collections', name="itu-institution-collections"),
     url(r'^itunes/genres/(?P<genre_id>\d+)/$', 'itu_genre', name="itu-genre"),
     url(r'^itunes/scanlogs/(?P<scanlog_id>\d+)/$', 'itu_scanlog', name="itu-scanlog"),
 

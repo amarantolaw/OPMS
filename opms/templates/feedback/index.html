@@ -26,61 +26,92 @@
     {% if message != '' %}
         <div class="alert alert-success">{{ message|escape }}</div>
     {% endif %}
+{% if tag %}<h1>{{ tag.title }}</h1>{% endif %}
+{% include 'feedback/opms_plot.html' %}
+
+{% if events %}
+<h2>Events</h2>
 <script>
     $(document).ready(function()
             {
                 $("#eventsTable").tablesorter({ sortList: [[0,1]], headers: { 0: { sorter: 'shortDate'} } });
-                $("#commentsTable").tablesorter({ sortList: [[0,1]], headers: { 0: { sorter: 'shortDate'} } });
             }
     );
 </script>
-<div style="text-align:right">
-    <a href="{% url comment-add %}">New comment</a> | <a href="{% url event-add %}">New event</a>
-</div>
-{% include 'feedback/opms_plot.html' %}
-
-<h2>Events</h2>
+{% for e in events %}
+    <div class="modal hide" id="eventTagModal{{ e.id }}">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">×</button>
+            <h3>Choose a tag to tag this event with:</h3>
+        </div>
+        <div class="modal-body">
+            {% for tag in tags %}
+                {% if tag not in e.tags.all %}
+                    <a href="{% url tag-event tag_id=tag.id event_id=e.id %}"><span class="label" style="background-color: {{ tag.color }}">{{ tag.name }} +</span></a>&nbsp;&nbsp;
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}
 <table id="eventsTable" class="tablesorter">
     <thead>
     <tr>
         <th>Date</th>
         <th>Title</th>
         <th>Detail</th>
+        <th><i class="icon-tags"/></th>
         <th>Category</th>
     </tr>
     </thead>
     <tbody>
-    {% if events|length == 0 %}
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    {% endif %}
     {% for e in events %}
     <tr>
         <td>{{ e.date }}</td>
         <td>{{ e.title|escape }}</td>
-        <td>{{ e.detail|escape }}</td>
+        <td>{{ e.detail|escape }} {% for tag in e.tags.all %}<span class="label" style="background-color: {{ tag.color }}"><a href="{% url tag-view tag_id=tag.id %}" style="color: #FFFFFF">{{ tag.name }}</a> <a href="{% url untag-event tag_id=tag.id event_id=e.id %}" style="color: #FFFFFF" name="event{{ e.id }}" id="event{{ e.id }}">x</a></span>&nbsp;&nbsp;{% endfor %}</td>
+        <td><a data-toggle="modal" href="#eventTagModal{{ e.id }}"><i class="icon-plus-sign"/></a></td>
         <td>{{ e.category.description|escape }}</td>
     </tr>
     {% endfor %}
     </tbody>
 </table>
+{% endif %}
 
+{% if comments_to_plot %}
 <h2>Comments</h2>
+<script>
+    $(document).ready(function()
+            {
+                $("#commentsTable").tablesorter({ sortList: [[0,1]], headers: { 0: { sorter: 'shortDate'} } });
+            }
+    );
+</script>
+{% for c in comments_to_plot %}
+    <div class="modal hide" id="commentTagModal{{ c.id }}">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">×</button>
+            <h3>Choose a tag to tag this comment with:</h3>
+        </div>
+        <div class="modal-body">
+            {% for tag in tags %}
+                {% if tag not in c.tags.all %}
+                    <a href="{% url tag-comment tag_id=tag.id comment_id=c.id %}"><span class="label" style="background-color: {{ tag.color }}">{{ tag.name }} +</span></a>&nbsp;&nbsp;
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}
 <table id="commentsTable" class="tablesorter">
     <thead>
     <tr>
         <th>Date</th>
         <th>Source</th>
         <th>Detail</th>
+        <th><i class="icon-tags"/></th>
         <th>Category</th>
     </tr>
     </thead>
     <tbody>
-    {% if comments_to_plot %}
     {% for c in comments_to_plot %}
     <tr>
     {% if c.date == None %}
@@ -89,19 +120,13 @@
         <td>{{ c.date }}</td>
     {% endif %}
         <td>{{ c.source|escape }}</td>
-        <td>"{{ c.detail|escape }}"</td>
+        <td>"{{ c.detail|escape }}" {% for tag in c.tags.all %}<span class="label" style="background-color: {{ tag.color }}"><a href="{% url tag-view tag_id=tag.id %}" style="color: #FFFFFF">{{ tag.name }}</a> <a href="{% url untag-comment tag_id=tag.id comment_id=c.id %}" style="color: #FFFFFF" name="comment{{ c.id }}" id="comment{{ c.id }}">x</a></span>&nbsp;&nbsp;{% endfor %}</td>
+        <td><a data-toggle="modal" href="#commentTagModal{{ c.id }}"><i class="icon-plus-sign"/></a></td>
         <td>{{ c.category.description|escape }}</td>
     </tr>
     {% endfor %}
-    {% else %}
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-    {% endif %}
     </tbody>
 </table>
+{% endif %}
 {% endif %}
 {% endblock %}

@@ -1,4 +1,5 @@
 from django.shortcuts import render_to_response
+from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 from django.db.models import Sum
 from stats.models import *
@@ -6,9 +7,12 @@ from chartit import PivotDataPool, PivotChart, DataPool, Chart
 
 
 # Default Stats module homepage
+@login_required
 def index(request):
     return render_to_response('stats/base.html', {}, context_instance=RequestContext(request))
 
+
+@login_required
 def apple_index(request):
     return render_to_response('stats/apple/base.html', {}, context_instance=RequestContext(request))
 
@@ -16,6 +20,7 @@ def apple_index(request):
 #####
 # APPLE/iTU Subviews
 #####
+@login_required
 def summary_index(request):
     "Show the Apple 'Summary' User Action results"
     summary_data = AppleWeeklySummary.merged.all()
@@ -79,6 +84,7 @@ def summary_index(request):
 #####
 # FEEDS Subviews
 #####
+@login_required
 def summary_feeds(request):
     listing = AppleWeeklyTrackCount.merged.psuedo_feeds()
     return render_to_response('stats/apple/feeds.html',{
@@ -86,6 +92,7 @@ def summary_feeds(request):
         }, context_instance=RequestContext(request))
 
 
+@login_required
 def feed_detail(request, partial_guid):
     # Construct pivot table of data.
     # Orientation 0 is items on x, time on y. Anything else is time on x, items on y.
@@ -264,6 +271,7 @@ def feed_detail(request, partial_guid):
     }, context_instance=RequestContext(request))
 
 
+@login_required
 def guid_detail(request, trackguid_id):
     # TODO: This view needs some error checking to happen on the input value
     listing = AppleWeeklyTrackCount.objects.filter(guid__id__exact=trackguid_id).order_by("summary__week_beginning")

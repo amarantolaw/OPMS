@@ -1,6 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
+from monitors.models import ItuComment, ItuItem, ItuCollection, ItuInstitution
 import datetime
+
+class Tag(models.Model):
+    """A short name which metrics, comments and events may be assigned, defining a page which may be used as a custom-built report."""
+    name = models.CharField(max_length=10, unique=True) #Unique identifier, for display in tables.
+    title = models.CharField(max_length=200)            #Title of reports about this tag.
+    color = models.CharField(max_length=7)              #Tag colour
 
 class Metric(models.Model):
     """A measure of web traffic"""
@@ -14,8 +21,13 @@ class Metric(models.Model):
     mouseover = models.BooleanField()                               #Whether rolling the mouse over a point will display the precise position of the point as an overlay
     defaultvisibility = models.BooleanField()                       #Whether the metric is visible by default
     source = models.CharField(max_length=20, choices=METRIC_SOURCES, default='feedback')
+    itucollection = models.ForeignKey(ItuCollection, null=True, blank=True, default=None)
+    ituitem = models.ForeignKey(ItuItem, null=True, blank=True, default=None)
+    ituinstitution = models.ForeignKey(ItuInstitution, null=True, blank=True, default=None)
 
     appleweeklyfield = models.CharField(max_length=200, default=None, blank=True, null=True)
+
+    tags = models.ManyToManyField(Tag,null=True,blank=True)
 
     def mouseover_timeplot(self):
         return str(self.mouseover).lower()
@@ -63,6 +75,8 @@ class Comment(models.Model):
     dt_uploaded = models.DateTimeField("Datetime uploaded",auto_now_add=True)           #The datetime at which the comment was originally uploaded.
     dt_moderated = models.DateTimeField("Datetime approved",blank=True,null=True)       #The datetime at which the comment was moderated. Should be blank if the comment has yet to be moderated.
     moderator = models.ForeignKey(User,blank=True,null=True)                            #The django admin user who moderated the comment.
+    tags = models.ManyToManyField(Tag,null=True,blank=True)
+    itu_source = models.ForeignKey(ItuComment,null=True,blank=True,default=None)
     def __unicode__(self):
         return self.detail
 
@@ -81,5 +95,6 @@ class Event(models.Model):
     dt_uploaded = models.DateTimeField("Datetime uploaded",auto_now_add=True)           #The datetime at which the event was originally uploaded.
     dt_moderated = models.DateTimeField("Datetime approved",blank=True,null=True)       #The datetime at which the event was moderated. Should be blank if the event has yet to be moderated.
     moderator = models.ForeignKey(User,blank=True,null=True)                            #The django admin user who moderated the event.
+    tags = models.ManyToManyField(Tag,null=True,blank=True)
     def __unicode__(self):
         return self.title

@@ -1,4 +1,4 @@
                     {% load sitetree %}<!-- Navlist items -->
-                    {% for item in sitetree_items %}<li {% if item.is_current or item.in_current_branch %}class="{{ item.is_current|yesno:"active," }}{{ item.in_current_branch|yesno:" active," }}"{% endif %}>
-                    <a href="{% sitetree_url for item %}"{% if item.hint %} title="{{ item.hint }}"{% endif %}>{{ item.title_resolved }}</a>
+                    {% for sitetree_item in sitetree_items %}<li {% if sitetree_item.is_current or sitetree_item.in_current_branch %}class="{{ sitetree_item.is_current|yesno:"active," }}{{ sitetree_item.in_current_branch|yesno:" active," }}"{% endif %}>
+                    <a href="{% sitetree_url for sitetree_item %}"{% if sitetree_item.hint %} title="{{ sitetree_item.hint }}"{% endif %}>{{ sitetree_item.title_resolved }}</a>
                     </li>{% endfor %}
