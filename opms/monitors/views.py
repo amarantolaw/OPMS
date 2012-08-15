@@ -9,7 +9,7 @@ from django.db.models import Q, F, Sum, Count
 from django_tables2 import RequestConfig
 import settings
 from opms.monitors.models import URLMonitorURL, URLMonitorScan
-from feedback.models import Metric, Traffic, Category, Comment, Event
+from feedback.models import Metric, Traffic, Category, Comment, Event, Tag
 from feedback.views import create_metric_textfiles
 from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
 from monitors.models import InstitutionalCollectionTable
@@ -280,6 +280,7 @@ def itu_collection(request, collection_id):
     """Display an absolute record of a collection."""
     message = ''
     error = ''
+    tags = Tag.objects.all()
     collection = ItuCollection.objects.get(id=int(collection_id))
     chartrecords = ItuCollectionChartScan.objects.filter(itucollection=collection).order_by('date')
     items = ItuItem.objects.filter(latest__series__itucollection=collection, latest__missing=None)
@@ -340,13 +341,15 @@ def itu_collection(request, collection_id):
              'metric_textfiles': create_metric_textfiles(traffic_to_plot, metrics_to_plot),
              'categories_to_plot': categories_to_plot,
              'events': [],
-             'chart': True}, context_instance=RequestContext(request), )
+             'chart': True,
+             'tags': tags}, context_instance=RequestContext(request), )
 
 
 def itu_item(request, item_id):
     """Display an absolute record of an item."""
     message = ''
     error = ''
+    tags = Tag.objects.all()
     item = ItuItem.objects.get(id=int(item_id))
     chartrecords = ItuItemChartScan.objects.filter(ituitem=item)
 
@@ -386,14 +389,14 @@ def itu_item(request, item_id):
              'metric_textfiles': create_metric_textfiles(traffic_to_plot, metrics_to_plot),
              'categories_to_plot': categories_to_plot,
              'events': [],
-             'chart': True},
-        context_instance=RequestContext(request))
+             'chart': True, 'tags': tags}, context_instance=RequestContext(request))
 
 
 def itu_institution(request, institution_id):
     """Display an institution."""
     message = ''
     error = ''
+    tags = Tag.objects.all()
     latest_tc_scanlog = ItuScanLog.objects.filter(mode=2).order_by('-time')[0]
     latest_ti_scanlog = ItuScanLog.objects.filter(mode=3).order_by('-time')[0]
     institution = ItuInstitution.objects.get(id=int(institution_id))
@@ -510,7 +513,8 @@ def itu_institution(request, institution_id):
              'metric_textfiles': create_metric_textfiles(traffic_to_plot, metrics_to_plot),
              'categories_to_plot': categories_to_plot,
              'events': [],
-             'chart': False}, context_instance=RequestContext(request))
+             'chart': False,
+             'tags': tags}, context_instance=RequestContext(request))
 
 
 def itu_institution_collections(request, institution_id):

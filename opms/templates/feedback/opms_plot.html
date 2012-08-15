@@ -20,6 +20,7 @@
         padding:4px 4px
     }
 </style>
+<script src="{{ STATIC_PREFIX }}js/bootstrap-modal.js"></script>
 <script>
 var timeplot;
 var min = "";
@@ -290,13 +291,39 @@ function setTimeRange(newmin,newmax){
 <a class="btn" id="panright" onclick="setTimeRange(panright_min,panright_max)"><i class="icon-chevron-right"></i> </a>
 
 <!-- Generate toggle buttons.-->
-{% if metrics_to_plot %} <span>Metrics:</span> {% endif %}
+{% if metrics_to_plot %}
+    {% for m in metrics_to_plot %}
+        <div class="modal hide" id="metricTagModal{{ m.id }}">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h3>"{{ m.description }}"</h3>
+            </div>
+            <div class="modal-body">
+                {% if m.tags.all %}
+                    <h4>"{{ m.description }}" is already tagged with:</h4>
+                    {% for tag in tags %}
+                        {% if tag in m.tags.all %}
+                            <a href="{% url tag-view tag_id=tag.id %}"><span class="label" style="background-color: {{ tag.color }}">{{ tag.name }}</span></a><a href="{% url untag-metric tag_id=tag.id metric_id=m.id %}"><span class="label">x</span></a>&nbsp;&nbsp;
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                <h4>You can tag "{{ m.description }}" with the following:</h4>
+                {% for tag in tags %}
+                    {% if tag not in m.tags.all %}
+                        <a href="{% url tag-metric tag_id=tag.id metric_id=m.id %}"><span class="label" style="background-color: {{ tag.color }}">{{ tag.name }} +</span></a>&nbsp;&nbsp;
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+&nbsp;<span>Metrics:</span> {% endif %}
 {% for m in metrics_to_plot %}
     {% if m.defaultvisibility %}
         <a id="{{ m.id }}" class="btn on_metric_{{ m.id }}" onclick="toggle(this)">{{ m.description|escape }}&nbsp;<span class="label" style="background-color: {{ m.linecolor }}; padding: 4px 4px 2px; border-radius: 0 15px 0 15px">&nbsp;&nbsp;&nbsp;</span></a>
     {% else %}
         <a id="{{ m.id }}" class="btn off_metric" onclick="toggle(this)">{{ m.description|escape }}&nbsp;<span class="label" style="background-color: {{ m.linecolor }}; padding: 4px 4px 2px; border-radius: 0 15px 0 15px">&nbsp;&nbsp;&nbsp;</span></a>
     {% endif %}
+    <a data-toggle="modal" href="#metricTagModal{{ m.id }}"><i class="icon-tags"></i></a>
 {% endfor %}
 {% if metrics_to_plot and categories_to_plot %}<b> | </b>{% endif %}
 {% if categories_to_plot %}<span>Categories:</span> {% endif %}
