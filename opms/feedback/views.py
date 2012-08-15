@@ -1,4 +1,5 @@
 from django.shortcuts import render_to_response, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from opms.utils import debug
 from feedback.models import Tag, Metric, Traffic, Category, Comment, Event
 from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
@@ -13,7 +14,7 @@ import imaplib
 from email import message_from_string
 from email.parser import Parser
 
-
+@login_required
 def index(request, error='', message='', tag=None, tag_id=None, comment_id=None, event_id=None, metric_id=None):
     if tag:
         metrics_to_plot = Metric.objects.filter(tags=tag)
@@ -180,7 +181,7 @@ def create_metric_textfiles(traffic_to_plot,metrics_to_plot):
         metric_textfiles[m.id] = '\\n'.join(metric_textfile_strlist)
     return metric_textfiles
 
-
+@login_required
 def comment_add(request,comment=None, error='', message=''):
     "Adds a new comment to the database. Optionally, it may replace the comment instead."
     categories = Category.objects.all()
@@ -267,7 +268,7 @@ def comment_add(request,comment=None, error='', message=''):
                  'comment': default_comment},
             context_instance=RequestContext(request))
 
-
+@login_required
 def event_add(request,event=None, error='', message=''):
     "Adds a new event to the database. Optionally, it may replace the event instead."
     categories = Category.objects.all()
@@ -371,7 +372,7 @@ def event_add(request,event=None, error='', message=''):
                  'event': default_event},
             context_instance=RequestContext(request))
 
-
+@login_required
 def email(request, error='', message=''):
     output = ''
     try:
@@ -399,7 +400,7 @@ def email(request, error='', message=''):
                     output += 'PART: ' + str(part.get_payload()) + '\n'
     return render_to_response('feedback/email.html', {'error': error, 'message': message, 'output': output}, context_instance=RequestContext(request))
 
-
+@login_required
 def tags(request, error='', message='', tag_id=None):
     tags = Tag.objects.all()
     return render_to_response('feedback/tags.html', {
@@ -408,7 +409,7 @@ def tags(request, error='', message='', tag_id=None):
         'tags': tags, 'tag_id': tag_id,
         }, context_instance=RequestContext(request))
 
-
+@login_required
 def tag_create(request, error='', message=''):
     error_fields=[]
     default_tag = Tag(name='',title='',color='#')
@@ -483,12 +484,12 @@ def tag_create(request, error='', message=''):
                  'default_tag': default_tag},
             context_instance=RequestContext(request))
 
-
+@login_required
 def tag_view(request, tag_id, error='', message=''):
     tag = Tag.objects.get(id=tag_id)
     return index(request=request, error=error, message=message, tag=tag, tag_id=tag_id)
 
-
+@login_required
 def tag_delete(request, tag_id, error='', message=''):
     tag = Tag.objects.get(id=tag_id)
     try:
@@ -499,7 +500,7 @@ def tag_delete(request, tag_id, error='', message=''):
         error += 'Failed to delete tag ' + tag_id + '.'
     return tags(request=request, error=error, message=message, tag_id=tag_id)
 
-
+@login_required
 def tag_comment(request, tag_id, comment_id, error='', message=''):
     try:
         tag = Tag.objects.get(id=tag_id)
@@ -521,7 +522,7 @@ def tag_comment(request, tag_id, comment_id, error='', message=''):
             error += 'Couldn\'t tag comment.'
     return index(request=request, error=error, message=message, comment_id=comment_id, tag_id=tag_id)
 
-
+@login_required
 def untag_comment(request, tag_id, comment_id, error='', message=''):
     try:
         tag = Tag.objects.get(id=tag_id)
@@ -542,7 +543,7 @@ def untag_comment(request, tag_id, comment_id, error='', message=''):
             error += 'Couldn\'t remove tag from comment.'
     return index(request=request, error=error, message=message, comment_id=comment_id, tag_id=tag_id)
 
-
+@login_required
 def tag_event(request, tag_id, event_id, error='', message=''):
     try:
         tag = Tag.objects.get(id=tag_id)
@@ -564,7 +565,7 @@ def tag_event(request, tag_id, event_id, error='', message=''):
             error += 'Couldn\'t tag event.'
     return index(request=request, error=error, message=message, event_id=event_id, tag_id=tag_id)
 
-
+@login_required
 def untag_event(request, tag_id, event_id, error='', message=''):
     try:
         tag = Tag.objects.get(id=tag_id)
@@ -585,7 +586,7 @@ def untag_event(request, tag_id, event_id, error='', message=''):
             error += 'Couldn\'t remove tag from comment.'
     return index(request=request, error=error, message=message, event_id=event_id, tag_id=tag_id)
 
-
+@login_required
 def tag_metric(request, tag_id, metric_id, error='', message=''):
     try:
         tag = Tag.objects.get(id=tag_id)
@@ -607,7 +608,7 @@ def tag_metric(request, tag_id, metric_id, error='', message=''):
             error += 'Couldn\'t tag metric.'
     return index(request=request, error=error, message=message, metric_id=metric_id, tag_id=tag_id)
 
-
+@login_required
 def untag_metric(request, tag_id, metric_id, error='', message=''):
     try:
         tag = Tag.objects.get(id=tag_id)

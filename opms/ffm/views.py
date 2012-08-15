@@ -7,42 +7,50 @@ from opms import settings
 import time
 from os import path
 from django.core.mail import send_mail
+from django.contrib.auth.decorators import login_required
 
 
 # Default FFM module homepage
+@login_required
 def index(request):
     # return HttpResponse("Hello World. You're at the OPMS:FFM Homepage.")
     return render_to_response('ffm/base.html', {})
 
 
+@login_required
 def summary_feeds(request):
     "List the Feedgroups and their associated feeds"
     summary_data = FeedGroup.objects.select_related().order_by('title')
     return render_to_response('ffm/feedgroups.html', {'summary_data': summary_data,})
 
 
+@login_required
 def feed_detail(request, feed_id):
     "Show the results for a given feed"
     return HttpResponse("Hello World. You're at the FEED (" + str(feed_id) + ") DETAIL page.")
 
 
+@login_required
 def summary_items(request):
     "List the Items and their associated files"
     summary_data = []
     return render_to_response('ffm/items.html', {'summary_data': summary_data,})
 
 
+@login_required
 def item_detail(request, item_id):
     "Show the results for a given item"
     return HttpResponse("Hello World. You're at the ITEM (" + str(item_id) + ") DETAIL page.")
 
 
+@login_required
 def summary_people(request):
     "List the People and their associated Feeds and Items"
     summary_data = []
     return render_to_response('ffm/people.html', {'summary_data': summary_data,})
 
 
+@login_required
 def person_detail(request, person_id):
     "Show the results for a given person"
     return HttpResponse("Hello World. You're at the PERSON (" + str(person_id) + ") DETAIL page.")

@@ -5,6 +5,7 @@ from django.http import Http404, HttpResponse
 from django.views.decorators.http import require_safe
 from django.template import Context, loader, RequestContext
 from django.shortcuts import render_to_response
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q, F, Sum, Count
 from django_tables2 import RequestConfig
 import settings
@@ -23,6 +24,7 @@ from monitors.models import InstitutionalCollectionTable
 
 # Default Monitors module homepage
 #@require_safe(request)
+@login_required
 def index(request):
 #    t = loader.get_template('monitors/base.html')
 #    return HttpResponse(t.render())
@@ -33,6 +35,7 @@ def index(request):
 # URL Monitoring Subviews
 ######
 
+@login_required
 def urlmonitoring_summary(request):
     "Show the results for a url monitoring"
     # List the URLS and the number of scans for that URL
@@ -55,6 +58,7 @@ def urlmonitoring_summary(request):
         context_instance=RequestContext(request))
 
 
+@login_required
 def urlmonitoring_task(request, task_id):
     "Show the results for a url monitoring of a specific task"
     scan_data = URLMonitorScan.objects.filter(task__id__exact=task_id).select_related().order_by('-url__url',
@@ -63,6 +67,7 @@ def urlmonitoring_task(request, task_id):
         context_instance=RequestContext(request))
 
 
+@login_required
 def urlmonitoring_url(request, url_id):
     "Show the results for a url monitoring of specific url"
     # Limit to the last 3 days' worth of scans (10 scans * 4 times an hour * 24 hours * 3 days)
@@ -163,6 +168,7 @@ def urlmonitoring_url(request, url_id):
 #    canvas.print_png(response)
 #    return response
 
+@login_required
 def itu_home(request):
     """The iTunes U Monitoring home page."""
     message = ''
@@ -173,6 +179,7 @@ def itu_home(request):
         context_instance=RequestContext(request))
 
 
+@login_required
 def itu_top_collections(request, chartscan=None):
     """Show a top collections chart, defaulting to the most recent completed scan."""
     message = ''
@@ -199,6 +206,7 @@ def itu_top_collections(request, chartscan=None):
         context_instance=RequestContext(request))
 
 
+@login_required
 def itu_top_items(request, chartscan=None):
     """Show a top items chart, defaulting to the most recent completed scan."""
     message = ''
@@ -217,6 +225,7 @@ def itu_top_items(request, chartscan=None):
         context_instance=RequestContext(request))
 
 
+@login_required
 def itu_collections(request):
     """Show a clickable list of all collections."""
     message = ''
@@ -225,6 +234,7 @@ def itu_collections(request):
         context_instance=RequestContext(request))
 
 
+@login_required
 def itu_items(request):
     """Show a clickable list of all items."""
     message = ''
@@ -233,6 +243,7 @@ def itu_items(request):
         context_instance=RequestContext(request))
 
 
+@login_required
 def itu_institutions(request, institutions=[]):
     """Show a clickable list of all institutions."""
     message = ''
@@ -250,6 +261,7 @@ def itu_institutions(request, institutions=[]):
         context_instance=RequestContext(request))
 
 
+@login_required
 def itu_genres(request):
     """Show a clickable list of all genres."""
     message = ''
@@ -265,6 +277,7 @@ def itu_genres(request):
         context_instance=RequestContext(request))
 
 
+@login_required
 def itu_scanlogs(request, all=False):
     """Show a clickable list of all scanlogs."""
     message = ''
@@ -282,6 +295,7 @@ def itu_scanlogs(request, all=False):
         context_instance=RequestContext(request))
 
 
+@login_required
 def itu_collection(request, collection_id):
     """Display an absolute record of a collection."""
     message = ''
@@ -351,6 +365,7 @@ def itu_collection(request, collection_id):
              'tags': tags}, context_instance=RequestContext(request), )
 
 
+@login_required
 def itu_item(request, item_id):
     """Display an absolute record of an item."""
     message = ''
@@ -398,6 +413,7 @@ def itu_item(request, item_id):
              'chart': True, 'tags': tags}, context_instance=RequestContext(request))
 
 
+@login_required
 def itu_institution(request, institution_id):
     """Display an institution."""
     message = ''
@@ -523,6 +539,7 @@ def itu_institution(request, institution_id):
              'tags': tags}, context_instance=RequestContext(request))
 
 
+@login_required
 def itu_institution_collections(request, institution_id):
     """Display all collections belonging to an institution."""
     message = ''
@@ -537,6 +554,7 @@ def itu_institution_collections(request, institution_id):
              'chart': False}, context_instance=RequestContext(request))
 
 
+@login_required
 def itu_genre(request, genre_id):
     """Display a genre."""
     message = ''
@@ -557,6 +575,7 @@ def itu_genre(request, genre_id):
         context_instance=RequestContext(request))
 
 
+@login_required
 def itu_scanlog(request, scanlog_id):
     """Display a scanlog, along with details of any relevant charts, modified items or modified collections."""
     message = ''
