@@ -1,7 +1,7 @@
                     {% load sitetree %}<!-- Navlist items -->
-                    {% for item in sitetree_items %}<li{% if item.is_current %} class="active"{% endif %}>
-                        <a href="{% sitetree_url for item %}"{% if item.hint %} title="{{ item.hint }}"{% endif %}>{{ item.title_resolved }}</a>
-                        {% if item.has_children %}
-                            {% sitetree_children of item for menu template "sitetree/navlist-items.html" %}
+                    {% for sitetree_item in sitetree_items %}<li{% if sitetree_item.is_current %} class="active"{% endif %}>
+                        <a href="{% sitetree_url for sitetree_item %}"{% if sitetree_item.hint %} title="{{ sitetree_item.hint }}"{% endif %}>{{ sitetree_item.title_resolved }}</a>
+                        {% if sitetree_item.has_children %}
+                            {% sitetree_children of sitetree_item for menu template "sitetree/navlist-items.html" %}
                         {% endif %}
                     </li>{% endfor %}

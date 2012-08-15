@@ -1,10 +1,6 @@
 {% extends "base.html" %}
 {% load static sitetree %}
 
-{% block sidebar %}
-    {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
-{% endblock %}
-
 {% block head %}
     <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
     {#    <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>#}
@@ -12,6 +8,10 @@
     <script src="{{ STATIC_PREFIX }}scripts/timeline/api/timeline-api.js" type="text/javascript"></script>
     <script src="{{ STATIC_PREFIX }}scripts/timeplot/api/timeplot-api.js" type="text/javascript"></script>
     {#    <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection"/>#}
+{% endblock %}
+
+{% block sidebar %}
+    {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
 {% endblock %}
 
 {% block content %}
