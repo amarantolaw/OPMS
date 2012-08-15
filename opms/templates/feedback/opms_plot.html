@@ -1,21 +1,26 @@
 <style type="text/css" xmlns="http://www.w3.org/1999/html">
     {% for c in categories_to_plot %}
         .on_category_{{ c.id }} {
-            background:{{ c.color }};
+            background:#cccccc;
+            padding:4px 4px
         }
     {% endfor %}
     {% for m in metrics_to_plot %}
         .on_metric_{{ m.id }} {
-            background:{{ m.linecolor }};
+            background:#cccccc;
+            padding:4px 4px
         }
     {% endfor %}
     .off_category {
         background:#efefef;
+        padding:4px 4px
     }
     .off_metric {
-        background:#cccccc;
+        background:#efefef;
+        padding:4px 4px
     }
 </style>
+<script src="{{ STATIC_PREFIX }}js/bootstrap-modal.js"></script>
 <script>
 var timeplot;
 var min = "";
@@ -103,10 +108,11 @@ function onLoad() {
 
     var valueGeometry = new Timeplot.DefaultValueGeometry({
         gridColor: "#000000",
+        axisLabelsPlacement: "left",
         {% if chart %}
-        min: -200,
-        max: 0,
-        gridType: "long"
+        min: -201,
+        max: -1,
+        gridType: "long",
         {% endif %}
     });
 
@@ -186,10 +192,10 @@ function onLoad() {
     panright_min_date.setDate(panright_min_date.getDate() + (length_in_days/10));
     panleft_max_date.setDate(panleft_max_date.getDate() - (length_in_days/10));
     panleft_min_date.setDate(panleft_min_date.getDate() - (length_in_days/10));
-    zoomin_min_date.setDate(zoomin_min_date.getDate() + (length_in_days/10));
-    zoomin_max_date.setDate(zoomin_max_date.getDate() - (length_in_days/10));
-    zoomout_min_date.setDate(zoomout_min_date.getDate() - (length_in_days/8));
-    zoomout_max_date.setDate(zoomout_max_date.getDate() + (length_in_days/8));
+    zoomout_min_date.setDate(zoomout_min_date.getDate() - (length_in_days/3.2));
+    zoomout_max_date.setDate(zoomout_max_date.getDate() + (length_in_days/3.2));
+    zoomin_min_date.setDate(zoomin_min_date.getDate() + (length_in_days/5));
+    zoomin_max_date.setDate(zoomin_max_date.getDate() - (length_in_days/5));
 
     zoomin_min = zoomin_min_date.toISOString();
     zoomin_max = zoomin_max_date.toISOString();
@@ -242,7 +248,7 @@ function toggle(el){
 
     //Create a new div identical to the old one to put the new timeplot in
     var parent = document.getElementById("timeplot-parent");
-    parent.innerHTML = "<div id=\"my-timeplot\" style=\"height: 150px;\"></div>";
+    parent.innerHTML = "<div id=\"my-timeplot\" style=\"height: 300px;\"></div>";
 
     onLoad();
 }
@@ -285,17 +291,46 @@ function setTimeRange(newmin,newmax){
 <a class="btn" id="panright" onclick="setTimeRange(panright_min,panright_max)"><i class="icon-chevron-right"></i> </a>
 
 <!-- Generate toggle buttons.-->
-{% for c in categories_to_plot %}
-    {% if c.defaultvisibility %}
-        <input type="button" id="{{ c.id }}" value="{{ c.description|escape }}" class="btn on_category_{{ c.id }}" onclick="toggle(this)" />
-    {% else %}
-        <input type="button" id="{{ c.id }}" value="{{ c.description|escape }}" class="btn off_category" onclick="toggle(this)" />
-    {% endif %}
-{% endfor %}
+{% if metrics_to_plot %}
+    {% for m in metrics_to_plot %}
+        <div class="modal hide" id="metricTagModal{{ m.id }}">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h3>"{{ m.description }}"</h3>
+            </div>
+            <div class="modal-body">
+                {% if m.tags.all %}
+                    <h4>"{{ m.description }}" is already tagged with:</h4>
+                    {% for tag in tags %}
+                        {% if tag in m.tags.all %}
+                            <a href="{% url tag-view tag_id=tag.id %}"><span class="label" style="background-color: {{ tag.color }}">{{ tag.name }}</span></a><a href="{% url untag-metric tag_id=tag.id metric_id=m.id %}"><span class="label">x</span></a>&nbsp;&nbsp;
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                <h4>You can tag "{{ m.description }}" with the following:</h4>
+                {% for tag in tags %}
+                    {% if tag not in m.tags.all %}
+                        <a href="{% url tag-metric tag_id=tag.id metric_id=m.id %}"><span class="label" style="background-color: {{ tag.color }}">{{ tag.name }} +</span></a>&nbsp;&nbsp;
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+&nbsp;<span>Metrics:</span> {% endif %}
 {% for m in metrics_to_plot %}
     {% if m.defaultvisibility %}
-        <input type="button" id="{{ m.id }}" value="{{ m.description|escape }}" class="btn on_metric_{{ m.id }}" onclick="toggle(this)" />
+        <a id="{{ m.id }}" class="btn on_metric_{{ m.id }}" onclick="toggle(this)">{{ m.description|escape }}&nbsp;<span class="label" style="background-color: {{ m.linecolor }}; padding: 4px 4px 2px; border-radius: 0 15px 0 15px">&nbsp;&nbsp;&nbsp;</span></a>
     {% else %}
-        <input type="button" id="{{ m.id }}" value="{{ m.description|escape }}" class="btn off_metric" onclick="toggle(this)" />
+        <a id="{{ m.id }}" class="btn off_metric" onclick="toggle(this)">{{ m.description|escape }}&nbsp;<span class="label" style="background-color: {{ m.linecolor }}; padding: 4px 4px 2px; border-radius: 0 15px 0 15px">&nbsp;&nbsp;&nbsp;</span></a>
+    {% endif %}
+    <a data-toggle="modal" href="#metricTagModal{{ m.id }}"><i class="icon-tags"></i></a>
+{% endfor %}
+{% if metrics_to_plot and categories_to_plot %}<b> | </b>{% endif %}
+{% if categories_to_plot %}<span>Categories:</span> {% endif %}
+{% for c in categories_to_plot %}
+    {% if c.defaultvisibility %}
+        <a id="{{ c.id }}" class="btn on_category_{{ c.id }}" onclick="toggle(this)">{{ c.description|escape }}&nbsp;<span class="label" style="background-color: {{ c.color }}; padding: 4px 4px 2px; border-radius: 0 15px 0 15px">&nbsp;&nbsp;&nbsp;</span></a>
+    {% else %}
+        <a id="{{ c.id }}" class="btn off_category" onclick="toggle(this)">{{ c.description|escape }}&nbsp;<span class="label" style="background-color: {{ c.color }}; padding: 4px 4px 2px; border-radius: 0 15px 0 15px">&nbsp;&nbsp;&nbsp;</span></a>
     {% endif %}
 {% endfor %}

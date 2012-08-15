@@ -52,7 +52,7 @@
         "model":"feedback.category",
         "fields":{
             "color":"#FFFF11",
-            "description":"Default",
+            "description":"Events",
             "defaultvisibility":true
         }
     },

@@ -4,6 +4,7 @@ PyYAML>=3.10
 apachelog==1.1
 django-chartit==0.1
 django-sitetree>=0.7
+django-tables2>=0.11.0
 dnspython==1.10.0
 feedparser==5.1.1
 isodate==0.4.7

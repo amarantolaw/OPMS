@@ -26,27 +26,32 @@
         {% if message != '' %}
             <div class="alert alert-success">{{ message }}</div>
         {% endif %}
+        {% if institutions %}
+        <div>Showing {{ institutions|length }} institutions whose contents have been scanned and stored in the database.</div>
         <table id="institutionTable" class="tablesorter">
             <thead>
             <tr>
                 <th>Name</th>
+                <th># of Collections</th>
+                <th>Collections in top 200</th>
+                <th>Items in top 200</th>
                 <th>Actions</th>
             </tr>
             </thead>
             <tbody>
-            {% if institutions|length == 0 %}
-                <tr>
-                    <td></td>
-                    <td></td>
-                </tr>
-            {% endif %}
             {% for i in institutions %}
                 <tr>
                     <td><a href="{% url itu-institution institution_id=i.id %}">{{ i.name }}</a></td>
+                    <td>{{ i.number_of_collections }}</td>
+                    <td>{{ i.collections_in_chart }}</td>
+                    <td>{{ i.items_in_chart }}</td>
                     <td><a href="{{ i.url }}">iTunes U</a></td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
+        {% else %}
+            <div>No scanned institutions found.</div>
+        {% endif %}
     {% endif %}
 {% endblock %}

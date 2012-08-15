@@ -136,6 +136,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'south',
     'django_extensions',
+    'django_tables2',
     'sitetree',
     'chartit',
     # These are the OPMS apps...

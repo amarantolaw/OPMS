@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static sitetree %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/paleblue.css" media="screen,projection"/>
+{% endblock %}
+
+{% block sidebar %}
+    {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+    {% if error != '' %}
+        <div class="alert alert-error">ERROR: {{ error }}</div>
+    {% else %}
+        <h3>{{ institution.name }}'s collections</h3>
+        {% if message != '' %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endif %}
+        {% if collections %}
+            <div>
+                {% load render_table from django_tables2 %}
+                {% render_table collection_table %}
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}

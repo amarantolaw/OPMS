@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static sitetree %}
+{% get_static_prefix as STATIC_PREFIX %}
+
+{% block sidebar %}
+    {% sitetree_menu from "opmstree" include "top-monitoring" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+    {% if error != '' %}
+        <div class="alert alert-error">ERROR: {{ error|escape }}</div>
+    {% else %}
+        {% if message != '' %}
+            <div class="alert alert-success">{{ message|escape }}</div>
+        {% endif %}
+        {% if tags %}
+            <h3>Tags</h3>
+            <div>Click on a tag to view a report on all comments, events and metrics tagged with it.</div>
+            {% for tag in tags %}
+                <a href="{% url tag-view tag_id=tag.id %}"><span class="label" style="background-color: {{ tag.color }}">{{ tag.name }}</span></a><a href="{% url tag-delete tag_id=tag.id %}"><span class="label">x</span></a>&nbsp;&nbsp;
+            {% endfor %}
+        {% else %}
+        <div class="alert alert-block">WARNING: No tags exist at the moment. Perhaps you need to <a href="{% url tag-create %}">create</a> some?</div>
+        {% endif %}
+    {% endif %}
+{% endblock %}

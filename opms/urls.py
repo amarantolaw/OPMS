@@ -1,5 +1,8 @@
 from django.conf.urls import patterns, url, include
 from django.views.generic import TemplateView
+from django.conf.urls.defaults import *
+from core.views import *
+from views import *
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -25,5 +28,8 @@ urlpatterns = patterns('',
     #(r'^ffm/', include('opms.ffm.urls')),
     
     # Root homepage
-    url(r'^$', TemplateView.as_view(template_name="base.html")),
+    (r'^$', home),
+
+    (r'^accounts/login/$', 'django.contrib.auth.views.login'),
+    (r'^logout/$', logout_page),
 )

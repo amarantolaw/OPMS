@@ -1,7 +1,9 @@
 from django.db import models
 from django.utils.encoding import smart_unicode
-from datetime import date
-#import math
+import django_tables2 as tables
+from django_tables2.utils import A
+from datetime import date, timedelta
+import math
 
 #TODO: Add this to south, eventually...
 # Remember: this application is managed by Django South so when you change this file, do the following:
@@ -84,6 +86,12 @@ class ItuGenre(models.Model):
     itu_id = models.IntegerField("iTunes U ID") #666 codes for unknown.
     url = models.URLField()
 
+    def collections_in_chart(self):
+        latest_collections_chart = ItuScanLog.objects.filter(mode=2,complete=True).order_by('-time')[0]
+        return ItuCollectionChartScan.objects.filter(scanlog=latest_collections_chart,itucollectionhistorical__genre=self).count()
+    def items_in_chart(self):
+        latest_items_chart = ItuScanLog.objects.filter(mode=3,complete=True).order_by('-time')[0]
+        return ItuItemChartScan.objects.filter(scanlog=latest_items_chart,ituitemhistorical__genre=self).count()
     class Meta:
         verbose_name = "iTunes U Genre"
         verbose_name_plural = "iTunes U Genres"
@@ -97,6 +105,12 @@ class ItuInstitution(models.Model):
     url = models.URLField()
     # Institutional Stats - to be done as methods
 
+    def collections_in_chart(self):
+        latest_collections_chart = ItuScanLog.objects.filter(mode=2,complete=True).order_by('-time')[0]
+        return ItuCollectionChartScan.objects.filter(scanlog=latest_collections_chart,itucollection__institution=self).count()
+    def items_in_chart(self):
+        latest_items_chart = ItuScanLog.objects.filter(mode=3,complete=True).order_by('-time')[0]
+        return ItuItemChartScan.objects.filter(scanlog=latest_items_chart,ituitem__institution=self).count()
     class Meta:
         verbose_name = "iTunes U Institution"
         verbose_name_plural = "iTunes U Institutions"
@@ -195,13 +209,13 @@ class ItuCollectionHistorical(models.Model):
         return l
 
     def average_rating(self):
-        rating_sum = 0
-        n = 0
+        rating_sum = 0.0
+        n = 0.0
         for rating in ItuRating.objects.filter(itucollectionhistorical=self):
             rating_sum += rating.stars * rating.count
             n += rating.count
-        if n > 0:
-            return (rating_sum/n)
+        if n > 0.0:
+            return round(rating_sum/n,2)
         else:
             return None
 
@@ -234,6 +248,8 @@ class ItuItemHistorical(models.Model):
     # buy_params = models.URLField()
     description = models.TextField()
     duration = models.IntegerField(null=True)
+    def duration_datetime(self):
+        return timedelta(microseconds=self.duration * 1000)
     explicit = models.BooleanField()
     feed_url = models.URLField()
     file_extension = models.CharField(max_length=20)
@@ -350,3 +366,21 @@ class ItuComment(models.Model):
         verbose_name_plural = "iTunes U Comments"
     def __unicode__(self):
         return smart_unicode(self.detail)
+
+
+class InstitutionalCollectionTable(tables.Table):
+    name = tables.LinkColumn('itu-collection', args=[A('pk')], accessor='latest.name', order_by='latest.name')
+    contains_movies = tables.Column(accessor='latest.contains_movies', order_by='latest.contains_movies', verbose_name='Type')
+    version = tables.Column(accessor='latest.version', order_by='latest.version')
+    last_modified = tables.Column(accessor='latest.last_modified', order_by='latest.last_modified')
+    genre = tables.LinkColumn('itu-genre', args=[A('latest.genre.pk')], accessor='latest.genre.name', order_by='latest.genre.name', verbose_name='Genre')
+
+    def render_contains_movies(self, value):
+        if value:
+            return 'Video'
+        else:
+            return 'Audio'
+
+    class Meta:
+        attrs = {'class': 'paleblue'}
+        order_by_field = True

@@ -54,7 +54,8 @@
             {% for c in chartrows %}
                 <tr>
                     <td>{{ c.position }}</td>
-                    <td><a href="{% url itu-collection collection_id=c.itucollection.id %}">{{ c.itucollectionhistorical.name }}</a></td>
+                    <td><a href="{% url itu-collection collection_id=c.itucollection.id %}">{{ c.itucollectionhistorical.name }}</a> {% if c.itucollectionhistorical.contains_movies %}<i
+                            class="icon-facetime-video"></i>{% else %}<i class="icon-headphones"></i>{% endif %}</td>
                     <td><a href="{% url itu-institution institution_id=c.itucollection.institution.id %}">{{ c.itucollection.institution.name }}</a></td>
                     <td><a href="{{ c.itucollectionhistorical.url }}">iTunes U</a></td>
                 </tr>

@@ -31,11 +31,11 @@
             <div>Genre: <a
                     href="{% url itu-genre genre_id=collection.latest.genre.id %}">{{ collection.latest.genre.name }}</a>
             </div>
+            <div><a href="{{ collection.latest.url }}">{{ collection.latest.url }}</a> <i class="icon-share-alt"></i></div>
             <div>Last modified: {{ collection.latest.last_modified }}</div>
             <div>Latest stored version is version {{ collection.latest.version }}, scanned on <a
                     href="{% url itu-scanlog scanlog_id=collection.latest.scanlog.id %}">{{ collection.latest.scanlog.time }}</a>
             </div>
-            <div style="text-align: right"><a href="{{ collection.latest.url }}">View in iTunes</a></div>
         </div>
         <div style="clear:right">
             {% if items %}
@@ -69,7 +69,7 @@
                             <tr>
                                 <td>{{ i.latest.rank }}</td>
                                 <td><a href="{% url itu-item item_id=i.id %}">{{ i.latest.name }}</a></td>
-                                <td>{{ i.latest.duration }}</td>
+                                <td>{{ i.latest.duration_datetime }}</td>
                                 <td>{{ i.latest.release_date }}</td>
                                 <td>{{ i.latest.description }}</td>
                                 <td>{{ i.latest.popularity }}</td>
@@ -84,16 +84,17 @@
                     <a data-toggle="collapse" href="#collapseTwo" class="btn btn-info"
                        style="width:45%; text-align:left"><h4>Appearances in the Top Collections Chart</h4></a>
                 </div>
-                <script>
-                    $(document).ready(function () {
-                                $("#chartTable").tablesorter({ sortList:[
-                                    [0, 1]
-                                ], headers:{ 0:{ sorter:'shortDate'} }
-                                });
-                            }
-                    );
-                </script>
+{#                <script>#}
+{#                    $(document).ready(function () {#}
+{#                                $("#chartTable").tablesorter({ sortList:[#}
+{#                                    [0, 1]#}
+{#                                ], headers:{ 0:{ sorter:'shortDate'} }#}
+{#                                });#}
+{#                            }#}
+{#                    );#}
+{#                </script>#}
                 <div id="collapseTwo" class="collapse">
+                    <h4>Daily ranking in the top 200 collections over time</h4>
                     {% include 'feedback/opms_plot.html' %}
 {#                    <table id="chartTable" class="tablesorter">#}
 {#                        <thead>#}

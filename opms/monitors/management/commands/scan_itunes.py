@@ -182,7 +182,11 @@ class Command(BaseCommand):
                     collections_spotted.append(collection_record_historical)
 
                     #Acquire the list of items for this collection.
-                    items = itunes.get_collection_items(collection_record_historical.url, hurry=True)
+                    try:
+                        items = itunes.get_collection_items(collection_record_historical.url, hurry=True)
+                    except:
+                        self._errorlog('Could not get items for collection ' + collection_record_historical.name + '.')
+                        items = []
                     for item in items:
                         if item is not {}: #Dictionary will be blank if we have failed to retrieve data on an item. If so, don't do anything with the item.
                             item_record_absolute = ItuItem(institution=institution)
