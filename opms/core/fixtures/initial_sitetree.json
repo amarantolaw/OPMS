@@ -31,29 +31,6 @@
         }
     },
     {
-        "pk":39,
-        "model":"sitetree.treeitem",
-        "fields":{
-            "parent":38,
-            "access_restricted":false,
-            "access_permissions":[],
-            "description":"",
-            "insitetree":true,
-            "hint":"",
-            "url":"/monitoring/feedback/tags/create/",
-            "inbreadcrumbs":true,
-            "title":"New tag",
-            "tree":1,
-            "access_perm_type":1,
-            "alias":null,
-            "sort_order":39,
-            "inmenu":true,
-            "access_loggedin":false,
-            "hidden":false,
-            "urlaspattern":false
-        }
-    },
-    {
         "pk":22,
         "model":"sitetree.treeitem",
         "fields":{
@@ -853,6 +830,29 @@
             "alias":null,
             "sort_order":27,
             "inmenu":false,
+            "access_loggedin":false,
+            "hidden":false,
+            "urlaspattern":false
+        }
+    },
+    {
+        "pk":39,
+        "model":"sitetree.treeitem",
+        "fields":{
+            "parent":13,
+            "access_restricted":false,
+            "access_permissions":[],
+            "description":"",
+            "insitetree":true,
+            "hint":"",
+            "url":"/monitoring/feedback/tags/create/",
+            "inbreadcrumbs":true,
+            "title":"New tag",
+            "tree":1,
+            "access_perm_type":1,
+            "alias":null,
+            "sort_order":39,
+            "inmenu":true,
             "access_loggedin":false,
             "hidden":false,
             "urlaspattern":false
