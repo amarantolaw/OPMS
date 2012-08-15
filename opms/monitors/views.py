@@ -265,14 +265,20 @@ def itu_genres(request):
         context_instance=RequestContext(request))
 
 
-def itu_scanlogs(request):
+def itu_scanlogs(request, all=False):
     """Show a clickable list of all scanlogs."""
     message = ''
     error = ''
-    scanlogs = ItuScanLog.objects.all()
+    if not all:
+        try:
+            scanlogs = ItuScanLog.objects.all().order_by('-time')[:100]
+        except KeyError: #ie. when there aren't 100 scanlogs yet.
+            scanlogs = ItuScanLog.objects.all()
+    else:
+        scanlogs = ItuScanLog.objects.all()
     if not scanlogs:
         error += 'Can\'t find any scanlogs. Perhaps you haven\'t run scan_itunes yet?'
-    return render_to_response('monitors/itu_scanlogs.html', {'error': error, 'message': message, 'scanlogs': scanlogs},
+    return render_to_response('monitors/itu_scanlogs.html', {'error': error, 'message': message, 'scanlogs': scanlogs, 'all': all},
         context_instance=RequestContext(request))
 
 

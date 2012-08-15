@@ -27,6 +27,10 @@
         {% if message != '' %}
             <div class="alert alert-success">{{ message }}</div>
         {% endif %}
+        {% if scanlogs %}
+        {% if not all %}
+            Showing the first {{ scanlogs|length }} scanlogs. If you want to see all the scanlogs (this may take a while to load), click <a href="{% url itu-scanlogs-all %}">here</a>.
+        {% endif %}
         <table id="scanlogTable" class="tablesorter">
             <thead>
             <tr>
@@ -37,7 +41,6 @@
             </tr>
             </thead>
             <tbody>
-            {% if scanlogs %}
                 {% for s in scanlogs %}
                     <tr>
                         {% if s.mode == 4 %}
