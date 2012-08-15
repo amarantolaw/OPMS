@@ -26,6 +26,8 @@ def index(request, error='', message='', tag=None, tag_id=None, comment_id=None,
         if metric_traffic:
             traffic_to_plot.append(metric_traffic)
 
+    chart = False
+
     for m in metrics_to_plot:
         if m.source == 'appleweekly':
             try:
@@ -52,6 +54,7 @@ def index(request, error='', message='', tag=None, tag_id=None, comment_id=None,
                             chartrecords_day.append(chartrecord)
                     traffic_to_plot.append(
                         Traffic(date=date, count=(-1 * chartrecords_day[0].position), metric=m))
+                chart = True
             except:
                 error += 'Failed to process traffic for an itu-collection-chart.'
         elif m.source == 'itu-item-chart':
@@ -69,6 +72,7 @@ def index(request, error='', message='', tag=None, tag_id=None, comment_id=None,
                             chartrecords_day.append(chartrecord)
                     traffic_to_plot.append(
                         Traffic(date=date, count=(-1 * chartrecords_day[0].position), metric=m))
+                chart = True
             except:
                 error += 'Failed to process traffic for an itu-item-chart.'
         elif m.source =='itu-#tc':
@@ -129,7 +133,7 @@ def index(request, error='', message='', tag=None, tag_id=None, comment_id=None,
         'categories_to_plot': categories_to_plot,
         'comments_to_plot': comments_to_plot,
         'events': events_to_plot,
-        'chart': True,
+        'chart': chart,
         'error': error,
         'message': message,
         'tag': tag, 'tag_id': tag_id, 'tags': Tag.objects.all(), 'comment_id': comment_id, 'event_id': event_id, 'metric_id': metric_id,
