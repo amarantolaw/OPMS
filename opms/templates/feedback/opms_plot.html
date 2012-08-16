@@ -285,10 +285,10 @@ function setTimeRange(newmin,newmax){
     <div id="my-timeplot" style="height: 300px;"></div>
 </div>
 
-<a class="btn" id="panleft" onclick="setTimeRange(panleft_min,panleft_max)"><i class="icon-chevron-left"></i> </a></input>
-<a class="btn" id="zoomin" onclick="setTimeRange(zoomin_min,zoomin_max)"><i class="icon-zoom-in"></i> </a>
-<a class="btn" id="zoomout" onclick="setTimeRange(zoomout_min,zoomout_max)"><i class="icon-zoom-out"></i> </a>
-<a class="btn" id="panright" onclick="setTimeRange(panright_min,panright_max)"><i class="icon-chevron-right"></i> </a>
+<a class="btn noprint" id="panleft" onclick="setTimeRange(panleft_min,panleft_max)"><i class="icon-chevron-left"></i> </a></input>
+<a class="btn noprint" id="zoomin" onclick="setTimeRange(zoomin_min,zoomin_max)"><i class="icon-zoom-in"></i> </a>
+<a class="btn noprint" id="zoomout" onclick="setTimeRange(zoomout_min,zoomout_max)"><i class="icon-zoom-out"></i> </a>
+<a class="btn noprint" id="panright" onclick="setTimeRange(panright_min,panright_max)"><i class="icon-chevron-right"></i> </a>
 
 <!-- Generate toggle buttons.-->
 {% if metrics_to_plot %}
@@ -323,7 +323,7 @@ function setTimeRange(newmin,newmax){
     {% else %}
         <a id="{{ m.id }}" class="btn off_metric" onclick="toggle(this)">{{ m.description|escape }}&nbsp;<span class="label" style="background-color: {{ m.linecolor }}; padding: 4px 4px 2px; border-radius: 0 15px 0 15px">&nbsp;&nbsp;&nbsp;</span></a>
     {% endif %}
-    <a data-toggle="modal" href="#metricTagModal{{ m.id }}"><i class="icon-tags"></i></a>
+    <a data-toggle="modal" href="#metricTagModal{{ m.id }}" class="noprint"><i class="icon-tags"></i></a>
 {% endfor %}
 {% if metrics_to_plot and categories_to_plot %}<b> | </b>{% endif %}
 {% if categories_to_plot %}<span>Categories:</span> {% endif %}

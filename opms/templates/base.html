@@ -14,6 +14,9 @@
         .sidebar-nav {
             padding: 9px 0;
         }
+        @media print {
+            .noprint { display: none; }
+        }
     </style>
     <link href="{{ STATIC_PREFIX }}css/datepicker.css" rel="stylesheet">
     <link href="{{ STATIC_PREFIX }}css/timepicker.css" rel="stylesheet">
@@ -54,7 +57,7 @@
 </head>
 
 <body>
-<div class="navbar">
+<div class="navbar noprint">
     <div class="navbar-inner">
         <div class="container-fluid">
             <a class="brand" href="/">OPMS</a>
@@ -66,15 +69,19 @@
 <div class="container-fluid">
     <div class="row-fluid">
         <div class="span2">
-            <div class="well sidebar-nav">
+            <div class="well sidebar-nav noprint">
                 {% block sidebar %}
                 {% sitetree_menu from "opmstree" include "trunk" template "sitetree/navlist.html" %}
                 {% endblock %}
-                {% if user.username %}<div>&nbsp;&nbsp;&nbsp;&nbsp;<a href="/logout/">Logout {{ user }}</a>{% endif %}</div>
             </div><!--/.well -->
+            {% if user.username %}
+                <a href="/logout/"><div class="btn-success noprint" style="padding: 3px 15px;" >Logout <i>{{ user }}</i></div></a>
+            {% endif %}
         </div><!--/span-->
         <div class="span10">
-            {% sitetree_breadcrumbs from "opmstree" template "sitetree/breadcrumbs.html"%}
+            <div class="noprint">
+                {% sitetree_breadcrumbs from "opmstree" template "sitetree/breadcrumbs.html"%}
+            </div>
             {% block content %}
             <div class="hero-unit">
                 <h1>Hello, world!</h1>

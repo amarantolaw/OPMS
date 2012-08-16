@@ -28,7 +28,7 @@
             <tr>
                 {% if recently_updated_collections %}
                     <td style="vertical-align: top">
-                        <h4>Recently updated collections  <a href="{% url itu-institution-collections institution_id=institution.id %}" class="btn-small">View all <i class="icon-share-alt"></i></a></h4>
+                        <h4>Recently updated collections  <a href="{% url itu-institution-collections institution_id=institution.id %}" class="btn-small noprint">View all <i class="icon-share-alt"></i></a></h4>
                         <table class="tablesorter">
                             <thead>
                                 <th>Last modified</th>
@@ -120,8 +120,9 @@
                 </tr>
             </tbody>
         </table>
+        <br/>
         {% if metrics_to_plot %}
-            <h4><a data-toggle="collapse" href="#collapseZero" class="btn btn-info" style="width:45%; text-align:left">In the charts</a></h4>
+            <h4><a data-toggle="collapse" href="#collapseZero" class="btn btn-info noprint" style="width:45%; text-align:left">In the charts</a></h4>
             <div id="collapseZero" class="collapse">
                 <h4>Number of collections and items in the top 200</h4>
                 {% include 'feedback/opms_plot.html' %}

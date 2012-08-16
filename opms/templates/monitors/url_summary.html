@@ -10,11 +10,17 @@
 
 {% block content %}
 <h2>URL Reporting</h2>
-{%  if summary_listing %}
+{%  if urls %}
 <p>The following URLs have been scanned by this system:</p>
 <ul>
-    {% for item in summary_listing %}
-    <li>{{ item|safe }}</li>
+    {% for url in urls %}
+        <li>
+            {% if url.active %}
+                <a href="./url-{{ url.id }}">{{ url.url }}</a> ({{ url.urlmonitorscan_set.count }})
+            {% else %}
+                <strong>[INACTIVE]</strong> <a href="./url-{{ url.id }}">{{ url.url }}</a> ({{ url.urlmonitorscan_set.count }})
+            {% endif %}
+        </li>
     {% endfor %}
 </ul>
 {% endif %}

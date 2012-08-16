@@ -1,5 +1,4 @@
 import random
-import datetime
 from datetime import timedelta
 from django.http import Http404, HttpResponse
 from django.views.decorators.http import require_safe
@@ -8,7 +7,7 @@ from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, F, Sum, Count
 from django_tables2 import RequestConfig
-import settings
+import opms.settings as settings
 from opms.monitors.models import URLMonitorURL, URLMonitorScan
 from feedback.models import Metric, Traffic, Category, Comment, Event, Tag
 from feedback.views import create_metric_textfiles
@@ -26,10 +25,9 @@ from monitors.models import InstitutionalCollectionTable
 #@require_safe(request)
 @login_required
 def index(request):
-#    t = loader.get_template('monitors/base.html')
-#    return HttpResponse(t.render())
-    # return HttpResponse("Hello World. You're at the OPMS:Monitors Homepage.")
+    """The Monitoring home page."""
     return render_to_response('monitors/base.html', {}, context_instance=RequestContext(request))
+
 
 ######
 # URL Monitoring Subviews
@@ -37,30 +35,19 @@ def index(request):
 
 @login_required
 def urlmonitoring_summary(request):
-    "Show the results for a url monitoring"
+    """Show the results for a url monitoring"""
     # List the URLS and the number of scans for that URL
     summary_listing = []
 
     urls = URLMonitorURL.objects.all().order_by('-active', 'url')
-    # TODO: Take out the hard coded HTML from here and put that in the template where it belongs!
-    for url in urls:
-        if url.active:
-            summary_listing.append(
-                '<a href="./url-' + str(url.id) + '">' + str(url.url) + '</a> (' +\
-                str(url.urlmonitorscan_set.count()) + ')'
-            )
-        else:
-            summary_listing.append(
-                '<strong>[INACTIVE]</strong> <a href="./url-' + str(url.id) + '">' + str(url.url) + '</a> (' +\
-                str(url.urlmonitorscan_set.count()) + ')'
-            )
-    return render_to_response('monitors/url_summary.html', {'summary_listing': summary_listing, },
+
+    return render_to_response('monitors/url_summary.html', {'urls': urls, },
         context_instance=RequestContext(request))
 
 
 @login_required
 def urlmonitoring_task(request, task_id):
-    "Show the results for a url monitoring of a specific task"
+    """Show the results for a url monitoring of a specific task"""
     scan_data = URLMonitorScan.objects.filter(task__id__exact=task_id).select_related().order_by('-url__url',
         'iteration')
     return render_to_response('monitors/url_summary.html', {'scan_data': scan_data, 'task_id': task_id},
@@ -69,7 +56,7 @@ def urlmonitoring_task(request, task_id):
 
 @login_required
 def urlmonitoring_url(request, url_id):
-    "Show the results for a url monitoring of specific url"
+    """Show the results for a url monitoring of specific url"""
     # Limit to the last 3 days' worth of scans (10 scans * 4 times an hour * 24 hours * 3 days)
     scan_data = URLMonitorScan.objects.filter(url__id__exact=url_id).select_related().order_by('-time_of_request')[
                 :2880]
@@ -377,11 +364,10 @@ def itu_item(request, item_id):
     metrics_to_plot = []
     traffic_to_plot = []
     categories_to_plot = []
-    comments_to_plot = []
     if chartrecords:
         #Get or create a suitable Metric
         metrics = Metric.objects.filter(description=item.latest.name)
-        if len(metrics) == 0:
+        if not metrics:
             random_colour = '#' + str(random.randint(222222, 999999))
             top_items_position = Metric(description=item.latest.name, linecolor=random_colour, fillcolor='#FFFFFF',
                 mouseover=True, defaultvisibility=True, source='itu-item-chart', ituitem=item)
