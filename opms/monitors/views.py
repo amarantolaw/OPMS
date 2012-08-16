@@ -160,7 +160,11 @@ def itu_home(request):
     """The iTunes U Monitoring home page."""
     message = ''
     error = ''
-    this_institution = ItuInstitution.objects.get(name=settings.YOUR_INSTITUTION)
+    try:
+        this_institution = ItuInstitution.objects.get(name=settings.YOUR_INSTITUTION)
+    except:
+        this_institution = None
+        error += 'Institution in settings file does not match an institution in the database. Perhaps you need to run scan_itunes first?'
     return render_to_response('monitors/itu_home.html',
             {'error': error, 'message': message, 'this_institution': this_institution},
         context_instance=RequestContext(request))
