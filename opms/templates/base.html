@@ -70,7 +70,7 @@
                 {% block sidebar %}
                 {% sitetree_menu from "opmstree" include "trunk" template "sitetree/navlist.html" %}
                 {% endblock %}
-                {% if user.username %}<div>&nbsp;&nbsp;&nbsp;&nbsp;<a href="/logout/">Logout {{ user }}</a>{% endif %}</div>
+                {% if user.username %}<div style="padding: 3px 15px;"><a href="/logout/">Logout {{ user }}</a></div>{% endif %}
             </div><!--/.well -->
         </div><!--/span-->
         <div class="span10">
