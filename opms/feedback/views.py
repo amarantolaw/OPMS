@@ -520,7 +520,9 @@ def tag_comment(request, tag_id, comment_id, error='', message=''):
             message += 'Tagged comment ' + str(comment.id) + ' with ' + tag.name + '.'
         except:
             error += 'Couldn\'t tag comment.'
-    return index(request=request, error=error, message=message, comment_id=comment_id, tag_id=tag_id)
+    return render_to_response('feedback/taglist.html', {
+        'object': comment, 'type': 'comment', 'error': error,
+        }, context_instance=RequestContext(request))
 
 @login_required
 def untag_comment(request, tag_id, comment_id, error='', message=''):
@@ -541,7 +543,9 @@ def untag_comment(request, tag_id, comment_id, error='', message=''):
             comment.tags.remove(tag)
         except:
             error += 'Couldn\'t remove tag from comment.'
-    return index(request=request, error=error, message=message, comment_id=comment_id, tag_id=tag_id)
+    return render_to_response('feedback/taglist.html', {
+        'object': comment, 'type': 'comment', 'error': error,
+        }, context_instance=RequestContext(request))
 
 @login_required
 def tag_event(request, tag_id, event_id, error='', message=''):
@@ -563,7 +567,9 @@ def tag_event(request, tag_id, event_id, error='', message=''):
             message += 'Tagged event ' + str(event.id) + ' with ' + tag.name + '.'
         except:
             error += 'Couldn\'t tag event.'
-    return index(request=request, error=error, message=message, event_id=event_id, tag_id=tag_id)
+    return render_to_response('feedback/taglist.html', {
+        'object': event, 'type': 'event', 'error': error,
+        }, context_instance=RequestContext(request))
 
 @login_required
 def untag_event(request, tag_id, event_id, error='', message=''):
@@ -584,7 +590,9 @@ def untag_event(request, tag_id, event_id, error='', message=''):
             event.tags.remove(tag)
         except:
             error += 'Couldn\'t remove tag from comment.'
-    return index(request=request, error=error, message=message, event_id=event_id, tag_id=tag_id)
+    return render_to_response('feedback/taglist.html', {
+        'object': event, 'type': 'event', 'error': error,
+        }, context_instance=RequestContext(request))
 
 @login_required
 def tag_metric(request, tag_id, metric_id, error='', message=''):
@@ -628,3 +636,20 @@ def untag_metric(request, tag_id, metric_id, error='', message=''):
         except:
             error += 'Couldn\'t remove tag from metric.'
     return index(request=request, error=error, message=message, metric_id=metric_id, tag_id=tag_id)
+
+@login_required
+def comment_modal(request, comment_id):
+    comment = Comment.objects.get(id=comment_id)
+    tags = Tag.objects.all()
+    return render_to_response('feedback/tagmodal.html', {
+        'object': comment, 'type': 'comment', 'tags': tags,
+        }, context_instance=RequestContext(request))
+
+
+@login_required
+def event_modal(request, event_id):
+    event = Event.objects.get(id=event_id)
+    tags = Tag.objects.all()
+    return render_to_response('feedback/tagmodal.html', {
+        'object': comment, 'type': 'event', 'tags': tags,
+        }, context_instance=RequestContext(request))

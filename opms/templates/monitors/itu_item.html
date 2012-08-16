@@ -34,7 +34,7 @@
             <div>Artist: {{ item.latest.artist_name }}</div>
             <div>Genre: <a href="{% url itu-genre genre_id=item.latest.genre.id %}">{{ item.latest.genre.name }}</a>
             </div>
-            <div><a href="{{ item.latest.url }}">{{ item.latest.url }}</a> <i class="icon-share-alt"></i></div>
+            <div><a href="{{ item.latest.url }}">{{ item.latest.url }}</a> <i class="icon-share-alt noprint"></i></div>
             <div>"<i>{{ item.latest.long_description }}</i>"</div>
             <div>Release date: {{ item.latest.release_date }} | Kind: {{ item.latest.kind }} | File
                 extension: {{ item.latest.file_extension }} | Duration: {{ item.latest.duration_datetime }}
