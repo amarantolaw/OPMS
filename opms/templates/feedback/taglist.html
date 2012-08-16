@@ -1,0 +1,13 @@
+<span id="taglist{% if type == 'comment' %}Comment{% elif type == 'event' %}Event{% endif %}{{ object.id }}">
+{% if object.tags.all %}
+    <br class="noprint"/>
+    {% for tag in object.tags.all %}
+        <span class="label noprint" style="background-color: {{ tag.color }}; white-space: nowrap;">
+                                    <a href="{% url tag-view tag_id=tag.id %}" style="color: #FFFFFF">{{ tag.name }}</a> <a {% if type == 'event' %}onclick="untagEvent(event_id={{ object.id }},tag_id={{ tag.id }});"{% elif type == 'comment' %}onclick="untagComment(comment_id={{ object.id }},tag_id={{ tag.id }});"{% endif %} style="color: #FFFFFF">x</a>
+                                </span>&nbsp;&nbsp;
+    {% endfor %}
+{% endif %}
+</span>
+{% if error %}
+    <div class="alert-error">ERROR: {{ error }}</div>
+{% endif %}

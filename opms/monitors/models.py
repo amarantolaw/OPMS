@@ -64,7 +64,7 @@ class ItuScanLog(models.Model):
         (3,"Top Downloads Scan"),
         (4,"Institutions Scan")
         )
-    time = models.DateTimeField(auto_now_add=True)
+    time = models.DateTimeField(auto_now_add=True,unique=True)
     mode = models.SmallIntegerField(default=0, choices=CHOICES) # Zero = Unknown mode
     comments = models.TextField(null=True)
     complete = models.BooleanField(default=False)
@@ -82,7 +82,7 @@ class ItuScanLog(models.Model):
 
 
 class ItuGenre(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255,unique=True)
     itu_id = models.IntegerField("iTunes U ID") #666 codes for unknown.
     url = models.URLField()
 
@@ -100,7 +100,7 @@ class ItuGenre(models.Model):
 
 
 class ItuInstitution(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255,unique=True)
     itu_id = models.IntegerField("iTunes U ID")
     url = models.URLField()
     # Institutional Stats - to be done as methods
@@ -119,7 +119,7 @@ class ItuInstitution(models.Model):
 
 class ItuItem(models.Model):
     institution = models.ForeignKey(ItuInstitution)
-    latest = models.ForeignKey("ItuItemHistorical", null=True, default=None, related_name="latest_historical_item_record")
+    latest = models.ForeignKey("ItuItemHistorical", null=True, default=None, related_name="latest_historical_item_record", unique=True)
 
     def find_latest(self):
         print('WARNING: Using find_latest will be inefficient! Don\'t do it!')
@@ -141,7 +141,7 @@ class ItuItem(models.Model):
 
 class ItuCollection(models.Model):
     institution = models.ForeignKey(ItuInstitution)
-    latest = models.ForeignKey("ItuCollectionHistorical", null=True, default=None, related_name="latest_historical_collection_record")
+    latest = models.ForeignKey("ItuCollectionHistorical", null=True, default=None, related_name="latest_historical_collection_record", unique=True)
 
     def find_latest(self):
         print('WARNING: Using find_latest will be inefficient! Don\'t do it!')

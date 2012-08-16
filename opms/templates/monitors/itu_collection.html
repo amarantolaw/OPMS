@@ -31,7 +31,7 @@
             <div>Genre: <a
                     href="{% url itu-genre genre_id=collection.latest.genre.id %}">{{ collection.latest.genre.name }}</a>
             </div>
-            <div><a href="{{ collection.latest.url }}">{{ collection.latest.url }}</a> <i class="icon-share-alt"></i></div>
+            <div><a href="{{ collection.latest.url }}">{{ collection.latest.url }}</a> <i class="icon-share-alt noprint"></i></div>
             <div>Last modified: {{ collection.latest.last_modified }}</div>
             <div>Latest stored version is version {{ collection.latest.version }}, scanned on <a
                     href="{% url itu-scanlog scanlog_id=collection.latest.scanlog.id %}">{{ collection.latest.scanlog.time }}</a>
