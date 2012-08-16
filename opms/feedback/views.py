@@ -9,6 +9,7 @@ from django.template import RequestContext
 from django.core.exceptions import ValidationError
 import settings
 import datetime, time
+import random
 from dateutil.parser import parse
 import imaplib
 from email import message_from_string
@@ -412,7 +413,7 @@ def tags(request, error='', message='', tag_id=None):
 @login_required
 def tag_create(request, error='', message=''):
     error_fields=[]
-    default_tag = Tag(name='',title='',color='#')
+    default_tag = Tag(name='',title='',color='#' + str(random.randint(222222, 999999)))
 
     try:
         added = bool(request.POST['add'])
@@ -455,7 +456,7 @@ def tag_create(request, error='', message=''):
                 try:
                     new_tag.save()
                     message += 'Your tag was added to the database.'
-                    default_tag = Tag(name='',title='',color='#')
+                    default_tag = Tag(name='',title='',color='#' + str(random.randint(222222, 999999)))
                 except:
                     error += 'Failed to access the database.'
             except ValidationError as ve:
