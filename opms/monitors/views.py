@@ -28,6 +28,7 @@ def index(request):
     """The Monitoring home page."""
     return render_to_response('monitors/base.html', {}, context_instance=RequestContext(request))
 
+
 ######
 # URL Monitoring Subviews
 ######
@@ -39,19 +40,8 @@ def urlmonitoring_summary(request):
     summary_listing = []
 
     urls = URLMonitorURL.objects.all().order_by('-active', 'url')
-    # TODO: Take out the hard coded HTML from here and put that in the template where it belongs!
-    for url in urls:
-        if url.active:
-            summary_listing.append(
-                '<a href="./url-' + str(url.id) + '">' + str(url.url) + '</a> (' +\
-                str(url.urlmonitorscan_set.count()) + ')'
-            )
-        else:
-            summary_listing.append(
-                '<strong>[INACTIVE]</strong> <a href="./url-' + str(url.id) + '">' + str(url.url) + '</a> (' +\
-                str(url.urlmonitorscan_set.count()) + ')'
-            )
-    return render_to_response('monitors/url_summary.html', {'summary_listing': summary_listing, },
+
+    return render_to_response('monitors/url_summary.html', {'urls': urls, },
         context_instance=RequestContext(request))
 
 
