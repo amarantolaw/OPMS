@@ -8,15 +8,16 @@ from django.db.models import Max, Min
 from django.template import RequestContext
 from django.core.exceptions import ValidationError
 import settings
-import datetime, time
+import datetime
 import random
 from dateutil.parser import parse
 import imaplib
 from email import message_from_string
-from email.parser import Parser
+#from email.parser import Parser
 
 @login_required
 def index(request, error='', message='', tag=None, tag_id=None, comment_id=None, event_id=None, metric_id=None):
+    """Display a report on either a given tag, or a default set of comments, events and metrics if a tag is not specified."""
     if tag:
         metrics_to_plot = Metric.objects.filter(tags=tag)
     else:
@@ -149,6 +150,7 @@ def index(request, error='', message='', tag=None, tag_id=None, comment_id=None,
 
 
 def create_metric_textfiles(traffic_to_plot,metrics_to_plot):
+    """Put together CSVs of dates and traffic."""
     if traffic_to_plot:
         start = traffic_to_plot[0].date
         stop = start
@@ -184,7 +186,7 @@ def create_metric_textfiles(traffic_to_plot,metrics_to_plot):
 
 @login_required
 def comment_add(request,comment=None, error='', message=''):
-    "Adds a new comment to the database. Optionally, it may replace the comment instead."
+    """Adds a new comment to the database. Optionally, it may replace the comment instead."""
     categories = Category.objects.all()
     error_fields=[]
     default_comment = Comment(date=datetime.date.today(), time=datetime.datetime.now().time, source='', detail='', category=Category.objects.filter(description='Events')[0], user_email='')
@@ -271,7 +273,7 @@ def comment_add(request,comment=None, error='', message=''):
 
 @login_required
 def event_add(request,event=None, error='', message=''):
-    "Adds a new event to the database. Optionally, it may replace the event instead."
+    """Adds a new event to the database. Optionally, it may replace the event instead."""
     categories = Category.objects.all()
     error_fields=[]
 
@@ -375,6 +377,7 @@ def event_add(request,event=None, error='', message=''):
 
 @login_required
 def email(request, error='', message=''):
+    """Not currently used. Some degree of e-mail reading capability."""
     output = ''
     try:
         host = settings.EMAIL_HOST
@@ -403,6 +406,7 @@ def email(request, error='', message=''):
 
 @login_required
 def tags(request, error='', message='', tag_id=None):
+    """Display a clickable list of all stored tags."""
     tags = Tag.objects.all()
     return render_to_response('feedback/tags.html', {
         'error': error,
@@ -412,6 +416,7 @@ def tags(request, error='', message='', tag_id=None):
 
 @login_required
 def tag_create(request, error='', message=''):
+    """Create a new tag, or display a form allowing one to do so."""
     error_fields=[]
     default_tag = Tag(name='',title='',color='#' + str(random.randint(222222, 999999)))
 
@@ -487,11 +492,13 @@ def tag_create(request, error='', message=''):
 
 @login_required
 def tag_view(request, tag_id, error='', message=''):
+    """View a report on a given tag."""
     tag = Tag.objects.get(id=tag_id)
     return index(request=request, error=error, message=message, tag=tag, tag_id=tag_id)
 
 @login_required
 def tag_delete(request, tag_id, error='', message=''):
+    """Delete a tag."""
     tag = Tag.objects.get(id=tag_id)
     try:
         name = tag.name
@@ -503,6 +510,7 @@ def tag_delete(request, tag_id, error='', message=''):
 
 @login_required
 def tag_comment(request, tag_id, comment_id, error='', message=''):
+    """Attach a tag to a comment."""
     try:
         tag = Tag.objects.get(id=tag_id)
     except:
@@ -527,6 +535,7 @@ def tag_comment(request, tag_id, comment_id, error='', message=''):
 
 @login_required
 def untag_comment(request, tag_id, comment_id, error='', message=''):
+    """Detach a tag from a comment."""
     try:
         tag = Tag.objects.get(id=tag_id)
     except:
@@ -550,6 +559,7 @@ def untag_comment(request, tag_id, comment_id, error='', message=''):
 
 @login_required
 def tag_event(request, tag_id, event_id, error='', message=''):
+    """Attach a tag to an event."""
     try:
         tag = Tag.objects.get(id=tag_id)
     except:
@@ -574,6 +584,7 @@ def tag_event(request, tag_id, event_id, error='', message=''):
 
 @login_required
 def untag_event(request, tag_id, event_id, error='', message=''):
+    """Detach a tag from an event."""
     try:
         tag = Tag.objects.get(id=tag_id)
     except:
@@ -597,6 +608,7 @@ def untag_event(request, tag_id, event_id, error='', message=''):
 
 @login_required
 def tag_metric(request, tag_id, metric_id, error='', message=''):
+    """Attach a tag to a metric."""
     try:
         tag = Tag.objects.get(id=tag_id)
     except:
@@ -619,6 +631,7 @@ def tag_metric(request, tag_id, metric_id, error='', message=''):
 
 @login_required
 def untag_metric(request, tag_id, metric_id, error='', message=''):
+    """Detach a tag from a metric."""
     try:
         tag = Tag.objects.get(id=tag_id)
     except:
@@ -640,6 +653,7 @@ def untag_metric(request, tag_id, metric_id, error='', message=''):
 
 @login_required
 def comment_modal(request, comment_id):
+    """Grab the latest HTML for a modal listing tags not currently attached to a given comment."""
     comment = Comment.objects.get(id=comment_id)
     tags = Tag.objects.all()
     return render_to_response('feedback/tagmodal.html', {
@@ -649,8 +663,9 @@ def comment_modal(request, comment_id):
 
 @login_required
 def event_modal(request, event_id):
+    """Grab the latest HTML for a modal listing tags not currently attached to a given event."""
     event = Event.objects.get(id=event_id)
     tags = Tag.objects.all()
     return render_to_response('feedback/tagmodal.html', {
-        'object': comment, 'type': 'event', 'tags': tags,
+        'object': event, 'type': 'event', 'tags': tags,
         }, context_instance=RequestContext(request))
