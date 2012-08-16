@@ -409,9 +409,14 @@ def itu_institution(request, institution_id):
     message = ''
     error = ''
     tags = Tag.objects.all()
-    latest_tc_scanlog = ItuScanLog.objects.filter(mode=2).order_by('-time')[0]
-    latest_ti_scanlog = ItuScanLog.objects.filter(mode=3).order_by('-time')[0]
     institution = ItuInstitution.objects.get(id=int(institution_id))
+    try:
+        latest_tc_scanlog = ItuScanLog.objects.filter(mode=2).order_by('-time')[0]
+        latest_ti_scanlog = ItuScanLog.objects.filter(mode=3).order_by('-time')[0]
+    except:
+        error += 'Couldn\'t find the latest top collections/items scanlogs. Perhaps you need to run scan_itunes first?'
+        return render_to_response('monitors/itu_home.html',
+                {'error': error, 'message': message, 'institution': institution}, context_instance=RequestContext(request))
     comments = ItuComment.objects.filter(ituinstitution=institution).order_by('-date')
     collections = ItuCollection.objects.filter(institution=institution).order_by('-latest__last_modified')
     current_collection_chartscans = ItuCollectionChartScan.objects.filter(itucollection__institution=institution,scanlog=latest_tc_scanlog).order_by('position')
