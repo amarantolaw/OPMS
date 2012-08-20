@@ -12,7 +12,6 @@ logs/
 data/
 apache2/
 opms/static/
-opms/media/
 
 # Specific files #
 ##################
