@@ -12,11 +12,10 @@ logs/
 data/
 apache2/
 opms/static/
-opms/media/
 
 # Specific files #
 ##################
-opms/settings.py
+opms/local_settings.py
 opms/stats/ua_data/cache
 opms/feedback.dot
 opms/feedback.png

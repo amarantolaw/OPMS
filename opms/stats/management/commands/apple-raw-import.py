@@ -6,6 +6,7 @@ from django.core.management.base import LabelCommand, CommandError
 from opms.utils import debug
 from opms.stats.models import LogFile, AppleRawLogEntry, AppleRawLogDailySummary, UserAgent, UA, OS, Rdns
 from opms.stats.uasparser import UASparser, UASException
+import pytz
 import datetime, time, sys, os, pygeoip, csv
 from datetime import timedelta
 from IPy import IP
@@ -63,7 +64,10 @@ class Command(LabelCommand):
         import_file_limit = 21
         if len(found_files_list) < import_file_limit:
             import_file_limit = len(found_files_list)
-        print "{0} files have been found. Importing {1} of them now.".format(
+        # Have this only work on the one file when debug is switched on
+        if debug.DEBUG:
+            import_file_limit = 1
+        print "{0} files have been found. Importing up to {1} of them now.".format(
             len(found_files_list),
             import_file_limit
         )
@@ -73,7 +77,7 @@ class Command(LabelCommand):
                 self.import_stats['filename'] = filename
                 self.import_stats['line_counter'] = 0
                 self.import_stats['line_count'] = 0
-                self.import_stats['import_starttime'] = datetime.datetime.utcnow()
+                self.import_stats['import_starttime'] = datetime.datetime.now(pytz.utc)
                 self.import_stats['import_startline'] = int(options.get('start_at_line', 1))
 
                 # This only needs setting/getting the once per call of this function
@@ -89,7 +93,7 @@ class Command(LabelCommand):
 
                 print "Import of [{0}] started at {1:%Y-%m-%d %H:%M:%S}\n".format(
                     filename,
-                    datetime.datetime.utcnow()
+                    datetime.datetime.now(pytz.utc)
                 )
 
                 # Create an error log per import file
@@ -100,7 +104,7 @@ class Command(LabelCommand):
 
                 # Final stats output at end of file
                 try:
-                    self.import_stats['import_duration'] = float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
+                    self.import_stats['import_duration'] = float((datetime.datetime.now(pytz.utc) - self.import_stats.get('import_starttime')).seconds)
                     self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')-self.import_stats.get('import_startline')) /\
                                                             self.import_stats['import_duration']
                 except ZeroDivisionError:
@@ -114,7 +118,7 @@ class Command(LabelCommand):
                     {1:d} Lines parsed over {2:.1f} seconds
                     Giving a rate of {3:.3f} lines/sec
                     """.format(
-                        datetime.datetime.utcnow(),
+                        datetime.datetime.now(pytz.utc),
                         self.import_stats.get('line_counter'),
                         self.import_stats.get('import_duration'),
                         self.import_stats.get('import_rate')
@@ -136,7 +140,7 @@ class Command(LabelCommand):
             logfile['file_name'] = filename
             logfile['file_path'] = "./"
             
-        logfile['last_updated'] = datetime.datetime.utcnow()
+        logfile['last_updated'] = datetime.datetime.now(pytz.utc)
         
         obj, created = LogFile.objects.get_or_create(
             service_name = logfile.get('service_name'),
@@ -183,7 +187,7 @@ class Command(LabelCommand):
                 try:
                     self.import_stats['import_rate'] = \
                     float(self.import_stats.get('line_counter') - self.import_stats.get('import_startline')) /\
-                    float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
+                    float((datetime.datetime.now(pytz.utc) - self.import_stats.get('import_starttime')).seconds)
                 except ZeroDivisionError:
                     self.import_stats['import_rate'] = 1
                 # Calculate how long till finished
@@ -202,7 +206,7 @@ class Command(LabelCommand):
 
                 # Output the status
                 print "{0:%Y-%m-%d %H:%M:%S} : {1:.1%} completed. Parsed {2:d} lines. Rate: {3:.2f} lines/sec. Estimated finish in {4}".format(
-                    datetime.datetime.utcnow(),
+                    datetime.datetime.now(pytz.utc),
                     float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')),
                     self.import_stats.get('line_counter'),
                     self.import_stats.get('import_rate'),
@@ -245,15 +249,24 @@ class Command(LabelCommand):
         # Build the log entry dictionary
         arle = AppleRawLogEntry()
         arle.logfile = logfile_obj
-        arle.artist_id = long(entrydict.get("artist_id"))
-        arle.itunes_id = long(entrydict.get("itunes_id"))
+        try:
+            arle.artist_id = long(entrydict.get("artist_id"))
+        except ValueError:
+            arle.artist_id = -1
+        try:
+            arle.itunes_id = long(entrydict.get("itunes_id"))
+        except ValueError:
+            arle.itunes_id = -1
         arle.action_type = self._action_type_validation(entrydict.get("action_type"))
         arle.title = entrydict.get("title","Unknown")
         arle.url = entrydict.get("url","")
-        arle.episode_id = long(entrydict.get("episode_id",0))
+        try:
+            arle.episode_id = long(entrydict.get("episode_id"))
+        except ValueError:
+            arle.episode_id = None
         arle.episode_title = entrydict.get("episode_title",None)
         arle.episode_type = entrydict.get("episode_type",None)
-        arle.storefront = self._storefront(entrydict.get("storefront",0))
+        arle.storefront = self._storefront(entrydict.get("storefront","0"))
         arle.user_agent = self._user_agent(entrydict.get("useragent",""))
         arle.ipaddress = self._ip_to_domainname(entrydict.get("ip_address",None))
         arle.timestamp = self._parse_timestamp(entrydict.get("timestamp"))
@@ -306,7 +319,7 @@ class Command(LabelCommand):
             rdns = Rdns()
             rdns.ip_address = adr.strNormal(0)
             rdns.resolved_name = 'Partial'
-            rdns.last_updated = datetime.datetime.utcnow()
+            rdns.last_updated = datetime.datetime.now(pytz.utc)
 
             # Attempt to locate in memory cache
             for item in self.cache_rdns:
@@ -396,12 +409,12 @@ class Command(LabelCommand):
     def _parse_timestamp(self,initialstring):
         """Adjust timestamp supplied to GMT and returns a datetime object"""
         input_format = "%Y-%m-%d %H:%M:%S"
-        base_time = time.strptime(initialstring[:-9],input_format)
+        base_time = datetime.datetime.strptime(initialstring[:-9],input_format)
         try:
             offset = int(initialstring[-5:])
             delta = timedelta(hours = offset / 100)
             ts = base_time - delta
         except:
             ts = base_time
-        dt = datetime.datetime.fromtimestamp(time.mktime(ts))
-        return dt #"{0:%Y-%m-%d %H:%M:%S}".format(ts)
+#        dt = datetime.datetime.fromtimestamp(time.mktime(ts))
+        return ts.replace(tzinfo = pytz.utc)

@@ -12,6 +12,7 @@ lxml==2.3.4
 psycopg2>=2.4.5
 pygeoip==0.2.3
 python-dateutil>=2.1
+pytz>=2012d
 rdflib==3.2.0
 simplejson==2.5.2
 six==1.1.0
