@@ -246,7 +246,7 @@ def itu_institutions(request, institutions=[]):
         except:
             error += 'Failed to query the database for institutions.'
     if not institutions:
-        error += 'Couldn\'t find any institutions. Perhaps you haven\'t run scan_itunes yet? You\'ll need to do a mode 2 and a mode 3 scan.'
+        error += 'Couldn\'t find any scanned institutions. Perhaps you haven\'t run scan_itunes yet? You\'ll need to do a mode 1 scan of the institutions you want to appear here.'
     return render_to_response('monitors/itu_institutions.html',
             {'error': error, 'message': message, 'institutions': institutions},
         context_instance=RequestContext(request))
