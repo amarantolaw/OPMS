@@ -376,29 +376,6 @@
         }
     },
     {
-        "pk":1,
-        "model":"sitetree.treeitem",
-        "fields":{
-            "parent":null,
-            "access_restricted":false,
-            "access_permissions":[],
-            "description":"",
-            "insitetree":true,
-            "hint":"",
-            "url":"/",
-            "inbreadcrumbs":true,
-            "title":"Home",
-            "tree":1,
-            "access_perm_type":1,
-            "alias":"topmenu1",
-            "sort_order":1,
-            "inmenu":true,
-            "access_loggedin":false,
-            "hidden":false,
-            "urlaspattern":false
-        }
-    },
-    {
         "pk":13,
         "model":"sitetree.treeitem",
         "fields":{
@@ -928,6 +905,52 @@
         }
     },
     {
+        "pk":1,
+        "model":"sitetree.treeitem",
+        "fields":{
+            "parent":null,
+            "access_restricted":false,
+            "access_permissions":[],
+            "description":"",
+            "insitetree":true,
+            "hint":"",
+            "url":"/",
+            "inbreadcrumbs":true,
+            "title":"Home",
+            "tree":1,
+            "access_perm_type":1,
+            "alias":"topmenu1",
+            "sort_order":1,
+            "inmenu":true,
+            "access_loggedin":false,
+            "hidden":false,
+            "urlaspattern":false
+        }
+    },
+    {
+        "pk":50,
+        "model":"sitetree.treeitem",
+        "fields":{
+            "parent":1,
+            "access_restricted":false,
+            "access_permissions":[],
+            "description":"",
+            "insitetree":false,
+            "hint":"",
+            "url":"/accounts/login/",
+            "inbreadcrumbs":false,
+            "title":"Login",
+            "tree":1,
+            "access_perm_type":1,
+            "alias":null,
+            "sort_order":50,
+            "inmenu":false,
+            "access_loggedin":false,
+            "hidden":false,
+            "urlaspattern":false
+        }
+    },
+    {
         "pk":23,
         "model":"sitetree.treeitem",
         "fields":{
@@ -945,6 +968,29 @@
             "alias":null,
             "sort_order":23,
             "inmenu":true,
+            "access_loggedin":false,
+            "hidden":false,
+            "urlaspattern":false
+        }
+    },
+    {
+        "pk":51,
+        "model":"sitetree.treeitem",
+        "fields":{
+            "parent":1,
+            "access_restricted":false,
+            "access_permissions":[],
+            "description":"",
+            "insitetree":false,
+            "hint":"",
+            "url":"/logout/",
+            "inbreadcrumbs":false,
+            "title":"Logout",
+            "tree":1,
+            "access_perm_type":1,
+            "alias":null,
+            "sort_order":51,
+            "inmenu":false,
             "access_loggedin":false,
             "hidden":false,
             "urlaspattern":false
