@@ -1,5 +1,6 @@
 # Perform various scans of URLs from iTunes Store
 import datetime
+import pytz
 import sys
 
 from dateutil.parser import *
@@ -58,7 +59,7 @@ class Command(BaseCommand):
                """)
             return False
 
-        scantime = datetime.datetime.now()
+        scantime = datetime.datetime.now(pytz.utc)
         print "Scan iTunes started at " + str(scantime) + "\n"
         # Create an error log
         self._errorlog_start('scan_itunes.log')
@@ -215,7 +216,7 @@ class Command(BaseCommand):
                                                             preview_length=int(item['previewLength']),
                                                             preview_url=item['previewURL'],
                                                             rank=int(item['rank']),
-                                                            release_date=parse(item['releaseDate'],ignoretz=True),
+                                                            release_date=pytz.utc.localize(parse(item['releaseDate'],ignoretz=True)),
                                                             missing=None,
                                                             version=1,
                                                             previous=None,
@@ -266,7 +267,7 @@ class Command(BaseCommand):
                                     self._errorlog(u'Failed to process ItuItemHistorical.')
 
                             try: #We can't afford this bit to die in the middle of the night.
-                                #Put together a list of saved item_record_historicals that look like they're the same as our item_record_historical, really.
+#                                Put together a list of saved item_record_historicals that look like they're the same as our item_record_historical, really.
                                 similar_item_record_historicals = []
                                 item_record_historical_exists = False
                                 for saved_item_record_historical in ItuItemHistorical.objects.filter(Q(series__itucollection=collection_record_historical.itucollection) & (Q(name=item_record_historical.name) | Q(itu_id=item_record_historical.itu_id) | Q(url=item_record_historical.url)) & Q(file_extension=item_record_historical.file_extension)): #name AND Video/Audio
@@ -303,24 +304,31 @@ class Command(BaseCommand):
                     self._log(u'WARNING: Blank category - perhaps we couldn\'t download the appropriate page?')
             print(u"Checking whether anything has gone missing or reappeared...")
             if collections:
+                counter = 0
                 for historical_collection_record in ItuCollectionHistorical.objects.filter(Q(institution=institution) & Q(itucollection__latest=F('id'))):
                     if historical_collection_record not in collections_spotted and historical_collection_record.missing == None:
                         self._log(unicode(historical_collection_record.name) + u" appears to have gone missing! We last saw it at " + unicode(historical_collection_record.scanlog.time))
                         historical_collection_record.missing = scanlog
                         historical_collection_record.save()
                     elif historical_collection_record in collections_spotted and historical_collection_record.missing:
-                        self._log(unicode(historical_collection_record.name) + u" has reappeared! It went missing at" + unicode(historical_collection_record.missing.time))
+                        self._log(unicode(historical_collection_record.name) + u" has reappeared! It went missing at " + unicode(historical_collection_record.missing.time))
                         historical_collection_record.missing = None
                         historical_collection_record.save()
+                    counter += 1
+                    if float(counter)/100.0 == int(float(counter)/100.0):
+                        print (u'Still checking... (at object ' + unicode(counter) + u')')
                 for historical_item_record in ItuItemHistorical.objects.filter(Q(institution=institution) & Q(ituitem__latest=F('id'))):
                     if historical_item_record not in items_spotted and historical_item_record.missing == None:
                         self._log(unicode(historical_item_record.name) + u" appears to have gone missing! We last saw it at " + unicode(historical_item_record.scanlog.time))
                         historical_item_record.missing = scanlog
                         historical_item_record.save()
                     elif historical_item_record in items_spotted and historical_item_record.missing:
-                        self._log(unicode(historical_item_record.name) + u" has reappeared! It went missing at" + unicode(historical_item_record.missing.time))
+                        self._log(unicode(historical_item_record.name) + u" has reappeared! It went missing at " + unicode(historical_item_record.missing.time))
                         historical_item_record.missing = None
                         historical_item_record.save()
+                    counter += 1
+                    if float(counter)/100.0 == int(float(counter)/100.0):
+                        print (u'Still checking... (at object ' + unicode(counter) + u')')
             else:
                 self._log(u"WARNING: No collections found. Perhaps you scanned an institution that only publishes courses?")
         elif mode == 2:
@@ -348,7 +356,7 @@ class Command(BaseCommand):
                             except:
                                 self._errorlog('Failed to scan institution ' + collection['institution'] + '. Perhaps this institution isn\'t listed by Apple?')
                         historical_collections=ItuCollectionHistorical.objects.filter(url=collection['series_url'])
-                    if historical_collections.count() > 0:
+                    if historical_collections.exists():
                         historical_collection=historical_collections[0].latest()
                         self._log(u'Creating new chart row: ' + unicode(historical_collection.name) + u' Position: ' + unicode(collection['chart_position']))
                         chartrow=ItuCollectionChartScan(position=int(collection['chart_position']),
@@ -385,7 +393,7 @@ class Command(BaseCommand):
                             except:
                                 self._errorlog('Failed to scan institution ' + item['institution'] + '. This is a bug.')
                         historical_items=ItuItemHistorical.objects.filter(name=item['item'])
-                    if historical_items.count() > 0:
+                    if historical_items.exists():
                         historical_item=historical_items[0].latest()
                         self._log(u'Created new download chart row: ' + unicode(historical_item.name) + u' Position: ' + unicode(item['chart_position']))
                         chartrow=ItuItemChartScan(position=int(item['chart_position']),
@@ -428,7 +436,7 @@ class Command(BaseCommand):
         else:
             self._errorlog(u"We shouldn't ever get this scan...")
 
-        print "\nScan iTunes finished at " + str(datetime.datetime.utcnow())
+        print "\nScan iTunes finished at " + str(datetime.datetime.now(pytz.utc))
 
         # Write the error cache to disk
         self._error_log_save()
@@ -442,7 +450,7 @@ class Command(BaseCommand):
     def _debug(self,error_str):
         "Basic optional debug function. Print the string if enabled"
         if self.debug:
-            print(unicode(datetime.datetime.utcnow()) + u': ' + u'DEBUG:' + unicode(error_str) + u'\n')
+            print(unicode(datetime.datetime.now(pytz.utc)) + u': ' + u'DEBUG:' + unicode(error_str) + u'\n')
             self._error_log_save()
         return None
 
@@ -452,13 +460,13 @@ class Command(BaseCommand):
         # sys.stderr.write('ERROR:' + str(error_str) + '\n')
         #self.error_log.write('ERROR:' + str(error_str) + '\n')
         self.error_cache += u'ERROR:' + unicode(error_str) + u'\n'
-        print(unicode(datetime.datetime.utcnow()) + u': ' + u'ERROR: ' + unicode(error_str) + u'\n')
+        print(unicode(datetime.datetime.now(pytz.utc)) + u': ' + u'ERROR: ' + unicode(error_str) + u'\n')
         self._error_log_save()
         return None
 
     def _log(self,error_str):
         "Write things that aren't errors to a log file"
-        self.error_cache += unicode(datetime.datetime.utcnow()) + u': ' + unicode(error_str) + u'\n'
+        self.error_cache += unicode(datetime.datetime.now(pytz.utc)) + u': ' + unicode(error_str) + u'\n'
         print(unicode(error_str))
         return None
 

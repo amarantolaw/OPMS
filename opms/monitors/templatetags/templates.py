@@ -26,12 +26,15 @@ def chop(text, length=10):
         return text
 
 @register.filter(name='mean')
-def chop(total, n):
+def mean(total, n):
     """Finds the mean from a total of values and the number of values."""
     if n and total:
         try:
             return round((float(total) / float(n)),2)
         except TypeError:
-            return timedelta(seconds=int(float(total.total_seconds()) / float(n)))
+            try:
+                return timedelta(seconds=int(float(total.total_seconds()) / float(n)))
+            except:
+                return 0
     else:
         return 0
