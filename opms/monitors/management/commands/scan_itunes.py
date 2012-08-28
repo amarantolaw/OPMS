@@ -356,7 +356,7 @@ class Command(BaseCommand):
                             except:
                                 self._errorlog('Failed to scan institution ' + collection['institution'] + '. Perhaps this institution isn\'t listed by Apple?')
                         historical_collections=ItuCollectionHistorical.objects.filter(url=collection['series_url'])
-                    if historical_collections.count() > 0:
+                    if historical_collections.exists():
                         historical_collection=historical_collections[0].latest()
                         self._log(u'Creating new chart row: ' + unicode(historical_collection.name) + u' Position: ' + unicode(collection['chart_position']))
                         chartrow=ItuCollectionChartScan(position=int(collection['chart_position']),
@@ -393,7 +393,7 @@ class Command(BaseCommand):
                             except:
                                 self._errorlog('Failed to scan institution ' + item['institution'] + '. This is a bug.')
                         historical_items=ItuItemHistorical.objects.filter(name=item['item'])
-                    if historical_items.count() > 0:
+                    if historical_items.exists():
                         historical_item=historical_items[0].latest()
                         self._log(u'Created new download chart row: ' + unicode(historical_item.name) + u' Position: ' + unicode(item['chart_position']))
                         chartrow=ItuItemChartScan(position=int(item['chart_position']),
