@@ -160,7 +160,11 @@ def itu_home(request):
     """The iTunes U Monitoring home page."""
     message = ''
     error = ''
-    this_institution = ItuInstitution.objects.get(name=settings.YOUR_INSTITUTION)
+    try:
+        this_institution = ItuInstitution.objects.get(name=settings.YOUR_INSTITUTION)
+    except:
+        this_institution = None
+        error += 'Institution in settings file does not match an institution in the database. Perhaps you need to run scan_itunes first?'
     return render_to_response('monitors/itu_home.html',
             {'error': error, 'message': message, 'this_institution': this_institution},
         context_instance=RequestContext(request))
@@ -242,7 +246,7 @@ def itu_institutions(request, institutions=[]):
         except:
             error += 'Failed to query the database for institutions.'
     if not institutions:
-        error += 'Couldn\'t find any institutions. Perhaps you haven\'t run scan_itunes --mode 4 yet?'
+        error += 'Couldn\'t find any scanned institutions. Perhaps you haven\'t run scan_itunes yet? You\'ll need to do a mode 1 scan of the institutions you want to appear here.'
     return render_to_response('monitors/itu_institutions.html',
             {'error': error, 'message': message, 'institutions': institutions},
         context_instance=RequestContext(request))
@@ -405,9 +409,14 @@ def itu_institution(request, institution_id):
     message = ''
     error = ''
     tags = Tag.objects.all()
-    latest_tc_scanlog = ItuScanLog.objects.filter(mode=2).order_by('-time')[0]
-    latest_ti_scanlog = ItuScanLog.objects.filter(mode=3).order_by('-time')[0]
     institution = ItuInstitution.objects.get(id=int(institution_id))
+    try:
+        latest_tc_scanlog = ItuScanLog.objects.filter(mode=2).order_by('-time')[0]
+        latest_ti_scanlog = ItuScanLog.objects.filter(mode=3).order_by('-time')[0]
+    except:
+        error += 'Couldn\'t find the latest top collections/items scanlogs. Perhaps you need to run scan_itunes first?'
+        return render_to_response('monitors/itu_home.html',
+                {'error': error, 'message': message, 'institution': institution}, context_instance=RequestContext(request))
     comments = ItuComment.objects.filter(ituinstitution=institution).order_by('-date')
     collections = ItuCollection.objects.filter(institution=institution).order_by('-latest__last_modified')
     current_collection_chartscans = ItuCollectionChartScan.objects.filter(itucollection__institution=institution,scanlog=latest_tc_scanlog).order_by('position')

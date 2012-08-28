@@ -224,6 +224,8 @@ class Command(LabelCommand):
             defaults = self.summary
         )
         ds.save()
+        # Reset the values after each file!
+        self.summary = dict()
         return None
 
     def _parseline(self, entrydict, logfile_obj):
@@ -253,9 +255,13 @@ class Command(LabelCommand):
             arle.artist_id = long(entrydict.get("artist_id"))
         except ValueError:
             arle.artist_id = -1
+        except TypeError:
+            arle.artist_id = -1
         try:
             arle.itunes_id = long(entrydict.get("itunes_id"))
         except ValueError:
+            arle.itunes_id = -1
+        except TypeError:
             arle.itunes_id = -1
         arle.action_type = self._action_type_validation(entrydict.get("action_type"))
         arle.title = entrydict.get("title","Unknown")
@@ -263,6 +269,8 @@ class Command(LabelCommand):
         try:
             arle.episode_id = long(entrydict.get("episode_id"))
         except ValueError:
+            arle.episode_id = None
+        except TypeError:
             arle.episode_id = None
         arle.episode_title = entrydict.get("episode_title",None)
         arle.episode_type = entrydict.get("episode_type",None)
