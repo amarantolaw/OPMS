@@ -5,6 +5,7 @@ DEBUG = False
 ERROR_CACHE = ""
 ERROR_LOG = None
 
+
 def __init__():
     global DEBUG
     DEBUG = False
@@ -14,21 +15,18 @@ def __init__():
     ERROR_LOG = None
     return None
 
-
 def onscreen(error_str):
     "Basic optional debug function. Print the string if enabled"
     global DEBUG
     if DEBUG:
-        sys.stderr.write('DEBUG:{}\n'.format(error_str))
+        sys.stderr.write('DEBUG:{0}\n'.format(error_str))
     return None
-
 
 def errorlog(error_str=""):
     "Write errors to a log file cache"
     global ERROR_CACHE
-    ERROR_CACHE += 'ERROR:{}\n'.format(error_str)
+    ERROR_CACHE += 'ERROR:{0}\n'.format(error_str)
     return None
-
 
 def errorlog_start(path_to_file):
     global ERROR_LOG
@@ -39,7 +37,7 @@ def errorlog_start(path_to_file):
         ERROR_LOG = open(path_to_file,'w')
 
     errorlog("Log started at {0:%Y-%m-%d %H:%M:%S}\n".format(datetime.datetime.utcnow()))
-    sys.stderr.write("Writing errors to: {}\n\n".format(path_to_file))
+    sys.stderr.write("Writing errors to: {0}\n\n".format(path_to_file))
     return None
 
 def errorlog_save():
@@ -49,9 +47,8 @@ def errorlog_save():
         ERROR_LOG.write(ERROR_CACHE)
         ERROR_CACHE = ""
     else:
-        sys.stderr.write("WARNING!! No Error Log file has been created\n\n{}".format(ERROR_CACHE))
+        sys.stderr.write("WARNING!! No Error Log file has been created\n\n{0}".format(ERROR_CACHE))
     return None
-
 
 def errorlog_stop():
     global ERROR_LOG

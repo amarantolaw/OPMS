@@ -52,7 +52,6 @@ class URLMonitorScan(models.Model):
                              str(self.url.url) + " #" + str(self.iteration) + ": TTFB:" + str(self.ttfb))
 
 
-
 ######
 # iTU Store analysis classes
 ######
@@ -106,6 +105,7 @@ class ItuGenre(models.Model):
         verbose_name_plural = "iTunes U Genres"
     def __unicode__(self):
         return smart_unicode(self.name)
+
 
 class ItuInstitution(models.Model):
     name = models.CharField(max_length=255,unique=True)
@@ -176,6 +176,7 @@ class ItuCollection(models.Model):
         except:
             return u'Unattached absolute collection record.'
 
+
 class ItuCollectionHistorical(models.Model):
     name = models.CharField(max_length=255)
     itu_id = models.IntegerField("iTunes U ID", null=True) # Historical records don't have this :-(
@@ -241,8 +242,8 @@ class ItuCollectionHistorical(models.Model):
         return checksum
 
     class Meta:
-        verbose_name = "iTunes U Historical Record of Collection"
-        verbose_name_plural = "iTunes U Historical Records of Collections"
+        verbose_name = "iTunes U Historical Collection Record"
+        verbose_name_plural = "iTunes U Historical Collection Records"
     def save(self): #Update absolute record so that the last-saved historical record is the latest record.
         super(ItuCollectionHistorical, self).save()
         self.itucollection.latest = self
@@ -359,12 +360,14 @@ class ItuCollectionChartScan(models.Model):
     def __unicode__(self):
         return smart_unicode('%s: %s' % (self.position, self.itucollectionhistorical.name))
 
+
 class ItuRating(models.Model):
     stars = models.PositiveIntegerField(choices=((1,'*'),(2,'**'),(3,'***'),(4,'****'),(5,'*****')))
     count = models.PositiveIntegerField()
     itucollectionhistorical = models.ForeignKey(ItuCollectionHistorical, verbose_name="Historical Collection Record")
     def __unicode__(self):
         return smart_unicode('%s people rated %s with %s stars.' % (self.count, self.itucollectionhistorical.name, self.stars))
+
 
 class ItuComment(models.Model):
     stars = models.PositiveIntegerField(choices=((1,'*'),(2,'**'),(3,'***'),(4,'****'),(5,'*****')))
@@ -379,6 +382,7 @@ class ItuComment(models.Model):
         verbose_name_plural = "iTunes U Comments"
     def __unicode__(self):
         return smart_unicode(self.detail)
+
 
 class InstitutionalCollectionTable(tables.Table):
     name = tables.LinkColumn('itu-collection', args=[A('pk')], accessor='latest.name', order_by='latest.name')

@@ -6,20 +6,21 @@ from django.core.management.base import LabelCommand, CommandError
 from opms.utils import debug
 from opms.stats.models import LogFile, AppleRawLogEntry, AppleRawLogDailySummary, UserAgent, UA, OS, Rdns
 from opms.stats.uasparser import UASparser, UASException
+import pytz
 import datetime, time, sys, os, pygeoip, csv
 from datetime import timedelta
 from IPy import IP
 from settings import PROJECT_ROOT
 
 class Command(LabelCommand):
-    args = 'filename'
-    help = 'Imports the contents of the specified logfile into the database.'
-    option_list = LabelCommand.option_list + (
-        make_option('--startline', action='store', dest='start_at_line',
-            default=1, help='Optional start line to allow resumption of large log files. Default is 1.'),
+    args = '<path/to/logfiles/>'
+    help = 'Imports the contents of the Apple Raw logfiles into the database.'
+#    option_list = LabelCommand.option_list + (
+#        make_option('--startline', action='store', dest='start_at_line',
+#            default=1, help='Optional start line to allow resumption of large log files. Default is 1.'),
 #        make_option('--single-import', action='store', dest='single_import',
 #            default=True, help='Speeds up import rate by disabling support for parallel imports.'),
-    )
+#    )
     
     def __init__(self):
         # Single GeoIP object for referencing
@@ -40,65 +41,90 @@ class Command(LabelCommand):
         
         super(Command, self).__init__()
 
+    def _list_files(self, path):
+        file_list = []
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                if file.lower()[-4:] == ".txt":
+                    file_list.append(os.path.abspath(os.path.join(root)+"/"+file)) # Yes, unix specific hack
+        return file_list
 
-    def handle_label(self, filename, **options):
+    def handle_label(self, path, **options):
         verbosity = int(options.get('verbosity', 0))
         if verbosity > 1:
             debug.DEBUG = True
 
-        print "Import started at {0:%Y-%m-%d %H:%M:%S}\n".format(datetime.datetime.utcnow())
+#        # Some basic checking
+#        if not filename.endswith('.txt'):
+#           raise CommandError("This is not a text (.txt) log file.\n\n")
 
-        # Some basic checking
-        if not filename.endswith('.txt'):
-           raise CommandError("This is not a text (.txt) log file.\n\n")
+        # Scan directory for files, compare them to names in the existing LogFile list. Import the first X new files.
+        found_files_list = self._list_files(path)
+        found_files_list.sort() # Trust the naming conventions to put a sortable date on them
+        import_file_limit = 21
+        if len(found_files_list) < import_file_limit:
+            import_file_limit = len(found_files_list)
+        # Have this only work on the one file when debug is switched on
+        if debug.DEBUG:
+            import_file_limit = 1
+        print "{0} files have been found. Importing up to {1} of them now.".format(
+            len(found_files_list),
+            import_file_limit
+        )
+        for filename in found_files_list:
+            if import_file_limit > 0:
+                # Reset statistics
+                self.import_stats['filename'] = filename
+                self.import_stats['line_counter'] = 0
+                self.import_stats['line_count'] = 0
+                self.import_stats['import_starttime'] = datetime.datetime.now(pytz.utc)
+                self.import_stats['import_startline'] = int(options.get('start_at_line', 1))
 
-        # Create an error log per import file
-        debug.errorlog_start(filename + '_import-error.log')
+                # This only needs setting/getting the once per call of this function
+                logfile_obj, created = self._logfile(filename, 'itu-raw')
+                if not created:
+                    err_string = "This file has already been imported: ({0})".format(filename)
+                    debug.onscreen(err_string)
+#                    debug.errorlog_stop()
+#                    raise CommandError(err_string)
+                    continue
 
-        # Reset statistics
-        self.import_stats['filename'] = filename
-        self.import_stats['line_counter'] = 0
-        self.import_stats['line_count'] = 0
-#        self.import_stats['duplicatecount'] = 0
-        self.import_stats['import_starttime'] = datetime.datetime.utcnow()
-        self.import_stats['import_startline'] = int(options.get('start_at_line', 1))
+                import_file_limit -= 1
 
-        # This only needs setting/getting the once per call of this function
-        logfile_obj, created = self._logfile(filename, 'itu-raw')
-#        if not created:
-#            err_string = "This file has already been imported: ({})".format(filename)
-#            debug.errorlog(err_string)
-#            debug.errorlog_stop()
-#            raise CommandError(err_string)
+                print "Import of [{0}] started at {1:%Y-%m-%d %H:%M:%S}\n".format(
+                    filename,
+                    datetime.datetime.now(pytz.utc)
+                )
 
-        # Send the file off to be parsed
-        self._parsefile(logfile_obj)
-#
-        # Final stats output at end of file
-        try:
-            self.import_stats['import_duration'] = float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
-            self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')-self.import_stats.get('import_startline')) /\
-                                                    self.import_stats['import_duration']
-        except ZeroDivisionError:
-            self.import_stats['import_rate'] = 0
+                # Create an error log per import file
+                debug.errorlog_start(filename + '_import-error.log')
 
-        print """
-            Import finished at {0:%Y-%m-%d %H:%M:%S}
-            {1:d} Lines parsed over {2:.1f} seconds
-            Giving a rate of {3:.3f} lines/sec
-            """.format(
-                datetime.datetime.utcnow(),
-                self.import_stats.get('line_counter'),
-                self.import_stats.get('import_duration'),
-                self.import_stats.get('import_rate')
-            )
-        
-        # Write the error cache to disk
-        debug.errorlog_stop()
-            
+                # Send the file off to be parsed
+                self._parsefile(logfile_obj)
+
+                # Final stats output at end of file
+                try:
+                    self.import_stats['import_duration'] = float((datetime.datetime.now(pytz.utc) - self.import_stats.get('import_starttime')).seconds)
+                    self.import_stats['import_rate'] = float(self.import_stats.get('line_counter')-self.import_stats.get('import_startline')) /\
+                                                            self.import_stats['import_duration']
+                except ZeroDivisionError:
+                    self.import_stats['import_rate'] = 0
+
+                # Write the error cache to disk
+                debug.errorlog_stop()
+
+                print """
+                    Import finished at {0:%Y-%m-%d %H:%M:%S}
+                    {1:d} Lines parsed over {2:.1f} seconds
+                    Giving a rate of {3:.3f} lines/sec
+                    """.format(
+                        datetime.datetime.now(pytz.utc),
+                        self.import_stats.get('line_counter'),
+                        self.import_stats.get('import_duration'),
+                        self.import_stats.get('import_rate')
+                    )
+
         return None
-
-
 
     def _logfile(self, filename, log_service):
         """Get or create a LogFile record for the given filename"""
@@ -114,12 +140,12 @@ class Command(LabelCommand):
             logfile['file_name'] = filename
             logfile['file_path'] = "./"
             
-        logfile['last_updated'] = datetime.datetime.utcnow()
+        logfile['last_updated'] = datetime.datetime.now(pytz.utc)
         
         obj, created = LogFile.objects.get_or_create(
             service_name = logfile.get('service_name'),
             file_name = logfile.get('file_name'),
-            file_path = logfile.get('file_path'),
+#            file_path = logfile.get('file_path'),  # Filenames are unique for the raw logs, so skip this
             defaults = logfile)
         
         # If this isn't the first time, and the datetime is significantly different from last access, update the time
@@ -129,8 +155,6 @@ class Command(LabelCommand):
         obj.save()
 
         return obj, created
-
-
 
     def _parsefile(self, logfile_obj):
         filename = logfile_obj.file_path + logfile_obj.file_name
@@ -163,7 +187,7 @@ class Command(LabelCommand):
                 try:
                     self.import_stats['import_rate'] = \
                     float(self.import_stats.get('line_counter') - self.import_stats.get('import_startline')) /\
-                    float((datetime.datetime.utcnow() - self.import_stats.get('import_starttime')).seconds)
+                    float((datetime.datetime.now(pytz.utc) - self.import_stats.get('import_starttime')).seconds)
                 except ZeroDivisionError:
                     self.import_stats['import_rate'] = 1
                 # Calculate how long till finished
@@ -182,7 +206,7 @@ class Command(LabelCommand):
 
                 # Output the status
                 print "{0:%Y-%m-%d %H:%M:%S} : {1:.1%} completed. Parsed {2:d} lines. Rate: {3:.2f} lines/sec. Estimated finish in {4}".format(
-                    datetime.datetime.utcnow(),
+                    datetime.datetime.now(pytz.utc),
                     float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')),
                     self.import_stats.get('line_counter'),
                     self.import_stats.get('import_rate'),
@@ -195,14 +219,14 @@ class Command(LabelCommand):
         # Create a summary record for this day's data
         debug.onscreen("Daily summary: " + str(self.summary))
         print "Daily summary: \n" + str(self.summary)
-        ds, created = AppleRawLogDailySummary().objects.get_or_create(
+        ds, created = AppleRawLogDailySummary.objects.get_or_create(
             date = self.summary.get("date", None),
             defaults = self.summary
         )
         ds.save()
+        # Reset the values after each file!
+        self.summary = dict()
         return None
-
-
 
     def _parseline(self, entrydict, logfile_obj):
 #        # Build the log entry dictionary
@@ -227,15 +251,30 @@ class Command(LabelCommand):
         # Build the log entry dictionary
         arle = AppleRawLogEntry()
         arle.logfile = logfile_obj
-        arle.artist_id = long(entrydict.get("artist_id"))
-        arle.itunes_id = long(entrydict.get("itunes_id"))
+        try:
+            arle.artist_id = long(entrydict.get("artist_id"))
+        except ValueError:
+            arle.artist_id = -1
+        except TypeError:
+            arle.artist_id = -1
+        try:
+            arle.itunes_id = long(entrydict.get("itunes_id"))
+        except ValueError:
+            arle.itunes_id = -1
+        except TypeError:
+            arle.itunes_id = -1
         arle.action_type = self._action_type_validation(entrydict.get("action_type"))
         arle.title = entrydict.get("title","Unknown")
         arle.url = entrydict.get("url","")
-        arle.episode_id = long(entrydict.get("episode_id",0))
+        try:
+            arle.episode_id = long(entrydict.get("episode_id"))
+        except ValueError:
+            arle.episode_id = None
+        except TypeError:
+            arle.episode_id = None
         arle.episode_title = entrydict.get("episode_title",None)
         arle.episode_type = entrydict.get("episode_type",None)
-        arle.storefront = self._storefront(entrydict.get("storefront",0))
+        arle.storefront = self._storefront(entrydict.get("storefront","0"))
         arle.user_agent = self._user_agent(entrydict.get("useragent",""))
         arle.ipaddress = self._ip_to_domainname(entrydict.get("ip_address",None))
         arle.timestamp = self._parse_timestamp(entrydict.get("timestamp"))
@@ -263,7 +302,6 @@ class Command(LabelCommand):
 
         return None
 
-
     def _action_type_validation(self, action_string):
         """Analyse the supplied action type string, and see if it's one we know about already. If it isn't, then
         don't panic, and store it anyway. We just need to update the choices list based on what we see in the error
@@ -279,9 +317,6 @@ class Command(LabelCommand):
         )
         return action_string
 
-
-
-
     def _ip_to_domainname(self, ipaddress):
         """Returns the domain name for a given IP where known"""
         # debug.onscreen('_ip_to_domainname('+str(ipaddress)+') called')
@@ -292,7 +327,7 @@ class Command(LabelCommand):
             rdns = Rdns()
             rdns.ip_address = adr.strNormal(0)
             rdns.resolved_name = 'Partial'
-            rdns.last_updated = datetime.datetime.utcnow()
+            rdns.last_updated = datetime.datetime.now(pytz.utc)
 
             # Attempt to locate in memory cache
             for item in self.cache_rdns:
@@ -315,7 +350,6 @@ class Command(LabelCommand):
             return int(initial_value)
         else:
             return 0
-
 
     def _user_agent(self, agent_string):
         "Get or create a UserAgent record for the given string"
@@ -380,17 +414,15 @@ class Command(LabelCommand):
         
         return user_agent
 
-
-
     def _parse_timestamp(self,initialstring):
         """Adjust timestamp supplied to GMT and returns a datetime object"""
         input_format = "%Y-%m-%d %H:%M:%S"
-        base_time = time.strptime(initialstring[:-9],input_format)
+        base_time = datetime.datetime.strptime(initialstring[:-9],input_format)
         try:
             offset = int(initialstring[-5:])
             delta = timedelta(hours = offset / 100)
             ts = base_time - delta
         except:
             ts = base_time
-        dt = datetime.datetime.fromtimestamp(time.mktime(ts))
-        return dt #"{0:%Y-%m-%d %H:%M:%S}".format(ts)
+#        dt = datetime.datetime.fromtimestamp(time.mktime(ts))
+        return ts.replace(tzinfo = pytz.utc)

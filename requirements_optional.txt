@@ -1,0 +1,10 @@
+South>=0.7.4
+distribute>=0.6.26
+django-debug-toolbar>=0.9.4
+django-extensions>=0.8
+feedparser==5.1.1
+ipython>=0.12
+nose==1.1.2
+numpy==1.6.1
+pygraphviz==1.1
+yolk==0.4.3
