@@ -1,15 +1,25 @@
 <div class="modal hide" id="{{ type }}TagModal{{ object.id }}">
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">×</button>
-        <h3>Choose a tag to tag this {{ type }} with:</h3>
+        {% if tags %}
+            <h3>Choose a tag to tag this {{ type }} with:</h3>
+        {% else %}
+            <h3>You haven't created any tags yet!</h3>
+        {% endif %}
     </div>
     <div class="modal-body">
-        {% for tag in tags %}
-            {% if tag not in object.tags.all %}
-                <a onclick="tag{% if type == 'event' %}Event{% elif type == 'comment' %}Comment{% endif %}({{ type }}_id={{ object.id }},tag_id={{ tag.id }});" data-dismiss="modal"><span class="label"
-                                                                                                                         style="background-color: {{ tag.color }}">{{ tag.name }} +</span></a>
-                &nbsp;&nbsp;
-            {% endif %}
-        {% endfor %}
+        {% if tags %}
+            {% for tag in tags %}
+                {% if tag not in object.tags.all %}
+                    <a onclick="tag
+                            {% if type == 'event' %}Event{% elif type == 'comment' %}Comment{% endif %}({{ type }}_id={{ object.id }},tag_id={{ tag.id }});"
+                       data-dismiss="modal"><span class="label"
+                                                  style="background-color: {{ tag.color }}">{{ tag.name }} +</span></a>
+                    &nbsp;&nbsp;
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <a href="{% url tag-create %}" class="btn btn-primary btn-large">Create new tag <i class="icon-chevron-right"></i></a>
+        {% endif %}
     </div>
 </div>

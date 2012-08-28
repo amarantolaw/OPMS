@@ -6,15 +6,17 @@
 {% endblock %}
 
 {% block content %}
-    <h3>iTunes U Monitoring</h3>
     {% if error != '' %}
         <div class="alert alert-error">ERROR: {{ error }}</div>
     {% else %}
+        <h3>iTunes U Monitoring</h3>
         {% if message != '' %}
             <div class="alert alert-success">{{ message }}</div>
         {% endif %}
         <div>The iTunes U Monitoring app allows the presentation of academic podcasts on iTunes to be tracked.</div>
         <br/>
-        <a href="{% url itu-institution institution_id=this_institution.id %}" class="btn btn-primary btn-large">{{ this_institution.name }} <i class="icon-chevron-right"></i></a>
+        {% if this_institution %}
+            <a href="{% url itu-institution institution_id=this_institution.id %}" class="btn btn-primary btn-large">{{ this_institution.name }} <i class="icon-chevron-right"></i></a>
+        {% endif %}
     {% endif %}
 {% endblock %}
