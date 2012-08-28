@@ -303,6 +303,7 @@ class Command(BaseCommand):
                     self._log(u'WARNING: Blank category - perhaps we couldn\'t download the appropriate page?')
             print(u"Checking whether anything has gone missing or reappeared...")
             if collections:
+                counter = 0
                 for historical_collection_record in ItuCollectionHistorical.objects.filter(Q(institution=institution) & Q(itucollection__latest=F('id'))):
                     if historical_collection_record not in collections_spotted and historical_collection_record.missing == None:
                         self._log(unicode(historical_collection_record.name) + u" appears to have gone missing! We last saw it at " + unicode(historical_collection_record.scanlog.time))
@@ -312,6 +313,9 @@ class Command(BaseCommand):
                         self._log(unicode(historical_collection_record.name) + u" has reappeared! It went missing at" + unicode(historical_collection_record.missing.time))
                         historical_collection_record.missing = None
                         historical_collection_record.save()
+                    counter += 1
+                    if float(counter)/100.0 == int(float(counter)/100.0):
+                        print (u'Still checking... (at object ' + unicode(counter) + u')')
                 for historical_item_record in ItuItemHistorical.objects.filter(Q(institution=institution) & Q(ituitem__latest=F('id'))):
                     if historical_item_record not in items_spotted and historical_item_record.missing == None:
                         self._log(unicode(historical_item_record.name) + u" appears to have gone missing! We last saw it at " + unicode(historical_item_record.scanlog.time))
@@ -321,6 +325,9 @@ class Command(BaseCommand):
                         self._log(unicode(historical_item_record.name) + u" has reappeared! It went missing at" + unicode(historical_item_record.missing.time))
                         historical_item_record.missing = None
                         historical_item_record.save()
+                    counter += 1
+                    if float(counter)/100.0 == int(float(counter)/100.0):
+                        print (u'Still checking... (at object ' + unicode(counter) + u')')
             else:
                 self._log(u"WARNING: No collections found. Perhaps you scanned an institution that only publishes courses?")
         elif mode == 2:
