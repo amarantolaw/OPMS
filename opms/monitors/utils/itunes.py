@@ -7,6 +7,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils.encoding import smart_unicode
 import urllib2
 import plistlib
+import httplib
 from xml.parsers import expat
 from lxml import etree, html
 from lxml.html.clean import *
@@ -47,7 +48,20 @@ def get_page(url, APPLE_STORE_LANGUAGE = 1, hurry = False):
     request.add_header('Accept-Language', ACCEPT_LANGUAGE)
     request.add_header('Host',HOST)
     opener = urllib2.build_opener()
-    data = opener.open(request).read()
+    read_attempts = 0
+    page_has_been_read = False
+    while read_attempts <= 5: #Try 5 times to read a page, and then give up.
+        read_attempts += 1
+        try:
+            data = opener.open(request).read()
+            page_has_been_read = True
+        except httplib.IncompleteRead:
+            if read_attempts <= 5:
+                print('WARNING: IncompleteRead of page. Waiting and trying again...')
+                time.sleep(5)
+            else:
+                raise CommandError('Failed to read page ' + url + '.')
+            page_has_been_read = False
     #print "g_p:1"
     if data.find('<!DOCTYPE plist PUBLIC') > 0 and data.find('<!DOCTYPE plist PUBLIC') < 60:
         #print "g_p:2"
