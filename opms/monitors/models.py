@@ -88,14 +88,14 @@ class ItuGenre(models.Model):
 
     def collections_in_chart(self):
         scans = ItuScanLog.objects.filter(mode=2,complete=True)
-        if scans.count() > 0:
+        if scans.exists():
             latest_collections_chart = scans.order_by('-time')[0]
             return ItuCollectionChartScan.objects.filter(scanlog=latest_collections_chart,itucollectionhistorical__genre=self).count()
         else:
             return 0
     def items_in_chart(self):
         scans = ItuScanLog.objects.filter(mode=3,complete=True)
-        if scans.count() > 0:
+        if scans.exists():
             latest_items_chart = scans.order_by('-time')[0]
             return ItuItemChartScan.objects.filter(scanlog=latest_items_chart,ituitemhistorical__genre=self).count()
         else:
@@ -115,14 +115,14 @@ class ItuInstitution(models.Model):
 
     def collections_in_chart(self):
         scans = ItuScanLog.objects.filter(mode=2,complete=True)
-        if scans.count() > 0:
+        if scans.exists():
             latest_collections_chart = scans.order_by('-time')[0]
             return ItuCollectionChartScan.objects.filter(scanlog=latest_collections_chart,itucollection__institution=self).count()
         else:
             return 0
     def items_in_chart(self):
         scans = ItuScanLog.objects.filter(mode=3,complete=True)
-        if scans.count() > 0:
+        if scans.exists():
             latest_items_chart = scans.order_by('-time')[0]
             return ItuItemChartScan.objects.filter(scanlog=latest_items_chart,ituitem__institution=self).count()
         else:
