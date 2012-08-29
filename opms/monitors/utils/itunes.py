@@ -55,12 +55,12 @@ def get_page(url, APPLE_STORE_LANGUAGE = 1, hurry = False):
         try:
             data = opener.open(request).read()
             page_has_been_read = True
-        except httplib.IncompleteRead:
+        except:
             if read_attempts <= 5:
                 print('WARNING: IncompleteRead of page. Waiting and trying again...')
                 time.sleep(5)
-            else:
-                raise CommandError('Failed to read page ' + url + '.')
+#            else:
+#                raise CommandError('Failed to read page ' + url + '.')
             page_has_been_read = False
     #print "g_p:1"
     if data.find('<!DOCTYPE plist PUBLIC') > 0 and data.find('<!DOCTYPE plist PUBLIC') < 60:
@@ -220,7 +220,6 @@ def get_collection_info(url, hurry=False):
     return info
 
 def get_collection_info_arty(url, hurry=False): #Workaround for pages (typically related to drawing and painting...) which don't work with lang=1 or lang=12. This is non-ideal, but better than nothing.
-    # print "get_collection_info(%s) called" % url
     info = {}
     try:
         xml = get_page(url,17, hurry=hurry)
@@ -228,8 +227,8 @@ def get_collection_info_arty(url, hurry=False): #Workaround for pages (typically
         return info
     except AttributeError: # If there's no URL, skip this link
         return info
-    except urllib2.HTTPError:
-        return info
+#    except urllib2.HTTPError:
+#        return info
     if xml == None:
         return info
     xml = clean_html(xml).replace('png">','png"/>').replace('Store">','Store"/>')
