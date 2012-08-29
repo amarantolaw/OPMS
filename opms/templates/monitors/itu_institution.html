@@ -72,9 +72,9 @@
             <thead>
                 <tr>
                     <th rowspan="2" style="text-align: center; vertical-align: middle">Content</th>
-                    <th colspan="2" style="text-align: center">Total number</th>
+                    <th colspan="2" style="text-align: center">Total duration</th>
                     <th rowspan="2" style="text-align: center; vertical-align: middle">Total running time</th>
-                    <th rowspan="2" style="text-align: center; vertical-align: middle">Average collection size</th>
+                    <th rowspan="2" style="text-align: center; vertical-align: middle">Average collection size<br/>(items)</th>
                     <th colspan="2" style="text-align: center">Average duration</th>
                 </tr>
                 <tr>
@@ -120,7 +120,7 @@
                 </tr>
             </tbody>
         </table>
-        <br/>
+        <div style="text-align: right"><i>Durations are in the form hh:mm:ss.</i></div>
         {% if metrics_to_plot %}
             <h4><a data-toggle="collapse" href="#collapseZero" class="btn btn-info noprint" style="width:45%; text-align:left">In the charts</a></h4>
             <div id="collapseZero" class="collapse">
