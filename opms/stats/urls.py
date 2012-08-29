@@ -13,6 +13,7 @@ urlpatterns = patterns('stats.views',
 
     url(r'^apple/summary/$', summary_index),
     url(r'^apple/$', apple_index),
+    url(r'^apple/raw/animation$', apple_raw_animation, name="apple-raw-animation"),
 
     #(r'report/authors/$', 'summary_authors'), # Consider this dead for now
 

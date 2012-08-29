@@ -16,6 +16,10 @@ def index(request):
 def apple_index(request):
     return render_to_response('stats/apple/base.html', {}, context_instance=RequestContext(request))
 
+#Pretty representation of the previous day's raw traffic
+@login_required
+def apple_raw_animation(request):
+    return render_to_response('stats/apple/raw/animation.html', {}, context_instance=RequestContext(request))
 
 #####
 # APPLE/iTU Subviews
