@@ -11,8 +11,7 @@
         {% if tags %}
             {% for tag in tags %}
                 {% if tag not in object.tags.all %}
-                    <a onclick="tag
-                            {% if type == 'event' %}Event{% elif type == 'comment' %}Comment{% endif %}({{ type }}_id={{ object.id }},tag_id={{ tag.id }});"
+                    <a onclick="tag{% if type == 'event' %}Event{% elif type == 'comment' %}Comment{% endif %}({{ type }}_id={{ object.id }},tag_id={{ tag.id }});"
                        data-dismiss="modal"><span class="label"
                                                   style="background-color: {{ tag.color }}">{{ tag.name }} +</span></a>
                     &nbsp;&nbsp;
