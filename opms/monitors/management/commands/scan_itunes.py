@@ -338,35 +338,38 @@ class Command(BaseCommand):
             collections = itunes.get_topcollections()
             for collection in collections:
                 if collection:
-                    historical_collections=ItuCollectionHistorical.objects.filter(url=collection['series_url'])
-                    if not historical_collections:
-                        self._log(u'WARNING: Couldn\'t find an historical record of collection at ' + unicode(collection['series_url']) + u'. Attempting an historical scan of ' + unicode(collection['institution']) + u' first...')
-                        if not updated_institutions:
-                            management.call_command('scan_itunes', mode=4)
-                            updated_institutions = True
-                        try:
-                            management.call_command('scan_itunes', collection['institution'], mode=1)
-                        except:
-                            try: #Deal with institutions which aren't listed by Apple.
-                                institution = ItuInstitution(name = collection['institution'],
-                                                             itu_id = int(collection['institution_id']),
-                                                             url = collection['institution_url'])
-                                institution.save()
+                    try:
+                        historical_collections=ItuCollectionHistorical.objects.filter(url=collection['series_url'])
+                        if not historical_collections:
+                            self._log(u'WARNING: Couldn\'t find an historical record of collection at ' + unicode(collection['series_url']) + u'. Attempting an historical scan of ' + unicode(collection['institution']) + u' first...')
+                            if not updated_institutions:
+                                management.call_command('scan_itunes', mode=4)
+                                updated_institutions = True
+                            try:
                                 management.call_command('scan_itunes', collection['institution'], mode=1)
                             except:
-                                self._errorlog('Failed to scan institution ' + collection['institution'] + '. Perhaps this institution isn\'t listed by Apple?')
-                        historical_collections=ItuCollectionHistorical.objects.filter(url=collection['series_url'])
-                    if historical_collections.exists():
-                        historical_collection=historical_collections[0].latest()
-                        self._log(u'Creating new chart row: ' + unicode(historical_collection.name) + u' Position: ' + unicode(collection['chart_position']))
-                        chartrow=ItuCollectionChartScan(position=int(collection['chart_position']),
-                                                        itucollection=historical_collection.itucollection,
-                                                        itucollectionhistorical=historical_collection,
-                                                        scanlog=scanlog,
-                                                        date=scanlog.time)
-                        chartrow.save()
-                    else:
-                        self._errorlog(u'Couldn\'tfind an historical record of collection at ' + unicode(collection['series_url']) + u' despite updating the database.')
+                                try: #Deal with institutions which aren't listed by Apple.
+                                    institution = ItuInstitution(name = collection['institution'],
+                                                                 itu_id = int(collection['institution_id']),
+                                                                 url = collection['institution_url'])
+                                    institution.save()
+                                    management.call_command('scan_itunes', collection['institution'], mode=1)
+                                except:
+                                    self._errorlog('Failed to scan institution ' + collection['institution'] + '. Perhaps this institution isn\'t listed by Apple?')
+                            historical_collections=ItuCollectionHistorical.objects.filter(url=collection['series_url'])
+                        if historical_collections.exists():
+                            historical_collection=historical_collections[0].latest()
+                            self._log(u'Creating new chart row: ' + unicode(historical_collection.name) + u' Position: ' + unicode(collection['chart_position']))
+                            chartrow=ItuCollectionChartScan(position=int(collection['chart_position']),
+                                                            itucollection=historical_collection.itucollection,
+                                                            itucollectionhistorical=historical_collection,
+                                                            scanlog=scanlog,
+                                                            date=scanlog.time)
+                            chartrow.save()
+                        else:
+                            self._errorlog(u'Couldn\'tfind an historical record of collection at ' + unicode(collection['series_url']) + u' despite updating the database.')
+                    except KeyError:
+                        self._errorlog('WARNING: Couldn\'t access collection (KeyError):' + str(collection))
 
         elif mode == 3:
             comment = u"Scan of the Top Downloads Chart..."
@@ -375,35 +378,38 @@ class Command(BaseCommand):
             items = itunes.get_topdownloads()
             for item in items:
                 if item:
-                    historical_items=ItuItemHistorical.objects.filter(name=item['item'])
-                    if not historical_items:
-                        self._log(u'WARNING: Couldn\'t find an historical record of item at ' + unicode(item['item_url']) + u'. Attempting an historical scan of ' + unicode(item['institution']) + u' first...')
-                        if not updated_institutions:
-                            management.call_command('scan_itunes', mode=4)
-                            updated_institutions = True
-                        try:
-                            management.call_command('scan_itunes', item['institution'], mode=1)
-                        except:
-                            try: #Deal with institutions which aren't listed by Apple.
-                                institution = ItuInstitution(name = item['institution'],
-                                                             itu_id = int(item['institution_id']),
-                                                             url = item['institution_url'])
-                                institution.save()
+                    try:
+                        historical_items=ItuItemHistorical.objects.filter(name=item['item'])
+                        if not historical_items:
+                            self._log(u'WARNING: Couldn\'t find an historical record of item at ' + unicode(item['item_url']) + u'. Attempting an historical scan of ' + unicode(item['institution']) + u' first...')
+                            if not updated_institutions:
+                                management.call_command('scan_itunes', mode=4)
+                                updated_institutions = True
+                            try:
                                 management.call_command('scan_itunes', item['institution'], mode=1)
                             except:
-                                self._errorlog('Failed to scan institution ' + item['institution'] + '. This is a bug.')
-                        historical_items=ItuItemHistorical.objects.filter(name=item['item'])
-                    if historical_items.exists():
-                        historical_item=historical_items[0].latest()
-                        self._log(u'Created new download chart row: ' + unicode(historical_item.name) + u' Position: ' + unicode(item['chart_position']))
-                        chartrow=ItuItemChartScan(position=int(item['chart_position']),
-                                                  ituitem=historical_item.ituitem,
-                                                  ituitemhistorical=historical_item,
-                                                  scanlog=scanlog,
-                                                  date=scanlog.time)
-                        chartrow.save()
-                    else:
-                        self._errorlog(u'Couldn\'t find an historical record of item at ' + unicode(item['item_url']) + u' despite updating the database.')
+                                try: #Deal with institutions which aren't listed by Apple.
+                                    institution = ItuInstitution(name = item['institution'],
+                                                                 itu_id = int(item['institution_id']),
+                                                                 url = item['institution_url'])
+                                    institution.save()
+                                    management.call_command('scan_itunes', item['institution'], mode=1)
+                                except:
+                                    self._errorlog('Failed to scan institution ' + item['institution'] + '. This is a bug.')
+                            historical_items=ItuItemHistorical.objects.filter(name=item['item'])
+                        if historical_items.exists():
+                            historical_item=historical_items[0].latest()
+                            self._log(u'Created new download chart row: ' + unicode(historical_item.name) + u' Position: ' + unicode(item['chart_position']))
+                            chartrow=ItuItemChartScan(position=int(item['chart_position']),
+                                                      ituitem=historical_item.ituitem,
+                                                      ituitemhistorical=historical_item,
+                                                      scanlog=scanlog,
+                                                      date=scanlog.time)
+                            chartrow.save()
+                        else:
+                            self._errorlog(u'Couldn\'t find an historical record of item at ' + unicode(item['item_url']) + u' despite updating the database.')
+                    except KeyError:
+                        self._errorlog('WARNING: Couldn\'t access item (KeyError):' + str(item))
         elif mode == 4:
             comment = "Scan of list of institutions..."
             self._log(u"Log started for: %s" % unicode(comment))
