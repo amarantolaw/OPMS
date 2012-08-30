@@ -1,8 +1,9 @@
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
-from django.db.models import Sum
+from django.db.models import Sum, Count, Max, Min
 from stats.models import *
+from monitors.models import ItuCollectionHistorical
 from chartit import PivotDataPool, PivotChart, DataPool, Chart
 
 
@@ -19,7 +20,15 @@ def apple_index(request):
 #Pretty representation of the previous day's raw traffic
 @login_required
 def apple_raw_animation(request):
-    return render_to_response('stats/apple/raw/animation.html', {}, context_instance=RequestContext(request))
+    download_raw_log_entries = AppleRawLogEntry.objects.filter(action_type='Download',itunes_id__gte=0)
+    date = download_raw_log_entries.aggregate(Max('timestamp'))['timestamp__max'].date()
+    raw_log_entries = download_raw_log_entries.filter(timestamp__contains=date)
+    itu_ids = raw_log_entries.values('itunes_id').annotate(Count('itunes_id')).order_by('-itunes_id__count')
+    historical_collection_records = []
+    for itu_id in itu_ids:
+        historical_collection_record = ItuCollectionHistorical.objects.filter(itu_id=int(itu_id['itunes_id'])).order_by('-version')[0]
+        historical_collection_records.append(historical_collection_record)
+    return render_to_response('stats/apple/raw/animation.html', {'historical_collection_records': historical_collection_records}, context_instance=RequestContext(request))
 
 #####
 # APPLE/iTU Subviews

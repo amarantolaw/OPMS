@@ -37,11 +37,14 @@ class AppleRawLogEntry(models.Model):
         return ''
 
     def __unicode__(self):
-        return "{} : {} : {}".format(
-            self.timestamp,
-            self.action_type_string,
-            self.title
-        )
+        try:
+            return "{} : {} : {}".format(
+                self.timestamp,
+                self.action_type_string,
+                self.title
+            )
+        except UnicodeEncodeError:
+            return "{UNICODE ERROR}"
 
     class Meta:
         app_label = 'stats'
