@@ -1004,7 +1004,7 @@
             "access_restricted":false,
             "access_permissions":[],
             "description":"",
-            "insitetree":false,
+            "insitetree":true,
             "hint":"",
             "url":"apple-raw-animation",
             "inbreadcrumbs":true,
@@ -1013,7 +1013,7 @@
             "access_perm_type":1,
             "alias":null,
             "sort_order":52,
-            "inmenu":false,
+            "inmenu":true,
             "access_loggedin":false,
             "hidden":false,
             "urlaspattern":true
