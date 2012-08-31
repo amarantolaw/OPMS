@@ -35,9 +35,9 @@ def mean(total, n):
         try:
             return round((float(total) / float(n)),2)
         except TypeError:
-            try:
-                return timedelta(seconds=int(float(total.total_seconds()) / float(n)))
-            except:
-                return "(Error: " + str(total) + ' / ' + str(n) + ')'
+#            try:
+            return timedelta(seconds=int(float(total.total_seconds()) / float(n)))
+#            except:
+#                return "(Error: " + str(total) + ' / ' + str(n) + ')'
     else:
         return 0
