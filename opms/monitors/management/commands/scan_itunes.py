@@ -12,6 +12,7 @@ from django.core import management
 from django.db.models import Q, F
 from settings import *
 
+from opms.utils import debug
 from monitors.utils import itunes as itunes
 from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
 from feedback.models import Metric, Traffic, Category, Comment, Event
@@ -34,35 +35,38 @@ class Command(BaseCommand):
 
         super(Command, self).__init__()
 
-    def handle(self, institution_name = YOUR_INSTITUTION,**options):
+    def handle(self, institution_name = YOUR_INSTITUTION, **options):
+        verbosity = int(options.get('verbosity', 0))
+        if verbosity > 1:
+            debug.DEBUG = True
+        # Create an error log
+        debug.errorlog_start('scan_itunes.log')
         # Some basic error checking
         if institution_name is None:
-            self._errorlog("Please specify the institution to scan.")
+            debug.errorlog("Please specify the institution to scan.", display=True)
             return False
 
         try:
             mode = int(options.get("mode",1))
         except ValueError:
-            self._errorlog("""Please specify a valid mode for this scan.
+            debug.errorlog("""Please specify a valid mode for this scan.
                1) Scan an institution's collection
                2) Scan the Top Collections chart
                3) Scan the Top Downloads chart
                4) Scan the list of institutions
-               """)
+               """, display=True)
             return False
         if mode < 1 or mode > 4:
-            self._errorlog("""Please specify a valid mode for this scan.
+            debug.errorlog("""Please specify a valid mode for this scan.
                1) Scan an institution's collection
                2) Scan the Top Collections chart
                3) Scan the Top Downloads chart
                4) Scan the list of institutions
-               """)
+               """, display=True)
             return False
 
         scantime = datetime.datetime.now(pytz.utc)
         print "Scan iTunes started at " + str(scantime) + "\n"
-        # Create an error log
-        self._errorlog_start('scan_itunes.log')
 
         scanlog = ItuScanLog(mode=mode, time=scantime, comments="")
         scanlog.save()
@@ -71,7 +75,7 @@ class Command(BaseCommand):
             try:
                 institution = ItuInstitution.objects.filter(name__iexact=institution_name)[0]
             except:
-                self._errorlog(institution_name + u" is not a recognised institution.")
+                debug.errorlog(institution_name + u" is not a recognised institution.", display=True)
                 scanlog.delete()
                 return False
 
@@ -79,7 +83,7 @@ class Command(BaseCommand):
             scanlog.save()
 
             comment = u"Scan (and update) of " + institution_name + u"\'s collection from %s" % institution.url
-            self._log(u"Log started for: %s" % unicode(comment))
+            debug.log(u"Log started for: %s" % unicode(comment), display=True)
             print comment
 
             print("Getting information about collections...")
@@ -100,7 +104,7 @@ class Command(BaseCommand):
                             genre_exists = True
                             genre = saved_genre
                     if not genre_exists:
-                        self._log(u'Created new genre ' + unicode(genre.name))
+                        debug.log(u'Created new genre ' + unicode(genre.name), display=True)
                         genre.save()
 
                     collection_record_absolute = ItuCollection(institution=institution)
@@ -154,7 +158,7 @@ class Command(BaseCommand):
                         else:
                             collection_record_absolute.save()
                             collection_record_historical.itucollection = collection_record_absolute
-                        self._log(u'Created new historical collection record for ' + unicode(collection_record_historical.name) + u', version ' + unicode(collection_record_historical.version))
+                        debug.log(u'Created new historical collection record for ' + unicode(collection_record_historical.name) + u', version ' + unicode(collection_record_historical.version), display=True)
                         collection_record_historical.save()
 
                         for r in collection_itunes['ratings']:
@@ -164,7 +168,7 @@ class Command(BaseCommand):
                                                itucollectionhistorical=collection_record_historical)
                                 rating.save()
                             except:
-                                self._log(u'WARNING: Failed to save rating.')
+                                debug.log(u'WARNING: Failed to save rating.', display=True)
 
                     for comment in collection_itunes['comments']:
                         if comment and len(ItuComment.objects.filter(detail=comment['detail'])) == 0:
@@ -176,9 +180,9 @@ class Command(BaseCommand):
                                                          source=comment['source'],
                                                          ituinstitution=institution)
                                 new_comment.save()
-                                self._log(u'Saved new comment by ' + unicode(new_comment.source) + u': \"' + unicode(new_comment.detail) + u'\".')
+                                debug.log(u'Saved new comment by ' + unicode(new_comment.source) + u': \"' + unicode(new_comment.detail) + u'\".', display=True)
                             except:
-                                self._log(u'WARNING: Failed to save comment.')
+                                debug.log(u'WARNING: Failed to save comment.', display=True)
 
                     collections_spotted.append(collection_record_historical)
 
@@ -186,7 +190,7 @@ class Command(BaseCommand):
                     try:
                         items = itunes.get_collection_items(collection_record_historical.url, hurry=True)
                     except:
-                        self._errorlog('Could not get items for collection ' + collection_record_historical.name + '.')
+                        debug.errorlog('Could not get items for collection ' + collection_record_historical.name + '.', display=True)
                         items = []
                     for item in items:
                         if item is not {}: #Dictionary will be blank if we have failed to retrieve data on an item. If so, don't do anything with the item.
@@ -262,9 +266,9 @@ class Command(BaseCommand):
                                                               scanlog=scanlog,
                                                               series=collection_record_historical)
                                 except KeyError:
-                                    self._errorlog(u'Missing key when trying to create an ItuItemHistorical. item=' + unicode(item))
+                                    debug.errorlog(u'Missing key when trying to create an ItuItemHistorical. item=' + unicode(item), display=True)
                                 except:
-                                    self._errorlog(u'Failed to process ItuItemHistorical.')
+                                    debug.errorlog(u'Failed to process ItuItemHistorical.', display=True)
 
                             try: #We can't afford this bit to die in the middle of the night.
 #                                Put together a list of saved item_record_historicals that look like they're the same as our item_record_historical, really.
@@ -293,25 +297,25 @@ class Command(BaseCommand):
                                     else:
                                         item_record_absolute.save()
                                         item_record_historical.ituitem = item_record_absolute
-                                    self._log(u'Created new historical item record for ' + unicode(item_record_historical.name) + u', version ' + unicode(item_record_historical.version))
+                                    debug.log(u'Created new historical item record for ' + unicode(item_record_historical.name) + u', version ' + unicode(item_record_historical.version), display=True)
                                     item_record_historical.save()
                                 items_spotted.append(item_record_historical)
                             except:
-                                self._errorlog(u'Failed to process potential historical item record.')
+                                debug.errorlog(u'Failed to process potential historical item record.', display=True)
                         else:
-                            self._log(u'WARNING: Blank item - perhaps we couldn\'t download the appropriate page?')
+                            debug.log(u'WARNING: Blank item - perhaps we couldn\'t download the appropriate page?', display=True)
                 else:
-                    self._log(u'WARNING: Blank category - perhaps we couldn\'t download the appropriate page?')
+                    debug.log(u'WARNING: Blank category - perhaps we couldn\'t download the appropriate page?', display=True)
             print(u"Checking whether anything has gone missing or reappeared...")
             if collections:
                 counter = 0
                 for historical_collection_record in ItuCollectionHistorical.objects.filter(Q(institution=institution) & Q(itucollection__latest=F('id'))):
                     if historical_collection_record not in collections_spotted and historical_collection_record.missing == None:
-                        self._log(unicode(historical_collection_record.name) + u" appears to have gone missing! We last saw it at " + unicode(historical_collection_record.scanlog.time))
+                        debug.log(unicode(historical_collection_record.name) + u" appears to have gone missing! We last saw it at " + unicode(historical_collection_record.scanlog.time), display=True)
                         historical_collection_record.missing = scanlog
                         historical_collection_record.save()
                     elif historical_collection_record in collections_spotted and historical_collection_record.missing:
-                        self._log(unicode(historical_collection_record.name) + u" has reappeared! It went missing at " + unicode(historical_collection_record.missing.time))
+                        debug.log(unicode(historical_collection_record.name) + u" has reappeared! It went missing at " + unicode(historical_collection_record.missing.time), display=True)
                         historical_collection_record.missing = None
                         historical_collection_record.save()
                     counter += 1
@@ -319,21 +323,21 @@ class Command(BaseCommand):
                         print (u'Still checking... (at object ' + unicode(counter) + u')')
                 for historical_item_record in ItuItemHistorical.objects.filter(Q(institution=institution) & Q(ituitem__latest=F('id'))):
                     if historical_item_record not in items_spotted and historical_item_record.missing == None:
-                        self._log(unicode(historical_item_record.name) + u" appears to have gone missing! We last saw it at " + unicode(historical_item_record.scanlog.time))
+                        debug.log(unicode(historical_item_record.name) + u" appears to have gone missing! We last saw it at " + unicode(historical_item_record.scanlog.time), display=True)
                         historical_item_record.missing = scanlog
                         historical_item_record.save()
                     elif historical_item_record in items_spotted and historical_item_record.missing:
-                        self._log(unicode(historical_item_record.name) + u" has reappeared! It went missing at " + unicode(historical_item_record.missing.time))
+                        debug.log(unicode(historical_item_record.name) + u" has reappeared! It went missing at " + unicode(historical_item_record.missing.time), display=True)
                         historical_item_record.missing = None
                         historical_item_record.save()
                     counter += 1
                     if float(counter)/100.0 == int(float(counter)/100.0):
                         print (u'Still checking... (at object ' + unicode(counter) + u')')
             else:
-                self._log(u"WARNING: No collections found. Perhaps you scanned an institution that only publishes courses?")
+                debug.log(u"WARNING: No collections found. Perhaps you scanned an institution that only publishes courses?", display=True)
         elif mode == 2:
             comment = u"Scan of the Top Collections Chart..."
-            self._log(u"Log started for: %s" % unicode(comment))
+            debug.log(u"Log started for: %s" % unicode(comment), display=True)
             updated_institutions = False
             collections = itunes.get_topcollections()
             for collection in collections:
@@ -341,7 +345,7 @@ class Command(BaseCommand):
                     try:
                         historical_collections=ItuCollectionHistorical.objects.filter(url=collection['series_url'])
                         if not historical_collections:
-                            self._log(u'WARNING: Couldn\'t find an historical record of collection at ' + unicode(collection['series_url']) + u'. Attempting an historical scan of ' + unicode(collection['institution']) + u' first...')
+                            debug.log(u'WARNING: Couldn\'t find an historical record of collection at ' + unicode(collection['series_url']) + u'. Attempting an historical scan of ' + unicode(collection['institution']) + u' first...', display=True)
                             if not updated_institutions:
                                 management.call_command('scan_itunes', mode=4)
                                 updated_institutions = True
@@ -355,11 +359,11 @@ class Command(BaseCommand):
                                     institution.save()
                                     management.call_command('scan_itunes', collection['institution'], mode=1)
                                 except:
-                                    self._errorlog('Failed to scan institution ' + collection['institution'] + '. Perhaps this institution isn\'t listed by Apple?')
+                                    debug.errorlog('Failed to scan institution ' + collection['institution'] + '. Perhaps this institution isn\'t listed by Apple?', display=True)
                             historical_collections=ItuCollectionHistorical.objects.filter(url=collection['series_url'])
                         if historical_collections.exists():
                             historical_collection=historical_collections[0].latest()
-                            self._log(u'Creating new chart row: ' + unicode(historical_collection.name) + u' Position: ' + unicode(collection['chart_position']))
+                            debug.log(u'Creating new chart row: ' + unicode(historical_collection.name) + u' Position: ' + unicode(collection['chart_position']), display=True)
                             chartrow=ItuCollectionChartScan(position=int(collection['chart_position']),
                                                             itucollection=historical_collection.itucollection,
                                                             itucollectionhistorical=historical_collection,
@@ -367,13 +371,13 @@ class Command(BaseCommand):
                                                             date=scanlog.time)
                             chartrow.save()
                         else:
-                            self._errorlog(u'Couldn\'tfind an historical record of collection at ' + unicode(collection['series_url']) + u' despite updating the database.')
+                            debug.errorlog(u'Couldn\'tfind an historical record of collection at ' + unicode(collection['series_url']) + u' despite updating the database.', display=True)
                     except KeyError:
-                        self._errorlog('WARNING: Couldn\'t access collection (KeyError):' + str(collection))
+                        debug.errorlog('WARNING: Couldn\'t access collection (KeyError):' + str(collection), display=True)
 
         elif mode == 3:
             comment = u"Scan of the Top Downloads Chart..."
-            self._log(u"Log started for: %s" % unicode(comment))
+            debug.log(u"Log started for: %s" % unicode(comment), display=True)
             updated_institutions = False
             items = itunes.get_topdownloads()
             for item in items:
@@ -381,7 +385,7 @@ class Command(BaseCommand):
                     try:
                         historical_items=ItuItemHistorical.objects.filter(name=item['item'])
                         if not historical_items:
-                            self._log(u'WARNING: Couldn\'t find an historical record of item at ' + unicode(item['item_url']) + u'. Attempting an historical scan of ' + unicode(item['institution']) + u' first...')
+                            debug.log(u'WARNING: Couldn\'t find an historical record of item at ' + unicode(item['item_url']) + u'. Attempting an historical scan of ' + unicode(item['institution']) + u' first...', display=True)
                             if not updated_institutions:
                                 management.call_command('scan_itunes', mode=4)
                                 updated_institutions = True
@@ -395,11 +399,11 @@ class Command(BaseCommand):
                                     institution.save()
                                     management.call_command('scan_itunes', item['institution'], mode=1)
                                 except:
-                                    self._errorlog('Failed to scan institution ' + item['institution'] + '. This is a bug.')
+                                    debug.errorlog('Failed to scan institution ' + item['institution'] + '. This is a bug.', display=True)
                             historical_items=ItuItemHistorical.objects.filter(name=item['item'])
                         if historical_items.exists():
                             historical_item=historical_items[0].latest()
-                            self._log(u'Created new download chart row: ' + unicode(historical_item.name) + u' Position: ' + unicode(item['chart_position']))
+                            debug.log(u'Created new download chart row: ' + unicode(historical_item.name) + u' Position: ' + unicode(item['chart_position']), display=True)
                             chartrow=ItuItemChartScan(position=int(item['chart_position']),
                                                       ituitem=historical_item.ituitem,
                                                       ituitemhistorical=historical_item,
@@ -407,12 +411,12 @@ class Command(BaseCommand):
                                                       date=scanlog.time)
                             chartrow.save()
                         else:
-                            self._errorlog(u'Couldn\'t find an historical record of item at ' + unicode(item['item_url']) + u' despite updating the database.')
+                            debug.errorlog(u'Couldn\'t find an historical record of item at ' + unicode(item['item_url']) + u' despite updating the database.', display=True)
                     except KeyError:
-                        self._errorlog('WARNING: Couldn\'t access item (KeyError):' + str(item))
+                        debug.errorlog('WARNING: Couldn\'t access item (KeyError):' + str(item), display=True)
         elif mode == 4:
             comment = "Scan of list of institutions..."
-            self._log(u"Log started for: %s" % unicode(comment))
+            debug.log(u"Log started for: %s" % unicode(comment))
             print comment
             institutions = itunes.get_institutions()
             for institution_itunes in institutions:
@@ -434,68 +438,19 @@ class Command(BaseCommand):
                             saved_institution.url = institution.url
                             institution = saved_institution
                     if need_update:
-                        self._log(u'Updated institution ' + unicode(institution.name))
+                        debug.log(u'Updated institution ' + unicode(institution.name), display=True)
                         institution.save()
                     elif need_create:
-                        self._log(u'Created new institution ' + unicode(institution.name))
+                        debug.log(u'Created new institution ' + unicode(institution.name), display=True)
                         institution.save()
         else:
-            self._errorlog(u"We shouldn't ever get this scan...")
+            debug.errorlog(u"We shouldn't ever get this scan...", display=True)
 
         print "\nScan iTunes finished at " + str(datetime.datetime.now(pytz.utc))
 
         # Write the error cache to disk
-        self._error_log_save()
-        self._errorlog_stop()
+        debug.errorlog_save()
+        debug.errorlog_stop()
         scanlog.complete = True
         scanlog.save()
-        return None
-
-    # DEBUG AND INTERNAL HELP METHODS ==============================================================
-
-    def _debug(self,error_str):
-        "Basic optional debug function. Print the string if enabled"
-        if self.debug:
-            print(unicode(datetime.datetime.now(pytz.utc)) + u': ' + u'DEBUG:' + unicode(error_str) + u'\n')
-            self._error_log_save()
-        return None
-
-
-    def _errorlog(self,error_str):
-        "Write errors to a log file"
-        # sys.stderr.write('ERROR:' + str(error_str) + '\n')
-        #self.error_log.write('ERROR:' + str(error_str) + '\n')
-        self.error_cache += u'ERROR:' + unicode(error_str) + u'\n'
-        print(unicode(datetime.datetime.now(pytz.utc)) + u': ' + u'ERROR: ' + unicode(error_str) + u'\n')
-        self._error_log_save()
-        return None
-
-    def _log(self,error_str):
-        "Write things that aren't errors to a log file"
-        self.error_cache += unicode(datetime.datetime.now(pytz.utc)) + u': ' + unicode(error_str) + u'\n'
-        print(unicode(error_str))
-        return None
-
-
-    def _errorlog_start(self, path_to_file):
-        try:
-            self.error_log = codecs.open(path_to_file,'a', encoding='utf-8')
-        except IOError:
-            sys.stderr.write("WARNING: Could not open existing error file. New file being created")
-            self.error_log = codecs.open(path_to_file,'w', encoding='utf-8')
-
-        self.error_log.write(u"Log started at " + unicode(datetime.datetime.utcnow()) + u"\n")
-        print "Writing errors to: " + path_to_file
-        return None
-
-    def _error_log_save(self):
-        "Write errors to a log file"
-        self.error_log.write(self.error_cache)
-        self.error_cache = u""
-        return None
-
-
-    def _errorlog_stop(self):
-        self.error_log.write(u"Log ended at " + unicode(datetime.datetime.utcnow()) + u"\n")
-        self.error_log.close()
         return None

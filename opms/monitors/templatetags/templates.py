@@ -16,7 +16,7 @@ def percentage(fraction, population):
             else:
                 return "0 %"
         except:
-            return 'TypeError'
+            return 'TypeError: ' + str(fraction) + ' / ' + str(population) + '%'
     except ValueError:
         return ''
 
@@ -38,6 +38,6 @@ def mean(total, n):
             try:
                 return timedelta(seconds=int(float(total.total_seconds()) / float(n)))
             except:
-                return "Error"
+                return "(Error: " + str(total) + ' / ' + str(n) + ')'
     else:
         return 0
