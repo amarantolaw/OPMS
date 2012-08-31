@@ -40,7 +40,7 @@ class Command(BaseCommand):
         if verbosity > 1:
             debug.DEBUG = True
         # Create an error log
-        debug.errorlog_start('scan_itunes.log')
+        debug.errorlog_start('scan_itunes')
         # Some basic error checking
         if institution_name is None:
             debug.errorlog("Please specify the institution to scan.", display=True)
