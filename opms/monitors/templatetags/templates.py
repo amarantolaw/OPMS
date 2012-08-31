@@ -11,7 +11,7 @@ def percentage(fraction, population):
         return "%.2f%%" % ((float(fraction) / float(population)) * 100)
     except TypeError:
         try:
-            if population.total_seconds():
+            if total_seconds(population):
                 return "%.2f%%" % ((float(total_seconds(fraction)) / float(total_seconds(population))) * 100) #cope with timedeltas
             else:
                 return "0 %"
