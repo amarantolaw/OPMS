@@ -11,7 +11,10 @@ def percentage(fraction, population):
         return "%.2f%%" % ((float(fraction) / float(population)) * 100)
     except TypeError:
         try:
-            return "%.2f%%" % ((float(fraction.total_seconds()) / float(population.total_seconds())) * 100) #cope with timedeltas
+            if population.total_seconds():
+                return "%.2f%%" % ((float(fraction.total_seconds()) / float(population.total_seconds())) * 100) #cope with timedeltas
+            else:
+                return "0 %"
         except:
             return 'TypeError'
     except ValueError:
@@ -35,6 +38,6 @@ def mean(total, n):
             try:
                 return timedelta(seconds=int(float(total.total_seconds()) / float(n)))
             except:
-                return 0
+                return "Error"
     else:
         return 0

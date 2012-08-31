@@ -995,5 +995,28 @@
             "hidden":false,
             "urlaspattern":false
         }
+    },
+    {
+        "pk":52,
+        "model":"sitetree.treeitem",
+        "fields":{
+            "parent":5,
+            "access_restricted":false,
+            "access_permissions":[],
+            "description":"",
+            "insitetree":true,
+            "hint":"",
+            "url":"apple-raw-animation",
+            "inbreadcrumbs":true,
+            "title":"Animation",
+            "tree":1,
+            "access_perm_type":1,
+            "alias":null,
+            "sort_order":52,
+            "inmenu":true,
+            "access_loggedin":false,
+            "hidden":false,
+            "urlaspattern":true
+        }
     }
 ]

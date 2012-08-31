@@ -1,0 +1,64 @@
+{% extends "stats/base.html" %}
+{% load static %}
+{% get_static_prefix as STATIC_PREFIX %}
+{% block head %}
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="timer" style="text-align: right;">
+Loading...
+</div>
+<div style="text-align: center">
+{% for historical_collection_record in historical_collection_records %}<img id="img{{ historical_collection_record.itu_id }}" src="{{ historical_collection_record.img170 }}" style="height: 70px; width: 70px"/>{% endfor %}
+</div>
+    <script>
+        function timer()
+        {
+            var d=new Date();
+            var t=d.toLocaleTimeString();
+            {% for raw_log_entry in raw_log_entries %}
+                if (t=='{{ raw_log_entry.timestamp.time|time:"H:i:s" }}')
+                {
+                    fadeout{{ raw_log_entry.itunes_id }}=setTimeout(function(){
+                        $('#img{{ raw_log_entry.itunes_id }}').animate({
+                            opacity: 0.25
+                        }, 500, function() {
+                            // Animation complete.
+                        })
+                        ,0});
+                    fadein{{ raw_log_entry.itunes_id }}=setTimeout(function(){
+                        $('#img{{ raw_log_entry.itunes_id }}').animate({
+                            opacity: 1.0
+                        }, 5000, function() {
+                            // Animation complete.
+                        })
+                        ,1500});
+                }
+            {% endfor %}
+            {% for browse in browses %}
+                if (t=='{{ browse.timestamp.time|time:"H:i:s" }}')
+                {
+                    fadeout{{ browse.itunes_id }}=setTimeout(function(){
+                        $('#img{{ browse.itunes_id }}').animate({
+                            opacity: 0.75
+                        }, 500, function() {
+                            // Animation complete.
+                        })
+                                ,0});
+                    fadein{{ browse.itunes_id }}=setTimeout(function(){
+                        $('#img{{ browse.itunes_id }}').animate({
+                            opacity: 1.0,
+                        }, 5000, function() {
+                            // Animation complete.
+                        })
+                                ,5000});
+                }
+            {% endfor %}
+            document.getElementById("timer").innerHTML=t;
+        }
+    </script>
+    <script>
+        setInterval(function(){timer()},1000);
+    </script>
+{% endblock %}
