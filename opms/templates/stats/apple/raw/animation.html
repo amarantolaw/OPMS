@@ -16,7 +16,7 @@ Loading...
         function timer()
         {
             var d=new Date();
-            var t=d.toLocaleTimeString();
+            var t=d.toTimeString().split(" ")[0];
             {% for raw_log_entry in raw_log_entries %}
                 if (t=='{{ raw_log_entry.timestamp.time|time:"H:i:s" }}')
                 {
