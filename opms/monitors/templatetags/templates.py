@@ -16,7 +16,7 @@ def percentage(fraction, population):
             else:
                 return "0 %"
         except:
-            return 'TypeError: ' + str(fraction) + ' / ' + str(population) + '%'
+            return 'Error: ' + str(fraction) + ' / ' + str(population) + '%'
     except ValueError:
         return ''
 

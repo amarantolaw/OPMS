@@ -28,7 +28,7 @@ def errorlog(error_str=u"",display=False):
     global ERROR_CACHE
     ERROR_CACHE += u'ERROR:{0}\n'.format(unicode(error_str))
     if display:
-        sys.stderr.write(error_str + u'\n')
+        sys.stderr.write(unicode(error_str + u'\n'))
     return None
 
 def log(str=u"",display=False):
@@ -36,7 +36,7 @@ def log(str=u"",display=False):
     global ERROR_CACHE
     ERROR_CACHE += u'{0}\n'.format(unicode(str))
     if display:
-        sys.stdout.write(str + u'\n')
+        sys.stdout.write(unicode(str + u'\n'))
     return None
 
 def errorlog_start(path_to_file):
