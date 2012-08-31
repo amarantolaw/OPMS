@@ -28,6 +28,12 @@ def errorlog(error_str=""):
     ERROR_CACHE += 'ERROR:{0}\n'.format(error_str)
     return None
 
+def log(error_str=""):
+    "Write messages to a log file cache"
+    global ERROR_CACHE
+    ERROR_CACHE += '{0}\n'.format(error_str)
+    return None
+
 def errorlog_start(path_to_file):
     global ERROR_LOG
     try:
