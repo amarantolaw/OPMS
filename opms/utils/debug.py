@@ -1,5 +1,8 @@
 import datetime, sys
 from codecs import open
+import pytz
+
+
 # DEBUG AND INTERNAL HELP METHODS ==============================================================
 # Eventually this should be all replaced by Django logging I presume...
 DEBUG = False
@@ -39,8 +42,10 @@ def log(str=u"",display=False):
         sys.stdout.write((str + u'\n').encode('utf-8'))
     return None
 
-def errorlog_start(path_to_file):
+def errorlog_start(prefix):
     global ERROR_LOG
+    dtstamp = datetime.datetime.now(pytz.utc).strftime('%d%m%Y-%H%M%S')
+    path_to_file = prefix + dtstamp + '.log'
     try:
         ERROR_LOG = open(path_to_file, mode='a', encoding='utf-8')
     except IOError:

@@ -38,7 +38,7 @@ class Command(LabelCommand):
         iterations = int(options.get('iterations', 10))
 
         # Create an error log
-        debug.errorlog_start('scan_urls.log')
+        debug.errorlog_start('scan_urls')
         debug.errorlog("Log started for: " + comment)
 
         t = URLMonitorTask()
