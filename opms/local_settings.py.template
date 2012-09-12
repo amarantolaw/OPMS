@@ -1,3 +1,4 @@
+from settings import MIDDLEWARE_CLASSES
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -31,3 +32,11 @@ EMAIL_USE_TLS = True
 EMAIL_SUBJECT_PREFIX = '[OPMS]'
 
 OPMS_EMAIL_ALERTS = ''
+
+MIDDLEWARE_CLASSES += (
+    "django.contrib.auth.middleware.RemoteUserMiddleware",
+)
+
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.RemoteUserBackend",
+)
