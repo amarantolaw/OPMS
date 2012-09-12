@@ -38,7 +38,7 @@ class AppleRawLogEntry(models.Model):
 
     def __unicode__(self):
         try:
-            return "{} : {} : {}".format(
+            return "{0} : {1} : {2}".format(
                 self.timestamp,
                 self.action_type_string,
                 self.title
@@ -67,7 +67,7 @@ class AppleRawLogDailySummary(models.Model):
     subscription_enclosure = models.IntegerField(default=0)
 
     def __unicode__(self):
-        return "Summary for {}".format(self.date)
+        return "Summary for {0}".format(self.date)
 
     class Meta:
         app_label = 'stats'

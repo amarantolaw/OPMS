@@ -1018,5 +1018,28 @@
             "hidden":false,
             "urlaspattern":true
         }
+    },
+    {
+        "pk":53,
+        "model":"sitetree.treeitem",
+        "fields":{
+            "parent":5,
+            "access_restricted":false,
+            "access_permissions":[],
+            "description":"",
+            "insitetree":true,
+            "hint":"",
+            "url":"/analytics/apple/raw/",
+            "inbreadcrumbs":true,
+            "title":"Raw Daily Data",
+            "tree":1,
+            "access_perm_type":1,
+            "alias":null,
+            "sort_order":53,
+            "inmenu":true,
+            "access_loggedin":false,
+            "hidden":false,
+            "urlaspattern":true
+        }
     }
 ]

@@ -11,9 +11,11 @@ urlpatterns = patterns('stats.views',
     url(r'^apple/feeds/$', summary_feeds),
     url(r'^apple/guid/(?P<trackguid_id>\d+)', guid_detail, name="apple-guid-detail"),
 
+    url(r'^apple/raw/animation$', apple_raw_animation, name="apple-raw-animation"),
+    url(r'^apple/raw/$', apple_raw_summary, name="apple-raw-summary"),
+
     url(r'^apple/summary/$', summary_index),
     url(r'^apple/$', apple_index),
-    url(r'^apple/raw/animation$', apple_raw_animation, name="apple-raw-animation"),
 
     #(r'report/authors/$', 'summary_authors'), # Consider this dead for now
 

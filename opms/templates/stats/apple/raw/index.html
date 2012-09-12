@@ -1,0 +1,48 @@
+{% extends "stats/base.html" %}
+{% load static %}
+{% get_static_prefix as STATIC_PREFIX %}
+{% block head %}
+    <script src="{{ STATIC_PREFIX }}scripts/jquery.tablesorter.min.js"></script>
+    <script src="{{ STATIC_PREFIX }}scripts/jquery-ui-1.8.13.min.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/tablesorter.css" media="screen,projection" />
+{% endblock %}
+
+{% block content %}
+<script>
+    $(document).ready(function()
+        {
+          $("#summaryTable").tablesorter( {} );
+        }
+    );
+</script>
+<h3>Data table</h3>
+<table id="summaryTable" class="tablesorter">
+    <thead>
+    <tr>
+        <th>Date</th>
+        <th>Browse</th>
+        <th>Subscribe</th>
+        <th>Download</th>
+        <th>Stream</th>
+        <th>Subscription</th>
+{#        <th>Auto Download</th>#}
+{#        <th>Download All</th>#}
+    </tr>
+    </thead>
+    <tbody>
+    {% for summary_row in summary_list %}
+        <tr>
+            <td>{{ summary_row.date }}</td>
+            <td>{{ summary_row.browse }}</td>
+            <td>{{ summary_row.subscribe }}</td>
+            <td>{{ summary_row.download|add:summary_row.auto_download|add:summary_row.download_all }}</td>
+            <td>{{ summary_row.stream }}</td>
+            <td>{{ summary_row.subscription_enclosure }}</td>
+{#            <td>{{ summary_row.auto_download }}</td>#}
+{#            <td>{{ summary_row.download_all }}</td>#}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

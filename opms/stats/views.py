@@ -9,32 +9,13 @@ from chartit import PivotDataPool, PivotChart, DataPool, Chart
 
 
 # Default Stats module homepage
-@login_required
 def index(request):
     return render_to_response('stats/base.html', {}, context_instance=RequestContext(request))
 
 
-@login_required
 def apple_index(request):
     return render_to_response('stats/apple/base.html', {}, context_instance=RequestContext(request))
 
-#Pretty representation of the previous day's raw traffic
-@login_required
-def apple_raw_animation(request):
-    download_raw_log_entries = AppleRawLogEntry.objects.filter(~Q(action_type='Browse'),Q(itunes_id__gte=0))
-    date = download_raw_log_entries.aggregate(Max('timestamp'))['timestamp__max'].date() - timedelta(1)
-    raw_log_entries = download_raw_log_entries.filter(timestamp__contains=date)
-#    raw_log_entries = download_raw_log_entries #Cheat and merge all the days together.
-    browses = AppleRawLogEntry.objects.filter(Q(action_type='Browse'),Q(itunes_id__gte=0),Q(timestamp__contains=date))
-    itu_ids = raw_log_entries.values('itunes_id').distinct()
-    historical_collection_records = []
-    for itu_id in itu_ids:
-        try:
-            historical_collection_record = ItuCollectionHistorical.objects.filter(itu_id=int(itu_id['itunes_id'])).order_by('-version')[0]
-            historical_collection_records.append(historical_collection_record)
-        except IndexError:
-            pass
-    return render_to_response('stats/apple/raw/animation.html', {'historical_collection_records': historical_collection_records, 'raw_log_entries': raw_log_entries, 'browses': browses}, context_instance=RequestContext(request))
 
 #####
 # APPLE/iTU Subviews
@@ -42,6 +23,20 @@ def apple_raw_animation(request):
 @login_required
 def summary_index(request):
     "Show the Apple 'Summary' User Action results"
+
+    # Do a check to see if the latest Apple Raw Daily summaries have been cloned into the equivalent WeeklySummary
+#    latest_raw = AppleRawLogEntry.objects.order_by('-timestamp').all()[0]
+    summary_temp = []
+    raw_daily = AppleRawLogDailySummary.objects.order_by('-date').all()
+    try:
+        latest_weekly = AppleWeeklySummary.objects.filter(service_name__exact='itu-raw').order_by('-week_beginning')[0]
+
+        if (raw_daily[0].date - latest_weekly.week_beginning).days >= 7:
+            pass #TODO calculate some weekly summaries
+
+    except IndexError:
+        pass #TODO No weekly summaries exist for itu-raw, start from the beginning
+
     summary_data = AppleWeeklySummary.merged.all()
 
     # Create a Datapool object for Chartit
@@ -376,34 +371,30 @@ def guid_detail(request, trackguid_id):
     }, context_instance=RequestContext(request))
 
 
-####
-# TEST RAW OUTPUT
-####
-#def list_daily_raw(request):
-#    raw_listing = AppleRawLogEntry.objects.raw(
-#        """
-#        SELECT date_trunc('day', timestamp) AS day, count(id) AS total, action_type
-#        FROM stats_applerawlogentry
-#        GROUP BY date_trunc('day', timestamp), action_type
-#        ORDER BY day, action_type;
-#        """
-#    )
-#    # Pivot this listing into a table on date vs action type, combining some actions to match the apple ones
-#    # Date vs Browse, Subscribe, Download, Stream, Enclosure
-#    listing = []
-#    for row in raw_listing:
-#
-#
-#
-#    AppleWeeklyTrackCount.merged.psuedo_feeds()
-#    return render_to_response('stats/apple/feeds.html',{
-#        'listing':listing
-#    }, context_instance=RequestContext(request))
+#######
+# Apple Raw Log Display
+#######
+def apple_raw_summary(request):
+    daily_summary_list = AppleRawLogDailySummary.objects.all().order_by('date')
+    return render_to_response('stats/apple/raw/index.html',
+        {'summary_list':daily_summary_list},
+        context_instance=RequestContext(request)
+    )
 
 
-#SELECT date_trunc('day', timestamp) AS day, count(id) AS total, action_type
-#FROM stats_applerawlogentry
-#WHERE date_trunc('day', timestamp) >= '2012-01-24'
-#  AND date_trunc('day', timestamp) < '2012-01-25'
-#GROUP BY date_trunc('day', timestamp), action_type
-#ORDER BY day;
+#Pretty representation of the previous day's raw traffic
+def apple_raw_animation(request):
+    download_raw_log_entries = AppleRawLogEntry.objects.filter(~Q(action_type='Browse'),Q(itunes_id__gte=0))
+    date = download_raw_log_entries.aggregate(Max('timestamp'))['timestamp__max'].date() - timedelta(1)
+    raw_log_entries = download_raw_log_entries.filter(timestamp__contains=date)
+    #    raw_log_entries = download_raw_log_entries #Cheat and merge all the days together.
+    browses = AppleRawLogEntry.objects.filter(Q(action_type='Browse'),Q(itunes_id__gte=0),Q(timestamp__contains=date))
+    itu_ids = raw_log_entries.values('itunes_id').distinct()
+    historical_collection_records = []
+    for itu_id in itu_ids:
+        try:
+            historical_collection_record = ItuCollectionHistorical.objects.filter(itu_id=int(itu_id['itunes_id'])).order_by('-version')[0]
+            historical_collection_records.append(historical_collection_record)
+        except IndexError:
+            pass
+    return render_to_response('stats/apple/raw/animation.html', {'historical_collection_records': historical_collection_records, 'raw_log_entries': raw_log_entries, 'browses': browses}, context_instance=RequestContext(request))
