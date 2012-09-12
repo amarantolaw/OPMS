@@ -189,6 +189,7 @@ MIDDLEWARE_CLASSES = (
     "django.contrib.messages.middleware.MessageMiddleware",
 )
 
+WSGI_APPLICATION = "opms.wsgi.application"
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
