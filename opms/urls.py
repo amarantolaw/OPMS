@@ -16,16 +16,16 @@ urlpatterns = patterns('',
     (r'^admin/', include(admin.site.urls)),
 
     # Stats module urls
-    (r'^analytics/', include('opms.stats.urls')),
+    (r'^analytics/', include('stats.urls')),
 
     # Monitors module urls
-    (r'^monitoring/', include('opms.monitors.urls')),
+    (r'^monitoring/', include('monitors.urls')),
 
     # Feedback module urls
-    (r'^monitoring/feedback/', include('opms.feedback.urls')),
+    (r'^monitoring/feedback/', include('feedback.urls')),
 
     # FFM module urls
-    #(r'^ffm/', include('opms.ffm.urls')),
+    #(r'^ffm/', include('ffm.urls')),
     
     # Root homepage
     (r'^$', home),
