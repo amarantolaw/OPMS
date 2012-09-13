@@ -3,9 +3,9 @@
 # Last Edited: 29-5-2012
 from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
-from opms.utils import debug
-from opms.stats.models import LogFile, AppleRawLogEntry, AppleRawLogDailySummary, UserAgent, UA, OS, Rdns
-from opms.stats.uasparser import UASparser, UASException
+from utils import debug
+from stats.models import LogFile, AppleRawLogEntry, AppleRawLogDailySummary, UserAgent, UA, OS, Rdns
+from stats.uasparser import UASparser, UASException
 import pytz
 import datetime, time, sys, os, pygeoip, csv
 from datetime import timedelta

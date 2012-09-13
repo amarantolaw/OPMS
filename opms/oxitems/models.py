@@ -12,7 +12,7 @@
 from django.db import models
 from django.utils.encoding import smart_str, smart_unicode
 from datetime import date
-from opms.ffm.models import Collection, Feed
+from ffm.models import Collection, Feed
 
 
 ## These are local temporary linking tables designed to make syncing easier

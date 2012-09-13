@@ -3,7 +3,7 @@
 # Last Edited: 22-3-2011
 from optparse import make_option
 from django.core.management.base import NoArgsCommand, CommandError
-from opms.stats.models import *
+from stats.models import *
 import datetime, sys
 from dns import resolver,reversename
 from IPy import IP

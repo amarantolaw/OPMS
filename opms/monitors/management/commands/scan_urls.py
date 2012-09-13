@@ -3,8 +3,8 @@
 # Last Edited: 04-19-2011
 from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
-from opms.monitors.models import *
-from opms.utils import debug
+from monitors.models import *
+from utils import debug
 import datetime, sys, urllib2, time
 
 

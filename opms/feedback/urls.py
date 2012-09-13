@@ -1,5 +1,5 @@
 from django.conf.urls import patterns, include, url
-from opms.feedback.views import *
+from feedback.views import *
 
 urlpatterns = patterns('feedback.views',
     url(r'^$', 'index', name="index"),

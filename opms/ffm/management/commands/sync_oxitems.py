@@ -3,9 +3,9 @@
 # Last Edited: 21-06-2011
 from optparse import make_option
 from django.core.management.base import NoArgsCommand, CommandError
-from opms.ffm.models import *
-from opms.oxitems.models import *
-from opms.core.models import *
+from ffm.models import *
+from oxitems.models import *
+from core.models import *
 import sys, re, csv, urllib
 from datetime import datetime
 from dateutil import parser
