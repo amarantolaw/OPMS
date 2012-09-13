@@ -7,8 +7,8 @@ from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, F, Sum, Count
 from django_tables2 import RequestConfig
-import opms.settings as settings
-from opms.monitors.models import URLMonitorURL, URLMonitorScan
+import settings
+from monitors.models import URLMonitorURL, URLMonitorScan
 from feedback.models import Metric, Traffic, Category, Comment, Event, Tag
 from feedback.views import create_metric_textfiles
 from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment

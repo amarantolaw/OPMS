@@ -12,7 +12,7 @@ from django.core import management
 from django.db.models import Q, F
 from settings import *
 
-from opms.utils import debug
+from utils import debug
 from monitors.utils import itunes as itunes
 from monitors.models import ItuCollectionChartScan, ItuCollectionHistorical, ItuCollection, ItuItemChartScan, ItuItemHistorical, ItuItem, ItuScanLog, ItuGenre, ItuInstitution, ItuRating, ItuComment
 from feedback.models import Metric, Traffic, Category, Comment, Event

@@ -3,8 +3,8 @@
 # Last Edited: 16-04-2012
 from optparse import make_option
 from django.core.management.base import NoArgsCommand
-from opms.stats.models import AppleTrackGUID
-from opms.oxitems.models import Rg07Channels, Rg07Items
+from stats.models import AppleTrackGUID
+from oxitems.models import Rg07Channels, Rg07Items
 import sys
 from datetime import datetime
 from django.utils.encoding import smart_unicode

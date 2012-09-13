@@ -3,8 +3,8 @@
 # Last Edited: 22-3-2011
 from optparse import make_option
 from django.core.management.base import LabelCommand, CommandError
-from opms.stats.models import *
-from opms.stats.uasparser import UASparser, UASException
+from stats.models import *
+from stats.uasparser import UASparser, UASException
 import apachelog, datetime, sys, pygeoip
 from IPy import IP
 

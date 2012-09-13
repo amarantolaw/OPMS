@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.encoding import smart_unicode
 from datetime import datetime
-from opms.core.models import Person
+from core.models import Person
 from django.contrib.auth.models import User
 import uuid
 
