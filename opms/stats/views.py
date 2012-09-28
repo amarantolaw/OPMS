@@ -375,7 +375,7 @@ def guid_detail(request, trackguid_id):
 # Apple Raw Log Display
 #######
 def apple_raw_summary(request):
-    daily_summary_list = AppleRawLogDailySummary.objects.filter(date__gt='2012-09-21').order_by('date')
+    daily_summary_list = AppleRawLogDailySummary.objects.filter(date__gt='2012-01-21').order_by('date')
     total_d = int(daily_summary_list.aggregate(Sum('download')).get("download__sum"))
     total_da = int(daily_summary_list.aggregate(Sum('download_all')).get("download_all__sum"))
     total_ad = int(daily_summary_list.aggregate(Sum('auto_download')).get("auto_download__sum"))
