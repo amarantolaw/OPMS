@@ -382,11 +382,13 @@ def apple_raw_summary(request):
     total_se = int(daily_summary_list.aggregate(Sum('subscription_enclosure')).get("subscription_enclosure__sum"))
     total_downloads =  total_d + total_da + total_ad + total_se
     latest_date = daily_summary_list.aggregate(Max('date')).get("date__max")
+    average_downloads_per_day = int(total_downloads / daily_summary_list.count())
     return render_to_response('stats/apple/raw/index.html',
         {
             'summary_list':daily_summary_list,
             'total_downloads':total_downloads,
             'latest_date':latest_date,
+            'average_downloads_per_day':average_downloads_per_day,
         },
         context_instance=RequestContext(request)
     )
