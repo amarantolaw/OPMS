@@ -376,9 +376,11 @@ def guid_detail(request, trackguid_id):
 #######
 def apple_raw_summary(request):
     daily_summary_list = AppleRawLogDailySummary.objects.all().order_by('date')
-    total_downloads = daily_summary_list.aggregate(Sum('download')) + daily_summary_list.aggregate(Sum(
-        'download_all')) + daily_summary_list.aggregate(Sum('auto_download')) + daily_summary_list.aggregate(Sum(
-        'subscription_enclosure'))
+    total_d = int(daily_summary_list.aggregate(Sum('download')).get("download__sum"))
+    total_da = int(daily_summary_list.aggregate(Sum('download_all')).get("download_all__sum"))
+    total_ad = int(daily_summary_list.aggregate(Sum('auto_download')).get("auto_download__sum"))
+    total_se = int(daily_summary_list.aggregate(Sum('subscription_enclosure')).get("subscription_enclosure__sum"))
+    total_downloads =  total_d + total_da + total_ad + total_se
     return render_to_response('stats/apple/raw/index.html',
         {
             'summary_list':daily_summary_list,
