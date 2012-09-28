@@ -376,10 +376,37 @@ def guid_detail(request, trackguid_id):
 #######
 def apple_raw_summary(request):
     daily_summary_list = AppleRawLogDailySummary.objects.all().order_by('date')
+    total_downloads = daily_summary_list.aggregate(Sum('download')) + daily_summary_list.aggregate(Sum(
+        'download_all')) + daily_summary_list.aggregate(Sum('auto_download')) + daily_summary_list.aggregate(Sum(
+        'subscription_enclosure'))
     return render_to_response('stats/apple/raw/index.html',
-        {'summary_list':daily_summary_list},
+        {
+            'summary_list':daily_summary_list,
+            'total_downloads':total_downloads,
+        },
         context_instance=RequestContext(request)
     )
+
+
+def apple_raw_collection_list(request):
+    """
+    @param request:
+    @return:
+
+    Display all collections belonging to an institution.
+    """
+#    message = ''
+#    error = ''
+#    institution = ItuInstitution.objects.get(id=int(institution_id))
+#    collections = ItuCollection.objects.filter(institution=institution).order_by('-latest__last_modified')
+#    collection_table = InstitutionalCollectionTable(collections, order_by=('-last_modified'))
+#    RequestConfig(request, paginate={'per_page': 100}).configure(collection_table)
+#    return render_to_response('monitors/itu_institution_collections.html',
+#            {'error': error, 'message': message, 'institution': institution,
+#             'collections': collections, 'collection_table': collection_table,
+#             'chart': False}, context_instance=RequestContext(request))
+#    )
+    pass
 
 
 #Pretty representation of the previous day's raw traffic
