@@ -85,8 +85,6 @@ class Command(LabelCommand):
                 if not created:
                     err_string = "This file has already been imported: ({0})".format(filename)
                     debug.onscreen(err_string)
-#                    debug.errorlog_stop()
-#                    raise CommandError(err_string)
                     continue
 
                 import_file_limit -= 1
@@ -177,7 +175,7 @@ class Command(LabelCommand):
         # Reset line counter for parsing scan
         self.import_stats['line_counter'] = self.import_stats.get('import_startline')
 
-        for i in range(self.import_stats.get('line_counter'),len(tsvdata)):
+        for i in range(self.import_stats.get('line_counter')-1,len(tsvdata)):
             self._parseline(tsvdata[i], logfile_obj)
             self.import_stats['line_counter'] = i
 
@@ -205,20 +203,22 @@ class Command(LabelCommand):
                 efstring = "{0:d}h {1:d}m {2:d}s".format(efhr,efmin,efsec)
 
                 # Output the status
-                print "{0:%Y-%m-%d %H:%M:%S} : {1:.1%} completed. Parsed {2:d} lines. Rate: {3:.2f} lines/sec. Estimated finish in {4}".format(
+                output = "{0:%Y-%m-%d %H:%M:%S} : {1:.1%} completed. Parsed {2:d} lines. Rate: {3:.2f} lines/sec. " \
+                    "Estimated finish in {4}".format(
                     datetime.datetime.now(pytz.utc),
                     float(self.import_stats.get('line_counter')) / float(self.import_stats.get('line_count')),
                     self.import_stats.get('line_counter'),
                     self.import_stats.get('import_rate'),
                     efstring
                 )
+                debug.errorlog(output, display=True)
 
                 # Write the error cache to disk
                 debug.errorlog_save()
 
         # Create a summary record for this day's data
-        debug.onscreen("Daily summary: " + str(self.summary))
-        print "Daily summary: \n" + str(self.summary)
+        debug.errorlog("Daily summary: " + str(self.summary), display=True)
+#        print "Daily summary: \n" + str(self.summary)
         ds, created = AppleRawLogDailySummary.objects.get_or_create(
             date = self.summary.get("date", None),
             defaults = self.summary
@@ -282,7 +282,8 @@ class Command(LabelCommand):
         arle.save(force_insert=True)
 
         # Add to the daily summary dictionary
-        self.summary["date"] = "{0:%Y-%m-%d}".format(arle.timestamp)
+        if self.summary.get("date", None) is None:
+            self.summary["date"] = "{0:%Y-%m-%d}".format(arle.timestamp)
         if arle.action_type == "AutoDownload":
             self.summary["auto_download"] = int(self.summary.get("auto_download",0) + 1)
         elif arle.action_type == "Browse":
