@@ -39,31 +39,58 @@
             <div class="alert alert-success">{{ message }}</div>
         {% endif %}
         {% if summary_list %}
+            <hr class="clearfix">
+            <p><i class="label label-info">info</i> There are {{ total_downloads.days }} days of results.</p>
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Action</th>
-                        <th>Timestamp</th>
-                        <th>Episode</th>
+                        <th>Date</th>
+                        <th>Browse</th>
+                        <th>Subscribe</th>
+                        <th>Download</th>
+                        <th>Stream</th>
+                        <th>Enclosure</th>
+                    </tr>
+                    <tr>
+                        <th><b class="label label-info">Daily averages</b></th>
+                        <td><i class="badge">{{ daily_averages.browse|floatformat }}</i></td>
+                        <td><i class="badge">{{ daily_averages.subscribe|floatformat }}</i></td>
+                        <td><i class="badge">{{ daily_averages.oxford_download|floatformat }}</i></td>
+                        <td><i class="badge">{{ daily_averages.stream|floatformat }}</i></td>
+                        <td><i class="badge">{{ daily_averages.subscription_enclosure|floatformat }}</i></td>
+                    </tr>
+                    <tr>
+                        <th><b class="label label-info">Totals</b></th>
+                        <td><i class="badge">{{ total_downloads.browse }}</i></td>
+                        <td><i class="badge">{{ total_downloads.subscribe }}</i></td>
+                        <td><i class="badge">{{ total_downloads.download|add:total_downloads.auto_download|add:total_downloads.download_all }}</i></td>
+                        <td><i class="badge">{{ total_downloads.stream }}</i></td>
+                        <td><i class="badge">{{ total_downloads.subscription_enclosure }}</i></td>
                     </tr>
                 </thead>
                 <tbody>
                 {% for item in summary_list %}
                     <tr>
-                        <td>{{ item.action_type_string }}</td>
-                        <td>{{ item.timestamp }}</td>
-                        <td>{% if item.episode_title %}{{ item.episode_id }} - {{ item.episode_title }}
-                            ({{ item.episode_type }}){% endif %}
-                        </td>
+                        <td>{{ item.date }}</td>
+                        <td>{{ item.browse }}</td>
+                        <td>{{ item.subscribe }}</td>
+                        <td>{{ item.download|add:item.auto_download|add:item.download_all }}</td>
+                        <td>{{ item.stream }}</td>
+                        <td>{{ item.subscription_enclosure }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <th>TOTALS</th>
+                        <td>{{ total_downloads.browse }}</td>
+                        <td>{{ total_downloads.subscribe }}</td>
+                        <td>{{ total_downloads.download|add:total_downloads.auto_download|add:total_downloads.download_all }}</td>
+                        <td>{{ total_downloads.stream }}</td>
+                        <td>{{ total_downloads.subscription_enclosure }}</td>
+                    </tr>
+                </tfoot>
             </table>
-
-{#            <div>#}
-{#                {% load render_table from django_tables2 %}#}
-{#                {% render_table collection_table %}#}
-{#            </div>#}
         {% endif %}
     {% endif %}
 {% endblock %}

@@ -76,6 +76,36 @@ class AppleRawLogDailySummary(models.Model):
         app_label = 'stats'
 
 
+class AppleRawLogDailyCollectionSummary(models.Model):
+    """
+    A summary of data aggregated from the AppleRawLogEntry table, done for convenience and speed of processing and
+    access.
+    Lists a day (date), itunes_id (collection), and then an integer count of the number of occurrences of each action
+    type known to the
+    system
+    """
+    updated = models.DateTimeField(auto_now=True)
+    date = models.DateField(db_index=True)
+    auto_download = models.IntegerField(default=0)
+    browse = models.IntegerField(default=0)
+    download = models.IntegerField(default=0)
+    download_all = models.IntegerField(default=0)
+    stream = models.IntegerField(default=0)
+    subscribe = models.IntegerField(default=0)
+    subscription_enclosure = models.IntegerField(default=0)
+
+    def __unicode__(self):
+        return "Summary for {0}".format(self.date)
+
+    class Meta:
+        app_label = 'stats'
+
+
+
+#############
+# Django Table Definitions
+#############
+
 class InstitutionalCollectionTable(tables.Table):
     """
     A table to enable pagination of all the collections belonging to a given institution,
