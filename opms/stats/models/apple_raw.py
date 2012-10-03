@@ -1,6 +1,9 @@
 from django.db import models
 from core import LogFile
 from apache_access import UserAgent, Rdns
+#from monitors.models import
+import django_tables2 as tables
+from django_tables2.utils import A
 
 class AppleRawLogEntry(models.Model):
     ACTION_TYPE_CHOICES = (
@@ -71,3 +74,30 @@ class AppleRawLogDailySummary(models.Model):
 
     class Meta:
         app_label = 'stats'
+
+
+class InstitutionalCollectionTable(tables.Table):
+    """
+    A table to enable pagination of all the collections belonging to a given institution,
+    to enable stats browsing
+    """
+    name = tables.Column(accessor='latest.name',
+                         order_by='latest.name',
+                         verbose_name="Collection Name")
+    collection_id = tables.LinkColumn('apple-raw-collection-detail', args=[A('latest.itu_id')],
+                             accessor='latest.itu_id',
+                             order_by='latest.itu_id',
+                             verbose_name="Collection ID")
+    contains_movies = tables.Column(accessor='latest.contains_movies',
+                                    order_by='latest.contains_movies',
+                                    verbose_name='Type')
+
+    def render_contains_movies(self, value):
+        if value:
+            return 'Video'
+        else:
+            return 'Audio'
+
+    class Meta:
+        attrs = {'class': 'paleblue'}
+        order_by_field = True

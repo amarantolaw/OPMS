@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load static sitetree %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ STATIC_PREFIX }}css/paleblue.css" media="screen,projection"/>
+{% endblock %}
+
+{% block sidebar %}
+    {% sitetree_menu from "opmstree" include "top-analytics" template "sitetree/navlist.html" %}
+{% endblock %}
+
+{% block content %}
+    {% if error != '' %}
+        <div class="alert alert-error">ERROR: {{ error }}</div>
+    {% else %}
+        <div>
+            <img style="float:right; margin-left:10px" src="{{ collection.img170 }}"/>
+
+            <h3>{{ collection.name }} {% if collection.contains_movies %}<i
+                    class="icon-facetime-video"></i>{% else %}<i class="icon-headphones"></i>{% endif %}</h3>
+            {% if message != '' %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endif %}
+            <div>
+                <a href="{% url itu-institution institution_id=collection.itucollection.institution.id %}">
+                    {{ collection.itucollection.institution.name }}</a>
+            </div>
+            <div>Genre: <a
+                    href="{% url itu-genre genre_id=collection.genre.id %}">{{ collection.genre.name }}</a>
+            </div>
+            <div><a href="{{ collection.url }}">{{ collection.url }}</a> <i class="icon-share-alt noprint"></i></div>
+            <div>Last modified: {{ collection.last_modified }}</div>
+            <div>Latest stored version is version {{ collection.version }}, scanned on <a
+                    href="{% url itu-scanlog scanlog_id=collection.scanlog.id %}">{{ collection.scanlog.time }}</a>
+            </div>
+        </div>
+
+        {% if message != '' %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endif %}
+        {% if summary_list %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Timestamp</th>
+                        <th>Episode</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in summary_list %}
+                    <tr>
+                        <td>{{ item.action_type_string }}</td>
+                        <td>{{ item.timestamp }}</td>
+                        <td>{% if item.episode_title %}{{ item.episode_id }} - {{ item.episode_title }}
+                            ({{ item.episode_type }}){% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+{#            <div>#}
+{#                {% load render_table from django_tables2 %}#}
+{#                {% render_table collection_table %}#}
+{#            </div>#}
+        {% endif %}
+    {% endif %}
+{% endblock %}
