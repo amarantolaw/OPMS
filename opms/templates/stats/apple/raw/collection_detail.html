@@ -40,7 +40,13 @@
         {% endif %}
         {% if summary_list %}
             <hr class="clearfix">
-            <p><i class="label label-info">info</i> There are {{ total_downloads.days }} days of results.</p>
+            <p><i class="label label-info">info</i> There are {{ total_downloads.days }} days of results with Total
+                (Oxford) Downloads of
+                <i class="label label-important">
+                {{ total_downloads.download|add:total_downloads.auto_download|add:total_downloads.download_all|add:total_downloads.subscription_enclosure }}</i>
+                <br>and a daily average of
+                {{ daily_averages.oxford_download|add:daily_averages.subscription_enclosure|floatformat }}.
+                <br>NB: Oxford Downloads calculated as Downloads + Enclosure.</p>
             <table class="table">
                 <thead>
                     <tr>
