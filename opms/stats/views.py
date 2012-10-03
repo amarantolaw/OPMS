@@ -430,23 +430,77 @@ def apple_raw_collection_detail(request, collection_id):
         collection = None
         error += "Where'd the collection go?"
 
-    summary_list = AppleRawLogEntry.objects.filter(itunes_id=collection_id).order_by('timestamp')
+    initial_data = AppleRawLogEntry.objects.filter(itunes_id=collection_id).order_by('timestamp')
 
-#    .annotate(
-#        count=Count('action_type')).values(
-#        'action_type','logfile__file_name','count')
+    def _increment_action(action_string, daily_dict, total_dict):
+        if action_string == 'AutoDownload':
+            daily_dict['auto_download'] += 1
+            total_dict['auto_download'] += 1
+        elif action_string == 'Browse':
+            daily_dict['browse'] += 1
+            total_dict['browse'] += 1
+        elif action_string == 'Download':
+            daily_dict['download'] += 1
+            total_dict['download'] += 1
+        elif action_string == 'DownloadAll':
+            daily_dict['download_all'] += 1
+            total_dict['download_all'] += 1
+        elif action_string == 'Stream':
+            daily_dict['stream'] += 1
+            total_dict['stream'] += 1
+        elif action_string == 'Subscribe':
+            daily_dict['subscribe'] += 1
+            total_dict['subscribe'] += 1
+        elif action_string == 'SubscriptionEnclosure':
+            daily_dict['subscription_enclosure'] += 1
+            total_dict['subscription_enclosure'] += 1
+        else:
+            pass
+        return None
 
-#{'logfile__file_name': u'20120119_381699182_iTunesReport.txt', 'action_type': u'Browse'}
+    summary_list = []
+    current_date = None
+    total_data = {
+        'days':0,
+        'auto_download':0,
+        'browse':0,
+        'download':0,
+        'download_all':0,
+        'stream':0,
+        'subscribe':0,
+        'subscription_enclosure':0
+    }
+    for row in initial_data:
+        if row.timestamp.date() != current_date:
+            # New day, start a new counter
+            if current_date is not None: #Skip the first date change
+                summary_list.append(current_data)
+            current_data = {
+                'date':row.timestamp.date(),
+                'auto_download':0,
+                'browse':0,
+                'download':0,
+                'download_all':0,
+                'stream':0,
+                'subscribe':0,
+                'subscription_enclosure':0
+            }
+            total_data['days'] += 1
+        _increment_action(row.action_type, current_data, total_data)
+        current_date = row.timestamp.date()
+    daily_average_data = {
+        'auto_download':float(total_data['auto_download']) / total_data['days'],
+        'browse':float(total_data['browse']) / total_data['days'],
+        'download':float(total_data['download']) / total_data['days'],
+        'download_all':float(total_data['download_all']) / total_data['days'],
+        'stream':float(total_data['stream']) / total_data['days'],
+        'subscribe':float(total_data['subscribe']) / total_data['days'],
+        'subscription_enclosure':float(total_data['subscription_enclosure']) / total_data['days'],
+        'oxford_download':float(total_data['auto_download'] + total_data['download'] +
+                          total_data['download_all']) / total_data['days']
+    }
 
-#    daily_summary_list = AppleRawLogDailySummary.objects.filter(date__gt='2012-01-21').order_by('date')
-#    total_d = int(daily_summary_list.aggregate(Sum('download')).get("download__sum"))
-#    total_da = int(daily_summary_list.aggregate(Sum('download_all')).get("download_all__sum"))
-#    total_ad = int(daily_summary_list.aggregate(Sum('auto_download')).get("auto_download__sum"))
-#    total_se = int(daily_summary_list.aggregate(Sum('subscription_enclosure')).get("subscription_enclosure__sum"))
-#    total_downloads =  total_d + total_da + total_ad + total_se
-#    latest_date = daily_summary_list.aggregate(Max('date')).get("date__max")
-#    average_downloads_per_day = int(total_downloads / daily_summary_list.count())
-
+# Ideally we can do all the data listing and grouping in the database... but not so easy in the ORM
 #SELECT count(rle.id), rle.action_type, SUBSTRING(lf.file_name,0,9)
 #FROM stats_applerawlogentry AS rle,
 #stats_logfile AS lf
@@ -455,8 +509,6 @@ def apple_raw_collection_detail(request, collection_id):
 #GROUP BY rle.action_type, lf.file_name
 #ORDER BY 3, 2
 
-
-
     return render_to_response('stats/apple/raw/collection_detail.html',
                               {
                                   'error': error,
@@ -464,12 +516,13 @@ def apple_raw_collection_detail(request, collection_id):
                                   'collection_id':collection_id,
                                   'collection':collection,
                                   'summary_list':summary_list,
-#                                  'total_downloads':total_downloads,
+                                  'total_downloads':total_data,
 #                                  'latest_date':latest_date,
-#                                  'average_downloads_per_day':average_downloads_per_day,
+                                  'daily_averages':daily_average_data,
                                   },
                               context_instance=RequestContext(request)
     )
+
 
 #Pretty representation of the previous day's raw traffic
 def apple_raw_animation(request):
