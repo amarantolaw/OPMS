@@ -12,6 +12,9 @@ urlpatterns = patterns('stats.views',
     url(r'^apple/guid/(?P<trackguid_id>\d+)', guid_detail, name="apple-guid-detail"),
 
     url(r'^apple/raw/animation$', apple_raw_animation, name="apple-raw-animation"),
+    url(r'^apple/raw/collections$', apple_raw_collection_list, name="apple-raw-collection-list"),
+    url(r'^apple/raw/collections/(?P<collection_id>\d+)/$', apple_raw_collection_detail,
+        name="apple-raw-collection-detail"),
     url(r'^apple/raw/$', apple_raw_summary, name="apple-raw-summary"),
 
     url(r'^apple/summary/$', summary_index),

@@ -2,10 +2,13 @@ from datetime import timedelta
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
+from django_tables2 import RequestConfig
 from django.db.models import Sum, Count, Max, Min, Q
 from stats.models import *
-from monitors.models import ItuCollectionHistorical
+from monitors.models import ItuCollectionHistorical, ItuCollection, ItuInstitution
+from stats.models import InstitutionalCollectionTable
 from chartit import PivotDataPool, PivotChart, DataPool, Chart
+import settings
 
 
 # Default Stats module homepage
@@ -399,21 +402,74 @@ def apple_raw_collection_list(request):
     @param request:
     @return:
 
-    Display all collections belonging to an institution.
+    Display all collections belonging to an institution. This may lead to incomplete listings
+    based on only the latest scan data, rather than what is in the stats history database.
     """
-#    message = ''
-#    error = ''
-#    institution = ItuInstitution.objects.get(id=int(institution_id))
-#    collections = ItuCollection.objects.filter(institution=institution).order_by('-latest__last_modified')
-#    collection_table = InstitutionalCollectionTable(collections, order_by=('-last_modified'))
-#    RequestConfig(request, paginate={'per_page': 100}).configure(collection_table)
-#    return render_to_response('monitors/itu_institution_collections.html',
-#            {'error': error, 'message': message, 'institution': institution,
-#             'collections': collections, 'collection_table': collection_table,
-#             'chart': False}, context_instance=RequestContext(request))
-#    )
-    pass
+    message = ''
+    error = ''
+    try:
+        this_institution = ItuInstitution.objects.get(name=settings.YOUR_INSTITUTION)
+    except:
+        this_institution = None
+        error += 'Institution in settings file does not match an institution in the database. Perhaps you need to run scan_itunes first?'
+    collections = ItuCollection.objects.filter(institution=this_institution).order_by('latest__name')
+    collection_table = InstitutionalCollectionTable(collections)
+    RequestConfig(request, paginate={'per_page': 100}).configure(collection_table)
+    return render_to_response('stats/apple/raw/collection_list.html',
+            {'error': error, 'message': message, 'institution': this_institution,
+             'collections': collections, 'collection_table': collection_table,
+             'chart': False}, context_instance=RequestContext(request))
 
+
+def apple_raw_collection_detail(request, collection_id):
+    message = ''
+    error = ''
+    try:
+        collection = ItuCollectionHistorical.objects.filter(itu_id=collection_id).order_by('-version')[0]
+    except:
+        collection = None
+        error += "Where'd the collection go?"
+
+    summary_list = AppleRawLogEntry.objects.filter(itunes_id=collection_id).order_by('timestamp')
+
+#    .annotate(
+#        count=Count('action_type')).values(
+#        'action_type','logfile__file_name','count')
+
+#{'logfile__file_name': u'20120119_381699182_iTunesReport.txt', 'action_type': u'Browse'}
+
+#    daily_summary_list = AppleRawLogDailySummary.objects.filter(date__gt='2012-01-21').order_by('date')
+#    total_d = int(daily_summary_list.aggregate(Sum('download')).get("download__sum"))
+#    total_da = int(daily_summary_list.aggregate(Sum('download_all')).get("download_all__sum"))
+#    total_ad = int(daily_summary_list.aggregate(Sum('auto_download')).get("auto_download__sum"))
+#    total_se = int(daily_summary_list.aggregate(Sum('subscription_enclosure')).get("subscription_enclosure__sum"))
+#    total_downloads =  total_d + total_da + total_ad + total_se
+#    latest_date = daily_summary_list.aggregate(Max('date')).get("date__max")
+#    average_downloads_per_day = int(total_downloads / daily_summary_list.count())
+
+#SELECT count(rle.id), rle.action_type, SUBSTRING(lf.file_name,0,9)
+#FROM stats_applerawlogentry AS rle,
+#stats_logfile AS lf
+#WHERE itunes_id = '520504803'
+#AND rle.logfile_id = lf.id
+#GROUP BY rle.action_type, lf.file_name
+#ORDER BY 3, 2
+
+
+
+    return render_to_response('stats/apple/raw/collection_detail.html',
+                              {
+                                  'error': error,
+                                  'message': message,
+                                  'collection_id':collection_id,
+                                  'collection':collection,
+                                  'summary_list':summary_list,
+#                                  'total_downloads':total_downloads,
+#                                  'latest_date':latest_date,
+#                                  'average_downloads_per_day':average_downloads_per_day,
+                                  },
+                              context_instance=RequestContext(request)
+    )
 
 #Pretty representation of the previous day's raw traffic
 def apple_raw_animation(request):
