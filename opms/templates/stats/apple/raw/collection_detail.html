@@ -13,40 +13,40 @@
     {% if error != '' %}
         <div class="alert alert-error">ERROR: {{ error }}</div>
     {% else %}
-        <div>
-            <img style="float:right; margin-left:10px" src="{{ collection.img170 }}"/>
-
-            <h3>{{ collection.name }} {% if collection.contains_movies %}<i
-                    class="icon-facetime-video"></i>{% else %}<i class="icon-headphones"></i>{% endif %}</h3>
-            {% if message != '' %}
-                <div class="alert alert-success">{{ message }}</div>
-            {% endif %}
-            <div>
-                <a href="{% url itu-institution institution_id=collection.itucollection.institution.id %}">
-                    {{ collection.itucollection.institution.name }}</a>
-            </div>
-            <div>Genre: <a
-                    href="{% url itu-genre genre_id=collection.genre.id %}">{{ collection.genre.name }}</a>
-            </div>
-            <div><a href="{{ collection.url }}">{{ collection.url }}</a> <i class="icon-share-alt noprint"></i></div>
-            <div>Last modified: {{ collection.last_modified }}</div>
-            <div>Latest stored version is version {{ collection.version }}, scanned on <a
-                    href="{% url itu-scanlog scanlog_id=collection.scanlog.id %}">{{ collection.scanlog.time }}</a>
-            </div>
-        </div>
-
         {% if message != '' %}
             <div class="alert alert-success">{{ message }}</div>
         {% endif %}
+        <div>
+            <img style="float:right; margin-left:10px" src="{{ collection.img170 }}"/>
+
+            <h3>{{ collection.name }} {% if collection.contains_movies %}<b class="small">[video]</b><i
+                    class="icon-facetime-video"></i>{% else %}<b class="small">[audio]</b><i class="icon-headphones">
+            </i>{% endif %}</h3>
+            {% if message != '' %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endif %}
+            <p>Institution:
+                <a href="{% url itu-institution institution_id=collection.itucollection.institution.id %}">
+                    {{ collection.itucollection.institution.name }}</a>
+
+            <br>Genre: <a
+                    href="{% url itu-genre genre_id=collection.genre.id %}">{{ collection.genre.name }}</a>
+            <br>iTunes: <a href="{{ collection.url }}">{{ collection.url }}</a> <i class="icon-share-alt
+            noprint"></i></div>
+        </p>
+
         {% if summary_list %}
-            <hr class="clearfix">
-            <p><i class="label label-info">info</i> There are {{ total_downloads.days }} days of results with Total
-                (Oxford) Downloads of
-                <i class="label label-important">
-                {{ total_downloads.download|add:total_downloads.auto_download|add:total_downloads.download_all|add:total_downloads.subscription_enclosure }}</i>
-                <br>and a daily average of
-                {{ daily_averages.oxford_download|add:daily_averages.subscription_enclosure|floatformat }}.
-                <br>NB: Oxford Downloads calculated as Downloads + Enclosure.</p>
+            <h4>Summary Info</h4>
+            <p>There are {{ total_downloads.days }} days of results since 19th January 2012<br>
+                Total Downloads for this feed over this period are <i class="badge">
+                {{ total_downloads.download|add:total_downloads.auto_download|add:total_downloads.download_all|add:total_downloads.subscription_enclosure }}</i><br>
+                This represents a daily average of
+                {{ daily_averages.total_download|floatformat }}.<br>
+                This represents a weekly average of {{ weekly_averages.total_download|floatformat }}.
+            </p>
+
+            <p>Feed description last modified: {{ collection.last_modified }}<br>
+            NB: Total Downloads above calculated as <em>Downloads + Enclosure</em>.</p>
             <table class="table">
                 <thead>
                     <tr>
@@ -69,9 +69,10 @@
                         <th><b class="label label-info">Totals</b></th>
                         <td><i class="badge">{{ total_downloads.browse }}</i></td>
                         <td><i class="badge">{{ total_downloads.subscribe }}</i></td>
-                        <td><i class="badge">{{ total_downloads.download|add:total_downloads.auto_download|add:total_downloads.download_all }}</i></td>
+                        <td><i class="badge badge-important"
+                                >{{ total_downloads.download|add:total_downloads.auto_download|add:total_downloads.download_all }}</i></td>
                         <td><i class="badge">{{ total_downloads.stream }}</i></td>
-                        <td><i class="badge">{{ total_downloads.subscription_enclosure }}</i></td>
+                        <td><i class="badge badge-important">{{ total_downloads.subscription_enclosure }}</i></td>
                     </tr>
                 </thead>
                 <tbody>
