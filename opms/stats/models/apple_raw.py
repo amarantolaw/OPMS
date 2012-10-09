@@ -41,10 +41,11 @@ class AppleRawLogEntry(models.Model):
 
     def __unicode__(self):
         try:
-            return "{0} : {1} : {2}".format(
+            return "{0} : {1} : {2} ({3})".format(
                 self.timestamp,
                 self.action_type_string,
-                self.title
+                self.title,
+                self.itunes_id
             )
         except UnicodeEncodeError:
             return "{UNICODE ERROR}"
@@ -86,6 +87,7 @@ class AppleRawLogDailyCollectionSummary(models.Model):
     """
     updated = models.DateTimeField(auto_now=True)
     date = models.DateField(db_index=True)
+    itunes_id = models.BigIntegerField()
     auto_download = models.IntegerField(default=0)
     browse = models.IntegerField(default=0)
     download = models.IntegerField(default=0)
@@ -95,7 +97,10 @@ class AppleRawLogDailyCollectionSummary(models.Model):
     subscription_enclosure = models.IntegerField(default=0)
 
     def __unicode__(self):
-        return "Summary for {0}".format(self.date)
+        return "Summary for {0} - {1}".format(
+            self.date,
+            self.itunes_id
+        )
 
     class Meta:
         app_label = 'stats'

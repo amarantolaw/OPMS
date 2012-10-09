@@ -430,64 +430,67 @@ def apple_raw_collection_detail(request, collection_id):
         collection = None
         error += "Where'd the collection go?"
 
-    initial_data = AppleRawLogEntry.objects.filter(itunes_id=collection_id).order_by('timestamp')
+#    initial_data = AppleRawLogEntry.objects.filter(itunes_id=collection_id).order_by('timestamp')
+#
+#    def _increment_action(action_string, daily_dict, total_dict):
+#        if action_string == 'AutoDownload':
+#            daily_dict['auto_download'] += 1
+#            total_dict['auto_download'] += 1
+#        elif action_string == 'Browse':
+#            daily_dict['browse'] += 1
+#            total_dict['browse'] += 1
+#        elif action_string == 'Download':
+#            daily_dict['download'] += 1
+#            total_dict['download'] += 1
+#        elif action_string == 'DownloadAll':
+#            daily_dict['download_all'] += 1
+#            total_dict['download_all'] += 1
+#        elif action_string == 'Stream':
+#            daily_dict['stream'] += 1
+#            total_dict['stream'] += 1
+#        elif action_string == 'Subscribe':
+#            daily_dict['subscribe'] += 1
+#            total_dict['subscribe'] += 1
+#        elif action_string == 'SubscriptionEnclosure':
+#            daily_dict['subscription_enclosure'] += 1
+#            total_dict['subscription_enclosure'] += 1
+#        else:
+#            pass
+#        return None
+#
+#    summary_list = []
+    summary_list = AppleRawLogDailyCollectionSummary.objects.filter(itunes_id=collection_id).order_by('date')
 
-    def _increment_action(action_string, daily_dict, total_dict):
-        if action_string == 'AutoDownload':
-            daily_dict['auto_download'] += 1
-            total_dict['auto_download'] += 1
-        elif action_string == 'Browse':
-            daily_dict['browse'] += 1
-            total_dict['browse'] += 1
-        elif action_string == 'Download':
-            daily_dict['download'] += 1
-            total_dict['download'] += 1
-        elif action_string == 'DownloadAll':
-            daily_dict['download_all'] += 1
-            total_dict['download_all'] += 1
-        elif action_string == 'Stream':
-            daily_dict['stream'] += 1
-            total_dict['stream'] += 1
-        elif action_string == 'Subscribe':
-            daily_dict['subscribe'] += 1
-            total_dict['subscribe'] += 1
-        elif action_string == 'SubscriptionEnclosure':
-            daily_dict['subscription_enclosure'] += 1
-            total_dict['subscription_enclosure'] += 1
-        else:
-            pass
-        return None
-
-    summary_list = []
-    current_date = None
+    #    current_date = None
     total_data = {
-        'days':0,
-        'auto_download':0,
-        'browse':0,
-        'download':0,
-        'download_all':0,
-        'stream':0,
-        'subscribe':0,
-        'subscription_enclosure':0
+        'days':summary_list.count(),
+        'auto_download':int(summary_list.aggregate(Sum('auto_download')).get("auto_download__sum")),
+        'browse':int(summary_list.aggregate(Sum('browse')).get("browse__sum")),
+        'download':int(summary_list.aggregate(Sum('download')).get("download__sum")),
+        'download_all':int(summary_list.aggregate(Sum('download_all')).get("download_all__sum")),
+        'stream':int(summary_list.aggregate(Sum('stream')).get("stream__sum")),
+        'subscribe':int(summary_list.aggregate(Sum('subscribe')).get("subscribe__sum")),
+        'subscription_enclosure':int(summary_list.aggregate(Sum('subscription_enclosure')).get("subscription_enclosure__sum"))
     }
-    for row in initial_data:
-        if row.timestamp.date() != current_date:
-            # New day, start a new counter
-            if current_date is not None: #Skip the first date change
-                summary_list.append(current_data)
-            current_data = {
-                'date':row.timestamp.date(),
-                'auto_download':0,
-                'browse':0,
-                'download':0,
-                'download_all':0,
-                'stream':0,
-                'subscribe':0,
-                'subscription_enclosure':0
-            }
-            total_data['days'] += 1
-        _increment_action(row.action_type, current_data, total_data)
-        current_date = row.timestamp.date()
+#    for row in initial_data:
+#        if row.timestamp.date() != current_date:
+#            # New day, start a new counter
+#            if current_date is not None: #Skip the first date change
+#                summary_list.append(current_data)
+#            current_data = {
+#                'date':row.timestamp.date(),
+#                'auto_download':0,
+#                'browse':0,
+#                'download':0,
+#                'download_all':0,
+#                'stream':0,
+#                'subscribe':0,
+#                'subscription_enclosure':0
+#            }
+#            total_data['days'] += 1
+#        _increment_action(row.action_type, current_data, total_data)
+#        current_date = row.timestamp.date()
+
     daily_average_data = {
         'auto_download':float(total_data['auto_download']) / total_data['days'],
         'browse':float(total_data['browse']) / total_data['days'],
@@ -497,17 +500,21 @@ def apple_raw_collection_detail(request, collection_id):
         'subscribe':float(total_data['subscribe']) / total_data['days'],
         'subscription_enclosure':float(total_data['subscription_enclosure']) / total_data['days'],
         'oxford_download':float(total_data['auto_download'] + total_data['download'] +
-                          total_data['download_all']) / total_data['days']
+                          total_data['download_all']) / total_data['days'],
+        'total_download':float(total_data['auto_download'] + total_data['download'] +
+                                total_data['download_all'] + total_data['subscription_enclosure']) / total_data['days']
+    }
+    weekly_average_data = {
+        'total_download':float(total_data['auto_download'] + total_data['download'] +
+                               total_data['download_all'] + total_data['subscription_enclosure']) / total_data[
+                                                                                                    'days'] * 7
     }
 
-# Ideally we can do all the data listing and grouping in the database... but not so easy in the ORM
-#SELECT count(rle.id), rle.action_type, SUBSTRING(lf.file_name,0,9)
-#FROM stats_applerawlogentry AS rle,
-#stats_logfile AS lf
-#WHERE itunes_id = '520504803'
-#AND rle.logfile_id = lf.id
-#GROUP BY rle.action_type, lf.file_name
-#ORDER BY 3, 2
+#    total_downloads =  total_d + total_da + total_ad + total_se
+    latest_date = summary_list.aggregate(Max('date')).get("date__max")
+#    average_downloads_per_day = int(total_downloads / )
+
+
 
     return render_to_response('stats/apple/raw/collection_detail.html',
                               {
@@ -517,8 +524,9 @@ def apple_raw_collection_detail(request, collection_id):
                                   'collection':collection,
                                   'summary_list':summary_list,
                                   'total_downloads':total_data,
-#                                  'latest_date':latest_date,
+                                  'latest_date':latest_date,
                                   'daily_averages':daily_average_data,
+                                  'weekly_averages':weekly_average_data,
                                   },
                               context_instance=RequestContext(request)
     )
